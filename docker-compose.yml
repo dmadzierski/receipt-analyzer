@@ -40,5 +40,12 @@ services:
     depends_on:
       - keycloak
 
+  receipt-analyzer-service:
+    build: receipt-analyzer-service
+    container_name: receipt-analyzer-service
+    environment:
+      DOCKER_IP: ${DOCKER_IP}
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
 volumes:
   mysql_data:
