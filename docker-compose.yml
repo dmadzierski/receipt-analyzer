@@ -24,6 +24,7 @@ services:
     depends_on:
       - mysql
     environment:
+      KC_LOG_LEVEL_ORG_KEYCLOAK: ALL
       KC_DB: mysql
       KC_DB_URL_HOST: mysql
       KC_DB_PORT: 3306
@@ -34,9 +35,12 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_PROXY_HEADERS: xforwarded
       KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME: http://${DOCKER_IP}/auth
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: true
       KC_HOSTNAME_STRICT_HTTP: true
       KC_HTTP_ENABLED: true
       KC_PROXY: EDGE
+      KC_SPI_COOKIE_SAMESITE_LEGACY_SAMESITE_VALUE: none
     command: start-dev
     ports:
       - "8081:8080"
@@ -51,10 +55,9 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-#    command: [nginx-debug, '-g', 'daemon off;']
+    command: [nginx-debug, '-g', 'daemon off;']
     depends_on:
       - keycloak
-      - receipt-analyzer-service
     networks:
       - app-network
 
@@ -68,6 +71,10 @@ services:
       DOCKER_IP: ${DOCKER_IP}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      - keycloak
+      - mysql
+      - nginx
     networks:
       - app-network
 

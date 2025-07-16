@@ -12,21 +12,13 @@ spring:
     show-sql: true
   security:
     oauth2:
-      client:
-        registration:
-          keycloak:
-            client-id: receipt-analyzer
-            client-secret: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN}
-            scope: openid, profile, email
-            redirect-uri: http://localhost/api/me
-            authorization-grant-type: authorization_code
-            provider: keycloak
-        provider:
-          keycloak:
-            issuer-uri: http://host.docker.internal:8081/auth/realms/activiti
-            user-name-attribute: preferred_username
+      resourceserver:
+        jwt:
+          issuer-uri: http://${DOCKER_IP}/auth/realms/activiti
+          jwk-set-uri: http://${DOCKER_IP}/auth/realms/activiti/protocol/openid-connect/certs
 
 server:
   port: 8090
   servlet:
     context-path: /api
+

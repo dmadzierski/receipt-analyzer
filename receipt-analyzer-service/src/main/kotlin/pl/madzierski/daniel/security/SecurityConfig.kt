@@ -2,11 +2,15 @@ package pl.madzierski.daniel.security
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 
@@ -15,17 +19,31 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class SecurityConfig : WebMvcConfigurer {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.authorizeHttpRequests { authz ->
-                authz.requestMatchers("/", "/public/**").permitAll().anyRequest().authenticated()
-            }.oauth2Login(Customizer.withDefaults())
-            .logout { logout ->
-                logout.logoutSuccessUrl("/").invalidateHttpSession(true).clearAuthentication(true)
-            }
-        return http.build()
-    }
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
+        http
+            .cors(Customizer.withDefaults())
+            .csrf(Customizer.withDefaults())
+            .authorizeHttpRequests { it
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/**").authenticated()
+            }.oauth2ResourceServer { it.jwt(Customizer.withDefaults()) }.build()
 
-    override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**").allowedOrigins("*").allowedMethods("*")
-    }
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource =
+        CorsConfiguration().apply {
+            allowedOrigins = listOf("http://localhost:4200")
+            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            allowedHeaders = listOf("*")
+            allowCredentials = true
+            maxAge = 3600L
+        }.let { config ->
+            UrlBasedCorsConfigurationSource().apply {
+                registerCorsConfiguration("/**", config)
+            }
+        }
+
+    @Bean
+    fun customJwtAuthenticationConverter(): JwtAuthenticationConverter =
+        JwtAuthenticationConverter().apply { setJwtGrantedAuthoritiesConverter(CustomJwtAuthorityConverter()) }
+
 }
