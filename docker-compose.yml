@@ -66,6 +66,7 @@ services:
     container_name: receipt-analyzer-service
     ports:
       - "8090:8090"
+      - "5005:5005"
     environment:
       RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN}
       DOCKER_IP: ${DOCKER_IP}
