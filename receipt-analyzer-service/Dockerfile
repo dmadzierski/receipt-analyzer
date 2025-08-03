@@ -6,7 +6,8 @@ COPY pom.xml .
 COPY src ./src
 
 #DEV profile ON
-RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip
+#RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip
+RUN --mount=type=cache,target=/root/.m2 mvn package -P dev  -Dmaven.test.skip
 #DEV profile OFF
 #RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip
 

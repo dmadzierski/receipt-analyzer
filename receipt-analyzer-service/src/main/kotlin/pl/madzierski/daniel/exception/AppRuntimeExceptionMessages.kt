@@ -1,0 +1,10 @@
+package pl.madzierski.daniel.exception
+
+import org.springframework.http.HttpStatus
+
+enum class AppRuntimeExceptionMessages(val i18nMessage: String, val status: HttpStatus) {
+    UNHANDLED_MEDIA_TYPE("EXCEPTION.UNHANDLED_MEDIA_TYPE", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+    FILE_RECEIPT_NOT_FOUND("EXCEPTION.FILE_RECEIPT_NOT_FOUND", HttpStatus.NOT_FOUND),
+    FILE_RECEIPT_PATH_NOT_FOUND("EXCEPTION.FILE_RECEIPT_PATH_NOT_FOUND", HttpStatus.NOT_FOUND),
+    FILE_RECEIPT_FILE_NOT_FOUND("EXCEPTION.FILE_RECEIPT_FILE_NOTFOUND", HttpStatus.NOT_FOUND),
+}

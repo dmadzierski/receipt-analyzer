@@ -25,7 +25,7 @@ class SecurityConfig : WebMvcConfigurer {
             .csrf(Customizer.withDefaults())
             .authorizeHttpRequests { it
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/**").authenticated()
+                    .anyRequest().authenticated()
             }.oauth2ResourceServer { it.jwt(Customizer.withDefaults()) }.build()
 
     @Bean
