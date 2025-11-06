@@ -5,15 +5,30 @@ import pl.madzierski.daniel.app.common.model.BaseEntity
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 
 @Entity
-@Table(name = "item")
+@Table(name = "receipt_item")
 data class ItemEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receipt_revistion_id")
-    val receiptRevision: ReceiptRevisionEntity,
+    var receiptRevision: ReceiptRevisionEntity?,
 
-    val name: String,
+    var name: String?,
 
-    val description: String
+    var vat: String?,
+
+    var amount: Double?,
+
+    var unitPrice: Double?,
+
+    var discount: Double?,
+
+    var totalPrice: Double?,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_item_id")
+    private var parentItem: ItemEntity? = null,
+
+    @OneToMany(mappedBy = "parentItem")
+    val childItems: MutableList<ItemEntity> = mutableListOf()
 
 ) : BaseEntity()
+

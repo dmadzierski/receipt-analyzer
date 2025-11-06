@@ -1,31 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import Keycloak, { KeycloakProfile } from 'keycloak-js';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css',
+  styleUrl: './app.scss',
+  imports: [RouterOutlet]
 })
 export class App implements OnInit {
-  userInfo: UserInfo | undefined;
+  profile: KeycloakProfile | undefined;
 
-  constructor(private http: HttpClient) {}
+  keycloak = inject(Keycloak);
 
   ngOnInit(): void {
-    this.getMe().subscribe((res) => {
-      this.userInfo = res;
-    });
+    this.keycloak.loadUserProfile().then((profile) => (this.profile = profile));
   }
-
-  getMe() {
-    return this.http.get<UserInfo>('/api/users/me');
-  }
-}
-
-export interface UserInfo {
-  username: string;
-  email: string;
-  claims: any;
+  private readonly http = inject(HttpClient);
 }

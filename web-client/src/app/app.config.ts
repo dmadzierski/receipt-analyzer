@@ -7,6 +7,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import {
   provideHttpClient,
+  withFetch,
   withInterceptors,
 } from '@angular/common/http';
 import {
@@ -16,6 +17,7 @@ import {
   includeBearerTokenInterceptor,
   provideKeycloak,
 } from 'keycloak-angular';
+
 
 const urlCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
   urlPattern: /.*/i,
@@ -34,11 +36,15 @@ export const appConfig: ApplicationConfig = {
       },
       initOptions: {
         onLoad: 'login-required',
-        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
-        pkceMethod: 'S256',
-      }
+        silentCheckSsoRedirectUri:
+          window.location.origin + '/silent-check-sso.html',
+        pkceMethod: 'S256'
+      },
     }),
-    provideHttpClient(withInterceptors([includeBearerTokenInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([includeBearerTokenInterceptor])
+    ),
     {
       provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
       useValue: [urlCondition],

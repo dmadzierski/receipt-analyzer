@@ -1,10 +1,27 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './home/home.component';
+import { ReceiptListComponent } from './receipt-list/receipt-list.component';
+import { ReceiptAddComponent } from './receipt-add/receipt-add.component';
+import { ReceiptDetails } from './receipt-details/receipt-details.component';
 
 export const routes: Routes = [
   {
+    path: 'receipt/details/:id',
+    component: ReceiptDetails,
+    pathMatch: 'prefix',
+  },
+  {
+    path: 'receipt/list',
+    component: ReceiptListComponent,
+    pathMatch: 'full',
+  },
+  {
+    path: 'receipt/add',
+    component: ReceiptAddComponent,
+    pathMatch: 'full',
+  },
+  {
     path: '',
-    component: HomeComponent,
-    pathMatch: 'full'
-  }
+    redirectTo: 'receipt/list',
+    pathMatch: 'full',
+  },
 ];

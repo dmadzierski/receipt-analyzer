@@ -23,7 +23,8 @@ class SecurityConfig : WebMvcConfigurer {
         http
             .cors(Customizer.withDefaults())
             .csrf(Customizer.withDefaults())
-            .authorizeHttpRequests { it
+            .authorizeHttpRequests {
+                it
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             }.oauth2ResourceServer { it.jwt(Customizer.withDefaults()) }.build()

@@ -1,0 +1,26 @@
+<div class="form-container">
+    <h1>Enter receipt data</h1>
+    <mat-form-field>
+        <mat-label>Enter receipt name</mat-label>
+        <input matInput maxlength="30" placeholder="Ex. Shopping" [(ngModel)]="data.name" />
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Enter description</mat-label>
+        <input matInput maxlength="30" [(ngModel)]="data.description"/>
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Choose a date</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="data.date">
+        <mat-hint>MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <file-upload [files]="data.files"></file-upload>
+
+    <button matButton="outlined" (click)="create()">Create</button>
+
+
+</div>

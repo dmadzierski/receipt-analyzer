@@ -26,7 +26,8 @@ server:
   port: 8090
   servlet:
     context-path: /api
-logging:
-  level:
-    root: debug
+
+ocr:
+  tesseract:
+    dataPath: /app/tesseract-data
 

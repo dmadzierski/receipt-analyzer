@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ReceiptRevisionRepository : JpaRepository<ReceiptRevisionEntity, String> {
+    fun findReceiptRevisionEntitiesById(id: String): ReceiptRevisionEntity
 }

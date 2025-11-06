@@ -11,14 +11,15 @@ import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 @Table(name = "receipt")
 data class ReceiptEntity(
 
-    val name: String,
+    var name: String,
 
-    val description: String?,
+    var description: String?,
 
     @Column(name = "user_sub")
-    val userSub: String,
+    var userSub: String,
 
     @OneToMany(mappedBy = "receipt")
-    val receiptRevisions: List<ReceiptRevisionEntity>?
+    val receiptRevisions: MutableList<ReceiptRevisionEntity>
+
 
 ) : BaseEntity()
