@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.security
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -16,7 +17,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig : WebMvcConfigurer {
+class SecurityConfig(
+    @Value("\${security.web-client-host}")
+    val webClientHost: String,
+): WebMvcConfigurer {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
@@ -32,7 +36,7 @@ class SecurityConfig : WebMvcConfigurer {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource =
         CorsConfiguration().apply {
-            allowedOrigins = listOf("http://localhost:4200")
+            allowedOrigins = listOf("http://localhost")
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true

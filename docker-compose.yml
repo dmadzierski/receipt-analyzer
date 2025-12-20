@@ -41,6 +41,8 @@ services:
       KC_HTTP_ENABLED: true
       KC_PROXY: EDGE
       KC_SPI_COOKIE_SAMESITE_LEGACY_SAMESITE_VALUE: none
+      KEYCLOAK_ISSUER_URI: http://localhost/auth/realms/activiti
+      KEYCLOAK_JWK_SET_URI: http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs
     command: start-dev
     ports:
       - "8081:8080"
@@ -48,7 +50,7 @@ services:
       - app-network
 
   nginx:
-    image: nginx:latest
+    image: nginx:1.29.3
     container_name: nginx
     restart: on-failure
     ports:
@@ -62,25 +64,39 @@ services:
       - app-network
 
   receipt-analyzer-service:
-    build: receipt-analyzer-service
+    build:
+      context: ./receipt-analyzer-service
+      dockerfile: Dockerfile
     container_name: receipt-analyzer-service
     ports:
       - "8090:8090"
       - "5005:5005"
     environment:
       RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN}
-      DOCKER_IP: ${DOCKER_IP}
+      DOCKER_IP: host.docker.internal
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_POST: ${MYSQL_PORT}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      WEB_CLIENT_HOST: ${WEB_CLIENT_HOST}
     depends_on:
       - keycloak
-      - mysql
       - nginx
     networks:
       - app-network
     volumes:
       - ./uploads:/app/uploads
 
+  web-client:
+    build:
+      context: ./web-client
+      dockerfile: Dockerfile
+    pull_policy: build
+    container_name: web-client
+    ports:
+      - "4200:4200"
+    networks:
+      - app-network
 
 volumes:
   mysql_data:

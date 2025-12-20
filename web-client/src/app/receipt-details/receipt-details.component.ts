@@ -18,8 +18,7 @@ import { FileUploadComponent } from '../component/file-upload/file-upload.compon
     MatSelectModule,
     FormsModule,
     MatDatepickerModule,
-    MatButtonModule,
-    FileUploadComponent
+    MatButtonModule
   ],
   templateUrl: './receipt-details.component.html',
   styleUrl: './receipt-details.component.scss',

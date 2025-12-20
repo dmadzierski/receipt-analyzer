@@ -30,7 +30,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideKeycloak({
       config: {
-        url: 'http://host.docker.internal/auth',
+        url: 'http://localhost/auth',
         realm: 'activiti',
         clientId: 'web-client',
       },

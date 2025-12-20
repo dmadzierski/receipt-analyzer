@@ -5,15 +5,11 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-#DEV profile ON
-RUN #--mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip
-RUN --mount=type=cache,target=/root/.m2 mvn package -P dev  -Dmaven.test.skip
-#DEV profile OFF
-#RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip -T 1C
 
-FROM openjdk:21-slim
+FROM eclipse-temurin:21-jdk
 
-RUN apt-get update && apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
+RUN apt-get update -y && apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
 
 WORKDIR /app
 

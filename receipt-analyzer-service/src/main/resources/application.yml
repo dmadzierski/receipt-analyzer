@@ -2,20 +2,20 @@ spring:
   application:
     name: receipt-analyzer-service
   datasource:
-    url: jdbc:mysql://${DOCKER_IP}:3306/receipt-analyzer-service?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/receipt-analyzer-service?useSSL=false&serverTimezone=UTC
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${JPA_DDL_AUTO:update}
     show-sql: true
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${DOCKER_IP}/auth/realms/activiti
-          jwk-set-uri: http://${DOCKER_IP}/auth/realms/activiti/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost/auth/realms/activiti}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs}
   servlet:
     multipart:
       enabled: true
@@ -31,3 +31,12 @@ ocr:
   tesseract:
     dataPath: /app/tesseract-data
 
+security:
+  web-client-host: ${WEB_CLIENT_HOST}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:DEBUG}
+    org:
+      springframework:
+        security: DEBUG
