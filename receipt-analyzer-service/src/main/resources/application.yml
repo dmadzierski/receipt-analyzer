@@ -37,6 +37,3 @@ security:
 logging:
   level:
     root: ${LOGGING_LEVEL_ROOT:DEBUG}
-    org:
-      springframework:
-        security: DEBUG
