@@ -19,7 +19,7 @@ data class ReceiptEntity(
     var userSub: String,
 
     @OneToMany(mappedBy = "receipt")
-    val receiptRevisions: MutableList<ReceiptRevisionEntity>
+    val receiptRevisions: MutableSet<ReceiptRevisionEntity>
 
 
 ) : BaseEntity()

@@ -22,10 +22,10 @@ data class ReceiptRevisionEntity(
     var receipt: ReceiptEntity,
 
     @OneToMany(mappedBy = "receiptRevision")
-    val receiptFiles: MutableList<ReceiptFileEntity>,
+    val receiptFiles: MutableSet<ReceiptFileEntity>,
 
     @OneToMany(mappedBy = "receiptRevision")
-    val items: MutableList<ItemEntity>,
+    val items: MutableSet<ItemEntity>,
 
     var totalPrice: Double?,
 
@@ -35,4 +35,37 @@ data class ReceiptRevisionEntity(
 
     var preferredRevision: Boolean?
 
-) : BaseEntity()
+
+) : BaseEntity() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ReceiptRevisionEntity
+
+        if (totalPrice != other.totalPrice) return false
+        if (preferredRevision != other.preferredRevision) return false
+        if (revision != other.revision) return false
+        if (resolver != other.resolver) return false
+        if (brand != other.brand) return false
+        if (receiptFiles != other.receiptFiles) return false
+        if (items != other.items) return false
+        if (payingDate != other.payingDate) return false
+        if (address != other.address) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = totalPrice?.hashCode() ?: 0
+        result = 31 * result + (preferredRevision?.hashCode() ?: 0)
+        result = 31 * result + (revision?.hashCode() ?: 0)
+        result = 31 * result + (resolver?.hashCode() ?: 0)
+        result = 31 * result + (brand?.hashCode() ?: 0)
+        result = 31 * result + receiptFiles.hashCode()
+        result = 31 * result + items.hashCode()
+        result = 31 * result + (payingDate?.hashCode() ?: 0)
+        result = 31 * result + (address?.hashCode() ?: 0)
+        return result
+    }
+}

@@ -44,7 +44,7 @@ class ReceiptService(
         ReceiptEntity(body?.name.takeUnless { it.isNullOrBlank() } ?: LocalDateTime.now().toString(),
             body?.description,
             SecurityUtils.getCurrentUserSub(),
-            mutableListOf())
+            mutableSetOf())
 
 
     private fun saveReceipt(receipt: ReceiptEntity): ReceiptEntity = receiptRepository.save(receipt)
@@ -68,7 +68,7 @@ class ReceiptService(
         }
     }
 
-    private fun receiptRevisionMapper(receiptRevisions: List<ReceiptRevisionEntity>): List<GetReceiptDetailsRevisionResponse> =
+    private fun receiptRevisionMapper(receiptRevisions: Set<ReceiptRevisionEntity>): List<GetReceiptDetailsRevisionResponse> =
         if (receiptRevisions.isNotEmpty()) receiptRevisions.map {
             GetReceiptDetailsRevisionResponse(
                 it.id,
@@ -82,8 +82,8 @@ class ReceiptService(
         GetReceiptDetailsRevisionDetailsResponse(
             receiptRevision.id!!,
             receiptRevision.brand,
-            receiptRevisionDetailsReceiptFilesMapper(receiptRevision.receiptFiles),
-            receiptRevisionDetailsReceiptItemMapper(receiptRevision.items),
+            receiptRevisionDetailsReceiptFilesMapper(receiptRevision.receiptFiles.toList()),
+            receiptRevisionDetailsReceiptItemMapper(receiptRevision.items.toList()),
             receiptRevision.totalPrice,
             receiptRevision.payingDate,
             receiptRevision.address

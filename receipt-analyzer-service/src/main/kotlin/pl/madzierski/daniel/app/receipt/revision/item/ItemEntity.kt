@@ -28,7 +28,7 @@ data class ItemEntity(
     private var parentItem: ItemEntity? = null,
 
     @OneToMany(mappedBy = "parentItem")
-    val childItems: MutableList<ItemEntity> = mutableListOf()
+    val childItems: MutableSet<ItemEntity> = mutableSetOf()
 
 ) : BaseEntity()
 
