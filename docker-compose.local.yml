@@ -1,3 +1,7 @@
+x-common-env: &common-env
+  env_file:
+    - .env.dev
+
 networks:
   app-network:
 
@@ -16,6 +20,7 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
+    <<: *common-env
 
   keycloak:
     image: keycloak/keycloak:26.3
@@ -49,6 +54,7 @@ services:
       - "8081:8080"
     networks:
       - app-network
+    <<: *common-env
 
   nginx:
     image: nginx:1.29.3
@@ -81,6 +87,8 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       WEB_CLIENT_HOST: ${WEB_CLIENT_HOST}
+      LOGGING_LEVEL_ROOT: ERROR
+      JPA_DDL_AUTO: create-drop
     depends_on:
       - keycloak
       - nginx
@@ -88,15 +96,7 @@ services:
       - app-network
     volumes:
       - ./uploads:/app/uploads
-
-  web-client:
-    build:
-      context: ./web-client
-      dockerfile: Dockerfile
-    pull_policy: build
-    container_name: web-client
-    networks:
-      - app-network
+    <<: *common-env
 
 volumes:
   mysql_data:

@@ -20,7 +20,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class SecurityConfig(
     @Value("\${security.web-client-host}")
     val webClientHost: String,
-): WebMvcConfigurer {
+) : WebMvcConfigurer {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
@@ -36,7 +36,7 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource =
         CorsConfiguration().apply {
-            allowedOrigins = listOf("http://localhost")
+            allowedOrigins = listOf("http://localhost", "http://localhost:4200")
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true

@@ -12,6 +12,4 @@ RUN npx ng build --configuration=production
 
 EXPOSE 4200
 
-
-
 CMD npm run start-prod
