@@ -28,3 +28,6 @@ build/
 /.idea/
 
 .env
+
+/uploads/
+/web-client/uploads
