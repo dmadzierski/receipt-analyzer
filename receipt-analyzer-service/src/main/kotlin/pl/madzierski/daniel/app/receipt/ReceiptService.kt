@@ -25,11 +25,6 @@ class ReceiptService(
     val receiptResolverService: ScanReceiptResolverService
 ) {
 
-    companion object {
-        private const val DEFAULT_FIRST_REVISION_NUMBER = "1.0"
-    }
-
-
     fun addReceipt(file: MultipartFile, body: CreateReceiptRequest?): CreateReceiptResponse {
         validateReceiptService.validate(file)
         var receipt = this.saveReceipt(createReceipt(body))
@@ -63,20 +58,49 @@ class ReceiptService(
                 receiptEntity.id,
                 receiptEntity.name,
                 receiptEntity.description,
-                receiptRevisionMapper(receiptEntity.receiptRevisions)
+                preferredRevisionMapper(it),
+                receiptRevisionMapper(receiptEntity.receiptRevisions),
+                receiptEntity.createdDate,
+                receiptEntity.modifiedDate
             )
         }
     }
 
-    private fun receiptRevisionMapper(receiptRevisions: Set<ReceiptRevisionEntity>): List<GetReceiptDetailsRevisionResponse> =
-        if (receiptRevisions.isNotEmpty()) receiptRevisions.map {
-            GetReceiptDetailsRevisionResponse(
-                it.id,
-                it.resolver,
-                it.createdDate
+    private fun preferredRevisionMapper(revisionEntity: ReceiptRevisionEntity?): GetReceiptDetailsResponse.PreferredRevisionResponse? {
+        if (revisionEntity != null) {
+            return GetReceiptDetailsResponse.PreferredRevisionResponse(
+                revisionEntity.id,
+                revisionEntity.resolver,
+                revisionEntity.createdDate,
+                revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) },
+                revisionEntity.receiptFiles.mapTo(mutableSetOf()) { fileMapper(it) })
+        }
+        return null;
+    }
+
+    private fun fileMapper(file: ReceiptFileEntity) = GetReceiptDetailsResponse.FileResponse(
+        file.id, file.path, file.rawData
+    )
+
+    private fun itemMapper(itemEntity: ItemEntity): GetReceiptDetailsResponse.ItemResponse =
+        GetReceiptDetailsResponse.ItemResponse(
+            itemEntity.id,
+            itemEntity.name,
+            itemEntity.vat,
+            itemEntity.amount,
+            itemEntity.unitPrice,
+            itemEntity.discount,
+            itemEntity.totalPrice,
+            itemEntity.position
+        )
+
+    private fun receiptRevisionMapper(receiptRevisions: Set<ReceiptRevisionEntity>): Set<GetReceiptDetailsResponse.RevisionResponse> =
+        if (receiptRevisions.isNotEmpty()) receiptRevisions.mapTo(mutableSetOf()) {
+            GetReceiptDetailsResponse.RevisionResponse(
+                it.id, it.resolver, it.createdDate
             )
         }
-        else emptyList()
+        else emptySet()
 
     private fun receiptRevisionDetailsMapper(receiptRevision: ReceiptRevisionEntity): GetReceiptDetailsRevisionDetailsResponse =
         GetReceiptDetailsRevisionDetailsResponse(

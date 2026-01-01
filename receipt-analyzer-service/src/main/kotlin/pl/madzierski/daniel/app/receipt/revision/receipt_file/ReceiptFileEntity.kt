@@ -19,4 +19,25 @@ data class ReceiptFileEntity(
     @Column(name = "raw_data", columnDefinition = "TEXT")
     var rawData: String? = null
 
-) : BaseEntity()
+) : BaseEntity() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ReceiptFileEntity
+
+        if (isOriginal != other.isOriginal) return false
+        if (receiptRevision != other.receiptRevision) return false
+        if (path != other.path) return false
+        if (rawData != other.rawData) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = isOriginal.hashCode()
+        result = 31 * result + (path?.hashCode() ?: 0)
+        result = 31 * result + (rawData?.hashCode() ?: 0)
+        return result
+    }
+}

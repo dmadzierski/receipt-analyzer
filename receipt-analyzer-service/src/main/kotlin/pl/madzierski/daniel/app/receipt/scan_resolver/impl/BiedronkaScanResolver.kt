@@ -63,7 +63,8 @@ class BiedronkaScanResolver @Autowired constructor(
                     matchResult.groups["amount"]?.value?.toDoubleOrNull(),
                     matchResult.groups["unitPrice"]?.value?.replace(",", ".")?.toDoubleOrNull(),
                     null,
-                    matchResult.groups["totalPrice"]?.value?.replace(",", ".")?.toDoubleOrNull()
+                    matchResult.groups["totalPrice"]?.value?.replace(",", ".")?.toDoubleOrNull(),
+                    (receiptRevision.items.size + 1)
                 )
                 receiptRevision.items.add(itemEntity)
             } ?: discountPatternRegex.matchEntire(rawDataList[i])?.let { matchResult ->
@@ -75,7 +76,8 @@ class BiedronkaScanResolver @Autowired constructor(
             }
         }
 
-        receiptRevision.items.forEach { itemService.save(it) }
+        itemService.saveAll(receiptRevision.items).toMutableSet().also { receiptRevision.items = it }
+
 
         return receiptRevision
     }

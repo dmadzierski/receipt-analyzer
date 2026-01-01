@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { ReceiptService } from '../service/receipt.service';
-import { GetReceiptDetailsResponse } from '../model/receipt.model';
-import { ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { FileUploadComponent } from '../component/file-upload/file-upload.component';
+import {Component, OnInit} from '@angular/core';
+import {ReceiptService} from '../service/receipt.service';
+import {GetReceiptDetailsResponse} from '../model/receipt.model';
+import {ActivatedRoute, Router} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatSelectModule} from '@angular/material/select';
+import {provideNativeDateAdapter} from '@angular/material/core';
+import {RevisionDetailsComponent} from '../component/revision-details/revision-details.component';
 
 @Component({
   selector: 'app-receipt-details',
@@ -18,18 +19,22 @@ import { FileUploadComponent } from '../component/file-upload/file-upload.compon
     MatSelectModule,
     FormsModule,
     MatDatepickerModule,
-    MatButtonModule
+    MatButtonModule,
+    RevisionDetailsComponent
   ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-details.component.html',
   styleUrl: './receipt-details.component.scss',
 })
-export class ReceiptDetails implements OnInit {
+export class ReceiptDetailsComponent implements OnInit {
   constructor(
     private receiptService: ReceiptService,
+    private readonly router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) {
+  }
 
-  receiptDetails!: GetReceiptDetailsResponse;
+  receiptDetails = {} as GetReceiptDetailsResponse;
 
   ngOnInit(): void {
     const receiptId = this.route.snapshot.paramMap.get('id');
@@ -37,7 +42,7 @@ export class ReceiptDetails implements OnInit {
       this.receiptService.getReceiptDetails(receiptId).subscribe((res) => {
         this.receiptDetails = res;
         console.log(this.receiptDetails);
-      });
+      }, error => this.router.navigate(["/"]));
     } else {
     }
   }

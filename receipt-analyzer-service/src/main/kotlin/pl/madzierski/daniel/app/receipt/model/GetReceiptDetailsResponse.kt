@@ -7,11 +7,40 @@ data class GetReceiptDetailsResponse(
     val id: String?,
     val name: String?,
     val description: String?,
-    val revisions: List<GetReceiptDetailsRevisionResponse>,
-)
+    val preferredRevision: PreferredRevisionResponse?,
+    val revisions: Set<RevisionResponse>,
+    val createDate: LocalDateTime?,
+    val updateDate: LocalDateTime?
+) {
+    data class ItemResponse(
+        val id: String?,
+        val name: String?,
+        val vat: String?,
+        val amount: Double?,
+        val unitPrice: Double?,
+        val discount: Double?,
+        val totalPrice: Double?,
+        val position: Int?,
+    )
+
+    data class PreferredRevisionResponse(
+        var id: String?, var resolver: ScanResolver?, val createdDate: LocalDateTime?, val items: Set<ItemResponse>?, val files: Set<FileResponse>?
+    )
+
+    data class RevisionResponse(
+        var id: String?, var resolver: ScanResolver?, val createdDate: LocalDateTime?
+    )
+
+    data class FileResponse(
+        val id: String?,
+        val path: String?,
+        val rawData: String?
+    )
+
+}
 
 data class GetReceiptDetailsRevisionDetailsResponse(
-    var id: String,
+    var id: String?,
     var brand: Brand?,
     val receiptFiles: List<GetReceiptDetailsFileResponse>,
     val items: List<GetReceiptDetailsItemResponse>,
@@ -32,13 +61,7 @@ data class GetReceiptDetailsItemResponse(
     val unitPrice: Double?,
     val discount: Double?,
     val totalPrice: Double?,
-
-    )
-
-data class GetReceiptDetailsRevisionResponse(
-    var id: String?,
-    var resolver: ScanResolver?,
-    val createdDate: LocalDateTime?
 )
+
 
 

@@ -13,7 +13,7 @@ interface ReceiptRepository : JpaRepository<ReceiptEntity, String> {
     fun getReceiptList(@Param("userSub") userSub: String): List<GetReceiptListItemResponse>
 
     @Query("""
-        SELECT DISTINCT r FROM ReceiptEntity r 
+        SELECT r FROM ReceiptEntity r 
         LEFT JOIN FETCH r.receiptRevisions rr
         LEFT JOIN FETCH rr.items rri
         LEFT JOIN FETCH rr.receiptFiles rrf

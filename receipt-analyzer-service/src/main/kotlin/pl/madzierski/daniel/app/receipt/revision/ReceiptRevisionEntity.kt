@@ -21,11 +21,11 @@ data class ReceiptRevisionEntity(
     @JoinColumn(name = "receipt_id")
     var receipt: ReceiptEntity,
 
-    @OneToMany(mappedBy = "receiptRevision")
-    val receiptFiles: MutableSet<ReceiptFileEntity>,
+    @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.EAGER)
+    var receiptFiles: MutableSet<ReceiptFileEntity>,
 
-    @OneToMany(mappedBy = "receiptRevision")
-    val items: MutableSet<ItemEntity>,
+    @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.EAGER)
+    var items: MutableSet<ItemEntity>,
 
     var totalPrice: Double?,
 
@@ -59,7 +59,6 @@ data class ReceiptRevisionEntity(
     override fun hashCode(): Int {
         var result = totalPrice?.hashCode() ?: 0
         result = 31 * result + (preferredRevision?.hashCode() ?: 0)
-        result = 31 * result + (revision?.hashCode() ?: 0)
         result = 31 * result + (resolver?.hashCode() ?: 0)
         result = 31 * result + (brand?.hashCode() ?: 0)
         result = 31 * result + receiptFiles.hashCode()

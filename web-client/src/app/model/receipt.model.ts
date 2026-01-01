@@ -8,7 +8,9 @@ export interface GetReceiptListResponseItem {
   description: string;
   createDate: Date;
 }
-export interface GetReceiptDetailsResponse {}
+
+export interface GetReceiptDetailsResponse {
+}
 
 export class CreateReceiptData {
   constructor(
@@ -16,7 +18,8 @@ export class CreateReceiptData {
     public description: string,
     public date: string,
     public files: File[]
-  ) {}
+  ) {
+  }
 }
 
 export interface CreateReceiptBody {
@@ -25,42 +28,45 @@ export interface CreateReceiptBody {
   date: string;
 }
 
-export interface CreateReceiptResponse {}
+export interface CreateReceiptResponse {
+}
 
 export interface GetReceiptDetailsResponse {
-  id: string;
-  name: string;
-  description: string;
-  preferredRevision: GetReceiptDetailsRevisionDetailsResponse;
-  revisions: GetReceiptDetailsRevisionResponse[];
+  id: string
+  name: string
+  description: string
+  preferredRevision: RevisionDetails
+  revisions: Revision[]
+  createDate: string
+  updateDate: string
 }
 
-export interface GetReceiptDetailsRevisionDetailsResponse {
-  id: string;
-  brand: string;
-  receiptFiles: GetReceiptDetailsFileResponse[];
-  items: GetReceiptDetailsItemResponse[];
-  totalPrice: Number;
-  payingDate: string;
-  address: string;
+export interface RevisionDetails {
+  id: string
+  resolver: any
+  createdDate: string
+  items: Item[]
+  files: ReceiptFile[]
 }
 
-export interface GetReceiptDetailsFileResponse {
-  id: string;
+export interface Item {
+  id: string
+  name: string
+  vat: string
+  amount: number
+  unitPrice: number
+  discount?: number
+  totalPrice: number
 }
 
-export interface GetReceiptDetailsItemResponse {
-  id: string;
-  name: string;
-  vat: string;
-  amount: Number;
-  unitPrice: Number;
-  discount: Number;
-  totalPrice: Number;
+export interface ReceiptFile {
+  id: string
+  path: string
+  rawData?: string
 }
 
-export interface GetReceiptDetailsRevisionResponse {
-  id: string;
-  resolver: string;
-  createdDate: Date;
+export interface Revision {
+  id: string
+  resolver: any
+  createdDate: string
 }

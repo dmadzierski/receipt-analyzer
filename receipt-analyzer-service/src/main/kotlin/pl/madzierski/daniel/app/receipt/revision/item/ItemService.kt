@@ -8,5 +8,5 @@ class ItemService @Autowired constructor(
     private val itemRepository: ItemRepository
 ) {
 
-    fun save(itemEntity: ItemEntity) = this.itemRepository.save(itemEntity)
+    fun saveAll(items: Collection<ItemEntity>) = this.itemRepository.saveAll(items)
 }
