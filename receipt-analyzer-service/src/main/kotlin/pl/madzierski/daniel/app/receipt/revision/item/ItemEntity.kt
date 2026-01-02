@@ -13,7 +13,7 @@ data class ItemEntity(
 
     var name: String?,
 
-    var vat: String?,
+    var ptu: String?,
 
     var amount: Double?,
 
@@ -46,7 +46,7 @@ data class ItemEntity(
         if (discount != other.discount) return false
         if (totalPrice != other.totalPrice) return false
         if (name != other.name) return false
-        if (vat != other.vat) return false
+        if (ptu != other.ptu) return false
         if (position != other.position) return false
 
         return true
@@ -58,7 +58,7 @@ data class ItemEntity(
         result = 31 * result + (discount?.hashCode() ?: 0)
         result = 31 * result + (totalPrice?.hashCode() ?: 0)
         result = 31 * result + (name?.hashCode() ?: 0)
-        result = 31 * result + (vat?.hashCode() ?: 0)
+        result = 31 * result + (ptu?.hashCode() ?: 0)
         result = 31 * result + (position?.hashCode() ?: 0)
         return result
     }

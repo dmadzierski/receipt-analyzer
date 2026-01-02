@@ -10,6 +10,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import {RevisionDetailsComponent} from '../component/revision-details/revision-details.component';
+import {PdfViewerComponent} from '../component/pdf-viewer/pdf-viewer.component';
 
 @Component({
   selector: 'app-receipt-details',
@@ -20,7 +21,8 @@ import {RevisionDetailsComponent} from '../component/revision-details/revision-d
     FormsModule,
     MatDatepickerModule,
     MatButtonModule,
-    RevisionDetailsComponent
+    RevisionDetailsComponent,
+    PdfViewerComponent
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-details.component.html',
@@ -36,12 +38,14 @@ export class ReceiptDetailsComponent implements OnInit {
 
   receiptDetails = {} as GetReceiptDetailsResponse;
 
+  receiptFileId: string = '';
+
   ngOnInit(): void {
     const receiptId = this.route.snapshot.paramMap.get('id');
     if (receiptId) {
       this.receiptService.getReceiptDetails(receiptId).subscribe((res) => {
         this.receiptDetails = res;
-        console.log(this.receiptDetails);
+        this.receiptFileId = this.receiptDetails.preferredRevision.files.find(k => k.rawData === null)?.id ?? '';
       }, error => this.router.navigate(["/"]));
     } else {
     }

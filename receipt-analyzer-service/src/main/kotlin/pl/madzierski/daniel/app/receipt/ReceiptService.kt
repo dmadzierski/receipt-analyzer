@@ -86,7 +86,7 @@ class ReceiptService(
         GetReceiptDetailsResponse.ItemResponse(
             itemEntity.id,
             itemEntity.name,
-            itemEntity.vat,
+            itemEntity.ptu,
             itemEntity.amount,
             itemEntity.unitPrice,
             itemEntity.discount,
@@ -119,7 +119,7 @@ class ReceiptService(
     private fun receiptRevisionDetailsReceiptItemMapper(receiptItems: List<ItemEntity>): List<GetReceiptDetailsItemResponse> =
         receiptItems.map {
             GetReceiptDetailsItemResponse(
-                it.id!!, it.name, it.vat, it.amount, it.unitPrice, it.discount, it.totalPrice
+                it.id!!, it.name, it.ptu, it.amount, it.unitPrice, it.discount, it.totalPrice
             )
         }
 

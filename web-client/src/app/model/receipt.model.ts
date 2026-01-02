@@ -52,7 +52,7 @@ export interface RevisionDetails {
 export interface Item {
   id: string
   name: string
-  vat: string
+  ptu: string
   amount: number
   unitPrice: number
   discount?: number

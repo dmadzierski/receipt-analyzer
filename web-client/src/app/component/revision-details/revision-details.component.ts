@@ -31,7 +31,7 @@ export class RevisionDetailsComponent implements OnChanges{
   constructor() {
   }
 
-  displayedColumns: string[] = ['position', 'name', 'vat', 'amount', 'unitPrice', 'totalPrice'];
+  displayedColumns: string[] = ['position', 'name', 'ptu', 'amount', 'unitPrice', 'totalPrice'];
 
   @Input()
   revision: RevisionDetails = {} as RevisionDetails

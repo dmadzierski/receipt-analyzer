@@ -15,7 +15,7 @@ data class GetReceiptDetailsResponse(
     data class ItemResponse(
         val id: String?,
         val name: String?,
-        val vat: String?,
+        val ptu: String?,
         val amount: Double?,
         val unitPrice: Double?,
         val discount: Double?,
@@ -56,7 +56,7 @@ data class GetReceiptDetailsFileResponse(
 data class GetReceiptDetailsItemResponse(
     val id: String,
     val name: String?,
-    val vat: String?,
+    val ptu: String?,
     val amount: Double?,
     val unitPrice: Double?,
     val discount: Double?,

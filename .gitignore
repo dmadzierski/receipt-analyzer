@@ -30,4 +30,6 @@ build/
 .env
 
 /uploads/
-/web-client/uploads
+/web-client/
+
+/test-data/

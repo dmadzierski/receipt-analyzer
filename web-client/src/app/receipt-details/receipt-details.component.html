@@ -1,29 +1,35 @@
-<div class="form-container">
-  <h1>Receipt data</h1>
-  <mat-form-field>
-    <mat-label>Receipt name</mat-label>
-    <input [readonly]="true" matInput maxlength="30" placeholder="Ex. Shopping" [(ngModel)]="receiptDetails.name"/>
-  </mat-form-field>
+<div class="content">
+  <div class="form-container left-panel">
+    <h1>Receipt data</h1>
+    <mat-form-field>
+      <mat-label>Receipt name</mat-label>
+      <input [readonly]="true" matInput maxlength="30" placeholder="Ex. Shopping" [(ngModel)]="receiptDetails.name"/>
+    </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Description</mat-label>
-    <input [readonly]="true" matInput maxlength="30" [(ngModel)]="receiptDetails.description"/>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <input [readonly]="true" matInput maxlength="30" [(ngModel)]="receiptDetails.description"/>
+    </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Create date</mat-label>
-    <input [readonly]="true" matInput [matDatepicker]="picker" [(ngModel)]="receiptDetails.createDate">
-    <mat-hint>MM/DD/YYYY</mat-hint>
-    <mat-datepicker #picker></mat-datepicker>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Create date</mat-label>
+      <input [readonly]="true" matInput [matDatepicker]="picker" [(ngModel)]="receiptDetails.createDate">
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Update date</mat-label>
-    <input [readonly]="true" matInput [matDatepicker]="picker2" [(ngModel)]="receiptDetails.updateDate">
-    <mat-hint>MM/DD/YYYY</mat-hint>
-    <mat-datepicker #picker2></mat-datepicker>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Update date</mat-label>
+      <input [readonly]="true" matInput [matDatepicker]="picker2" [(ngModel)]="receiptDetails.updateDate">
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker #picker2></mat-datepicker>
+    </mat-form-field>
 
-  <app-revision-details [revision]="receiptDetails.preferredRevision"></app-revision-details>
+    <h2>Items list</h2>
 
+    <app-revision-details [revision]="receiptDetails.preferredRevision"></app-revision-details>
+  </div>
+  <div class="right-panel">
+    <app-pdf-viewer receiptFileId="{{this.receiptFileId}}"></app-pdf-viewer>
+  </div>
 </div>
