@@ -2,12 +2,12 @@ package pl.madzierski.daniel.app.receipt
 
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import pl.madzierski.daniel.app.receipt.model.*
-import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
+import pl.madzierski.daniel.app.receipt.model.CreateReceiptRequest
+import pl.madzierski.daniel.app.receipt.model.CreateReceiptResponse
+import pl.madzierski.daniel.app.receipt.model.GetReceiptDetailsResponse
+import pl.madzierski.daniel.app.receipt.model.GetReceiptListResponse
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionRepository
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionService
-import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
-import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileEntity
 import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileService
 import pl.madzierski.daniel.app.receipt.scan_resolver.service.ScanReceiptResolverService
 import pl.madzierski.daniel.app.receipt.validator.file_validator.ValidateReceiptService
@@ -50,77 +50,10 @@ class ReceiptService(
 
     fun getReceiptDetails(receiptId: String): GetReceiptDetailsResponse {
         val receiptEntity = receiptRepository.findReceiptEntityById(receiptId)
-
-        return receiptEntity.receiptRevisions.first { it.preferredRevision!! }.id?.let {
+        return receiptEntity.receiptRevisions.first { true == it.preferredRevision }.id?.let {
             receiptRevisionRepository.findReceiptRevisionEntitiesById(it)
         }.let {
-            GetReceiptDetailsResponse(
-                receiptEntity.id,
-                receiptEntity.name,
-                receiptEntity.description,
-                preferredRevisionMapper(it),
-                receiptRevisionMapper(receiptEntity.receiptRevisions),
-                receiptEntity.createdDate,
-                receiptEntity.modifiedDate
-            )
+            GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, it)
         }
     }
-
-    private fun preferredRevisionMapper(revisionEntity: ReceiptRevisionEntity?): GetReceiptDetailsResponse.PreferredRevisionResponse? {
-        if (revisionEntity != null) {
-            return GetReceiptDetailsResponse.PreferredRevisionResponse(
-                revisionEntity.id,
-                revisionEntity.resolver,
-                revisionEntity.createdDate,
-                revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) },
-                revisionEntity.receiptFiles.mapTo(mutableSetOf()) { fileMapper(it) })
-        }
-        return null;
-    }
-
-    private fun fileMapper(file: ReceiptFileEntity) = GetReceiptDetailsResponse.FileResponse(
-        file.id, file.path, file.rawData
-    )
-
-    private fun itemMapper(itemEntity: ItemEntity): GetReceiptDetailsResponse.ItemResponse =
-        GetReceiptDetailsResponse.ItemResponse(
-            itemEntity.id,
-            itemEntity.name,
-            itemEntity.ptu,
-            itemEntity.amount,
-            itemEntity.unitPrice,
-            itemEntity.discount,
-            itemEntity.totalPrice,
-            itemEntity.position
-        )
-
-    private fun receiptRevisionMapper(receiptRevisions: Set<ReceiptRevisionEntity>): Set<GetReceiptDetailsResponse.RevisionResponse> =
-        if (receiptRevisions.isNotEmpty()) receiptRevisions.mapTo(mutableSetOf()) {
-            GetReceiptDetailsResponse.RevisionResponse(
-                it.id, it.resolver, it.createdDate
-            )
-        }
-        else emptySet()
-
-    private fun receiptRevisionDetailsMapper(receiptRevision: ReceiptRevisionEntity): GetReceiptDetailsRevisionDetailsResponse =
-        GetReceiptDetailsRevisionDetailsResponse(
-            receiptRevision.id!!,
-            receiptRevision.brand,
-            receiptRevisionDetailsReceiptFilesMapper(receiptRevision.receiptFiles.toList()),
-            receiptRevisionDetailsReceiptItemMapper(receiptRevision.items.toList()),
-            receiptRevision.totalPrice,
-            receiptRevision.payingDate,
-            receiptRevision.address
-        )
-
-    private fun receiptRevisionDetailsReceiptFilesMapper(receiptFiles: List<ReceiptFileEntity>): List<GetReceiptDetailsFileResponse> =
-        receiptFiles.map { GetReceiptDetailsFileResponse(it.id!!) }
-
-    private fun receiptRevisionDetailsReceiptItemMapper(receiptItems: List<ItemEntity>): List<GetReceiptDetailsItemResponse> =
-        receiptItems.map {
-            GetReceiptDetailsItemResponse(
-                it.id!!, it.name, it.ptu, it.amount, it.unitPrice, it.discount, it.totalPrice
-            )
-        }
-
 }

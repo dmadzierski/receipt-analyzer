@@ -13,7 +13,6 @@ class ScanReceiptResolverService @Autowired constructor(
     val biedronkaScanResolver: BiedronkaScanResolver
 ) {
 
-    //    TODO
     private fun findBrand(receiptFileEntity: ReceiptFileEntity): OCRHandlingResolver {
         return OCRHandlingResolver.BIEDRONKA
     }

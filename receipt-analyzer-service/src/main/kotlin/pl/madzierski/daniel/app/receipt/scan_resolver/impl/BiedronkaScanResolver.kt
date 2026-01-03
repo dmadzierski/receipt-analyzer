@@ -25,11 +25,15 @@ class BiedronkaScanResolver @Autowired constructor(
 
     companion object {
         val itemPatternRegex =
-            Regex("^(?<name>.*)\\s(?<vat>[ABC])\\s(?<amount>\\d+\\.\\d+)\\s[x]\\s(?<unitPrice>\\d+,\\d+)\\s(?<totalPrice>\\d+,\\d+)\$")
-        val discountPatternRegex = Regex("^Rabat -(?<discount>\\d+,\\d+)$")
-        val discountedPriceRegex = Regex("^(?<totalPrice>\\d+,\\d+)$")
-        val startItemIndexRegex = Regex("Nazwa PTU Ilość Cena Wartość")
-        val lastItemIndexRegex = Regex("Sprzeda[zż] opodatkowana C.*")
+            Regex("^(?<name>.*)\\s+(?<ptu>[ABC])\\s+(?<amount>\\d+[\\s.]?\\d+)\\s*[xX]\\s+(?<unitPrice>\\d+[.,\\s]?\\d+)\\s(?<totalPrice>\\d+[.,\\s]\\d+)$")
+        val itemPatternWithoutPtuRegex =
+            Regex("^(?<name>.*)\\s+(?<amount>\\d+[\\s.]?\\d+)\\s*[xX]\\s+(?<unitPrice>\\d+[.,\\s]?\\d+)\\s(?<totalPrice>\\d+[.,\\s]\\d+)\$")
+        val discountPatternRegex = Regex("^Rabat -(?<discount>\\d+[.,\\s]\\d+)$")
+        val discountedPriceRegex = Regex("^(?<totalPrice>\\d+[.,\\s]\\d+)$")
+        val priceSuffixRegex = Regex("\\d+[.,\\s]?\\d{2}$")
+        val startItemIndexRegex = Regex("Nazwa PTU Ilość Cena Wartość", RegexOption.IGNORE_CASE)
+        val lastItemIndexRegex = Regex("Sprzeda[zż] opodatkowana C.*", RegexOption.IGNORE_CASE)
+        val pageInfoRegex = Regex(".*Strona\\s+\\d+\\s+z\\s+\\d+.*", RegexOption.IGNORE_CASE)
     }
 
     override fun execute(
@@ -49,28 +53,43 @@ class BiedronkaScanResolver @Autowired constructor(
         val startItemsIndex = (rawDataList.indexOfFirst { startItemIndexRegex.containsMatchIn(it) } + 1)
         val lastIItemIndex = rawDataList.indexOfFirst { lastItemIndexRegex.containsMatchIn(it) }
 
-        if (startItemsIndex == -1 || lastIItemIndex == -1 || lastIItemIndex < startItemsIndex)
-            throw AppRuntimeException(AppRuntimeExceptionMessages.CAN_NOT_RESOLVER_RECEIPT)
+        if (startItemsIndex == -1 || lastIItemIndex == -1 || lastIItemIndex < startItemsIndex) throw AppRuntimeException(
+            AppRuntimeExceptionMessages.CAN_NOT_RESOLVER_RECEIPT
+        )
 
-        val rawItemList = rawDataList.subList(startItemsIndex, lastIItemIndex)
+        var rawItemList = rawDataList.subList(startItemsIndex, lastIItemIndex)
+
+        val mergedItemList = mutableListOf<String>()
+        var nameBuffer = ""
+
+        for (line in rawItemList) {
+            val trimmedLine = line.trim()
+            if (trimmedLine.isEmpty()) continue
+            if (pageInfoRegex.matches(trimmedLine)) continue
+            if (priceSuffixRegex.containsMatchIn(trimmedLine)) {
+                if (nameBuffer.isNotEmpty()) {
+                    val cleanLine = trimmedLine.replace(Regex("^.*?(?=\\d[.,]\\d{3}|[ABC]\\s)"), "")
+                    mergedItemList.add("$nameBuffer $cleanLine")
+                    nameBuffer = ""
+                } else {
+                    mergedItemList.add(trimmedLine)
+                }
+            } else {
+                nameBuffer = trimmedLine
+            }
+        }
+        rawItemList = mergedItemList
 
         for (i in rawItemList.indices) {
-            itemPatternRegex.matchEntire(rawDataList[i])?.let { matchResult ->
-                val itemEntity = ItemEntity(
-                    receiptRevision,
-                    matchResult.groups["name"]?.value,
-                    matchResult.groups["vat"]?.value,
-                    matchResult.groups["amount"]?.value?.toDoubleOrNull(),
-                    matchResult.groups["unitPrice"]?.value?.replace(",", ".")?.toDoubleOrNull(),
-                    null,
-                    matchResult.groups["totalPrice"]?.value?.replace(",", ".")?.toDoubleOrNull(),
-                    (receiptRevision.items.size + 1)
-                )
-                receiptRevision.items.add(itemEntity)
-            } ?: discountPatternRegex.matchEntire(rawDataList[i])?.let { matchResult ->
+            itemPatternRegex.matchEntire(rawItemList[i])?.let { matchResult ->
+                saveResult(receiptRevision, matchResult)
+            } ?: itemPatternWithoutPtuRegex.matchEntire(rawItemList[i])?.let { matchResult ->
+                saveResult(receiptRevision, matchResult)
+            }
+            ?: discountPatternRegex.matchEntire(rawItemList[i])?.let { matchResult ->
                 receiptRevision.items.last().discount =
                     matchResult.groups["discount"]?.value?.replace(",", ".")?.toDoubleOrNull()
-            } ?: discountedPriceRegex.matchEntire(rawDataList[i])?.let { matchResult ->
+            } ?: discountedPriceRegex.matchEntire(rawItemList[i])?.let { matchResult ->
                 receiptRevision.items.last().totalPrice =
                     matchResult.groups["totalPrice"]?.value?.replace(",", ".")?.toDoubleOrNull()
             }
@@ -82,8 +101,39 @@ class BiedronkaScanResolver @Autowired constructor(
         return receiptRevision
     }
 
+    private fun saveResult(
+        receiptRevision: ReceiptRevisionEntity,
+        matchResult: MatchResult
+    ): Boolean {
+        val itemEntity = ItemEntity(
+            receiptRevision,
+            getValueFromGroup(matchResult, "name")?.value?.replace(Regex("(?<=\\d)9(?=\\s|$)"), "g"),
+            getValueFromGroup(matchResult, "ptu")?.value,
+            parseDouble(getValueFromGroup(matchResult, "amount")?.value),
+            parseDouble(getValueFromGroup(matchResult, "unitPrice")?.value),
+            null,
+            parseDouble(getValueFromGroup(matchResult, "totalPrice")?.value),
+            (receiptRevision.items.size + 1)
+        )
+        return receiptRevision.items.add(itemEntity)
+    }
+
+    private fun getValueFromGroup(matchResult: MatchResult, group: String): MatchGroup? {
+        return try {
+            matchResult.groups[group]
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun parseDouble(valStr: String?): Double? {
+        return valStr?.replace(" ", ".")?.replace(",", ".")?.toDoubleOrNull()
+    }
+
     fun extractTextFromImage(imagePath: String): String = Tesseract().apply {
         setDatapath(tesseractDataPath)
         setLanguage("pol+eng")
+        setPageSegMode(6)
+        setOcrEngineMode(0)
     }.doOCR(File(imagePath))
 }
