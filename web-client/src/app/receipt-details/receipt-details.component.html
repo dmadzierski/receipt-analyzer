@@ -3,7 +3,7 @@
     <h1>Receipt data</h1>
     <mat-form-field>
       <mat-label>Receipt name</mat-label>
-      <input [readonly]="true" matInput maxlength="30" placeholder="Ex. Shopping" [(ngModel)]="receiptDetails.name"/>
+      <input [readonly]="true" matInput maxlength="30" [(ngModel)]="receiptDetails.name"/>
     </mat-form-field>
 
     <mat-form-field>
@@ -25,9 +25,14 @@
       <mat-datepicker #picker2></mat-datepicker>
     </mat-form-field>
 
-    <h2>Items list</h2>
+    <h2>Revision details <mat-icon class="edit-icon" (click)="doEdit()" fontIcon="edit"></mat-icon></h2>
 
-    <app-revision-details [revision]="receiptDetails.preferredRevision"></app-revision-details>
+    <app-revision-details [revision]="receiptDetails.preferredRevision" [contentEditable]="editRevisionMode"></app-revision-details>
+
+    <h2>Revisions</h2>
+
+    <app-revision-list [revisions]="receiptDetails.revisions"></app-revision-list>
+
   </div>
   <div class="right-panel">
     <app-pdf-viewer receiptFileId="{{this.receiptFileId}}"></app-pdf-viewer>

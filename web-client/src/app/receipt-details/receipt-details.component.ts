@@ -11,6 +11,8 @@ import {MatSelectModule} from '@angular/material/select';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import {RevisionDetailsComponent} from '../component/revision-details/revision-details.component';
 import {PdfViewerComponent} from '../component/pdf-viewer/pdf-viewer.component';
+import {RevisionListComponent} from '../component/revision-list/revision-list.component';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'app-receipt-details',
@@ -22,7 +24,9 @@ import {PdfViewerComponent} from '../component/pdf-viewer/pdf-viewer.component';
     MatDatepickerModule,
     MatButtonModule,
     RevisionDetailsComponent,
-    PdfViewerComponent
+    PdfViewerComponent,
+    RevisionListComponent,
+    MatIcon
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-details.component.html',
@@ -40,6 +44,8 @@ export class ReceiptDetailsComponent implements OnInit {
 
   receiptFileId: string = '';
 
+  editRevisionMode: boolean = false;
+
   ngOnInit(): void {
     const receiptId = this.route.snapshot.paramMap.get('id');
     if (receiptId) {
@@ -49,5 +55,9 @@ export class ReceiptDetailsComponent implements OnInit {
       }, error => this.router.navigate(["/"]));
     } else {
     }
+  }
+
+  doEdit() {
+    this.editRevisionMode = !this.editRevisionMode;
   }
 }

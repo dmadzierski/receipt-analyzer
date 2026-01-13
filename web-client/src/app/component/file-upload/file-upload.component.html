@@ -1,15 +1,15 @@
 <input type="file" style="display: none" #fileInput (change)="onFileSelected($event)">
 
 <button class="add-attachment" mat-raised-button color="primary" (click)="fileInput.click()">
-    <mat-icon>attach_file</mat-icon>
-    <span>Add attachment</span>
+  <mat-icon>attach_file</mat-icon>
+  <span>Add attachment</span>
 </button>
 
 <div *ngIf="files.length > 0" style="margin-top: 10px;">
-    <strong>Select file:</strong>
-    <mat-list>
-        @for(file of files; track $index){
-        <mat-list-item>{{ file.name }}</mat-list-item>
-        }
-    </mat-list>
+  <strong>Select file:</strong>
+  <mat-list>
+    @for (file of files; track $index) {
+      <mat-list-item>{{ file.name }}</mat-list-item>
+    }
+  </mat-list>
 </div>

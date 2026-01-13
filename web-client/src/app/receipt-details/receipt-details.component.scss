@@ -1,15 +1,4 @@
-.form-container {
-  padding: 2% 5% 5% 5%;
-  display: flex;
-  flex-direction: column;
-}
-
-h1, h2 {
-  padding: 20px;
-}
-
 .content {
-  display: flex;
   flex-direction: row;
 }
 
@@ -20,7 +9,11 @@ h1, h2 {
 .right-panel {
   flex: 1;
   position: sticky;
-  top: 20px;
+  top: 0;
   align-self: start;
   height: fit-content;
+}
+
+.edit-icon{
+  margin-left: 10px;
 }

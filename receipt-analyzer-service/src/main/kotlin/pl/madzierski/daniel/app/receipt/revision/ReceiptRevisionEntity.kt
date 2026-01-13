@@ -3,7 +3,6 @@ package pl.madzierski.daniel.app.receipt.revision
 import jakarta.persistence.*
 import pl.madzierski.daniel.app.common.model.BaseEntity
 import pl.madzierski.daniel.app.receipt.ReceiptEntity
-import pl.madzierski.daniel.app.receipt.model.Brand
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
 import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileEntity
 
@@ -15,7 +14,7 @@ data class ReceiptRevisionEntity(
 
     var resolver: ScanResolver?,
 
-    var brand: Brand?,
+    var brand: String?,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receipt_id")
@@ -33,7 +32,9 @@ data class ReceiptRevisionEntity(
 
     var address: String?,
 
-    var preferredRevision: Boolean?
+    var isPreferredRevision: Boolean?,
+
+    var isCorrect: Boolean?
 
 
 ) : BaseEntity() {
@@ -44,7 +45,8 @@ data class ReceiptRevisionEntity(
         other as ReceiptRevisionEntity
 
         if (totalPrice != other.totalPrice) return false
-        if (preferredRevision != other.preferredRevision) return false
+        if (isPreferredRevision != other.isPreferredRevision) return false
+        if (isCorrect != other.isCorrect) return false
         if (revision != other.revision) return false
         if (resolver != other.resolver) return false
         if (brand != other.brand) return false
@@ -58,7 +60,8 @@ data class ReceiptRevisionEntity(
 
     override fun hashCode(): Int {
         var result = totalPrice?.hashCode() ?: 0
-        result = 31 * result + (preferredRevision?.hashCode() ?: 0)
+        result = 31 * result + (isPreferredRevision?.hashCode() ?: 0)
+        result = 31 * result + (isCorrect?.hashCode() ?: 0)
         result = 31 * result + (resolver?.hashCode() ?: 0)
         result = 31 * result + (brand?.hashCode() ?: 0)
         result = 31 * result + receiptFiles.hashCode()

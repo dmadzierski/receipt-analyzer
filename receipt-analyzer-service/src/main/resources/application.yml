@@ -37,3 +37,8 @@ security:
 logging:
   level:
     root: ${LOGGING_LEVEL_ROOT:DEBUG}
+
+receipt:
+  revision:
+    default:
+      version: 1.0

@@ -1,13 +1,16 @@
 package pl.madzierski.daniel.app.receipt
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import pl.madzierski.daniel.app.receipt.model.CreateReceiptRequest
 import pl.madzierski.daniel.app.receipt.model.CreateReceiptResponse
 import pl.madzierski.daniel.app.receipt.model.GetReceiptDetailsResponse
 import pl.madzierski.daniel.app.receipt.model.GetReceiptListResponse
+import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionRepository
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionService
+import pl.madzierski.daniel.app.receipt.revision.ScanResolver
 import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileService
 import pl.madzierski.daniel.app.receipt.scan_resolver.service.ScanReceiptResolverService
 import pl.madzierski.daniel.app.receipt.validator.file_validator.ValidateReceiptService
@@ -22,13 +25,15 @@ class ReceiptService(
     val receiptRevisionService: ReceiptRevisionService,
     val receiptFileService: ReceiptFileService,
     val validateReceiptService: ValidateReceiptService,
-    val receiptResolverService: ScanReceiptResolverService
+    val receiptResolverService: ScanReceiptResolverService,
+    @Value("\${receipt.revision.default.version}") val revisionVersion: String
 ) {
 
     fun addReceipt(file: MultipartFile, body: CreateReceiptRequest?): CreateReceiptResponse {
         validateReceiptService.validate(file)
         var receipt = this.saveReceipt(createReceipt(body))
-        val receiptRevision = this.receiptRevisionService.saveDefaultReceiptRevision(receipt)
+        var receiptRevision = this.createReceiptRevisionEntity(receipt, "Biedronka", ScanResolver.OCR, revisionVersion)
+        receiptRevision = this.receiptRevisionService.saveDefaultReceiptRevision(receiptRevision)
         val receiptFile = this.receiptFileService.saveReceiptFile(receiptRevision, file)
         receipt.receiptRevisions.add(receiptResolverService.resolve(receipt, receiptRevision, receiptFile))
         receipt = this.saveReceipt(receipt)
@@ -48,12 +53,20 @@ class ReceiptService(
         return GetReceiptListResponse(receiptRepository.getReceiptList(SecurityUtils.getCurrentUserSub()))
     }
 
+    fun createReceiptRevisionEntity(
+        receipt: ReceiptEntity, brand: String, scanResolver: ScanResolver, revisionVersion: String
+    ): ReceiptRevisionEntity = ReceiptRevisionEntity(
+        revisionVersion, scanResolver, brand, receipt, mutableSetOf(), mutableSetOf(), null, null, null, true, false
+    )
+
     fun getReceiptDetails(receiptId: String): GetReceiptDetailsResponse {
         val receiptEntity = receiptRepository.findReceiptEntityById(receiptId)
-        return receiptEntity.receiptRevisions.first { true == it.preferredRevision }.id?.let {
+        return receiptEntity.receiptRevisions.first { true == it.isPreferredRevision }.id?.let {
             receiptRevisionRepository.findReceiptRevisionEntitiesById(it)
         }.let {
             GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, it)
         }
     }
+
+    fun findById(receiptId: String) = receiptRepository.findById(receiptId)
 }

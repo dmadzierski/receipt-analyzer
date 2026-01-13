@@ -1,0 +1,93 @@
+.form-container {
+  flex: 1
+}
+
+.table-input {
+  border-style: none;
+  background-color: var(--mat-sys-surface);
+  font-size: var(--mat-sys-body-medium);
+}
+
+.table-input:focus, .table-input:active {
+  background-color: var(--mat-sys-surface);
+  font-size: var(--mat-sys-body-medium);
+  outline: none;
+}
+
+.table-input {
+  width: 100%;
+  text-align: inherit;
+  border-bottom-style: double;
+  border-bottom-color: white;
+}
+
+.table-input-editable{
+  border-bottom-color: black;
+}
+
+.mat-column-position,
+.mat-column-ptu {
+  width: 80px;
+}
+
+.mat-column-amount {
+  width: 100px;
+  text-align: right;
+}
+
+.mat-column-unitPrice,
+.mat-column-totalPrice {
+  width: 120px;
+  text-align: right;
+}
+.position-container {
+  display: flex;
+  align-items: center;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: #757575;
+  margin-right: 8px;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* --- Style dla Drag & Drop --- */
+
+/* Styl wiersza, który "leci" za myszką (Preview) */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+  0 8px 10px 1px rgba(0, 0, 0, 0.14),
+  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  background-color: white;
+
+  /* Ważne: zachowanie układu komórek w "duchu" */
+  display: table;
+
+  td {
+    /* Ustawienie szerokości komórek w podglądzie, by nie były ściśnięte */
+    padding: 16px;
+    border-bottom: none;
+  }
+}
+
+/* Styl pustego miejsca (Placeholder) */
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+/* Animacje przesuwania innych wierszy */
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Animacja powrotu elementów na miejsce */
+.cdk-drop-list-dragging tr:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+

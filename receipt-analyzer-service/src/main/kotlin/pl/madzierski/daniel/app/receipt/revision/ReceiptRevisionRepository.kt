@@ -7,10 +7,12 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ReceiptRevisionRepository : JpaRepository<ReceiptRevisionEntity, String> {
 
-    @Query("""
+    @Query(
+        """
         SELECT r FROM ReceiptRevisionEntity r 
         LEFT JOIN FETCH r.items ri
         WHERE r.id = :id
-        """)
+        """
+    )
     fun findReceiptRevisionEntitiesById(id: String): ReceiptRevisionEntity
 }

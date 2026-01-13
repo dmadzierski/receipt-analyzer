@@ -9,4 +9,5 @@ class ItemService @Autowired constructor(
 ) {
 
     fun saveAll(items: Collection<ItemEntity>) = this.itemRepository.saveAll(items)
+    fun findById(id: String) = this.itemRepository.findById(id)
 }

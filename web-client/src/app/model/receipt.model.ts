@@ -45,12 +45,17 @@ export interface RevisionDetails {
   id: string
   resolver: any
   createdDate: string
+  brand: string
+  totalPrice: Number
+  payingDate: string
+  address: string
   items: Item[]
   files: ReceiptFile[]
 }
 
 export interface Item {
-  id: string
+  id?: string
+  position: number
   name: string
   ptu: string
   amount: number
@@ -69,4 +74,8 @@ export interface Revision {
   id: string
   resolver: any
   createdDate: string
+  brand: string
+  totalPrice: Number
+  payingDate: string
+  address: string
 }

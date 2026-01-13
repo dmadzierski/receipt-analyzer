@@ -1,10 +1,10 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import {CommonModule} from '@angular/common';
+import {Component, Input} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
+import {MatToolbarModule} from '@angular/material/toolbar';
 
 @Component({
   selector: 'file-upload',
@@ -24,7 +24,9 @@ export class FileUploadComponent {
 
   @Input()
   files: File[] = [];
-  constructor() {}
+
+  constructor() {
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

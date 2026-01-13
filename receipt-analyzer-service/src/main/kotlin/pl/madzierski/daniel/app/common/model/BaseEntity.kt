@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 @EntityListeners(AuditingEntityListener::class)
 abstract class BaseEntity(
 
-@Id
+    @Id
     @UuidGenerator
     val id: String? = null,
 

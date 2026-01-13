@@ -31,12 +31,24 @@ data class GetReceiptDetailsResponse(
         var id: String?,
         var resolver: ScanResolver?,
         val createdDate: LocalDateTime?,
+        val brand: String?,
+        val totalPrice: Double?,
+        val payingDate: String?,
+        val address: String?,
         val items: Set<ItemResponse>?,
         val files: Set<FileResponse>?
     )
 
     data class RevisionResponse(
-        var id: String?, var resolver: ScanResolver?, val createdDate: LocalDateTime?
+        var id: String?,
+        var resolver: ScanResolver?,
+        val createdDate: LocalDateTime?,
+        val brand: String?,
+        val totalPrice: Double?,
+        val payingDate: String?,
+        val address: String?,
+        val preferredRevision: Boolean?,
+        val isCorrect: Boolean?,
     )
 
     data class FileResponse(
@@ -61,6 +73,10 @@ data class GetReceiptDetailsResponse(
                     revisionEntity.id,
                     revisionEntity.resolver,
                     revisionEntity.createdDate,
+                    revisionEntity.brand,
+                    revisionEntity.totalPrice,
+                    revisionEntity.payingDate,
+                    revisionEntity.address,
                     revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) },
                     revisionEntity.receiptFiles.mapTo(mutableSetOf()) { fileMapper(it) })
             }
@@ -85,7 +101,15 @@ data class GetReceiptDetailsResponse(
         fun receiptRevisionMapper(receiptRevisions: Set<ReceiptRevisionEntity>): Set<RevisionResponse> =
             if (receiptRevisions.isNotEmpty()) receiptRevisions.mapTo(mutableSetOf()) {
                 RevisionResponse(
-                    it.id, it.resolver, it.createdDate
+                    it.id,
+                    it.resolver,
+                    it.createdDate,
+                    it.brand,
+                    it.totalPrice,
+                    it.payingDate,
+                    it.address,
+                    it.isPreferredRevision,
+                    it.isCorrect
                 )
             }
             else emptySet()

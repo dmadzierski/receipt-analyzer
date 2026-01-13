@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, inject, Input, ViewChild,} from "@angular/core";
+import {Component, ElementRef, inject, Input, ViewChild,} from "@angular/core";
 import * as pdfjsLib from "pdfjs-dist";
 import Keycloak from 'keycloak-js';
 

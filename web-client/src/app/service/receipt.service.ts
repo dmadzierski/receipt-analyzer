@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
 import {
   CreateReceiptData,
   CreateReceiptResponse,
@@ -47,7 +47,7 @@ export class ReceiptService {
           }),
         ],
         'payapp_init_json.json',
-        { type: 'application/json' }
+        {type: 'application/json'}
       )
     );
 

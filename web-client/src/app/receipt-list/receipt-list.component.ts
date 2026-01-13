@@ -1,11 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { ReceiptService } from '../service/receipt.service';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { Router } from '@angular/router';
-import { RouterModule } from '@angular/router';
-import { GetReceiptListResponse, GetReceiptListResponseItem } from '../model/receipt.model';
+import {Component, OnInit} from '@angular/core';
+import {ReceiptService} from '../service/receipt.service';
+import {MatTableModule} from '@angular/material/table';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {Router, RouterModule} from '@angular/router';
+import {GetReceiptListResponse, GetReceiptListResponseItem} from '../model/receipt.model';
 
 @Component({
   selector: 'receipt-list',
@@ -20,7 +19,8 @@ export class ReceiptListComponent implements OnInit {
   constructor(
     private readonly receiptService: ReceiptService,
     private readonly router: Router
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.getReceiptList();
