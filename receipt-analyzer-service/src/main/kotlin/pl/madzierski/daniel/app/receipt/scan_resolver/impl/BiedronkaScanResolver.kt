@@ -8,7 +8,7 @@ import pl.madzierski.daniel.app.common.model.util.PdfUtil
 import pl.madzierski.daniel.app.receipt.ReceiptEntity
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
-import pl.madzierski.daniel.app.receipt.revision.item.ItemService
+import pl.madzierski.daniel.app.receipt.revision.item.ItemProvider
 import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileEntity
 import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileService
 import pl.madzierski.daniel.app.receipt.scan_resolver.ScanResolverStrategy
@@ -20,7 +20,7 @@ import java.io.File
 class BiedronkaScanResolver @Autowired constructor(
     val receiptFileService: ReceiptFileService,
     @Value("\${ocr.tesseract.dataPath}") val tesseractDataPath: String,
-    val itemService: ItemService,
+    val itemProvider: ItemProvider,
 ) : ScanResolverStrategy {
 
     companion object {
@@ -95,8 +95,7 @@ class BiedronkaScanResolver @Autowired constructor(
             }
         }
 
-        itemService.saveAll(receiptRevision.items).toMutableSet().also { receiptRevision.items = it }
-
+        itemProvider.saveAll(receiptRevision.items).toMutableSet().also { receiptRevision.items = it }
 
         return receiptRevision
     }

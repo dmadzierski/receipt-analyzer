@@ -19,7 +19,6 @@ interface ReceiptRepository : JpaRepository<ReceiptEntity, String> {
         """
         SELECT r FROM ReceiptEntity r 
         LEFT JOIN FETCH r.receiptRevisions rr
-        LEFT JOIN FETCH rr.items rri
         LEFT JOIN FETCH rr.receiptFiles rrf
         WHERE r.id = :id
         """

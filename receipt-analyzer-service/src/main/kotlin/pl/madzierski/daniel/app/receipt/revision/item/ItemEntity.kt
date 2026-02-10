@@ -29,7 +29,7 @@ data class ItemEntity(
     @JoinColumn(name = "parent_item_id")
     var parentItem: ItemEntity? = null,
 
-    @OneToMany(mappedBy = "parentItem")
+    @OneToMany(mappedBy = "parentItem", fetch = FetchType.LAZY)
     val childItems: MutableSet<ItemEntity> = mutableSetOf()
 
 

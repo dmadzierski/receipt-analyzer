@@ -16,7 +16,7 @@ abstract class BaseEntity(
 
     @Id
     @UuidGenerator
-    val id: String? = null,
+    var id: String? = null,
 
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)

@@ -2,15 +2,10 @@ package pl.madzierski.daniel.app.receipt
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import pl.madzierski.daniel.app.receipt.model.CreateReceiptRequest
-import pl.madzierski.daniel.app.receipt.model.CreateReceiptResponse
-import pl.madzierski.daniel.app.receipt.model.GetReceiptDetailsResponse
-import pl.madzierski.daniel.app.receipt.model.GetReceiptListResponse
-import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
-import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionRepository
-import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionService
-import pl.madzierski.daniel.app.receipt.revision.ScanResolver
+import pl.madzierski.daniel.app.receipt.model.*
+import pl.madzierski.daniel.app.receipt.revision.*
 import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileService
 import pl.madzierski.daniel.app.receipt.scan_resolver.service.ScanReceiptResolverService
 import pl.madzierski.daniel.app.receipt.validator.file_validator.ValidateReceiptService
@@ -26,6 +21,7 @@ class ReceiptService(
     val receiptFileService: ReceiptFileService,
     val validateReceiptService: ValidateReceiptService,
     val receiptResolverService: ScanReceiptResolverService,
+    val revisionProvider: RevisionProvider,
     @Value("\${receipt.revision.default.version}") val revisionVersion: String
 ) {
 
@@ -54,9 +50,20 @@ class ReceiptService(
     }
 
     fun createReceiptRevisionEntity(
-        receipt: ReceiptEntity, brand: String, scanResolver: ScanResolver, revisionVersion: String
+        receipt: ReceiptEntity, brand: String, scanResolver: ScanResolver, revisionVersion: String,
     ): ReceiptRevisionEntity = ReceiptRevisionEntity(
-        revisionVersion, scanResolver, brand, receipt, mutableSetOf(), mutableSetOf(), null, null, null, true, false
+        null,
+        revisionVersion,
+        scanResolver,
+        brand,
+        receipt,
+        mutableSetOf(),
+        mutableSetOf(),
+        null,
+        null,
+        null,
+        true,
+        false,
     )
 
     fun getReceiptDetails(receiptId: String): GetReceiptDetailsResponse {
@@ -68,5 +75,7 @@ class ReceiptService(
         }
     }
 
-    fun findById(receiptId: String) = receiptRepository.findById(receiptId)
+    fun getReceiptRevisions(receiptId: String): List<GetReceiptRevisionsResponse> =
+        revisionProvider.getReceiptRevisions(receiptId).map { GetReceiptRevisionsResponse.receiptRevisionMapper(it) }
+            .toList()
 }

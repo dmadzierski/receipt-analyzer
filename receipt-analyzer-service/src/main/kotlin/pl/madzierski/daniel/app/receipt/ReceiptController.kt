@@ -7,10 +7,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import pl.madzierski.daniel.app.receipt.model.CreateReceiptRequest
-import pl.madzierski.daniel.app.receipt.model.CreateReceiptResponse
-import pl.madzierski.daniel.app.receipt.model.GetReceiptDetailsResponse
-import pl.madzierski.daniel.app.receipt.model.GetReceiptListResponse
+import pl.madzierski.daniel.app.receipt.model.*
 
 
 @RestController
@@ -37,4 +34,8 @@ class ReceiptController(val receiptService: ReceiptService) {
     }
 
 
+    @GetMapping(path = ["/{receiptId}/revisions"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReceiptRevisions(@PathVariable receiptId: String): ResponseEntity<List<GetReceiptRevisionsResponse>> {
+        return ResponseEntity.ok(receiptService.getReceiptRevisions(receiptId))
+    }
 }

@@ -25,13 +25,15 @@
       <mat-datepicker #picker2></mat-datepicker>
     </mat-form-field>
 
+    <h2>Revisions</h2>
+
+    <app-revision-list [receiptId]="receiptDetails.id" [revisions]="receiptDetails.revisions"></app-revision-list>
+
+
     <h2>Revision details <mat-icon class="edit-icon" (click)="doEdit()" fontIcon="edit"></mat-icon></h2>
 
     <app-revision-details [revision]="receiptDetails.preferredRevision" [contentEditable]="editRevisionMode"></app-revision-details>
 
-    <h2>Revisions</h2>
-
-    <app-revision-list [revisions]="receiptDetails.revisions"></app-revision-list>
 
   </div>
   <div class="right-panel">

@@ -75,6 +75,7 @@ services:
     environment:
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n"
       RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN}
+      RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID}
       DOCKER_IP: $(DOCKER_IP)
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_POST: ${MYSQL_PORT}
@@ -86,6 +87,7 @@ services:
     depends_on:
       - keycloak
       - nginx
+      - mysql
     networks:
       - app-network
     volumes:

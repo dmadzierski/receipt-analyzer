@@ -10,6 +10,8 @@ import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileEntity
 @Table(name = "receipt_revision")
 data class ReceiptRevisionEntity(
 
+    var name: String?,
+
     var revision: String?,
 
     var resolver: ScanResolver?,
@@ -23,7 +25,7 @@ data class ReceiptRevisionEntity(
     @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.EAGER)
     var receiptFiles: MutableSet<ReceiptFileEntity>,
 
-    @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.LAZY)
     var items: MutableSet<ItemEntity>,
 
     var totalPrice: Double?,
@@ -34,8 +36,14 @@ data class ReceiptRevisionEntity(
 
     var isPreferredRevision: Boolean?,
 
-    var isCorrect: Boolean?
+    var isCorrect: Boolean?,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_receipt_revision_id")
+    var parentReceiptRevision: ReceiptRevisionEntity? = null,
+
+    @OneToMany(mappedBy = "parentReceiptRevision")
+    val childReceiptRevisions: MutableSet<ReceiptRevisionEntity> = mutableSetOf()
 
 ) : BaseEntity() {
     override fun equals(other: Any?): Boolean {

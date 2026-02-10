@@ -5,7 +5,7 @@ import {
   CreateReceiptData,
   CreateReceiptResponse,
   GetReceiptDetailsResponse,
-  GetReceiptListResponse,
+  GetReceiptListResponse, Revision,
 } from '../model/receipt.model';
 
 @Injectable({
@@ -53,4 +53,9 @@ export class ReceiptService {
 
     return this.httpClient.post<CreateReceiptResponse>('/api/receipts', body);
   }
+
+  getReceiptRevisions(receiptId: string): Observable<Revision[]> {
+    return this.httpClient.get<Revision[]>(`/api/receipts/${receiptId}/revisions`)
+  }
+
 }

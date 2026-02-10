@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, inject, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
 import {Revision} from '../../model/receipt.model';
 import {
   MatCell,
@@ -15,6 +15,8 @@ import {RouterModule} from '@angular/router';
 import {MatSort, MatSortHeader} from '@angular/material/sort';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {DatePipe} from '@angular/common';
+import {RevisionService} from '../../service/revision.service';
+import {ReceiptService} from '../../service/receipt.service';
 
 @Component({
   selector: 'app-revision-list',
@@ -33,10 +35,15 @@ export class RevisionListComponent implements OnChanges {
   constructor() {
   }
 
-  displayedColumns: string[] = ['brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'preferredRevision', 'isCorrect'];
+  private revisionService = inject(RevisionService);
+  private receiptService = inject(ReceiptService);
+
+  displayedColumns: string[] = ['brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'preferredRevision', 'isCorrect', 'actions'];
 
   @Input()
   revisions: Revision[] = {} as Revision[];
+
+  @Input() receiptId: string = '';
 
   @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (sort) {
@@ -50,6 +57,27 @@ export class RevisionListComponent implements OnChanges {
     if (changes['revisions'] && this.revisions) {
       this.data.data = this.revisions;
     }
+  }
+
+  duplicateRevision(id: string) {
+    if (!id) return;
+
+    this.revisionService.copyRevision(id).subscribe({
+      next: (newRevision) => {
+        this.refreshData(this.receiptId)
+      },
+      error: (err) => console.error('Błąd kopiowania', err)
+    });
+  }
+
+  refreshData(receiptId: string){
+    this.receiptService.getReceiptRevisions(receiptId).subscribe(
+      {
+        next: (revisions) => {
+          this.data.data = revisions;
+        }
+      }
+    )
   }
 
 }

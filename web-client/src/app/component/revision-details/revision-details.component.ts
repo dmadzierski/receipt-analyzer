@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
 import {Item, RevisionDetails} from '../../model/receipt.model';
 import {
   MatCell,
@@ -36,7 +36,7 @@ import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-dr
   styleUrl: './revision-details.component.scss',
 })
 export class RevisionDetailsComponent implements OnChanges {
-  constructor() {
+  constructor(private cdr: ChangeDetectorRef) {
   }
 
   displayedColumns: string[] = ['position', 'name', 'ptu', 'amount', 'unitPrice', 'totalPrice', 'actions'];
@@ -55,6 +55,7 @@ export class RevisionDetailsComponent implements OnChanges {
         this.data.sort.active = 'position';
         this.data.sort.direction = 'asc';
       }
+      this.cdr.detectChanges();
     }
   }
 

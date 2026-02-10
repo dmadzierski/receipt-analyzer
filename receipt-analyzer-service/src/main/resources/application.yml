@@ -16,6 +16,18 @@ spring:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost/auth/realms/activiti}
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs}
+#          client-id: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID}
+#          client-secret: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN}
+#      client:
+#        registration:
+#          keycloak:
+#            client-id: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID}
+#            client-secret: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN}
+#            authorization-grant-type: authorization_code
+#            scope: openid
+#        provider:
+#          keycloak:
+#            issuer-uri: ${KEYCLOAK_ISSUER_URI}
   servlet:
     multipart:
       enabled: true
