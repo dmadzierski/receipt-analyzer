@@ -27,7 +27,7 @@
 
     <h2>Revisions</h2>
 
-    <app-revision-list [receiptId]="receiptDetails.id" [revisions]="receiptDetails.revisions"></app-revision-list>
+    <app-revision-list [receiptId]="receiptDetails.id" [revisions]="receiptDetails.revisions" (selectedRevisionChange)="handleSelectedRevisionChange($event)"></app-revision-list>
 
 
     <h2>Revision details <mat-icon class="edit-icon" (click)="doEdit()" fontIcon="edit"></mat-icon></h2>

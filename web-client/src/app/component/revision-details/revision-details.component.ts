@@ -50,11 +50,8 @@ export class RevisionDetailsComponent implements OnChanges {
   @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (sort) {
       this.data.sort = sort;
-
-      if (!this.contentEditable) {
-        this.data.sort.active = 'position';
-        this.data.sort.direction = 'asc';
-      }
+      this.data.sort.active = 'position';
+      this.data.sort.direction = 'asc';
       this.cdr.detectChanges();
     }
   }
@@ -67,16 +64,7 @@ export class RevisionDetailsComponent implements OnChanges {
     }
 
     if (changes['contentEditable']) {
-      if (this.contentEditable) {
-        this.data.sort = null;
-        this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
-
-      } else {
-        if (this.data.sort) {
-          this.data.sort = this.data.sort;
-          this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
-        }
-      }
+      this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
     }
   }
 
@@ -116,6 +104,7 @@ export class RevisionDetailsComponent implements OnChanges {
     this.data.data.forEach((item, index) => {
       item.position = index + 1;
     });
+    this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
   }
 }
 

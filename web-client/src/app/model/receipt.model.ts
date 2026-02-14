@@ -78,4 +78,6 @@ export interface Revision {
   totalPrice: Number
   payingDate: string
   address: string
+  preferredRevision: boolean
+  isCorrect: boolean
 }

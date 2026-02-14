@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ReceiptService} from '../service/receipt.service';
-import {GetReceiptDetailsResponse} from '../model/receipt.model';
+import {GetReceiptDetailsResponse, RevisionDetails} from '../model/receipt.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -13,6 +13,8 @@ import {RevisionDetailsComponent} from '../component/revision-details/revision-d
 import {PdfViewerComponent} from '../component/pdf-viewer/pdf-viewer.component';
 import {RevisionListComponent} from '../component/revision-list/revision-list.component';
 import {MatIcon} from '@angular/material/icon';
+import {RevisionService} from '../service/revision.service';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-receipt-details',
@@ -35,6 +37,7 @@ import {MatIcon} from '@angular/material/icon';
 export class ReceiptDetailsComponent implements OnInit {
   constructor(
     private receiptService: ReceiptService,
+    private revisionService: RevisionService,
     private readonly router: Router,
     private route: ActivatedRoute
   ) {
@@ -52,12 +55,26 @@ export class ReceiptDetailsComponent implements OnInit {
       this.receiptService.getReceiptDetails(receiptId).subscribe((res) => {
         this.receiptDetails = res;
         this.receiptFileId = this.receiptDetails.preferredRevision.files.find(k => k.rawData === null)?.id ?? '';
-      }, error => this.router.navigate(["/"]));
+      }, () => this.router.navigate(["/"]));
     } else {
     }
   }
 
   doEdit() {
     this.editRevisionMode = !this.editRevisionMode;
+  }
+
+  handleSelectedRevisionChange($event: string) {
+    this.getRevisionDate($event).subscribe(
+      {
+        next: (revision) => {
+          this.receiptDetails.preferredRevision = revision
+        }
+      }
+    )
+  }
+
+  getRevisionDate(revisionId: string): Observable<RevisionDetails> {
+    return this.revisionService.getRevisionDetails(revisionId);
   }
 }

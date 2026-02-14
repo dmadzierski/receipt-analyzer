@@ -5,17 +5,14 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import pl.madzierski.daniel.app.receipt.model.GetReceiptDetailsResponse
 import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionRequest
 import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionResponse
-import pl.madzierski.daniel.app.receipt.model.GetReceiptRevisionsResponse
 import pl.madzierski.daniel.app.receipt.revision.model.RevisionCopyResponse
+import pl.madzierski.daniel.app.receipt.revision.model.GetRevisionResponse
 
 @RestController
 @RequestMapping(
     "/revisions",
-    produces = [MediaType.APPLICATION_JSON_VALUE],
-    consumes = [MediaType.APPLICATION_JSON_VALUE]
 )
 @Validated
 class RevisionController(val receiptRevisionService: ReceiptRevisionService) {
@@ -25,9 +22,14 @@ class RevisionController(val receiptRevisionService: ReceiptRevisionService) {
         return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.addRevision(revisionRequest))
     }
 
-    @PostMapping(path = ["/{revisionId}/copy"])
+    @PostMapping(path = ["/{revisionId}/copy"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createCopy(@PathVariable revisionId: String): ResponseEntity<RevisionCopyResponse> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.createRevisionCopy(revisionId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.createRevisionCopy(revisionId))
+    }
+
+    @GetMapping(path = ["/{revisionId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getRevision(@PathVariable revisionId: String): ResponseEntity<GetRevisionResponse> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.getRevision(revisionId))
     }
 
 }

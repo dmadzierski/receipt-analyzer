@@ -6,8 +6,8 @@ import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
 import pl.madzierski.daniel.app.receipt.revision.item.ItemProvider
 import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionRequest
 import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionResponse
-import pl.madzierski.daniel.app.receipt.model.GetReceiptRevisionsResponse
 import pl.madzierski.daniel.app.receipt.revision.model.RevisionCopyResponse
+import pl.madzierski.daniel.app.receipt.revision.model.GetRevisionResponse
 import pl.madzierski.daniel.exception.AppRuntimeException
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages
 
@@ -91,19 +91,7 @@ class ReceiptRevisionService(
         return RevisionCopyResponse(revisionCopy.id)
     }
 
-    fun getReceiptRevisions(receiptId: String): List<GetReceiptRevisionsResponse>? {
-        return revisionRepository.findReceiptRevisionEntityByReceiptId(receiptId).map { revision ->
-            GetReceiptRevisionsResponse(
-                revision.id,
-                revision.resolver,
-                revision.createdDate,
-                revision.brand,
-                revision.totalPrice,
-                revision.payingDate,
-                revision.address,
-                revision.isPreferredRevision,
-                revision.isCorrect
-            )
-        }
+    fun getRevision(revisionId: String): GetRevisionResponse? {
+        return GetRevisionResponse.revisionMapper(revisionRepository.findById(revisionId).orElseThrow { AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND) })
     }
 }

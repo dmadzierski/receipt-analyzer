@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {Revision} from '../../model/receipt.model';
 import {
   MatCell,
@@ -36,14 +36,19 @@ export class RevisionListComponent implements OnChanges {
   }
 
   private revisionService = inject(RevisionService);
-  private receiptService = inject(ReceiptService);
 
-  displayedColumns: string[] = ['brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'preferredRevision', 'isCorrect', 'actions'];
+  private receiptService = inject(ReceiptService);
+  displayedColumns: string[] = ['selected', 'brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'preferredRevision', 'isCorrect', 'actions'];
 
   @Input()
   revisions: Revision[] = {} as Revision[];
 
-  @Input() receiptId: string = '';
+  @Input()
+  receiptId: string = '';
+
+  @Output() selectedRevisionChange = new EventEmitter<string>();
+
+  public selectedId: string | undefined = 'init';
 
   @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (sort) {
@@ -57,20 +62,23 @@ export class RevisionListComponent implements OnChanges {
     if (changes['revisions'] && this.revisions) {
       this.data.data = this.revisions;
     }
+    if (this.selectedId === 'init' && this.revisions != undefined) {
+      this.selectedId = this.revisions?.find(revision => revision?.preferredRevision)?.id;
+    }
   }
 
   duplicateRevision(id: string) {
     if (!id) return;
 
     this.revisionService.copyRevision(id).subscribe({
-      next: (newRevision) => {
+      next: () => {
         this.refreshData(this.receiptId)
       },
       error: (err) => console.error('Błąd kopiowania', err)
     });
   }
 
-  refreshData(receiptId: string){
+  refreshData(receiptId: string) {
     this.receiptService.getReceiptRevisions(receiptId).subscribe(
       {
         next: (revisions) => {
@@ -80,6 +88,12 @@ export class RevisionListComponent implements OnChanges {
     )
   }
 
+  changeSelected(revisionId: string) {
+    if (this.selectedId !== revisionId) {
+      this.selectedId = revisionId;
+      this.selectedRevisionChange.emit(this.selectedId);
+    }
+  }
 }
 
 
