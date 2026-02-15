@@ -10,4 +10,5 @@ class ItemProvider @Autowired constructor(
 
     fun saveAll(items: Collection<ItemEntity>) = this.itemRepository.saveAll(items)
     fun findById(id: String) = this.itemRepository.findById(id)
+    fun save(item: ItemEntity): ItemEntity = this.itemRepository.save(item)
 }

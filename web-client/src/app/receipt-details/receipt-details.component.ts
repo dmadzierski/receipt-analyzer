@@ -65,16 +65,36 @@ export class ReceiptDetailsComponent implements OnInit {
   }
 
   handleSelectedRevisionChange($event: string) {
-    this.getRevisionDate($event).subscribe(
+    this.refreshRevisionDetails($event)
+  }
+
+  getRevisionDate(revisionId: string): Observable<RevisionDetails> {
+    return this.revisionService.getRevisionDetails(revisionId);
+  }
+
+  protected saveRevision() {
+    this.revisionService.updateRevision(this.receiptDetails.preferredRevision).subscribe(
+      {
+        next: (revision: RevisionDetails) => {
+          this.receiptDetails.preferredRevision = revision
+          this.editRevisionMode = false
+        }
+      }
+    )
+  }
+
+  protected declineEdit() {
+    this.refreshRevisionDetails(this.receiptDetails.preferredRevision.id)
+    this.editRevisionMode = false
+  }
+
+  private refreshRevisionDetails(revisionId: string) {
+    this.getRevisionDate(revisionId).subscribe(
       {
         next: (revision) => {
           this.receiptDetails.preferredRevision = revision
         }
       }
     )
-  }
-
-  getRevisionDate(revisionId: string): Observable<RevisionDetails> {
-    return this.revisionService.getRevisionDetails(revisionId);
   }
 }

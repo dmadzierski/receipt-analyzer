@@ -9,6 +9,8 @@ import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionRequest
 import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionResponse
 import pl.madzierski.daniel.app.receipt.revision.model.RevisionCopyResponse
 import pl.madzierski.daniel.app.receipt.revision.model.GetRevisionResponse
+import pl.madzierski.daniel.app.receipt.revision.model.UpdateRevisionRequest
+import pl.madzierski.daniel.app.receipt.revision.model.UpdateRevisionResponse
 
 @RestController
 @RequestMapping(
@@ -29,7 +31,12 @@ class RevisionController(val receiptRevisionService: ReceiptRevisionService) {
 
     @GetMapping(path = ["/{revisionId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getRevision(@PathVariable revisionId: String): ResponseEntity<GetRevisionResponse> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.getRevision(revisionId))
+        return ResponseEntity.ok(receiptRevisionService.getRevision(revisionId))
+    }
+
+    @PutMapping(path = ["/{revisionId}"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun updateRevision(@PathVariable revisionId: String, @RequestBody revision: UpdateRevisionRequest): ResponseEntity<UpdateRevisionResponse> {
+        return ResponseEntity.ok(receiptRevisionService.updateRevision(revisionId, revision))
     }
 
 }

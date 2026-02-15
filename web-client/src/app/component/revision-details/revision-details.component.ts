@@ -1,4 +1,13 @@
-import {ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  model,
+  ModelSignal,
+  OnChanges,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import {Item, RevisionDetails} from '../../model/receipt.model';
 import {
   MatCell,
@@ -41,8 +50,7 @@ export class RevisionDetailsComponent implements OnChanges {
 
   displayedColumns: string[] = ['position', 'name', 'ptu', 'amount', 'unitPrice', 'totalPrice', 'actions'];
 
-  @Input()
-  revision: RevisionDetails = {} as RevisionDetails
+  revision: ModelSignal<RevisionDetails> = model({} as RevisionDetails)
 
   @Input()
   contentEditable: boolean = false;
@@ -59,11 +67,11 @@ export class RevisionDetailsComponent implements OnChanges {
   data = new MatTableDataSource({} as Item[]);
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['revision'] && this.revision?.items) {
-      this.data.data = [...this.revision.items].sort((a, b) => a.position - b.position);
+    if (changes['revision'] && this.revision()?.items) {
+      this.data.data = [...this.revision().items].sort((a, b) => a.position - b.position);
     }
 
-    if (changes['contentEditable']) {
+    if (changes['contentEditable'] && this.revision()?.items) {
       this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
     }
   }
@@ -105,6 +113,7 @@ export class RevisionDetailsComponent implements OnChanges {
       item.position = index + 1;
     });
     this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
+    this.revision().items = this.data.data
   }
 }
 

@@ -1,13 +1,11 @@
 package pl.madzierski.daniel.app.receipt.revision
 
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import pl.madzierski.daniel.app.receipt.ReceiptProvider
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
 import pl.madzierski.daniel.app.receipt.revision.item.ItemProvider
-import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionRequest
-import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionResponse
-import pl.madzierski.daniel.app.receipt.revision.model.RevisionCopyResponse
-import pl.madzierski.daniel.app.receipt.revision.model.GetRevisionResponse
+import pl.madzierski.daniel.app.receipt.revision.model.*
 import pl.madzierski.daniel.exception.AppRuntimeException
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages
 
@@ -68,9 +66,9 @@ class ReceiptRevisionService(
         return AddRevisionResponse.addRevisionMapper(receiptRevisionEntity)
     }
 
+    @Transactional
     fun createRevisionCopy(revisionId: String): RevisionCopyResponse {
-        val revision = revisionRepository.findById(revisionId)
-            .orElseThrow { AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND) }
+        val revision = getRevisionById(revisionId)
 
         val revisionCopy = revision.copy(
             items = mutableSetOf(),
@@ -92,6 +90,61 @@ class ReceiptRevisionService(
     }
 
     fun getRevision(revisionId: String): GetRevisionResponse? {
-        return GetRevisionResponse.revisionMapper(revisionRepository.findById(revisionId).orElseThrow { AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND) })
+        return GetRevisionResponse.revisionMapper(
+            revisionRepository.findById(revisionId)
+                .orElseThrow { AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND) })
     }
+
+    @Transactional
+    fun updateRevision(revisionId: String, updatedRevision: UpdateRevisionRequest): UpdateRevisionResponse {
+        val currentRevision = getRevisionById(revisionId)
+
+        currentRevision.apply {
+            updatedRevision.brand?.let { brand = it }
+            updatedRevision.totalPrice?.let { totalPrice = it }
+            updatedRevision.payingDate?.let { payingDate = it }
+            updatedRevision.address?.let { address = it }
+            updatedRevision.items?.let { incomingItems ->
+                val incomingIds = incomingItems.mapNotNull { it.id }.toSet()
+                items.removeIf { existingItem ->
+                    existingItem.id !in incomingIds
+                }
+                incomingItems.forEach { incomingItem ->
+                    if (incomingItem.id?.isNotBlank() ?: false) {
+                        val existingItem = items.find { it.id == incomingItem.id }
+                        existingItem?.apply {
+                            incomingItem.name?.let { name = it }
+                            incomingItem.ptu?.let { ptu = it }
+                            incomingItem.amount?.let { amount = it }
+                            incomingItem.unitPrice?.let { unitPrice = it }
+                            incomingItem.totalPrice?.let { totalPrice = it }
+                            incomingItem.position?.let { position = it }
+                        }
+                    } else {
+                        val newItem = ItemEntity(
+                            name = incomingItem.name,
+                            ptu = incomingItem.ptu,
+                            amount = incomingItem.amount,
+                            unitPrice = incomingItem.unitPrice,
+                            totalPrice = incomingItem.totalPrice,
+                            position = incomingItem.position,
+                            receiptRevision = this@apply,
+                            discount = 0.0,
+                            parentItem = null,
+                            childItems = mutableSetOf()
+                        )
+                        items.add(itemProvider.save(newItem))
+                    }
+                }
+            }
+        }
+        val savedRevision = revisionRepository.save(currentRevision)
+        return UpdateRevisionResponse.revisionMapper(savedRevision)
+    }
+
+    private fun getRevisionById(revisionId: String): ReceiptRevisionEntity {
+        return revisionRepository.findById(revisionId)
+            .orElseThrow { AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND) }
+    }
+
 }

@@ -1,19 +1,19 @@
 <div class="content">
-  @if (revision) {
+  @if (revision()) {
 
     <mat-form-field>
       <mat-label>Brand name</mat-label>
-      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision.brand"/>
+      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision().brand"/>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Total price</mat-label>
-      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision.totalPrice"/>
+      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision().totalPrice"/>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Choose a date</mat-label>
-      <input [readonly]="!contentEditable" matInput [matDatepicker]="picker" [(ngModel)]="revision.payingDate">
+      <input [readonly]="!contentEditable" matInput [matDatepicker]="picker" [(ngModel)]="revision().payingDate">
       <mat-hint>MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker [disabled]="!contentEditable" #picker></mat-datepicker>
@@ -21,7 +21,7 @@
 
     <mat-form-field>
       <mat-label>Address</mat-label>
-      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision.address"/>
+      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision().address"/>
     </mat-form-field>
 
     <h3>Items</h3>
