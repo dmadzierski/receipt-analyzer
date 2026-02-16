@@ -11,8 +11,9 @@ data class UpdateRevisionRequest(
     val totalPrice: Double?,
     val payingDate: String?,
     val address: String?,
+    val isPreferredRevision: Boolean?,
+    val isCorrect: Boolean?,
     val items: Set<ItemResponse>?,
-
     ) {
 
     data class ItemResponse(

@@ -1,10 +1,10 @@
 import {
   ChangeDetectorRef,
-  Component,
+  Component, EventEmitter,
   Input,
   model,
   ModelSignal,
-  OnChanges,
+  OnChanges, Output,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
@@ -27,6 +27,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from '@angular/material/datepicker';
 import {CommonModule, NgClass} from '@angular/common';
 import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
+import {MatCheckbox} from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-revision-details',
@@ -39,7 +40,7 @@ import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-dr
     DragDropModule,
     MatTable,
     DragDropModule,
-    MatTableModule, MatIconModule, MatButtonModule, RouterModule, MatSortHeader, MatSort, MatFormField, MatInput, MatLabel, ReactiveFormsModule, FormsModule, MatDatepicker, MatDatepickerInput, MatHint, MatDatepickerToggle, MatSuffix, NgClass
+    MatTableModule, MatIconModule, MatButtonModule, RouterModule, MatSortHeader, MatSort, MatFormField, MatInput, MatLabel, ReactiveFormsModule, FormsModule, MatDatepicker, MatDatepickerInput, MatHint, MatDatepickerToggle, MatSuffix, NgClass, MatCheckbox
   ],
   templateUrl: './revision-details.component.html',
   styleUrl: './revision-details.component.scss',

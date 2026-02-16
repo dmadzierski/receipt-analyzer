@@ -12,7 +12,7 @@ data class GetReceiptRevisionsResponse(
     val totalPrice: Double?,
     val payingDate: String?,
     val address: String?,
-    val preferredRevision: Boolean?,
+    val isPreferredRevision: Boolean?,
     val isCorrect: Boolean?,
 
     ) {

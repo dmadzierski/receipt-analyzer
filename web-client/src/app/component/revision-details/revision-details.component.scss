@@ -21,7 +21,7 @@
   border-bottom-color: white;
 }
 
-.table-input-editable{
+.table-input-editable {
   border-bottom-color: black;
 }
 
@@ -40,6 +40,7 @@
   width: 120px;
   text-align: right;
 }
+
 .position-container {
   display: flex;
   align-items: center;
@@ -55,9 +56,7 @@
   }
 }
 
-/* --- Style dla Drag & Drop --- */
 
-/* Styl wiersza, który "leci" za myszką (Preview) */
 .cdk-drag-preview {
   box-sizing: border-box;
   border-radius: 4px;
@@ -66,28 +65,40 @@
   0 3px 14px 2px rgba(0, 0, 0, 0.12);
   background-color: white;
 
-  /* Ważne: zachowanie układu komórek w "duchu" */
   display: table;
 
   td {
-    /* Ustawienie szerokości komórek w podglądzie, by nie były ściśnięte */
     padding: 16px;
     border-bottom: none;
   }
 }
 
-/* Styl pustego miejsca (Placeholder) */
 .cdk-drag-placeholder {
   opacity: 0;
 }
 
-/* Animacje przesuwania innych wierszy */
 .cdk-drag-animating {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* Animacja powrotu elementów na miejsce */
 .cdk-drop-list-dragging tr:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
+.revision-checkboxes-container {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 16px 16px 18px 16px;
+  background-color: #e0e2ec;
+  border-radius: 4px 4px 0 0;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.revision-checkboxes-container:hover {
+  background-color: #d0d2db;
+}

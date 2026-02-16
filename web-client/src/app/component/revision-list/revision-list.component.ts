@@ -36,9 +36,9 @@ export class RevisionListComponent implements OnChanges {
   }
 
   private revisionService = inject(RevisionService);
-
   private receiptService = inject(ReceiptService);
-  displayedColumns: string[] = ['selected', 'brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'preferredRevision', 'isCorrect', 'actions'];
+
+  displayedColumns: string[] = ['selected', 'brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'isPreferredRevision', 'isCorrect', 'actions'];
 
   @Input()
   revisions: Revision[] = {} as Revision[];
@@ -63,7 +63,7 @@ export class RevisionListComponent implements OnChanges {
       this.data.data = this.revisions;
     }
     if (this.selectedId === 'init' && this.revisions != undefined) {
-      this.selectedId = this.revisions?.find(revision => revision?.preferredRevision)?.id;
+      this.selectedId = this.revisions?.find(revision => revision?.isPreferredRevision)?.id;
     }
   }
 

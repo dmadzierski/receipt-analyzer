@@ -2,7 +2,6 @@ package pl.madzierski.daniel.app.receipt
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import pl.madzierski.daniel.app.receipt.model.*
 import pl.madzierski.daniel.app.receipt.revision.*
@@ -68,11 +67,13 @@ class ReceiptService(
 
     fun getReceiptDetails(receiptId: String): GetReceiptDetailsResponse {
         val receiptEntity = receiptRepository.findReceiptEntityById(receiptId)
-        return receiptEntity.receiptRevisions.first { true == it.isPreferredRevision }.id?.let {
-            receiptRevisionRepository.findReceiptRevisionEntitiesById(it)
-        }.let {
-            GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, it)
+
+        val preferredRevisionId = receiptEntity.receiptRevisions.firstOrNull { it.isPreferredRevision == true }?.id
+        val revisionEntity = preferredRevisionId?.let { id ->
+            receiptRevisionRepository.findReceiptRevisionEntitiesById(id)
         }
+
+        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, revisionEntity)
     }
 
     fun getReceiptRevisions(receiptId: String): List<GetReceiptRevisionsResponse> =

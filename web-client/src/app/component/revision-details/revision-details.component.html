@@ -24,6 +24,21 @@
       <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision().address"/>
     </mat-form-field>
 
+    <div class="revision-checkboxes-container">
+      <mat-checkbox
+        [(ngModel)]="revision().isPreferredRevision"
+        [disabled]="!contentEditable">
+        Preferred
+      </mat-checkbox>
+
+      <mat-checkbox
+        [(ngModel)]="revision().isCorrect"
+        [disabled]="!contentEditable">
+        Correct
+      </mat-checkbox>
+    </div>
+
+
     <h3>Items</h3>
 
     <table mat-table

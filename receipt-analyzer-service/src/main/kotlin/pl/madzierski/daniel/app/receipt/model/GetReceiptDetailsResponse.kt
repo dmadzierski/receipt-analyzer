@@ -35,6 +35,8 @@ data class GetReceiptDetailsResponse(
         val totalPrice: Double?,
         val payingDate: String?,
         val address: String?,
+        val isPreferredRevision: Boolean?,
+        val isCorrect: Boolean?,
         val items: Set<ItemResponse>?,
         val files: Set<FileResponse>?
     )
@@ -47,7 +49,7 @@ data class GetReceiptDetailsResponse(
         val totalPrice: Double?,
         val payingDate: String?,
         val address: String?,
-        val preferredRevision: Boolean?,
+        val isPreferredRevision: Boolean?,
         val isCorrect: Boolean?,
     )
 
@@ -77,6 +79,8 @@ data class GetReceiptDetailsResponse(
                     revisionEntity.totalPrice,
                     revisionEntity.payingDate,
                     revisionEntity.address,
+                    revisionEntity.isPreferredRevision,
+                    revisionEntity.isCorrect,
                     revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) },
                     revisionEntity.receiptFiles.mapTo(mutableSetOf()) { fileMapper(it) })
             }

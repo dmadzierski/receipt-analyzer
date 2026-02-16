@@ -14,6 +14,8 @@ data class UpdateRevisionResponse(
     val totalPrice: Double?,
     val payingDate: String?,
     val address: String?,
+    val isPreferredRevision: Boolean?,
+    val isCorrect: Boolean?,
     val items: Set<ItemResponse>?,
     val files: Set<FileResponse>?
 ) {
@@ -35,17 +37,22 @@ data class UpdateRevisionResponse(
 
     companion object {
 
-        fun revisionMapper(revisionEntity: ReceiptRevisionEntity?): UpdateRevisionResponse {
-            return UpdateRevisionResponse(
-                revisionEntity?.id,
-                revisionEntity?.resolver,
-                revisionEntity?.createdDate,
-                revisionEntity?.brand,
-                revisionEntity?.totalPrice,
-                revisionEntity?.payingDate,
-                revisionEntity?.address,
-                revisionEntity?.items?.mapTo(mutableSetOf()) { itemMapper(it) },
-                revisionEntity?.receiptFiles?.mapTo(mutableSetOf()) { fileMapper(it) })
+        fun revisionMapper(revisionEntity: ReceiptRevisionEntity?): UpdateRevisionResponse? {
+            if (revisionEntity != null) {
+                return UpdateRevisionResponse(
+                    revisionEntity.id,
+                    revisionEntity.resolver,
+                    revisionEntity.createdDate,
+                    revisionEntity.brand,
+                    revisionEntity.totalPrice,
+                    revisionEntity.payingDate,
+                    revisionEntity.address,
+                    revisionEntity.isPreferredRevision,
+                    revisionEntity.isCorrect,
+                    revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) },
+                    revisionEntity.receiptFiles.mapTo(mutableSetOf()) { fileMapper(it) })
+            }
+            return null
         }
 
         fun fileMapper(file: ReceiptFileEntity) = FileResponse(

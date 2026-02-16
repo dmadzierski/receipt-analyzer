@@ -49,6 +49,8 @@ export interface RevisionDetails {
   totalPrice: Number
   payingDate: string
   address: string
+  isPreferredRevision: boolean
+  isCorrect: boolean
   items: Item[]
   files: ReceiptFile[]
 }
@@ -78,6 +80,6 @@ export interface Revision {
   totalPrice: Number
   payingDate: string
   address: string
-  preferredRevision: boolean
+  isPreferredRevision: boolean
   isCorrect: boolean
 }

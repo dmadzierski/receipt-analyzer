@@ -96,7 +96,7 @@ class ReceiptRevisionService(
     }
 
     @Transactional
-    fun updateRevision(revisionId: String, updatedRevision: UpdateRevisionRequest): UpdateRevisionResponse {
+    fun updateRevision(revisionId: String, updatedRevision: UpdateRevisionRequest): UpdateRevisionResponse? {
         val currentRevision = getRevisionById(revisionId)
 
         currentRevision.apply {
@@ -104,6 +104,8 @@ class ReceiptRevisionService(
             updatedRevision.totalPrice?.let { totalPrice = it }
             updatedRevision.payingDate?.let { payingDate = it }
             updatedRevision.address?.let { address = it }
+            updatedRevision.isPreferredRevision?.let { isPreferredRevision = it }
+            updatedRevision.isCorrect?.let { isCorrect = it }
             updatedRevision.items?.let { incomingItems ->
                 val incomingIds = incomingItems.mapNotNull { it.id }.toSet()
                 items.removeIf { existingItem ->

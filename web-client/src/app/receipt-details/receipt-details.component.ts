@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ReceiptService} from '../service/receipt.service';
-import {GetReceiptDetailsResponse, RevisionDetails} from '../model/receipt.model';
+import {GetReceiptDetailsResponse, Revision, RevisionDetails} from '../model/receipt.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -76,8 +76,9 @@ export class ReceiptDetailsComponent implements OnInit {
     this.revisionService.updateRevision(this.receiptDetails.preferredRevision).subscribe(
       {
         next: (revision: RevisionDetails) => {
-          this.receiptDetails.preferredRevision = revision
-          this.editRevisionMode = false
+          this.receiptDetails.preferredRevision = revision;
+          this.editRevisionMode = false;
+          this.refreshRevision(this.receiptDetails.id);
         }
       }
     )
@@ -96,5 +97,14 @@ export class ReceiptDetailsComponent implements OnInit {
         }
       }
     )
+  }
+
+  protected refreshRevision(id: any) {
+    this.receiptService.getReceiptRevisions(this.receiptDetails.id)
+      .subscribe({
+        next: (revisions: Revision[]) => {
+          this.receiptDetails.revisions = revisions;
+        }
+      })
   }
 }
