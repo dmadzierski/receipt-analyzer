@@ -33,7 +33,6 @@ class ReceiptController(val receiptService: ReceiptService) {
         return ResponseEntity.ok(receiptService.getReceiptDetails(receiptId))
     }
 
-
     @GetMapping(path = ["/{receiptId}/revisions"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getReceiptRevisions(@PathVariable receiptId: String): ResponseEntity<List<GetReceiptRevisionsResponse>> {
         return ResponseEntity.ok(receiptService.getReceiptRevisions(receiptId))

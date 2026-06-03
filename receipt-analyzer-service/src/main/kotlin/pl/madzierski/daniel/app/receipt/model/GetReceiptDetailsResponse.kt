@@ -1,10 +1,10 @@
 package pl.madzierski.daniel.app.receipt.model
 
+import pl.madzierski.daniel.app.file_group.FileType
 import pl.madzierski.daniel.app.receipt.ReceiptEntity
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 import pl.madzierski.daniel.app.receipt.revision.ScanResolver
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
-import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileEntity
 import java.time.LocalDateTime
 
 data class GetReceiptDetailsResponse(
@@ -14,7 +14,8 @@ data class GetReceiptDetailsResponse(
     val preferredRevision: PreferredRevisionResponse?,
     val revisions: Set<RevisionResponse>,
     val createDate: LocalDateTime?,
-    val updateDate: LocalDateTime?
+    val updateDate: LocalDateTime?,
+    val fileId: String?,
 ) {
     data class ItemResponse(
         val id: String?,
@@ -37,8 +38,7 @@ data class GetReceiptDetailsResponse(
         val address: String?,
         val isPreferredRevision: Boolean?,
         val isCorrect: Boolean?,
-        val items: Set<ItemResponse>?,
-        val files: Set<FileResponse>?
+        val items: Set<ItemResponse>?
     )
 
     data class RevisionResponse(
@@ -58,7 +58,11 @@ data class GetReceiptDetailsResponse(
     )
 
     companion object {
-        fun receiptDetailsMapper(receiptEntity: ReceiptEntity, preferredRevisionEntity: ReceiptRevisionEntity?) =
+        fun receiptDetailsMapper(
+            receiptEntity: ReceiptEntity,
+            preferredRevisionEntity: ReceiptRevisionEntity?,
+            fileId: String
+        ) =
             GetReceiptDetailsResponse(
                 receiptEntity.id,
                 receiptEntity.name,
@@ -66,7 +70,8 @@ data class GetReceiptDetailsResponse(
                 preferredRevisionMapper(preferredRevisionEntity),
                 receiptRevisionMapper(receiptEntity.receiptRevisions),
                 receiptEntity.createdDate,
-                receiptEntity.modifiedDate
+                receiptEntity.modifiedDate,
+                fileId
             )
 
         fun preferredRevisionMapper(revisionEntity: ReceiptRevisionEntity?): PreferredRevisionResponse? {
@@ -81,15 +86,11 @@ data class GetReceiptDetailsResponse(
                     revisionEntity.address,
                     revisionEntity.isPreferredRevision,
                     revisionEntity.isCorrect,
-                    revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) },
-                    revisionEntity.receiptFiles.mapTo(mutableSetOf()) { fileMapper(it) })
+                    revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) }
+                )
             }
             return null;
         }
-
-        fun fileMapper(file: ReceiptFileEntity) = FileResponse(
-            file.id, file.path, file.rawData
-        )
 
         fun itemMapper(itemEntity: ItemEntity): ItemResponse = ItemResponse(
             itemEntity.id,

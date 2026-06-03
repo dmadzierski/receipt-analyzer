@@ -4,7 +4,6 @@ import jakarta.persistence.*
 import pl.madzierski.daniel.app.common.model.BaseEntity
 import pl.madzierski.daniel.app.receipt.ReceiptEntity
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
-import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileEntity
 
 @Entity
 @Table(name = "receipt_revision")
@@ -21,9 +20,6 @@ data class ReceiptRevisionEntity(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receipt_id")
     var receipt: ReceiptEntity,
-
-    @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.EAGER)
-    var receiptFiles: MutableSet<ReceiptFileEntity>,
 
     @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.LAZY)
     var items: MutableSet<ItemEntity>,
@@ -58,7 +54,6 @@ data class ReceiptRevisionEntity(
         if (revision != other.revision) return false
         if (resolver != other.resolver) return false
         if (brand != other.brand) return false
-        if (receiptFiles != other.receiptFiles) return false
         if (items != other.items) return false
         if (payingDate != other.payingDate) return false
         if (address != other.address) return false
@@ -72,7 +67,6 @@ data class ReceiptRevisionEntity(
         result = 31 * result + (isCorrect?.hashCode() ?: 0)
         result = 31 * result + (resolver?.hashCode() ?: 0)
         result = 31 * result + (brand?.hashCode() ?: 0)
-        result = 31 * result + receiptFiles.hashCode()
         result = 31 * result + items.hashCode()
         result = 31 * result + (payingDate?.hashCode() ?: 0)
         result = 31 * result + (address?.hashCode() ?: 0)

@@ -4,23 +4,29 @@ import net.sourceforge.tess4j.Tesseract
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import pl.madzierski.daniel.app.common.model.util.PdfUtil
+import pl.madzierski.daniel.app.file_group.FileGroupEntity
+import pl.madzierski.daniel.app.file_group.FileGroupProvider
+import pl.madzierski.daniel.app.file_group.FileGroupService
+import pl.madzierski.daniel.app.file_group.FileType
+import pl.madzierski.daniel.app.file_group.file.FileService
 import pl.madzierski.daniel.app.receipt.ReceiptEntity
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
 import pl.madzierski.daniel.app.receipt.revision.item.ItemProvider
-import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileEntity
-import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileService
 import pl.madzierski.daniel.app.receipt.scan_resolver.ScanResolverStrategy
+import pl.madzierski.daniel.app.receipt.scan_resolver.service.PDFService
 import pl.madzierski.daniel.exception.AppRuntimeException
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages
 import java.io.File
 
 @Component
 class BiedronkaScanResolver @Autowired constructor(
-    val receiptFileService: ReceiptFileService,
+    val fileService: FileService,
     @Value("\${ocr.tesseract.dataPath}") val tesseractDataPath: String,
     val itemProvider: ItemProvider,
+    val fileGroupService: FileGroupService,
+    val pdfService: PDFService,
+    private val fileGroupProvider: FileGroupProvider,
 ) : ScanResolverStrategy {
 
     companion object {
@@ -37,19 +43,23 @@ class BiedronkaScanResolver @Autowired constructor(
     }
 
     override fun execute(
-        receipt: ReceiptEntity, receiptRevision: ReceiptRevisionEntity, receiptFileEntity: ReceiptFileEntity
+        receipt: ReceiptEntity, receiptRevision: ReceiptRevisionEntity, fileGroupEntity: FileGroupEntity
     ): ReceiptRevisionEntity {
 
-        val receiptFileList = receiptFileEntity.path?.let {
-            PdfUtil.convertToPng(it).map { receiptFileService.saveReceiptFile(receiptRevision, it, false) }
-        }?.map {
+        if (!(fileGroupEntity.fileType?.equals(FileType.PDF) ?: true)) {
+            throw AppRuntimeException(AppRuntimeExceptionMessages.UNHANDLED_FILE_TYPE)
+        }
+        val fileEntity = fileGroupEntity.files.first()
+        val receiptFileList = fileEntity.let {
+            pdfService.createImageFileGroup(receipt, it).files
+        }.map {
             val rawData = extractTextFromImage(it.path!!)
             it.rawData = rawData
-            receiptFileService.save(it)
+            fileService.save(it)
         }
 
         val rawDataList: List<String> =
-            receiptFileList?.mapNotNull { it.rawData?.split("\n")?.dropLast(1) }?.flatten()!!
+            receiptFileList.mapNotNull { it.rawData?.split("\n")?.dropLast(1) }.flatten()
         val startItemsIndex = (rawDataList.indexOfFirst { startItemIndexRegex.containsMatchIn(it) } + 1)
         val lastIItemIndex = rawDataList.indexOfFirst { lastItemIndexRegex.containsMatchIn(it) }
 
@@ -85,8 +95,7 @@ class BiedronkaScanResolver @Autowired constructor(
                 saveResult(receiptRevision, matchResult)
             } ?: itemPatternWithoutPtuRegex.matchEntire(rawItemList[i])?.let { matchResult ->
                 saveResult(receiptRevision, matchResult)
-            }
-            ?: discountPatternRegex.matchEntire(rawItemList[i])?.let { matchResult ->
+            } ?: discountPatternRegex.matchEntire(rawItemList[i])?.let { matchResult ->
                 receiptRevision.items.last().discount =
                     matchResult.groups["discount"]?.value?.replace(",", ".")?.toDoubleOrNull()
             } ?: discountedPriceRegex.matchEntire(rawItemList[i])?.let { matchResult ->
@@ -101,8 +110,7 @@ class BiedronkaScanResolver @Autowired constructor(
     }
 
     private fun saveResult(
-        receiptRevision: ReceiptRevisionEntity,
-        matchResult: MatchResult
+        receiptRevision: ReceiptRevisionEntity, matchResult: MatchResult
     ): Boolean {
         val itemEntity = ItemEntity(
             receiptRevision,

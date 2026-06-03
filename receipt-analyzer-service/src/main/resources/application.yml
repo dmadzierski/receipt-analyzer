@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:update}
+      ddl-auto: ${JPA_DDL_AUTO:create-drop}
     show-sql: true
   security:
     oauth2:
@@ -51,6 +51,8 @@ logging:
     root: ${LOGGING_LEVEL_ROOT:DEBUG}
 
 receipt:
+  default:
+    brand: Biedronka
   revision:
     default:
       version: 1.0

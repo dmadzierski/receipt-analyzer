@@ -3,7 +3,7 @@ package pl.madzierski.daniel.app.receipt.revision.model
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 import pl.madzierski.daniel.app.receipt.revision.ScanResolver
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
-import pl.madzierski.daniel.app.receipt.revision.receipt_file.ReceiptFileEntity
+import pl.madzierski.daniel.app.file_group.file.FileEntity
 import java.time.LocalDateTime
 
 data class UpdateRevisionResponse(
@@ -16,8 +16,7 @@ data class UpdateRevisionResponse(
     val address: String?,
     val isPreferredRevision: Boolean?,
     val isCorrect: Boolean?,
-    val items: Set<ItemResponse>?,
-    val files: Set<FileResponse>?
+    val items: Set<ItemResponse>?
 ) {
 
     data class ItemResponse(
@@ -49,13 +48,13 @@ data class UpdateRevisionResponse(
                     revisionEntity.address,
                     revisionEntity.isPreferredRevision,
                     revisionEntity.isCorrect,
-                    revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) },
-                    revisionEntity.receiptFiles.mapTo(mutableSetOf()) { fileMapper(it) })
+                    revisionEntity.items.mapTo(mutableSetOf()) { itemMapper(it) }
+                )
             }
             return null
         }
 
-        fun fileMapper(file: ReceiptFileEntity) = FileResponse(
+        fun fileMapper(file: FileEntity) = FileResponse(
             file.id, file.path, file.rawData
         )
 

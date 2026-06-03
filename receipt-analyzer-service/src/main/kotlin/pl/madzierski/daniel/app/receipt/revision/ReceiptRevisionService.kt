@@ -34,7 +34,6 @@ class ReceiptRevisionService(
             revisionRequest.brand,
             receiptEntity,
             mutableSetOf(),
-            mutableSetOf(),
             revisionRequest.totalPrice,
             revisionRequest.payingDate,
             revisionRequest.address,
@@ -73,7 +72,6 @@ class ReceiptRevisionService(
         val revisionCopy = revision.copy(
             items = mutableSetOf(),
             isPreferredRevision = false,
-            receiptFiles = mutableSetOf(),
             resolver = ScanResolver.USER,
             childReceiptRevisions = mutableSetOf(),
         ).let {

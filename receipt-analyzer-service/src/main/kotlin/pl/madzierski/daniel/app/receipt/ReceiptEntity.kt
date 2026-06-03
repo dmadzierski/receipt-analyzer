@@ -1,10 +1,8 @@
 package pl.madzierski.daniel.app.receipt
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import pl.madzierski.daniel.app.common.model.BaseEntity
+import pl.madzierski.daniel.app.file_group.FileGroupEntity
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 
 @Entity
@@ -19,7 +17,9 @@ data class ReceiptEntity(
     var userSub: String,
 
     @OneToMany(mappedBy = "receipt")
-    val receiptRevisions: MutableSet<ReceiptRevisionEntity>
+    val receiptRevisions: MutableSet<ReceiptRevisionEntity>,
 
+    @OneToMany(mappedBy = "receipt")
+    var fileGroupEntity: MutableSet<FileGroupEntity> = mutableSetOf(),
 
-) : BaseEntity()
+    ) : BaseEntity()

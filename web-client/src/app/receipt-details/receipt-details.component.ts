@@ -47,21 +47,21 @@ export class ReceiptDetailsComponent implements OnInit {
 
   receiptFileId: string = '';
 
-  editRevisionMode: boolean = false;
+  editMode: boolean = false;
 
   ngOnInit(): void {
     const receiptId = this.route.snapshot.paramMap.get('id');
     if (receiptId) {
       this.receiptService.getReceiptDetails(receiptId).subscribe((res) => {
         this.receiptDetails = res;
-        this.receiptFileId = this.receiptDetails.preferredRevision.files.find(k => k.rawData === null)?.id ?? '';
+        this.receiptFileId = this.receiptDetails.fileId
       }, () => this.router.navigate(["/"]));
     } else {
     }
   }
 
   doEdit() {
-    this.editRevisionMode = !this.editRevisionMode;
+    this.editMode = !this.editMode;
   }
 
   handleSelectedRevisionChange($event: string) {
@@ -77,7 +77,7 @@ export class ReceiptDetailsComponent implements OnInit {
       {
         next: (revision: RevisionDetails) => {
           this.receiptDetails.preferredRevision = revision;
-          this.editRevisionMode = false;
+          this.editMode = false;
           this.refreshRevision(this.receiptDetails.id);
         }
       }
@@ -86,7 +86,7 @@ export class ReceiptDetailsComponent implements OnInit {
 
   protected declineEdit() {
     this.refreshRevisionDetails(this.receiptDetails.preferredRevision.id)
-    this.editRevisionMode = false
+    this.editMode = false
   }
 
   private refreshRevisionDetails(revisionId: string) {

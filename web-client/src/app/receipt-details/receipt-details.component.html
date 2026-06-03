@@ -32,7 +32,7 @@
 
 
     <h2>Revision details
-      @if (this.editRevisionMode) {
+      @if (this.editMode) {
         <mat-icon class="icon" (click)="saveRevision()" fontIcon="save"></mat-icon>
         <mat-icon class="icon" (click)="declineEdit()" fontIcon="cancel"></mat-icon>
       } @else {
@@ -42,7 +42,7 @@
     </h2>
 
     <app-revision-details [(revision)]="receiptDetails.preferredRevision"
-                          [contentEditable]="editRevisionMode" ></app-revision-details>
+                          [contentEditable]="editMode" ></app-revision-details>
 
 
   </div>

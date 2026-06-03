@@ -5,7 +5,7 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip -T 1C
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip -T 1.5C
 
 FROM eclipse-temurin:21-jdk
 

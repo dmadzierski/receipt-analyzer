@@ -38,7 +38,8 @@ export interface GetReceiptDetailsResponse {
   preferredRevision: RevisionDetails
   revisions: Revision[]
   createDate: string
-  updateDate: string
+  updateDate: string,
+  fileId: string
 }
 
 export interface RevisionDetails {
