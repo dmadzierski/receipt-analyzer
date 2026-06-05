@@ -5,12 +5,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionRequest
-import pl.madzierski.daniel.app.receipt.revision.model.AddRevisionResponse
-import pl.madzierski.daniel.app.receipt.revision.model.RevisionCopyResponse
-import pl.madzierski.daniel.app.receipt.revision.model.GetRevisionResponse
-import pl.madzierski.daniel.app.receipt.revision.model.UpdateRevisionRequest
-import pl.madzierski.daniel.app.receipt.revision.model.UpdateRevisionResponse
+import pl.madzierski.daniel.app.receipt.revision.model.*
 
 @RestController
 @RequestMapping(
@@ -24,7 +19,11 @@ class RevisionController(val receiptRevisionService: ReceiptRevisionService) {
         return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.addRevision(revisionRequest))
     }
 
-    @PostMapping(path = ["/{revisionId}/copy"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        path = ["/{revisionId}/copy"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun createCopy(@PathVariable revisionId: String): ResponseEntity<RevisionCopyResponse> {
         return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.createRevisionCopy(revisionId))
     }
@@ -34,8 +33,15 @@ class RevisionController(val receiptRevisionService: ReceiptRevisionService) {
         return ResponseEntity.ok(receiptRevisionService.getRevision(revisionId))
     }
 
-    @PutMapping(path = ["/{revisionId}"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateRevision(@PathVariable revisionId: String, @RequestBody revision: UpdateRevisionRequest): ResponseEntity<UpdateRevisionResponse> {
+    @PutMapping(
+        path = ["/{revisionId}"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun updateRevision(
+        @PathVariable revisionId: String,
+        @RequestBody revision: UpdateRevisionRequest
+    ): ResponseEntity<UpdateRevisionResponse> {
         return ResponseEntity.ok(receiptRevisionService.updateRevision(revisionId, revision))
     }
 

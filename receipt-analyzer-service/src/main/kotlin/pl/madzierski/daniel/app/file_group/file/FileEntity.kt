@@ -3,12 +3,10 @@ package pl.madzierski.daniel.app.file_group.file
 import jakarta.persistence.*
 import pl.madzierski.daniel.app.common.model.BaseEntity
 import pl.madzierski.daniel.app.file_group.FileGroupEntity
-import pl.madzierski.daniel.app.file_group.FileType
-import pl.madzierski.daniel.app.receipt.ReceiptEntity
 
 @Entity
 @Table(name = "receipt_file")
-data class FileEntity(
+class FileEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file_group_id", nullable = true)

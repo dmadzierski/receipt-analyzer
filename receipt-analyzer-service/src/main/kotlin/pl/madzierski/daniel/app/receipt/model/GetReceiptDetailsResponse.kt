@@ -1,10 +1,9 @@
 package pl.madzierski.daniel.app.receipt.model
 
-import pl.madzierski.daniel.app.file_group.FileType
 import pl.madzierski.daniel.app.receipt.ReceiptEntity
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
-import pl.madzierski.daniel.app.receipt.revision.ScanResolver
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
 import java.time.LocalDateTime
 
 data class GetReceiptDetailsResponse(
@@ -20,7 +19,6 @@ data class GetReceiptDetailsResponse(
     data class ItemResponse(
         val id: String?,
         val name: String?,
-        val ptu: String?,
         val amount: Double?,
         val unitPrice: Double?,
         val discount: Double?,
@@ -30,7 +28,7 @@ data class GetReceiptDetailsResponse(
 
     data class PreferredRevisionResponse(
         var id: String?,
-        var resolver: ScanResolver?,
+        var resolver: ReceiptResolverStrategyType?,
         val createdDate: LocalDateTime?,
         val brand: String?,
         val totalPrice: Double?,
@@ -43,7 +41,7 @@ data class GetReceiptDetailsResponse(
 
     data class RevisionResponse(
         var id: String?,
-        var resolver: ScanResolver?,
+        var resolver: ReceiptResolverStrategyType?,
         val createdDate: LocalDateTime?,
         val brand: String?,
         val totalPrice: Double?,
@@ -95,7 +93,6 @@ data class GetReceiptDetailsResponse(
         fun itemMapper(itemEntity: ItemEntity): ItemResponse = ItemResponse(
             itemEntity.id,
             itemEntity.name,
-            itemEntity.ptu,
             itemEntity.amount,
             itemEntity.unitPrice,
             itemEntity.discount,

@@ -7,7 +7,7 @@ import pl.madzierski.daniel.app.receipt.ReceiptEntity
 
 @Entity
 @Table(name = "receipt_file_group")
-data class FileGroupEntity(
+class FileGroupEntity(
 
     var fileType: FileType?,
 
@@ -20,4 +20,4 @@ data class FileGroupEntity(
     @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     var files: MutableSet<FileEntity> = mutableSetOf(),
 
-) : BaseEntity()
+    ) : BaseEntity()

@@ -50,9 +50,9 @@ logging:
   level:
     root: ${LOGGING_LEVEL_ROOT:DEBUG}
 
-receipt:
-  default:
-    brand: Biedronka
-  revision:
-    default:
-      version: 1.0
+receipt-resolver-strategy:
+  biedronka:
+    version: 1.0
+
+pdf-service:
+  tmp-dir: /app/pdf-service-tmp

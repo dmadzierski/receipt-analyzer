@@ -7,7 +7,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface FileGroupRepository : JpaRepository<FileGroupEntity, Long> {
 
-    @Query("""
+    @Query(
+        """
         SELECT
             file.files_id
         FROM
@@ -20,6 +21,7 @@ interface FileGroupRepository : JpaRepository<FileGroupEntity, Long> {
             fileGroup.file_type = 'PDF'
             AND fileGroup.is_original = true
         LIMIT 1
-    """, nativeQuery = true)
+    """, nativeQuery = true
+    )
     fun findFirstOriginalPdf(receiptId: String): String
 }

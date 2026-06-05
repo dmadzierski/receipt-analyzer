@@ -1,15 +1,13 @@
 package pl.madzierski.daniel.app.receipt.scan_resolver
 
-import pl.madzierski.daniel.app.file_group.FileGroupEntity
-import pl.madzierski.daniel.app.receipt.ReceiptEntity
-import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
-import pl.madzierski.daniel.app.file_group.file.FileEntity
+import pl.madzierski.daniel.app.receipt.revision.model.ReceiptRevisionResolveData
 
-interface ScanResolverStrategy {
+interface ReceiptResolverStrategyTypeStrategy {
+
+    fun strategy(): ReceiptResolverStrategyType
 
     fun execute(
-        receipt: ReceiptEntity,
-        receiptRevision: ReceiptRevisionEntity,
-        fileGroupEntity: FileGroupEntity,
-    ): ReceiptRevisionEntity
+        filePath: String
+    ): ReceiptRevisionResolveData
+
 }

@@ -6,14 +6,12 @@ import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 
 @Entity
 @Table(name = "receipt_item")
-data class ItemEntity(
+class ItemEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     var receiptRevision: ReceiptRevisionEntity?,
 
     var name: String?,
-
-    var ptu: String?,
 
     var amount: Double?,
 
@@ -45,7 +43,6 @@ data class ItemEntity(
         if (discount != other.discount) return false
         if (totalPrice != other.totalPrice) return false
         if (name != other.name) return false
-        if (ptu != other.ptu) return false
         if (position != other.position) return false
 
         return true
@@ -57,7 +54,6 @@ data class ItemEntity(
         result = 31 * result + (discount?.hashCode() ?: 0)
         result = 31 * result + (totalPrice?.hashCode() ?: 0)
         result = 31 * result + (name?.hashCode() ?: 0)
-        result = 31 * result + (ptu?.hashCode() ?: 0)
         result = 31 * result + (position?.hashCode() ?: 0)
         return result
     }

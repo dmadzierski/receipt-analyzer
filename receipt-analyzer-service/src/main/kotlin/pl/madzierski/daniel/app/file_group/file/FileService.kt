@@ -2,8 +2,6 @@ package pl.madzierski.daniel.app.file_group.file
 
 import org.springframework.core.io.FileSystemResource
 import org.springframework.stereotype.Service
-import pl.madzierski.daniel.app.file_group.FileType
-import pl.madzierski.daniel.app.receipt.ReceiptEntity
 import pl.madzierski.daniel.exception.AppRuntimeException
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages
 import java.io.File

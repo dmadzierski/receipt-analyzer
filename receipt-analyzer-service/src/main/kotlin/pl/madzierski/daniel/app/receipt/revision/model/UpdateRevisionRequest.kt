@@ -1,11 +1,11 @@
 package pl.madzierski.daniel.app.receipt.revision.model
 
-import pl.madzierski.daniel.app.receipt.revision.ScanResolver
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
 import java.time.LocalDateTime
 
 data class UpdateRevisionRequest(
     var id: String?,
-    var resolver: ScanResolver?,
+    var resolver: ReceiptResolverStrategyType?,
     val createdDate: LocalDateTime?,
     val brand: String?,
     val totalPrice: Double?,
@@ -14,12 +14,11 @@ data class UpdateRevisionRequest(
     val isPreferredRevision: Boolean?,
     val isCorrect: Boolean?,
     val items: Set<ItemResponse>?,
-    ) {
+) {
 
     data class ItemResponse(
         val id: String?,
         val name: String?,
-        val ptu: String?,
         val amount: Double?,
         val unitPrice: Double?,
         val discount: Double?,

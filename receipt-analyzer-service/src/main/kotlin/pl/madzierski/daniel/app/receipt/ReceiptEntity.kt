@@ -7,7 +7,7 @@ import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
 
 @Entity
 @Table(name = "receipt")
-data class ReceiptEntity(
+class ReceiptEntity(
 
     var name: String,
 
@@ -16,10 +16,14 @@ data class ReceiptEntity(
     @Column(name = "user_sub")
     var userSub: String,
 
-    @OneToMany(mappedBy = "receipt")
-    val receiptRevisions: MutableSet<ReceiptRevisionEntity>,
+    @OneToMany(mappedBy = "receipt", cascade = [CascadeType.ALL])
+    var receiptRevisions: MutableSet<ReceiptRevisionEntity> = mutableSetOf(),
 
     @OneToMany(mappedBy = "receipt")
     var fileGroupEntity: MutableSet<FileGroupEntity> = mutableSetOf(),
 
-    ) : BaseEntity()
+    ) : BaseEntity() {
+    fun addRevision(toReceiptRevisionEntity: ReceiptRevisionEntity) {
+        this.receiptRevisions.add(toReceiptRevisionEntity)
+    }
+}

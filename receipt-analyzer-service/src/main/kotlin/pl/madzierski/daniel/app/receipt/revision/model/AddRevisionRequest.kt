@@ -1,8 +1,8 @@
 package pl.madzierski.daniel.app.receipt.revision.model
 
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
-import pl.madzierski.daniel.app.receipt.revision.ScanResolver
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
 import java.time.LocalDateTime
 
 data class AddRevisionRequest(
@@ -17,7 +17,6 @@ data class AddRevisionRequest(
     data class AddRevisionItemRequest(
         val id: String,
         val name: String?,
-        val ptu: String?,
         val amount: Double?,
         val unitPrice: Double?,
         val discount: Double?,
@@ -29,7 +28,7 @@ data class AddRevisionRequest(
 
 data class AddRevisionResponse(
     var revision: String?,
-    var resolver: ScanResolver?,
+    var resolver: ReceiptResolverStrategyType?,
     val receiptId: String,
     val createdDate: LocalDateTime?,
     val brand: String?,
@@ -41,7 +40,6 @@ data class AddRevisionResponse(
     data class AddRevisionItemResponse(
         val id: String?,
         val name: String?,
-        val ptu: String?,
         val amount: Double?,
         val unitPrice: Double?,
         val discount: Double?,
@@ -54,7 +52,7 @@ data class AddRevisionResponse(
         fun addRevisionMapper(receiptRevisionEntity: ReceiptRevisionEntity) = AddRevisionResponse(
             receiptRevisionEntity.id,
             receiptRevisionEntity.resolver,
-            receiptRevisionEntity.receipt.id!!,
+            receiptRevisionEntity.receipt?.id!!,
             receiptRevisionEntity.createdDate,
             receiptRevisionEntity.brand,
             receiptRevisionEntity.totalPrice,
@@ -66,7 +64,6 @@ data class AddRevisionResponse(
         fun addRevisionItemMapper(itemEntity: ItemEntity): AddRevisionItemResponse = AddRevisionItemResponse(
             itemEntity.id,
             itemEntity.name,
-            itemEntity.ptu,
             itemEntity.amount,
             itemEntity.unitPrice,
             itemEntity.discount,

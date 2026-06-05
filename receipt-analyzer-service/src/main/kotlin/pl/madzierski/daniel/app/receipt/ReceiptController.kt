@@ -18,7 +18,7 @@ class ReceiptController(val receiptService: ReceiptService) {
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun addReceipt(
         @RequestPart(required = true, value = "file") file: MultipartFile,
-        @RequestPart(required = false, value = "body") body: CreateReceiptRequest?
+        @RequestPart(required = false, value = "body") body: CreateReceiptRequest
     ): ResponseEntity<CreateReceiptResponse> {
         return ResponseEntity.status(HttpStatus.CREATED).body(receiptService.addReceipt(file, body))
     }

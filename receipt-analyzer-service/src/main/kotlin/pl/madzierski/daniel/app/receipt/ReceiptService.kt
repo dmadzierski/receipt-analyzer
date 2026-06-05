@@ -1,13 +1,16 @@
 package pl.madzierski.daniel.app.receipt
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import pl.madzierski.daniel.app.file_group.FileGroupProvider
 import pl.madzierski.daniel.app.receipt.model.*
-import pl.madzierski.daniel.app.receipt.revision.*
-import pl.madzierski.daniel.app.receipt.scan_resolver.service.ScanReceiptResolverService
+import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
+import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionRepository
+import pl.madzierski.daniel.app.receipt.revision.RevisionProvider
+import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
+import pl.madzierski.daniel.app.receipt.revision.model.ReceiptRevisionResolveData
+import pl.madzierski.daniel.app.receipt.scan_resolver.service.ReceiptResolverService
 import pl.madzierski.daniel.app.receipt.validator.file_validator.ValidateReceiptService
 import pl.madzierski.daniel.security.SecurityUtils
 import java.time.LocalDateTime
@@ -16,22 +19,21 @@ import java.time.LocalDateTime
 class ReceiptService(
     val receiptRepository: ReceiptRepository,
     val receiptRevisionRepository: ReceiptRevisionRepository,
-    val receiptRevisionService: ReceiptRevisionService,
     val fileGroupProvider: FileGroupProvider,
     val validateReceiptService: ValidateReceiptService,
-    val receiptResolverService: ScanReceiptResolverService,
+    val receiptResolverService: ReceiptResolverService,
     val revisionProvider: RevisionProvider,
-    @Value("\${receipt.revision.default.version}") val revisionVersion: String,
-    @Value("\${receipt.default.brand}") val defaultBrand: String
 ) {
 
-    fun addReceipt(file: MultipartFile, body: CreateReceiptRequest?): CreateReceiptResponse {
+    @Transactional
+    fun addReceipt(file: MultipartFile, body: CreateReceiptRequest): CreateReceiptResponse {
         validateReceiptService.validate(file)
         val receipt = this.saveReceipt(createReceipt(body))
-        var receiptRevision = this.createReceiptRevisionEntity(receipt, defaultBrand, ScanResolver.OCR, revisionVersion)
-        receiptRevision = this.receiptRevisionService.saveDefaultReceiptRevision(receiptRevision)
         val fileGroup = this.fileGroupProvider.saveReceiptFile(receipt, file)
-        receipt.receiptRevisions.add(receiptResolverService.resolve(receipt, receiptRevision, fileGroup))
+        val revisionData = receiptResolverService.resolve(
+            fileGroup.files.first().path!!, body.strategy
+        )
+        receipt.addRevision(toReceiptRevisionEntity(receipt, body, revisionData))
         return this.saveReceipt(receipt).let { CreateReceiptResponse(it.id, it.name, it.description) }
     }
 
@@ -42,6 +44,28 @@ class ReceiptService(
             mutableSetOf(),
             mutableSetOf())
 
+    fun toReceiptRevisionEntity(
+        receipt: ReceiptEntity, body: CreateReceiptRequest, revisionData: ReceiptRevisionResolveData
+    ): ReceiptRevisionEntity {
+        val revisionEntity = ReceiptRevisionEntity(
+            body.name,
+            revisionData.revisionVersion,
+            body.strategy,
+            revisionData.brand,
+            receipt,
+            mutableSetOf(),
+            revisionData.items.sumOf { it.totalPrice ?: 0.0 },
+            LocalDateTime.now().toString(),
+            null,
+            true,
+            false,
+        )
+        val items = revisionData.items.map {
+            ItemEntity(null, it.name, it.amount, it.unitPrice, it.discount, it.totalPrice, it.position)
+        }.toMutableSet()
+        revisionEntity.addItems(items)
+        return revisionEntity
+    }
 
     private fun saveReceipt(receipt: ReceiptEntity): ReceiptEntity = receiptRepository.save(receipt)
 
@@ -49,22 +73,6 @@ class ReceiptService(
         return GetReceiptListResponse(receiptRepository.getReceiptList(SecurityUtils.getCurrentUserSub()))
     }
 
-    fun createReceiptRevisionEntity(
-        receipt: ReceiptEntity, brand: String, scanResolver: ScanResolver, revisionVersion: String,
-    ): ReceiptRevisionEntity =
-        ReceiptRevisionEntity(
-            null,
-            revisionVersion,
-            scanResolver,
-            brand,
-            receipt,
-            mutableSetOf(),
-            null,
-            null,
-            null,
-            true,
-            false
-        )
 
     @Transactional(readOnly = true)
     fun getReceiptDetails(receiptId: String): GetReceiptDetailsResponse {

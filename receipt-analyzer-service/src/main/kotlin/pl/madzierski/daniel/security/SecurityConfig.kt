@@ -1,6 +1,5 @@
 package pl.madzierski.daniel.security
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -35,7 +34,7 @@ class SecurityConfig(
     fun corsConfigurationSource(): CorsConfigurationSource =
         CorsConfiguration().apply {
 //            @TODO
-            allowedOrigins = listOf("http://localhost", "http://localhost:4200",)
+            allowedOrigins = listOf("http://localhost", "http://localhost:4200")
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true

@@ -4,62 +4,50 @@ import net.sourceforge.tess4j.Tesseract
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import pl.madzierski.daniel.app.file_group.FileGroupEntity
-import pl.madzierski.daniel.app.file_group.FileGroupProvider
-import pl.madzierski.daniel.app.file_group.FileGroupService
-import pl.madzierski.daniel.app.file_group.FileType
 import pl.madzierski.daniel.app.file_group.file.FileService
-import pl.madzierski.daniel.app.receipt.ReceiptEntity
-import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
-import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
-import pl.madzierski.daniel.app.receipt.revision.item.ItemProvider
-import pl.madzierski.daniel.app.receipt.scan_resolver.ScanResolverStrategy
+import pl.madzierski.daniel.app.receipt.revision.model.ReceiptRevisionResolveData
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyTypeStrategy
 import pl.madzierski.daniel.app.receipt.scan_resolver.service.PDFService
 import pl.madzierski.daniel.exception.AppRuntimeException
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages
 import java.io.File
 
 @Component
-class BiedronkaScanResolver @Autowired constructor(
+class BiedronkaReceiptResolverStrategyType @Autowired constructor(
     val fileService: FileService,
     @Value("\${ocr.tesseract.dataPath}") val tesseractDataPath: String,
-    val itemProvider: ItemProvider,
-    val fileGroupService: FileGroupService,
-    val pdfService: PDFService,
-    private val fileGroupProvider: FileGroupProvider,
-) : ScanResolverStrategy {
+    @Value("\${receipt-resolver-strategy.biedronka.version}") val resolverVersion: String,
+    val pdfService: PDFService
+) : ReceiptResolverStrategyTypeStrategy {
 
     companion object {
-        val itemPatternRegex =
+        private val itemPatternRegex =
             Regex("^(?<name>.*)\\s+(?<ptu>[ABC])\\s+(?<amount>\\d+[\\s.]?\\d+)\\s*[xX]\\s+(?<unitPrice>\\d+[.,\\s]?\\d+)\\s(?<totalPrice>\\d+[.,\\s]\\d+)$")
-        val itemPatternWithoutPtuRegex =
+        private val itemPatternWithoutPtuRegex =
             Regex("^(?<name>.*)\\s+(?<amount>\\d+[\\s.]?\\d+)\\s*[xX]\\s+(?<unitPrice>\\d+[.,\\s]?\\d+)\\s(?<totalPrice>\\d+[.,\\s]\\d+)\$")
-        val discountPatternRegex = Regex("^Rabat -(?<discount>\\d+[.,\\s]\\d+)$")
-        val discountedPriceRegex = Regex("^(?<totalPrice>\\d+[.,\\s]\\d+)$")
-        val priceSuffixRegex = Regex("\\d+[.,\\s]?\\d{2}$")
-        val startItemIndexRegex = Regex("Nazwa PTU Ilość Cena Wartość", RegexOption.IGNORE_CASE)
-        val lastItemIndexRegex = Regex("Sprzeda[zż] opodatkowana C.*", RegexOption.IGNORE_CASE)
-        val pageInfoRegex = Regex(".*Strona\\s+\\d+\\s+z\\s+\\d+.*", RegexOption.IGNORE_CASE)
+        private val discountPatternRegex = Regex("^Rabat -(?<discount>\\d+[.,\\s]\\d+)$")
+        private val discountedPriceRegex = Regex("^(?<totalPrice>\\d+[.,\\s]\\d+)$")
+        private val priceSuffixRegex = Regex("\\d+[.,\\s]?\\d{2}$")
+        private val startItemIndexRegex = Regex("Nazwa PTU Ilość Cena Wartość", RegexOption.IGNORE_CASE)
+        private val lastItemIndexRegex = Regex("Sprzeda[zż] opodatkowana C.*", RegexOption.IGNORE_CASE)
+        private val pageInfoRegex = Regex(".*Strona\\s+\\d+\\s+z\\s+\\d+.*", RegexOption.IGNORE_CASE)
     }
 
+    override fun strategy(): ReceiptResolverStrategyType = ReceiptResolverStrategyType.BIEDRONKA
+
     override fun execute(
-        receipt: ReceiptEntity, receiptRevision: ReceiptRevisionEntity, fileGroupEntity: FileGroupEntity
-    ): ReceiptRevisionEntity {
+        filePath: String
+    ): ReceiptRevisionResolveData {
 
-        if (!(fileGroupEntity.fileType?.equals(FileType.PDF) ?: true)) {
-            throw AppRuntimeException(AppRuntimeExceptionMessages.UNHANDLED_FILE_TYPE)
-        }
-        val fileEntity = fileGroupEntity.files.first()
-        val receiptFileList = fileEntity.let {
-            pdfService.createImageFileGroup(receipt, it).files
-        }.map {
-            val rawData = extractTextFromImage(it.path!!)
-            it.rawData = rawData
-            fileService.save(it)
+        val receiptFileList = pdfService.dividePdfFileToImages(filePath).mapIndexed { index, pdfPath ->
+            val rawData = extractTextFromImage(pdfPath)
+            ReceiptRevisionResolveData.ReceiptRevisionResolveDataFile(
+                pdfPath, index, rawData
+            )
         }
 
-        val rawDataList: List<String> =
-            receiptFileList.mapNotNull { it.rawData?.split("\n")?.dropLast(1) }.flatten()
+        val rawDataList: List<String> = receiptFileList.map { it.rawData.split("\n").dropLast(1) }.flatten()
         val startItemsIndex = (rawDataList.indexOfFirst { startItemIndexRegex.containsMatchIn(it) } + 1)
         val lastIItemIndex = rawDataList.indexOfFirst { lastItemIndexRegex.containsMatchIn(it) }
 
@@ -89,40 +77,37 @@ class BiedronkaScanResolver @Autowired constructor(
             }
         }
         rawItemList = mergedItemList
-
+        val items = mutableListOf<ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem>()
         for (i in rawItemList.indices) {
             itemPatternRegex.matchEntire(rawItemList[i])?.let { matchResult ->
-                saveResult(receiptRevision, matchResult)
+                items.add(extractItem(items.size + 1, matchResult))
             } ?: itemPatternWithoutPtuRegex.matchEntire(rawItemList[i])?.let { matchResult ->
-                saveResult(receiptRevision, matchResult)
+                items.add(extractItem(items.size + 1, matchResult))
             } ?: discountPatternRegex.matchEntire(rawItemList[i])?.let { matchResult ->
-                receiptRevision.items.last().discount =
-                    matchResult.groups["discount"]?.value?.replace(",", ".")?.toDoubleOrNull()
+                items.last().discount = matchResult.groups["discount"]?.value?.replace(",", ".")?.toDoubleOrNull()
             } ?: discountedPriceRegex.matchEntire(rawItemList[i])?.let { matchResult ->
-                receiptRevision.items.last().totalPrice =
-                    matchResult.groups["totalPrice"]?.value?.replace(",", ".")?.toDoubleOrNull()
+                items.last().totalPrice = matchResult.groups["totalPrice"]?.value?.replace(",", ".")?.toDoubleOrNull()
             }
         }
-
-        itemProvider.saveAll(receiptRevision.items).toMutableSet().also { receiptRevision.items = it }
-
-        return receiptRevision
+        items.forEachIndexed { index, item ->
+            item.position = index + 1
+        }
+        val a = 10
+        return ReceiptRevisionResolveData(resolverVersion, "Biedronka", items, receiptFileList)
     }
 
-    private fun saveResult(
-        receiptRevision: ReceiptRevisionEntity, matchResult: MatchResult
-    ): Boolean {
-        val itemEntity = ItemEntity(
-            receiptRevision,
+
+    private fun extractItem(
+        index: Int, matchResult: MatchResult
+    ): ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem {
+        return ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(
             getValueFromGroup(matchResult, "name")?.value?.replace(Regex("(?<=\\d)9(?=\\s|$)"), "g"),
-            getValueFromGroup(matchResult, "ptu")?.value,
             parseDouble(getValueFromGroup(matchResult, "amount")?.value),
             parseDouble(getValueFromGroup(matchResult, "unitPrice")?.value),
             null,
             parseDouble(getValueFromGroup(matchResult, "totalPrice")?.value),
-            (receiptRevision.items.size + 1)
+            index
         )
-        return receiptRevision.items.add(itemEntity)
     }
 
     private fun getValueFromGroup(matchResult: MatchResult, group: String): MatchGroup? {

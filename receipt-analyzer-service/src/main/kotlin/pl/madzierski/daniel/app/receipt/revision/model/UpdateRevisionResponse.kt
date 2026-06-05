@@ -1,14 +1,14 @@
 package pl.madzierski.daniel.app.receipt.revision.model
 
-import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
-import pl.madzierski.daniel.app.receipt.revision.ScanResolver
-import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
 import pl.madzierski.daniel.app.file_group.file.FileEntity
+import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
+import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
 import java.time.LocalDateTime
 
 data class UpdateRevisionResponse(
     var id: String?,
-    var resolver: ScanResolver?,
+    var resolver: ReceiptResolverStrategyType?,
     val createdDate: LocalDateTime?,
     val brand: String?,
     val totalPrice: Double?,
@@ -22,7 +22,6 @@ data class UpdateRevisionResponse(
     data class ItemResponse(
         val id: String?,
         val name: String?,
-        val ptu: String?,
         val amount: Double?,
         val unitPrice: Double?,
         val discount: Double?,
@@ -61,7 +60,6 @@ data class UpdateRevisionResponse(
         fun itemMapper(itemEntity: ItemEntity): ItemResponse = ItemResponse(
             itemEntity.id,
             itemEntity.name,
-            itemEntity.ptu,
             itemEntity.amount,
             itemEntity.unitPrice,
             itemEntity.discount,

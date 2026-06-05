@@ -4,25 +4,26 @@ import jakarta.persistence.*
 import pl.madzierski.daniel.app.common.model.BaseEntity
 import pl.madzierski.daniel.app.receipt.ReceiptEntity
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
 
 @Entity
 @Table(name = "receipt_revision")
-data class ReceiptRevisionEntity(
+class ReceiptRevisionEntity(
 
     var name: String?,
 
     var revision: String?,
 
-    var resolver: ScanResolver?,
+    var resolver: ReceiptResolverStrategyType?,
 
     var brand: String?,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receipt_id")
-    var receipt: ReceiptEntity,
+    var receipt: ReceiptEntity?,
 
-    @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.LAZY)
-    var items: MutableSet<ItemEntity>,
+    @OneToMany(mappedBy = "receiptRevision", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+    val items: MutableSet<ItemEntity> = mutableSetOf(),
 
     var totalPrice: Double?,
 
@@ -42,6 +43,17 @@ data class ReceiptRevisionEntity(
     val childReceiptRevisions: MutableSet<ReceiptRevisionEntity> = mutableSetOf()
 
 ) : BaseEntity() {
+
+    fun addItem(item: ItemEntity) {
+        item.receiptRevision = this
+        items.add(item)
+    }
+
+    fun addItems(items: Collection<ItemEntity>) {
+        items.forEach { it.receiptRevision = this }
+        this.items.addAll(items)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -67,7 +79,7 @@ data class ReceiptRevisionEntity(
         result = 31 * result + (isCorrect?.hashCode() ?: 0)
         result = 31 * result + (resolver?.hashCode() ?: 0)
         result = 31 * result + (brand?.hashCode() ?: 0)
-        result = 31 * result + items.hashCode()
+        result = 31 * result + if (items != null) items.hashCode() else 0
         result = 31 * result + (payingDate?.hashCode() ?: 0)
         result = 31 * result + (address?.hashCode() ?: 0)
         return result

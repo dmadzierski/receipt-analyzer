@@ -6,6 +6,7 @@ import pl.madzierski.daniel.app.receipt.ReceiptProvider
 import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity
 import pl.madzierski.daniel.app.receipt.revision.item.ItemProvider
 import pl.madzierski.daniel.app.receipt.revision.model.*
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
 import pl.madzierski.daniel.exception.AppRuntimeException
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages
 
@@ -16,8 +17,7 @@ class ReceiptRevisionService(
     val itemProvider: ItemProvider,
 ) {
 
-    fun saveDefaultReceiptRevision(receiptRevision: ReceiptRevisionEntity): ReceiptRevisionEntity =
-        this.save(receiptRevision)
+    fun saveReceiptRevision(receiptRevision: ReceiptRevisionEntity): ReceiptRevisionEntity = this.save(receiptRevision)
 
     private fun save(receiptRevision: ReceiptRevisionEntity): ReceiptRevisionEntity {
         return revisionRepository.save(receiptRevision)
@@ -30,7 +30,7 @@ class ReceiptRevisionService(
         val receiptRevisionEntity = ReceiptRevisionEntity(
             "",
             "1.0",
-            ScanResolver.USER,
+            ReceiptResolverStrategyType.USER,
             revisionRequest.brand,
             receiptEntity,
             mutableSetOf(),
@@ -43,14 +43,13 @@ class ReceiptRevisionService(
 
         val revisionEntity = revisionRepository.save(receiptRevisionEntity)
 
-        revisionEntity.items = revisionRequest.items?.map { item ->
+        revisionEntity.addItems(revisionRequest.items?.map { item ->
             val parentItem = item.originalItemId?.let { itemId ->
                 itemProvider.findById(itemId).orElse(null)
             }
             ItemEntity(
-                revisionEntity,
+                null,
                 item.name,
-                item.ptu,
                 item.amount,
                 item.unitPrice,
                 item.discount,
@@ -60,7 +59,7 @@ class ReceiptRevisionService(
             )
         }?.let { items ->
             itemProvider.saveAll(items).toMutableSet()
-        } ?: mutableSetOf()
+        } ?: mutableSetOf())
 
         return AddRevisionResponse.addRevisionMapper(receiptRevisionEntity)
     }
@@ -69,22 +68,39 @@ class ReceiptRevisionService(
     fun createRevisionCopy(revisionId: String): RevisionCopyResponse {
         val revision = getRevisionById(revisionId)
 
-        val revisionCopy = revision.copy(
+        val revisionCopy = ReceiptRevisionEntity(
+            name = revision.name + "(copy)",
+            revision = "",
+            resolver = ReceiptResolverStrategyType.USER,
+            brand = revision.brand,
+            receipt = revision.receipt,
             items = mutableSetOf(),
+            totalPrice = revision.totalPrice,
+            payingDate = revision.payingDate,
+            address = revision.address,
             isPreferredRevision = false,
-            resolver = ScanResolver.USER,
+            isCorrect = revision.isCorrect,
+            parentReceiptRevision = revision,
             childReceiptRevisions = mutableSetOf(),
-        ).let {
-            it.id = null
-            revisionRepository.save(it)
-        }
+        )
+        revisionCopy.addItems(revision.items.map(::createItemCopy))
 
-        revision.items.map { item ->
-            item.copy(parentItem = item, receiptRevision = revisionCopy, childItems = mutableSetOf())
-                .also { it.id = null }
-        }.toSet().let { items -> itemProvider.saveAll(items) }
+        val savedRevisionCopy = revisionRepository.save(revisionCopy)
+        return RevisionCopyResponse(savedRevisionCopy.id)
+    }
 
-        return RevisionCopyResponse(revisionCopy.id)
+    private fun createItemCopy(item: ItemEntity): ItemEntity {
+        return ItemEntity(
+            receiptRevision = null,
+            name = item.name,
+            amount = item.amount,
+            unitPrice = item.unitPrice,
+            discount = item.discount,
+            totalPrice = item.totalPrice,
+            position = item.position,
+            parentItem = item,
+            childItems = mutableSetOf(),
+        )
     }
 
     fun getRevision(revisionId: String): GetRevisionResponse? {
@@ -114,7 +130,6 @@ class ReceiptRevisionService(
                         val existingItem = items.find { it.id == incomingItem.id }
                         existingItem?.apply {
                             incomingItem.name?.let { name = it }
-                            incomingItem.ptu?.let { ptu = it }
                             incomingItem.amount?.let { amount = it }
                             incomingItem.unitPrice?.let { unitPrice = it }
                             incomingItem.totalPrice?.let { totalPrice = it }
@@ -123,7 +138,6 @@ class ReceiptRevisionService(
                     } else {
                         val newItem = ItemEntity(
                             name = incomingItem.name,
-                            ptu = incomingItem.ptu,
                             amount = incomingItem.amount,
                             unitPrice = incomingItem.unitPrice,
                             totalPrice = incomingItem.totalPrice,

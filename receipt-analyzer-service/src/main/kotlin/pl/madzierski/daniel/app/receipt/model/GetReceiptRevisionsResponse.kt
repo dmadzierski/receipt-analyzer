@@ -1,12 +1,12 @@
 package pl.madzierski.daniel.app.receipt.model
 
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity
-import pl.madzierski.daniel.app.receipt.revision.ScanResolver
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
 import java.time.LocalDateTime
 
 data class GetReceiptRevisionsResponse(
     var id: String?,
-    var resolver: ScanResolver?,
+    var resolver: ReceiptResolverStrategyType?,
     val createdDate: LocalDateTime?,
     val brand: String?,
     val totalPrice: Double?,
