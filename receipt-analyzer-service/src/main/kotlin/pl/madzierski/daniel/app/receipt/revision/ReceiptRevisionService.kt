@@ -67,7 +67,6 @@ class ReceiptRevisionService(
     @Transactional
     fun createRevisionCopy(revisionId: String): RevisionCopyResponse {
         val revision = getRevisionById(revisionId)
-
         val revisionCopy = ReceiptRevisionEntity(
             name = revision.name + "(copy)",
             revision = "",
@@ -112,6 +111,7 @@ class ReceiptRevisionService(
     @Transactional
     fun updateRevision(revisionId: String, updatedRevision: UpdateRevisionRequest): UpdateRevisionResponse? {
         val currentRevision = getRevisionById(revisionId)
+        require(currentRevision.resolver == ReceiptResolverStrategyType.USER)
 
         currentRevision.apply {
             updatedRevision.brand?.let { brand = it }
