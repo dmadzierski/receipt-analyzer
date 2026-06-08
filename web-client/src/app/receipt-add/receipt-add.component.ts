@@ -7,8 +7,9 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {FileUploadComponent} from '../component/file-upload/file-upload.component';
 import {ReceiptService} from '../service/receipt.service';
-import {CreateReceiptData} from '../model/receipt.model';
+import {CreateReceiptData, ResolverStrategy} from '../model/receipt.model';
 import {FormsModule} from '@angular/forms';
+import {TitleCasePipe} from '@angular/common';
 
 @Component({
   selector: 'app-receipt-add',
@@ -20,6 +21,7 @@ import {FormsModule} from '@angular/forms';
     MatDatepickerModule,
     MatButtonModule,
     FileUploadComponent,
+    TitleCasePipe,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-add.component.html',
@@ -30,7 +32,8 @@ export class ReceiptAddComponent {
   constructor(private readonly receiptService: ReceiptService) {
   }
 
-  data: CreateReceiptData = new CreateReceiptData('', '', '', []);
+  strategies = Object.keys(ResolverStrategy).filter(key => isNaN(Number(key)));
+  data: CreateReceiptData = new CreateReceiptData('', '', '', ResolverStrategy.BIEDRONKA, []);
 
   create() {
     console.log(this.data);

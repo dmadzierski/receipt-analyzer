@@ -54,16 +54,16 @@ class ReceiptService(
             revisionData.brand,
             null,
             mutableSetOf(),
-            revisionData.items.sumOf { it.totalPrice ?: 0.0 },
+            revisionData.items?.sumOf { it.totalPrice ?: 0.0 },
             LocalDateTime.now().toString(),
             null,
             true,
             false,
         )
-        val items = revisionData.items.map {
+        revisionData.items?.map {
             ItemEntity(null, it.name, it.amount, it.unitPrice, it.discount, it.totalPrice, it.position)
-        }.toMutableSet()
-        revisionEntity.addItems(items)
+        }?.toMutableSet()?.let { revisionEntity.addItems(it) }
+
         return revisionEntity
     }
 

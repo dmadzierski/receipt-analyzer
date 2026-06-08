@@ -4,7 +4,6 @@ import net.sourceforge.tess4j.Tesseract
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import pl.madzierski.daniel.app.file_group.file.FileService
 import pl.madzierski.daniel.app.receipt.revision.model.ReceiptRevisionResolveData
 import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType
 import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyTypeStrategy
@@ -14,8 +13,7 @@ import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages
 import java.io.File
 
 @Component
-class BiedronkaReceiptResolverStrategyType @Autowired constructor(
-    val fileService: FileService,
+class BiedronkaScanResolver @Autowired constructor(
     @Value("\${ocr.tesseract.dataPath}") val tesseractDataPath: String,
     @Value("\${receipt-resolver-strategy.biedronka.version}") val resolverVersion: String,
     val pdfService: PDFService

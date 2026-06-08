@@ -1,10 +1,10 @@
 package pl.madzierski.daniel.app.receipt.revision.model
 
 data class ReceiptRevisionResolveData(
-    var revisionVersion: String,
-    var brand: String,
-    var items: List<ReceiptRevisionResolveDataItem>,
-    var files: List<ReceiptRevisionResolveDataFile>
+    var revisionVersion: String?,
+    var brand: String?,
+    var items: List<ReceiptRevisionResolveDataItem>?,
+    var files: List<ReceiptRevisionResolveDataFile>?
 ) {
     data class ReceiptRevisionResolveDataItem(
         var name: String?,

@@ -7,9 +7,9 @@ COPY src ./src
 
 RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip -T 1.5C
 
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jre-alpine
 
-RUN apt-get update -y && apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
+RUN apk add --no-cache tesseract-ocr
 
 WORKDIR /app
 

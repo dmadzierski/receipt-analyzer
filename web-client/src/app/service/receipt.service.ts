@@ -44,7 +44,7 @@ export class ReceiptService {
             name: data.name,
             description: data.description,
             date: data.date,
-            strategy: "BIEDRONKA"
+            strategy: data.strategy,
           }),
         ],
         'payapp_init_json.json',

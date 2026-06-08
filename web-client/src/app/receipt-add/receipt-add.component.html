@@ -18,6 +18,17 @@
     <mat-datepicker #picker></mat-datepicker>
   </mat-form-field>
 
+  <mat-form-field>
+    <mat-label>Select strategy</mat-label>
+    <mat-select [(ngModel)]="data.strategy">
+      @for (strategy of strategies; track strategy) {
+        <mat-option [value]="strategy">
+          {{ strategy }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
   <file-upload [files]="data.files"></file-upload>
 
   <button matButton="outlined" (click)="create()">Create</button>

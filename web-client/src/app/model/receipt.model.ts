@@ -17,9 +17,16 @@ export class CreateReceiptData {
     public name: string,
     public description: string,
     public date: string,
+    public strategy: ResolverStrategy,
     public files: File[]
   ) {
   }
+}
+
+export enum ResolverStrategy{
+  BIEDRONKA,
+  USER,
+  BIEDRONKA_JSON
 }
 
 export interface CreateReceiptBody {
