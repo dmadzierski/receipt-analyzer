@@ -60,7 +60,6 @@ export interface Item {
   id?: string
   position: number
   name: string
-  ptu: string
   amount: number
   unitPrice: number
   discount?: number

@@ -33,7 +33,7 @@ class ReceiptService(
         val revisionData = receiptResolverService.resolve(
             fileGroup.files.first().path!!, body.strategy
         )
-        receipt.addRevision(toReceiptRevisionEntity(receipt, body, revisionData))
+        receipt.addRevision(mapToReceiptRevisionEntity(body, revisionData))
         return this.saveReceipt(receipt).let { CreateReceiptResponse(it.id, it.name, it.description) }
     }
 
@@ -44,15 +44,15 @@ class ReceiptService(
             mutableSetOf(),
             mutableSetOf())
 
-    fun toReceiptRevisionEntity(
-        receipt: ReceiptEntity, body: CreateReceiptRequest, revisionData: ReceiptRevisionResolveData
+    private fun mapToReceiptRevisionEntity(
+        body: CreateReceiptRequest, revisionData: ReceiptRevisionResolveData
     ): ReceiptRevisionEntity {
         val revisionEntity = ReceiptRevisionEntity(
             body.name,
             revisionData.revisionVersion,
             body.strategy,
             revisionData.brand,
-            receipt,
+            null,
             mutableSetOf(),
             revisionData.items.sumOf { it.totalPrice ?: 0.0 },
             LocalDateTime.now().toString(),

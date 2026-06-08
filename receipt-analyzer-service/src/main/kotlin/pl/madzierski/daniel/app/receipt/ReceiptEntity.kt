@@ -23,7 +23,8 @@ class ReceiptEntity(
     var fileGroupEntity: MutableSet<FileGroupEntity> = mutableSetOf(),
 
     ) : BaseEntity() {
-    fun addRevision(toReceiptRevisionEntity: ReceiptRevisionEntity) {
-        this.receiptRevisions.add(toReceiptRevisionEntity)
+    fun addRevision(revisionEntity: ReceiptRevisionEntity) {
+        revisionEntity.receipt = this
+        this.receiptRevisions.add(revisionEntity)
     }
 }

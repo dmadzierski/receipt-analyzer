@@ -49,7 +49,7 @@ export class RevisionDetailsComponent implements OnChanges {
   constructor(private cdr: ChangeDetectorRef) {
   }
 
-  displayedColumns: string[] = ['position', 'name', 'ptu', 'amount', 'unitPrice', 'totalPrice', 'actions'];
+  displayedColumns: string[] = ['position', 'name', 'amount', 'unitPrice', 'totalPrice', 'actions'];
 
   revision: ModelSignal<RevisionDetails> = model({} as RevisionDetails)
 
@@ -90,7 +90,6 @@ export class RevisionDetailsComponent implements OnChanges {
       id: '',
       position: 0,
       name: '',
-      ptu: '',
       amount: 0,
       unitPrice: 0,
       totalPrice: 0
