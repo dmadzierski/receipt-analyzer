@@ -1,4 +1,4 @@
-FROM maven:3.9.6-amazoncorretto-21 AS maven_build
+FROM maven:3.9.16-amazoncorretto-25 AS maven_build
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY src ./src
 
 RUN --mount=type=cache,target=/root/.m2 mvn clean package -P dev  -Dmaven.test.skip -T 1.5C
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 RUN apk add --no-cache tesseract-ocr
 

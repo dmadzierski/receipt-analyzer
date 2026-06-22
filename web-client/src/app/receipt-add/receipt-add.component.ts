@@ -21,7 +21,6 @@ import {TitleCasePipe} from '@angular/common';
     MatDatepickerModule,
     MatButtonModule,
     FileUploadComponent,
-    TitleCasePipe,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-add.component.html',
