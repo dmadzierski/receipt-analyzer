@@ -16,8 +16,6 @@ spring:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI}
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
-          client-id: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID}
-          client-secret: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN}
   servlet:
     multipart:
       enabled: true
