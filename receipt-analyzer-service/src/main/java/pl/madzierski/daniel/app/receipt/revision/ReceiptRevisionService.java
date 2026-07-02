@@ -68,15 +68,13 @@ public class ReceiptRevisionService {
 
         ReceiptRevisionEntity revisionCopy = new ReceiptRevisionEntity(revision.getName() + "(copy)", "", ReceiptResolverStrategyType.USER, revision.getBrand(), revision.getTotalPrice(), revision.getPayingDate(), revision.getAddress(), false, revision.getIsCorrect(), revision.getReceipt(), revision);
 
-        Set<ItemEntity> copiedItems = revision.getItems().stream().map(this::createItemCopy).collect(Collectors.toSet());
-        revisionCopy.getItems().addAll(copiedItems);
+        Set<ItemEntity> copiedItems = revision.getItems().stream().map(item->
+            new ItemEntity(revisionCopy, item.getName(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>())
+        ).collect(Collectors.toSet());
+        revisionCopy.addItems(copiedItems);
 
         ReceiptRevisionEntity savedRevisionCopy = revisionRepository.save(revisionCopy);
         return new RevisionCopyResponse(savedRevisionCopy.getId());
-    }
-
-    private ItemEntity createItemCopy(ItemEntity item) {
-        return new ItemEntity(null, item.getName(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>());
     }
 
     public GetRevisionResponse getRevision(String revisionId) {
@@ -96,9 +94,17 @@ public class ReceiptRevisionService {
         if (updatedRevision.isCorrect() != null) currentRevision.setIsCorrect(updatedRevision.isCorrect());
 
         if (updatedRevision.items() != null && currentRevision.getResolver() != ReceiptResolverStrategyType.USER) {
-            Set<String> incomingIds = updatedRevision.items().stream().map(UpdateRevisionRequest.ItemResponse::id).filter(Objects::nonNull).collect(Collectors.toSet());
+            Set<String> incomingIds = updatedRevision.items().stream()
+                    .map(UpdateRevisionRequest.ItemResponse::id)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
 
-            currentRevision.getItems().removeIf(existingItem -> !incomingIds.contains(existingItem.getId()));
+            List<String> idsToRemove = currentRevision.getItems().stream()
+                    .map(ItemEntity::getId)
+                    .filter(id -> !incomingIds.contains(id))
+                    .toList();
+
+            idsToRemove.forEach(currentRevision::removeItem);
 
             for (UpdateRevisionRequest.ItemResponse incomingItem : updatedRevision.items()) {
                 if (incomingItem.id() != null && !incomingItem.id().trim().isEmpty()) {

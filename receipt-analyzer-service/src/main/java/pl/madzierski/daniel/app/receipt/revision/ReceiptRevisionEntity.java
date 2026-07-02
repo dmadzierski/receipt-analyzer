@@ -9,15 +9,15 @@ import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyTyp
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "receipt_revision")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ReceiptRevisionEntity extends BaseEntity {
 
     private String name;
@@ -36,8 +36,12 @@ public class ReceiptRevisionEntity extends BaseEntity {
     @JoinColumn(name = "parent_receipt_revision_id")
     private ReceiptRevisionEntity parentReceiptRevision;
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private final Set<ItemEntity> items = new HashSet<>();
     @OneToMany(mappedBy = "parentReceiptRevision")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private final Set<ReceiptRevisionEntity> childReceiptRevisions = new HashSet<>();
 
     public void addItem(ItemEntity item) {
@@ -46,5 +50,29 @@ public class ReceiptRevisionEntity extends BaseEntity {
 
     public void addItems(Collection<ItemEntity> items) {
         this.items.addAll(items);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ReceiptRevisionEntity that = (ReceiptRevisionEntity) o;
+        return Objects.equals(name, that.name) && Objects.equals(revision, that.revision) && resolver == that.resolver && Objects.equals(brand, that.brand) && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(payingDate, that.payingDate) && Objects.equals(address, that.address) && Objects.equals(isPreferredRevision, that.isPreferredRevision) && Objects.equals(isCorrect, that.isCorrect);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, revision, resolver, brand, totalPrice, payingDate, address, isPreferredRevision, isCorrect);
+    }
+
+    public Set<ItemEntity> getItems() {
+        return items.stream().collect(Collectors.toUnmodifiableSet());
+    }
+
+    public Boolean removeItem(String itemId) {
+        return items.removeIf(itemEntity -> itemEntity.getId().equals(itemId));
+    }
+
+    public Set<ReceiptRevisionEntity> getChildReceiptRevisions() {
+        return childReceiptRevisions.stream().collect(Collectors.toUnmodifiableSet());
     }
 }
