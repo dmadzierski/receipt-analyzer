@@ -60,8 +60,8 @@ public class ReceiptRevisionService {
 
         ReceiptRevisionEntity revisionCopy = new ReceiptRevisionEntity(revision.getName() + "(copy)", "", ReceiptResolverStrategyType.USER, revision.getBrand(), revision.getTotalPrice(), revision.getPayingDate(), revision.getAddress(), false, revision.getIsCorrect(), revision.getReceipt(), revision);
 
-        Set<ItemEntity> copiedItems = revision.getItems().stream().map(item->
-            new ItemEntity(revisionCopy, item.getName(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>())
+        Set<ItemEntity> copiedItems = revision.getItems().stream().map(item ->
+                new ItemEntity(revisionCopy, item.getName(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>())
         ).collect(Collectors.toSet());
         revisionCopy.addItems(copiedItems);
 
@@ -96,7 +96,7 @@ public class ReceiptRevisionService {
                     .filter(id -> !incomingIds.contains(id))
                     .forEach(currentRevision::removeItem);
 
-            for (UpdateRevisionRequest. ItemRequest incomingItem : updatedRevision.items()) {
+            for (UpdateRevisionRequest.ItemRequest incomingItem : updatedRevision.items()) {
                 if (incomingItem.id() != null && !incomingItem.id().trim().isEmpty()) {
                     ItemEntity existingItem = currentRevision.getItems().stream().filter(it -> incomingItem.id().equals(it.getId())).findFirst().orElse(null);
                     if (existingItem != null) {

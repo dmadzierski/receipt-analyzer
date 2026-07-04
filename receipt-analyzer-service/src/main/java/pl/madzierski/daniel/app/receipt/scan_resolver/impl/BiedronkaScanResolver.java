@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import pl.madzierski.daniel.app.receipt.revision.model.ReceiptRevisionResolveData;
-import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategy;
+import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.app.receipt.scan_resolver.service.PDFService;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
@@ -52,7 +52,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
 
     @Override
     public ReceiptRevisionResolveData execute(List<String> filePaths) {
-        if(filePaths == null || filePaths.size() != 1) {
+        if (filePaths == null || filePaths.size() != 1) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.INVALID_INPUT_AMOUNT_OF_INPUT_FILES);
         }
         String filePath = filePaths.getFirst();

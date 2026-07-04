@@ -5,6 +5,7 @@ import lombok.*;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.file_group.FileGroupEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
+import pl.madzierski.daniel.app.wallet.WalletEntity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,15 +19,15 @@ import java.util.Set;
 @Builder
 public class ReceiptEntity extends BaseEntity {
 
-    private String name;
-    private String description;
-    @Column(name = "user_sub")
-    private String userSub;
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "receipt")
     private final Set<ReceiptRevisionEntity> receiptRevisions = new HashSet<>();
+    private String name;
+    private String description;
     @OneToMany(mappedBy = "receipt")
-
     private Set<FileGroupEntity> fileGroupEntity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wallet_id")
+    private WalletEntity wallet;
 
     public void addRevision(ReceiptRevisionEntity receiptRevision) {
         this.receiptRevisions.add(receiptRevision);

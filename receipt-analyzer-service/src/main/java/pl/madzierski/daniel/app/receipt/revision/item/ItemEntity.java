@@ -1,7 +1,9 @@
 package pl.madzierski.daniel.app.receipt.revision.item;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
 

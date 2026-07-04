@@ -20,6 +20,14 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ReceiptRevisionEntity extends BaseEntity {
 
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private final Set<ItemEntity> items = new HashSet<>();
+    @OneToMany(mappedBy = "parentReceiptRevision")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private final Set<ReceiptRevisionEntity> childReceiptRevisions = new HashSet<>();
     private String name;
     private String revision;
     private ReceiptResolverStrategyType resolver;
@@ -35,14 +43,6 @@ public class ReceiptRevisionEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_receipt_revision_id")
     private ReceiptRevisionEntity parentReceiptRevision;
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private final Set<ItemEntity> items = new HashSet<>();
-    @OneToMany(mappedBy = "parentReceiptRevision")
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private final Set<ReceiptRevisionEntity> childReceiptRevisions = new HashSet<>();
 
     public void addItem(ItemEntity item) {
         this.items.add(item);
