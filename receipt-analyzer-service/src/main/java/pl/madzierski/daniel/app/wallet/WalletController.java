@@ -7,9 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pl.madzierski.daniel.app.wallet.model.CreateWalletRequest;
 import pl.madzierski.daniel.app.wallet.model.CreateWalletResponse;
-import pl.madzierski.daniel.app.wallet.model.GetWalletResponse;
-
-import java.util.List;
+import pl.madzierski.daniel.app.wallet.model.GetWalletListResponse;
 
 @AllArgsConstructor
 @RestController
@@ -24,8 +22,8 @@ public class WalletController {
         return ResponseEntity.ok(this.walletService.addWallet(request));
     }
 
-    @GetMapping()
-    public ResponseEntity<List<GetWalletResponse>> getWallets(){
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetWalletListResponse> getWallets(){
         return ResponseEntity.ok(this.walletService.getWallets());
     }
 }

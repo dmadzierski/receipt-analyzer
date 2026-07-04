@@ -1,7 +1,7 @@
 <div class="action-container">
-  <a matFab extended class="action-button" routerLink="/receipt/add">
+  <a matFab extended class="action-button" routerLink="/wallet/add">
     <mat-icon color="orange">add_circle</mat-icon>
-    Add receipt
+    Add wallet
   </a>
 </div>
 
@@ -14,16 +14,6 @@
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef> Name</th>
     <td mat-cell *matCellDef="let element"> {{ element.name }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="description">
-    <th mat-header-cell *matHeaderCellDef> Description</th>
-    <td mat-cell *matCellDef="let element"> {{ element.description }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="createDate">
-    <th mat-header-cell *matHeaderCellDef> Create date</th>
-    <td mat-cell *matCellDef="let element"> {{ element.createDate }}</td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
