@@ -15,10 +15,10 @@ public record UpdateRevisionRequest(
         String address,
         Boolean isPreferredRevision,
         Boolean isCorrect,
-        Set<ItemResponse> items
+        Set<ItemRequest> items
 ) {
 
-    public record ItemResponse(
+    public record ItemRequest(
             String id,
             String name,
             Double amount,

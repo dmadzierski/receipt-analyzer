@@ -30,14 +30,6 @@ public class ReceiptRevisionService {
         return new ReceiptRevisionEntity("", "1.0", ReceiptResolverStrategyType.USER, revisionRequest.brand(), revisionRequest.totalPrice(), revisionRequest.payingDate(), revisionRequest.address(), false, false, receiptEntity, null);
     }
 
-    public ReceiptRevisionEntity saveReceiptRevision(ReceiptRevisionEntity receiptRevision) {
-        return this.save(receiptRevision);
-    }
-
-    private ReceiptRevisionEntity save(ReceiptRevisionEntity receiptRevision) {
-        return revisionRepository.save(receiptRevision);
-    }
-
     public AddRevisionResponse addRevision(AddRevisionRequest revisionRequest) {
         ReceiptEntity receiptEntity = receiptProvider.findById(revisionRequest.receiptId()).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
 
@@ -93,20 +85,18 @@ public class ReceiptRevisionService {
             currentRevision.setIsPreferredRevision(updatedRevision.isPreferredRevision());
         if (updatedRevision.isCorrect() != null) currentRevision.setIsCorrect(updatedRevision.isCorrect());
 
-        if (updatedRevision.items() != null && currentRevision.getResolver() != ReceiptResolverStrategyType.USER) {
+        if (updatedRevision.items() != null && currentRevision.getResolver() == ReceiptResolverStrategyType.USER) {
             Set<String> incomingIds = updatedRevision.items().stream()
-                    .map(UpdateRevisionRequest.ItemResponse::id)
+                    .map(UpdateRevisionRequest.ItemRequest::id)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
 
-            List<String> idsToRemove = currentRevision.getItems().stream()
+            currentRevision.getItems().stream()
                     .map(ItemEntity::getId)
                     .filter(id -> !incomingIds.contains(id))
-                    .toList();
+                    .forEach(currentRevision::removeItem);
 
-            idsToRemove.forEach(currentRevision::removeItem);
-
-            for (UpdateRevisionRequest.ItemResponse incomingItem : updatedRevision.items()) {
+            for (UpdateRevisionRequest. ItemRequest incomingItem : updatedRevision.items()) {
                 if (incomingItem.id() != null && !incomingItem.id().trim().isEmpty()) {
                     ItemEntity existingItem = currentRevision.getItems().stream().filter(it -> incomingItem.id().equals(it.getId())).findFirst().orElse(null);
                     if (existingItem != null) {
@@ -118,8 +108,7 @@ public class ReceiptRevisionService {
                     }
                 } else {
                     ItemEntity newItem = new ItemEntity(currentRevision, incomingItem.name(), incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null, new HashSet<>());
-
-                    currentRevision.getItems().add(itemProvider.save(newItem));
+                    currentRevision.addItem(itemProvider.save(newItem));
                 }
             }
         }
