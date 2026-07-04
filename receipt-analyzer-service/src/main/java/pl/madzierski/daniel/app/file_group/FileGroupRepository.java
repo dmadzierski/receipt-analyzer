@@ -19,6 +19,7 @@ interface FileGroupRepository extends JpaRepository<FileGroupEntity, Long> {
                 WHERE
                     fileGroup.file_type = 'PDF'
                     AND fileGroup.is_original = true
+                    AND receipt.id = :receiptId
                 LIMIT 1
             """, nativeQuery = true)
     String findFirstOriginalPdf(String receiptId);
