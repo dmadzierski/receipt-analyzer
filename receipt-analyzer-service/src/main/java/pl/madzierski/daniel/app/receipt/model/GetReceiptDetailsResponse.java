@@ -2,7 +2,7 @@ package pl.madzierski.daniel.app.receipt.model;
 
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
-import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity;
+import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemEntity;
 import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType;
 
 import java.time.LocalDateTime;
@@ -63,15 +63,15 @@ public record GetReceiptDetailsResponse(
         );
     }
 
-    public static ItemResponse itemMapper(ItemEntity itemEntity) {
+    public static ItemResponse itemMapper(ReceiptItemEntity receiptItemEntity) {
         return new ItemResponse(
-                itemEntity.getId(),
-                itemEntity.getName(),
-                itemEntity.getAmount(),
-                itemEntity.getUnitPrice(),
-                itemEntity.getDiscount(),
-                itemEntity.getTotalPrice(),
-                itemEntity.getPosition()
+                receiptItemEntity.getId(),
+                receiptItemEntity.getName(),
+                receiptItemEntity.getAmount(),
+                receiptItemEntity.getUnitPrice(),
+                receiptItemEntity.getDiscount(),
+                receiptItemEntity.getTotalPrice(),
+                receiptItemEntity.getPosition()
         );
     }
 

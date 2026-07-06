@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
 import pl.madzierski.daniel.app.receipt.ReceiptProvider;
-import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity;
-import pl.madzierski.daniel.app.receipt.revision.item.ItemProvider;
+import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemEntity;
+import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemProvider;
 import pl.madzierski.daniel.app.receipt.revision.model.*;
 import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.exception.AppRuntimeException;
@@ -24,7 +24,7 @@ public class ReceiptRevisionService {
 
     private final ReceiptRevisionRepository revisionRepository;
     private final ReceiptProvider receiptProvider;
-    private final ItemProvider itemProvider;
+    private final ReceiptItemProvider receiptItemProvider;
 
     private static ReceiptRevisionEntity getReceiptRevisionEntity(AddRevisionRequest revisionRequest, ReceiptEntity receiptEntity) {
         return new ReceiptRevisionEntity("", "1.0", ReceiptResolverStrategyType.USER, revisionRequest.brand(), revisionRequest.totalPrice(), revisionRequest.payingDate(), revisionRequest.address(), false, false, receiptEntity, null);
@@ -38,16 +38,16 @@ public class ReceiptRevisionService {
         ReceiptRevisionEntity revisionEntity = revisionRepository.save(receiptRevisionEntity);
 
         if (revisionRequest.items() != null) {
-            Set<ItemEntity> mappedItems = revisionRequest.items().stream().map(item -> {
-                ItemEntity parentItem = null;
+            Set<ReceiptItemEntity> mappedItems = revisionRequest.items().stream().map(item -> {
+                ReceiptItemEntity parentItem = null;
                 if (item.originalItemId() != null) {
-                    parentItem = itemProvider.findById(item.originalItemId()).orElse(null);
+                    parentItem = receiptItemProvider.findById(item.originalItemId()).orElse(null);
                 }
 
-                return new ItemEntity(null, item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), parentItem, new HashSet<>());
+                return new ReceiptItemEntity(null, item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), parentItem, new HashSet<>());
             }).collect(Collectors.toSet());
 
-            List<ItemEntity> savedItems = itemProvider.saveAll(mappedItems);
+            List<ReceiptItemEntity> savedItems = receiptItemProvider.saveAll(mappedItems);
             revisionEntity.getItems().addAll(savedItems);
         }
 
@@ -60,8 +60,8 @@ public class ReceiptRevisionService {
 
         ReceiptRevisionEntity revisionCopy = new ReceiptRevisionEntity(revision.getName() + "(copy)", "", ReceiptResolverStrategyType.USER, revision.getBrand(), revision.getTotalPrice(), revision.getPayingDate(), revision.getAddress(), false, revision.getIsCorrect(), revision.getReceipt(), revision);
 
-        Set<ItemEntity> copiedItems = revision.getItems().stream().map(item ->
-                new ItemEntity(revisionCopy, item.getName(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>())
+        Set<ReceiptItemEntity> copiedItems = revision.getItems().stream().map(item ->
+                new ReceiptItemEntity(revisionCopy, item.getName(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>())
         ).collect(Collectors.toSet());
         revisionCopy.addItems(copiedItems);
 
@@ -92,13 +92,13 @@ public class ReceiptRevisionService {
                     .collect(Collectors.toSet());
 
             currentRevision.getItems().stream()
-                    .map(ItemEntity::getId)
+                    .map(ReceiptItemEntity::getId)
                     .filter(id -> !incomingIds.contains(id))
                     .forEach(currentRevision::removeItem);
 
             for (UpdateRevisionRequest.ItemRequest incomingItem : updatedRevision.items()) {
                 if (incomingItem.id() != null && !incomingItem.id().trim().isEmpty()) {
-                    ItemEntity existingItem = currentRevision.getItems().stream().filter(it -> incomingItem.id().equals(it.getId())).findFirst().orElse(null);
+                    ReceiptItemEntity existingItem = currentRevision.getItems().stream().filter(it -> incomingItem.id().equals(it.getId())).findFirst().orElse(null);
                     if (existingItem != null) {
                         if (incomingItem.name() != null) existingItem.setName(incomingItem.name());
                         if (incomingItem.amount() != null) existingItem.setAmount(incomingItem.amount());
@@ -107,8 +107,8 @@ public class ReceiptRevisionService {
                         if (incomingItem.position() != null) existingItem.setPosition(incomingItem.position());
                     }
                 } else {
-                    ItemEntity newItem = new ItemEntity(currentRevision, incomingItem.name(), incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null, new HashSet<>());
-                    currentRevision.addItem(itemProvider.save(newItem));
+                    ReceiptItemEntity newItem = new ReceiptItemEntity(currentRevision, incomingItem.name(), incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null, new HashSet<>());
+                    currentRevision.addItem(receiptItemProvider.save(newItem));
                 }
             }
         }

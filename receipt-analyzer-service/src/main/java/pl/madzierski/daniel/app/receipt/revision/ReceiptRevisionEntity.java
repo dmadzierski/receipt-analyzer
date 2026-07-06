@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
-import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity;
+import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemEntity;
 import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType;
 
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class ReceiptRevisionEntity extends BaseEntity {
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    private final Set<ItemEntity> items = new HashSet<>();
+    private final Set<ReceiptItemEntity> items = new HashSet<>();
     @OneToMany(mappedBy = "parentReceiptRevision")
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -44,11 +44,11 @@ public class ReceiptRevisionEntity extends BaseEntity {
     @JoinColumn(name = "parent_receipt_revision_id")
     private ReceiptRevisionEntity parentReceiptRevision;
 
-    public void addItem(ItemEntity item) {
+    public void addItem(ReceiptItemEntity item) {
         this.items.add(item);
     }
 
-    public void addItems(Collection<ItemEntity> items) {
+    public void addItems(Collection<ReceiptItemEntity> items) {
         this.items.addAll(items);
     }
 
@@ -64,7 +64,7 @@ public class ReceiptRevisionEntity extends BaseEntity {
         return Objects.hash(name, revision, resolver, brand, totalPrice, payingDate, address, isPreferredRevision, isCorrect);
     }
 
-    public Set<ItemEntity> getItems() {
+    public Set<ReceiptItemEntity> getItems() {
         return items.stream().collect(Collectors.toUnmodifiableSet());
     }
 

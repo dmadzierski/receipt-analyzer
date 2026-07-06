@@ -1,7 +1,7 @@
 package pl.madzierski.daniel.app.receipt.revision.model;
 
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
-import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity;
+import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemEntity;
 import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyType;
 
 import java.time.LocalDateTime;
@@ -35,16 +35,16 @@ public record AddRevisionResponse(
         );
     }
 
-    public static AddRevisionItemResponse addRevisionItemMapper(ItemEntity itemEntity) {
+    public static AddRevisionItemResponse addRevisionItemMapper(ReceiptItemEntity receiptItemEntity) {
         return new AddRevisionItemResponse(
-                itemEntity.getId(),
-                itemEntity.getName(),
-                itemEntity.getAmount(),
-                itemEntity.getUnitPrice(),
-                itemEntity.getDiscount(),
-                itemEntity.getTotalPrice(),
-                itemEntity.getPosition(),
-                itemEntity.getParentItem() != null ? itemEntity.getParentItem().getId() : null
+                receiptItemEntity.getId(),
+                receiptItemEntity.getName(),
+                receiptItemEntity.getAmount(),
+                receiptItemEntity.getUnitPrice(),
+                receiptItemEntity.getDiscount(),
+                receiptItemEntity.getTotalPrice(),
+                receiptItemEntity.getPosition(),
+                receiptItemEntity.getParentItem() != null ? receiptItemEntity.getParentItem().getId() : null
         );
     }
 

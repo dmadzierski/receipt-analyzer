@@ -1,6 +1,5 @@
 package pl.madzierski.daniel.app.receipt;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +11,7 @@ import pl.madzierski.daniel.app.receipt.model.*;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionRepository;
 import pl.madzierski.daniel.app.receipt.revision.RevisionProvider;
-import pl.madzierski.daniel.app.receipt.revision.item.ItemEntity;
+import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemEntity;
 import pl.madzierski.daniel.app.receipt.revision.model.ReceiptRevisionResolveData;
 import pl.madzierski.daniel.app.receipt.scan_resolver.service.ReceiptResolverLocatorService;
 import pl.madzierski.daniel.app.wallet.WalletEntity;
@@ -73,8 +72,8 @@ public class ReceiptService {
         ReceiptRevisionEntity revisionEntity = new ReceiptRevisionEntity(body.name(), revisionData.revisionVersion(), body.strategy(), revisionData.brand(), totalPrice, LocalDateTime.now().toString(), null, false, false, null, null);
 
         if (revisionData.items() != null) {
-            Set<ItemEntity> items = revisionData.items().stream().map(it ->
-                    new ItemEntity(revisionEntity, it.name(), it.amount(), it.unitPrice(), it.discount(), it.totalPrice(), it.position(), null, null)).collect(Collectors.toSet());
+            Set<ReceiptItemEntity> items = revisionData.items().stream().map(it ->
+                    new ReceiptItemEntity(revisionEntity, it.name(), it.amount(), it.unitPrice(), it.discount(), it.totalPrice(), it.position(), null, null)).collect(Collectors.toSet());
             revisionEntity.addItems(items);
         }
         return revisionEntity;

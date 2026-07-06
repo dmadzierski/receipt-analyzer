@@ -16,7 +16,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemEntity extends BaseEntity {
+public class ReceiptItemEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ReceiptRevisionEntity receiptRevision;
@@ -35,15 +35,15 @@ public class ItemEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_item_id")
-    private ItemEntity parentItem;
+    private ReceiptItemEntity parentItem;
 
     @OneToMany(mappedBy = "parentItem", fetch = FetchType.LAZY)
-    private Set<ItemEntity> childItems = new HashSet<>();
+    private Set<ReceiptItemEntity> childItems = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        ItemEntity that = (ItemEntity) o;
+        ReceiptItemEntity that = (ReceiptItemEntity) o;
         return Objects.equals(name, that.name) && Objects.equals(amount, that.amount) && Objects.equals(unitPrice, that.unitPrice) && Objects.equals(discount, that.discount) && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(position, that.position);
     }
 
