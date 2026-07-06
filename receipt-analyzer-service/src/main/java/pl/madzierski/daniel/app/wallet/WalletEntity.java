@@ -20,7 +20,7 @@ import java.util.List;
 public class WalletEntity extends BaseEntity {
     private String name;
     @OneToMany(mappedBy = "wallet")
-    private List<ReceiptEntity> receipt;
+    private List<ReceiptEntity> receipts;
     @Column(name = "user_sub")
     private String userSub;
 }

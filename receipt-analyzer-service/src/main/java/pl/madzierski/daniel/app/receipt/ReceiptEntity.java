@@ -7,14 +7,16 @@ import pl.madzierski.daniel.app.file_group.FileGroupEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
 import pl.madzierski.daniel.app.wallet.WalletEntity;
 
+import java.lang.annotation.Inherited;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
 @Entity
-@Setter
+@Data
 @Table(name = "receipt")
 @Builder
 public class ReceiptEntity extends BaseEntity {
@@ -36,4 +38,5 @@ public class ReceiptEntity extends BaseEntity {
     public void addFileGroup(FileGroupEntity fileGroup) {
         this.fileGroupEntity.add(fileGroup);
     }
+
 }

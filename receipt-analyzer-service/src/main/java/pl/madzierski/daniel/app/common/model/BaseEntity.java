@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
@@ -16,8 +17,7 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 @EntityListeners({AuditingEntityListener.class})
-@Getter
-@Setter
+@Data
 public abstract class BaseEntity {
     @Id
     @UuidGenerator

@@ -1,4 +1,5 @@
 import {WalletService} from '../service/wallet-service';
+import {GetReceiptResponseItem} from './receipt.model';
 
 export interface GetWalletListResponse {
   items: GetWalletListResponseItem[];
@@ -16,4 +17,10 @@ export class AddWalletData {
 export interface AddWalletResponse {
   id: string;
   name: string;
+}
+
+export interface WalletDetails {
+  id: string;
+  name: string;
+  receipts: GetReceiptResponseItem[];
 }

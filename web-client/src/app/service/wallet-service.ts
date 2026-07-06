@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {AddWalletData, AddWalletResponse, GetWalletListResponse} from '../model/wallet.model';
+import {AddWalletData, AddWalletResponse, GetWalletListResponse, WalletDetails} from '../model/wallet.model';
 
 @Injectable({
   providedIn: 'root',
@@ -23,5 +23,12 @@ export class WalletService {
     return this.httpClient.post<AddWalletResponse>(
       '/api/wallets', data
     )
+  }
+
+  getWalletDetails(walletId: string) {
+    return this.httpClient.get<WalletDetails>(
+      `/api/wallets/${walletId}`
+    )
+
   }
 }

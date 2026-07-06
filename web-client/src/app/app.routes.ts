@@ -1,38 +1,38 @@
 import {Routes} from '@angular/router';
-import {ReceiptListComponent} from './receipt-list/receipt-list.component';
 import {ReceiptAddComponent} from './receipt-add/receipt-add.component';
 import {ReceiptDetailsComponent} from './receipt-details/receipt-details.component';
 import {WalletListComponent} from './wallet-list/wallet-list.component';
 import {WalletAddComponent} from './wallet-add/wallet-add.component';
+import {WalletDetailsComponent} from './wallet-details/wallet-details.component';
 
 export const routes: Routes = [
   {
-    path: 'receipt/details/:id',
+    path: 'receipts/details/:id',
     component: ReceiptDetailsComponent,
     pathMatch: 'prefix',
   },
   {
-    path: 'wallet/:walletId/receipt/list',
-    component: ReceiptListComponent,
+    path: 'wallets/:walletId',
+    component: WalletDetailsComponent,
     pathMatch: 'full',
   },
   {
-    path: 'wallet/:walletId/receipt/add',
+    path: 'wallets/:walletId/receipt/add',
     component: ReceiptAddComponent,
     pathMatch: 'full',
   },
   {
-    path: 'wallet/list',
+    path: 'wallets',
     component: WalletListComponent,
     pathMatch: 'full',
   },
   {
     path: '',
-    redirectTo: 'wallet/list',
+    redirectTo: 'wallets',
     pathMatch: 'full',
   },
   {
-    path: 'wallet/add',
+    path: 'wallets/new',
     component: WalletAddComponent,
     pathMatch: 'full',
   },

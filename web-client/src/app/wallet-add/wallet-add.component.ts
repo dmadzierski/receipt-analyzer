@@ -9,6 +9,7 @@ import {FileUploadComponent} from '../component/file-upload/file-upload.componen
 import {FormsModule} from '@angular/forms';
 import {WalletService} from '../service/wallet-service';
 import {AddWalletData} from '../model/wallet.model';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-wallet-add',
@@ -19,7 +20,6 @@ import {AddWalletData} from '../model/wallet.model';
     FormsModule,
     MatDatepickerModule,
     MatButtonModule,
-    FileUploadComponent,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './wallet-add.component.html',
@@ -27,7 +27,10 @@ import {AddWalletData} from '../model/wallet.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WalletAddComponent {
-  constructor(private readonly walletService: WalletService,) {
+  constructor(
+    private readonly walletService: WalletService,
+    private readonly router: Router,
+    ) {
   }
 
   data: AddWalletData = new AddWalletData('');
@@ -36,6 +39,7 @@ export class WalletAddComponent {
     console.log(this.data);
     this.walletService.addWallet(this.data).subscribe((res) => {
       console.log(res);
+      this.router.navigate(['/']);
     });
   }
 }

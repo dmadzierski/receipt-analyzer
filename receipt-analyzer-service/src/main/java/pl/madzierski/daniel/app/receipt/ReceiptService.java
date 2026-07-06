@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.app.receipt;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,9 +84,9 @@ public class ReceiptService {
         return receiptRepository.save(receipt);
     }
 
-    public GetReceiptListResponse getReceiptList() {
+    public GetReceiptListResponse getReceiptList(String walletId) {
         return new GetReceiptListResponse(
-                receiptRepository.getReceiptList(SecurityUtils.getCurrentUserSub()).stream().map(receiptEntity -> new GetReceiptListResponse.GetReceiptListItemResponse(
+                receiptRepository.getReceiptList(SecurityUtils.getCurrentUserSub(), walletId).stream().map(receiptEntity -> new GetReceiptListResponse.GetReceiptListItemResponse(
                         receiptEntity.getId(),
                         receiptEntity.getName(),
                         receiptEntity.getDescription(),

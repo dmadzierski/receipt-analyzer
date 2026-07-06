@@ -1,0 +1,12 @@
+<div class="content">
+  <div class="form-container left-panel">
+    <h1>Wallet data</h1>
+    <mat-form-field>
+      <mat-label>Wallet name</mat-label>
+      <input [readonly]="true" matInput maxlength="30" [(ngModel)]="wallet.name"/>
+    </mat-form-field>
+
+    <receipt-list [dataSource]="getReceipts()"></receipt-list>
+
+  </div>
+</div>

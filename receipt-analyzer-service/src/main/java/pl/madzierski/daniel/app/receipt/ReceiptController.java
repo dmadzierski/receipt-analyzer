@@ -26,9 +26,9 @@ public class ReceiptController {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.receiptService.addReceipt(file, body));
     }
 
-    @GetMapping(path = {"/list"})
-    public ResponseEntity<GetReceiptListResponse> getReceiptList() {
-        return ResponseEntity.ok(this.receiptService.getReceiptList());
+    @GetMapping
+    public ResponseEntity<GetReceiptListResponse> getReceiptList(@RequestParam @NotNull String walletId) {
+        return ResponseEntity.ok(this.receiptService.getReceiptList(walletId));
     }
 
     @GetMapping(path = {"/{receiptId}"})

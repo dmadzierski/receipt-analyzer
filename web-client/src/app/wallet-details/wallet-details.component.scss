@@ -1,0 +1,19 @@
+.content {
+  flex-direction: row;
+}
+
+.left-panel {
+  flex: 1;
+}
+
+.right-panel {
+  flex: 1;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: fit-content;
+}
+
+.icon{
+  margin-left: 10px;
+}

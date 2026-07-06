@@ -3,7 +3,7 @@ import {MatTableModule} from '@angular/material/table';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {Router, RouterModule} from '@angular/router';
-import {GetReceiptListResponseItem} from '../model/receipt.model';
+import {GetReceiptResponseItem} from '../model/receipt.model';
 import {GetWalletListResponse, GetWalletListResponseItem} from '../model/wallet.model';
 import {WalletService} from '../service/wallet-service';
 
@@ -35,7 +35,7 @@ export class WalletListComponent implements OnInit {
       });
   }
 
-  goToDetails(row: GetReceiptListResponseItem) {
-    this.router.navigate(['/receipt/details', row.id]);
+  toReceipts(row: GetReceiptResponseItem) {
+    this.router.navigate(['/wallets/', row.id]);
   }
 }

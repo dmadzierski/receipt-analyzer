@@ -1,8 +1,8 @@
 export interface GetReceiptListResponse {
-  items: GetReceiptListResponseItem[];
+  items: GetReceiptResponseItem[];
 }
 
-export interface GetReceiptListResponseItem {
+export interface GetReceiptResponseItem {
   id: string;
   name: string;
   description: string;

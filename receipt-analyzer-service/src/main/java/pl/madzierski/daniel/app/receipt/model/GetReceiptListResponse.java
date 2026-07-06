@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.app.receipt.model;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record GetReceiptListResponse(
@@ -9,7 +10,7 @@ public record GetReceiptListResponse(
             String id,
             String name,
             String description,
-            java.time.LocalDateTime createDate
+            LocalDateTime createDate
     ) {
     }
 }
