@@ -13,7 +13,7 @@ public interface WalletRepository extends JpaRepository<WalletEntity, String> {
 
     @Query(
             value = """
-                        SELECT w, r
+                        SELECT DISTINCT w
                         FROM WalletEntity w
                         LEFT JOIN FETCH w.receipts r
                         WHERE w.id = :walletId AND w.userSub = :userSub

@@ -14,6 +14,7 @@ export interface GetReceiptDetailsResponse {
 
 export class CreateReceiptData {
   constructor(
+    public walletId: string,
     public name: string,
     public description: string,
     public date: string,

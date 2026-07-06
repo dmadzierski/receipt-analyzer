@@ -7,9 +7,14 @@ import {WalletDetailsComponent} from './wallet-details/wallet-details.component'
 
 export const routes: Routes = [
   {
-    path: 'receipts/details/:id',
+    path: 'receipts/:id',
     component: ReceiptDetailsComponent,
     pathMatch: 'prefix',
+  },
+  {
+    path: 'wallets/new',
+    component: WalletAddComponent,
+    pathMatch: 'full',
   },
   {
     path: 'wallets/:walletId',
@@ -17,7 +22,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'wallets/:walletId/receipt/add',
+    path: 'wallets/:walletId/receipts/new',
     component: ReceiptAddComponent,
     pathMatch: 'full',
   },
@@ -30,10 +35,5 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'wallets',
     pathMatch: 'full',
-  },
-  {
-    path: 'wallets/new',
-    component: WalletAddComponent,
-    pathMatch: 'full',
-  },
+  }
 ];

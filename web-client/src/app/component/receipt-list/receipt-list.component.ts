@@ -16,6 +16,9 @@ export class ReceiptListComponent{
   displayedColumns: string[] = ['name', 'description', 'createDate'];
 
   @Input()
+  public walletId: string = '';
+
+  @Input()
   public dataSource: GetReceiptResponseItem[] = [];
 
   constructor(
@@ -24,7 +27,7 @@ export class ReceiptListComponent{
   }
 
   goToDetails(row: GetReceiptResponseItem) {
-    this.router.navigate(['/receipt/details', row.id]);
+    this.router.navigate(['/receipts/', row.id]);
   }
 
 }

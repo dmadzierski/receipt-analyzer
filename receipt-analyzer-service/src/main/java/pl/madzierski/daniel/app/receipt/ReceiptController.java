@@ -9,7 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pl.madzierski.daniel.app.receipt.model.*;
+import pl.madzierski.daniel.app.receipt.model.CreateReceiptRequest;
+import pl.madzierski.daniel.app.receipt.model.CreateReceiptResponse;
+import pl.madzierski.daniel.app.receipt.model.GetReceiptDetailsResponse;
+import pl.madzierski.daniel.app.receipt.model.GetReceiptRevisionsResponse;
 
 import java.util.List;
 
@@ -24,11 +27,6 @@ public class ReceiptController {
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<CreateReceiptResponse> addReceipt(@RequestPart(value = "file") MultipartFile file, @RequestPart(value = "body") @NotNull CreateReceiptRequest body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.receiptService.addReceipt(file, body));
-    }
-
-    @GetMapping
-    public ResponseEntity<GetReceiptListResponse> getReceiptList(@RequestParam @NotNull String walletId) {
-        return ResponseEntity.ok(this.receiptService.getReceiptList(walletId));
     }
 
     @GetMapping(path = {"/{receiptId}"})

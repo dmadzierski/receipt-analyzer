@@ -9,7 +9,7 @@ import {FileUploadComponent} from '../component/file-upload/file-upload.componen
 import {ReceiptService} from '../service/receipt.service';
 import {CreateReceiptData, ResolverStrategy} from '../model/receipt.model';
 import {FormsModule} from '@angular/forms';
-import {TitleCasePipe} from '@angular/common';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-receipt-add',
@@ -28,14 +28,24 @@ import {TitleCasePipe} from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReceiptAddComponent {
-  constructor(private readonly receiptService: ReceiptService) {
+
+  private walletId: string = '';
+
+  constructor(private readonly receiptService: ReceiptService,
+              private readonly activatedRoute: ActivatedRoute,
+  ) {
+    this.activatedRoute.params.subscribe(params => {
+      this.walletId = params['walletId'];
+    })
   }
 
+
   strategies = Object.keys(ResolverStrategy).filter(key => isNaN(Number(key)));
-  data: CreateReceiptData = new CreateReceiptData('', '', '', ResolverStrategy.BIEDRONKA, []);
+  data: CreateReceiptData = new CreateReceiptData('', '', '', '', ResolverStrategy.BIEDRONKA, []);
 
   create() {
     console.log(this.data);
+    this.data.walletId = this.walletId;
     this.receiptService.addReceipt(this.data).subscribe((res) => {
       console.log(res);
     });

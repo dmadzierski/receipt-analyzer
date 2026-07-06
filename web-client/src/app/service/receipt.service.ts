@@ -14,12 +14,6 @@ import {
 export class ReceiptService {
   private readonly httpClient = inject(HttpClient);
 
-  getReceiptList(): Observable<GetReceiptListResponse> {
-    return this.httpClient.get<GetReceiptListResponse>('/api/receipts/list', {
-      withCredentials: true,
-    });
-  }
-
   getReceiptDetails(id: string): Observable<GetReceiptDetailsResponse> {
     return this.httpClient.get<GetReceiptDetailsResponse>(
       '/api/receipts/' + id,
@@ -45,9 +39,10 @@ export class ReceiptService {
             description: data.description,
             date: data.date,
             strategy: data.strategy,
+            walletId: data.walletId,
           }),
         ],
-        'payapp_init_json.json',
+        'body.json',
         {type: 'application/json'}
       )
     );
