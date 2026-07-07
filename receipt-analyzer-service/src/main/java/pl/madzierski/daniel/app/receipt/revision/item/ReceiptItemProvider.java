@@ -24,4 +24,8 @@ public class ReceiptItemProvider {
     public ReceiptItemEntity save(ReceiptItemEntity item) {
         return receiptItemRepository.save(item);
     }
+
+    public List<ReceiptItemEntity> findAllMissingAliasesInRevision(String receiptId) {
+        return receiptItemRepository.findAllMissingAliasesInRevision(receiptId);
+    }
 }

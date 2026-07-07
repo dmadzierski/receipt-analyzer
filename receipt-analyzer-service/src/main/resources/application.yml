@@ -44,3 +44,7 @@ receipt-resolver-strategy:
 
 pdf-service:
   tmp-dir: /app/pdf-service-tmp
+
+product-dict:
+  max-allowed-damerau-levenshtein-distance: 4
+  .min-required-similarity: 0.8

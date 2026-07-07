@@ -1,10 +1,9 @@
 package pl.madzierski.daniel.app.receipt.revision.item;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
+import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
 
 import java.util.HashSet;
@@ -22,6 +21,10 @@ public class ReceiptItemEntity extends BaseEntity {
     private ReceiptRevisionEntity receiptRevision;
 
     private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_dict_id")
+    private ProductDictEntity nameDict;
 
     private Double amount;
 

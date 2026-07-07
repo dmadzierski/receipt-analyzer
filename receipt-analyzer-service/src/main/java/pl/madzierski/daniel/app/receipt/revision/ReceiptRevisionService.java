@@ -3,6 +3,8 @@ package pl.madzierski.daniel.app.receipt.revision;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
+import pl.madzierski.daniel.app.product_dict.ProductDictProvider;
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
 import pl.madzierski.daniel.app.receipt.ReceiptProvider;
 import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemEntity;
@@ -25,6 +27,7 @@ public class ReceiptRevisionService {
     private final ReceiptRevisionRepository revisionRepository;
     private final ReceiptProvider receiptProvider;
     private final ReceiptItemProvider receiptItemProvider;
+    private final ProductDictProvider productDictProvider;
 
     private static ReceiptRevisionEntity getReceiptRevisionEntity(AddRevisionRequest revisionRequest, ReceiptEntity receiptEntity) {
         return new ReceiptRevisionEntity("", "1.0", ReceiptResolverStrategyType.USER, revisionRequest.brand(), revisionRequest.totalPrice(), revisionRequest.payingDate(), revisionRequest.address(), false, false, receiptEntity, null);
@@ -43,8 +46,8 @@ public class ReceiptRevisionService {
                 if (item.originalItemId() != null) {
                     parentItem = receiptItemProvider.findById(item.originalItemId()).orElse(null);
                 }
-
-                return new ReceiptItemEntity(null, item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), parentItem, new HashSet<>());
+                ProductDictEntity productDictEntity = productDictProvider.findCanonicalName(item.name()).orElse(null);
+                return new ReceiptItemEntity(null, item.name(), productDictEntity, item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), parentItem, new HashSet<>());
             }).collect(Collectors.toSet());
 
             List<ReceiptItemEntity> savedItems = receiptItemProvider.saveAll(mappedItems);
@@ -60,8 +63,7 @@ public class ReceiptRevisionService {
 
         ReceiptRevisionEntity revisionCopy = new ReceiptRevisionEntity(revision.getName() + "(copy)", "", ReceiptResolverStrategyType.USER, revision.getBrand(), revision.getTotalPrice(), revision.getPayingDate(), revision.getAddress(), false, revision.getIsCorrect(), revision.getReceipt(), revision);
 
-        Set<ReceiptItemEntity> copiedItems = revision.getItems().stream().map(item ->
-                new ReceiptItemEntity(revisionCopy, item.getName(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>())
+        Set<ReceiptItemEntity> copiedItems = revision.getItems().stream().map(item -> new ReceiptItemEntity(revisionCopy, item.getName(), item.getNameDict(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>())
         ).collect(Collectors.toSet());
         revisionCopy.addItems(copiedItems);
 
@@ -107,7 +109,8 @@ public class ReceiptRevisionService {
                         if (incomingItem.position() != null) existingItem.setPosition(incomingItem.position());
                     }
                 } else {
-                    ReceiptItemEntity newItem = new ReceiptItemEntity(currentRevision, incomingItem.name(), incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null, new HashSet<>());
+                    ProductDictEntity productDictEntity = productDictProvider.findCanonicalName(incomingItem.name()).orElse(null);
+                    ReceiptItemEntity newItem = new ReceiptItemEntity(currentRevision, incomingItem.name(), productDictEntity, incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null, new HashSet<>());
                     currentRevision.addItem(receiptItemProvider.save(newItem));
                 }
             }
@@ -119,5 +122,20 @@ public class ReceiptRevisionService {
 
     private ReceiptRevisionEntity getRevisionById(String revisionId) {
         return revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+    }
+
+    public void updateDictByUserRevision(String revisionId) {
+        receiptItemProvider.findAllMissingAliasesInRevision(revisionId).forEach(receiptItemEntity -> {
+            String alias = receiptItemEntity.getParentItem().getName();
+            String userText = receiptItemEntity.getName();
+            productDictProvider.findCanonicalName(alias)
+                .ifPresentOrElse(
+                    productDictEntity -> {
+                        productDictEntity.addAlias(alias);
+                        receiptItemEntity.getParentItem().setNameDict(productDictEntity);
+                    },
+                    () -> productDictProvider.save(new ProductDictEntity(userText, Set.of(userText, alias)))
+                );
+        });
     }
 }

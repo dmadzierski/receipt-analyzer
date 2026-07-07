@@ -10,7 +10,7 @@ import pl.madzierski.daniel.app.receipt.revision.model.*;
 @RestController
 @RequestMapping("/revisions")
 @Validated
-public class RevisionController {
+class RevisionController {
 
     private final ReceiptRevisionService receiptRevisionService;
 
@@ -36,5 +36,10 @@ public class RevisionController {
     @PutMapping(path = "/{revisionId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UpdateRevisionResponse> updateRevision(@PathVariable String revisionId, @RequestBody UpdateRevisionRequest revision) {
         return ResponseEntity.ok(receiptRevisionService.updateRevision(revisionId, revision));
+    }
+
+    @PostMapping("/{revisionId}/aliases")
+    void updateAliasesByUserRevision(@RequestParam String revisionId) {
+        receiptRevisionService.updateDictByUserRevision(revisionId);
     }
 }

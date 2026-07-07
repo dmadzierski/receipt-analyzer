@@ -7,6 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 import pl.madzierski.daniel.app.file_group.FileGroupEntity;
 import pl.madzierski.daniel.app.file_group.FileGroupProvider;
 import pl.madzierski.daniel.app.file_group.file.FileEntity;
+import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
+import pl.madzierski.daniel.app.product_dict.ProductDictProvider;
 import pl.madzierski.daniel.app.receipt.model.*;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionRepository;
@@ -22,12 +24,13 @@ import pl.madzierski.daniel.security.SecurityUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class ReceiptService {
+class ReceiptService {
 
     private final ReceiptRepository receiptRepository;
     private final ReceiptRevisionRepository receiptRevisionRepository;
@@ -35,6 +38,7 @@ public class ReceiptService {
     private final ReceiptResolverLocatorService receiptResolverLocatorService;
     private final RevisionProvider revisionProvider;
     private final WalletProvider walletProvider;
+    private final ProductDictProvider productDictProvider;
 
     @Transactional
     public CreateReceiptResponse addReceipt(MultipartFile file, CreateReceiptRequest body) {
@@ -71,9 +75,12 @@ public class ReceiptService {
         }
         ReceiptRevisionEntity revisionEntity = new ReceiptRevisionEntity(body.name(), revisionData.revisionVersion(), body.strategy(), revisionData.brand(), totalPrice, LocalDateTime.now().toString(), null, false, false, null, null);
 
+
         if (revisionData.items() != null) {
-            Set<ReceiptItemEntity> items = revisionData.items().stream().map(it ->
-                    new ReceiptItemEntity(revisionEntity, it.name(), it.amount(), it.unitPrice(), it.discount(), it.totalPrice(), it.position(), null, null)).collect(Collectors.toSet());
+            Set<ReceiptItemEntity> items = revisionData.items().stream().map(it -> {
+                Optional<ProductDictEntity> canonicalName = productDictProvider.findCanonicalName(it.name());
+                return new ReceiptItemEntity(revisionEntity, it.name(), canonicalName.orElse(null), it.amount(), it.unitPrice(), it.discount(), it.totalPrice(), it.position(), null, null);
+            }).collect(Collectors.toSet());
             revisionEntity.addItems(items);
         }
         return revisionEntity;
