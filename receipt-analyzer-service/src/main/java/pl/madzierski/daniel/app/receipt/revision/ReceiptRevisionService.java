@@ -14,10 +14,7 @@ import pl.madzierski.daniel.app.receipt.scan_resolver.ReceiptResolverStrategyTyp
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -124,18 +121,20 @@ public class ReceiptRevisionService {
         return revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
     }
 
-    public void updateDictByUserRevision(String revisionId) {
-        receiptItemProvider.findAllMissingAliasesInRevision(revisionId).forEach(receiptItemEntity -> {
+    synchronized public void updateDictByUserRevision(String revisionId) {
+        List<ProductDictEntity> list = receiptItemProvider.findAllMissingAliasesInRevision(revisionId).stream().map(receiptItemEntity -> {
             String alias = receiptItemEntity.getParentItem().getName();
             String userText = receiptItemEntity.getName();
-            productDictProvider.findCanonicalName(alias)
-                .ifPresentOrElse(
-                    productDictEntity -> {
-                        productDictEntity.addAlias(alias);
-                        receiptItemEntity.getParentItem().setNameDict(productDictEntity);
-                    },
-                    () -> productDictProvider.save(new ProductDictEntity(userText, Set.of(userText, alias)))
-                );
-        });
+            Optional<ProductDictEntity> productDictEntityOptional = productDictProvider.findCanonicalName(alias);
+            if (productDictEntityOptional.isPresent()) {
+                ProductDictEntity productDictEntity = productDictEntityOptional.get();
+                productDictEntity.addAlias(alias);
+                receiptItemEntity.getParentItem().setNameDict(productDictEntity);
+                return productDictEntity;
+            } else {
+                return new ProductDictEntity(userText, Set.of(userText, alias));
+            }
+        }).toList();
+        productDictProvider.saveAll(list);
     }
 }

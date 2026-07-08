@@ -1,22 +1,18 @@
 package pl.madzierski.daniel.app.product_dict;
 
+import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ProductDictProvider {
 
-    @Value("${product-dict.max-allowed-distance:2}")
-    private int maxAllowedDamerauLevenshteinDistance;
-    @Value("${product-dict.min-required-similarity:0.8}")
+    @Value("${product-dict.min-required-similarity}")
     private Double minRequiredStringSimilarity;
     private final ProductDictRepository productDictRepository;
 
@@ -26,27 +22,36 @@ public class ProductDictProvider {
             return exactMatch;
         }
 
-        List<ProductDictEntity> allDictionaries = productDictRepository.findAll();
+        Set<ProductDictEntity> allDictionaries = productDictRepository.findAllCacheable();
         String normalizedSearchAlias = alias.trim().toUpperCase();
-        LevenshteinDistance levenshtein = new LevenshteinDistance(maxAllowedDamerauLevenshteinDistance);
-        return allDictionaries.parallelStream().flatMap(dict -> dict.getAliases().stream().map(knownAlias -> {
-            String normalizedKnownAlias = knownAlias.trim().toUpperCase();
-            double distance = levenshtein.apply(normalizedSearchAlias, normalizedKnownAlias);
-            if (distance == -1)
-                return Map.entry(dict, 0.0);
-            int maxLength = Math.max(normalizedSearchAlias.length(), normalizedKnownAlias.length());
-            if (maxLength == 0)
-                return Map.entry(dict, 1.0);
-            double similarityScore = (maxLength - distance) / maxLength;
-            return Map.entry(dict, similarityScore);
-        })).filter(entry -> entry.getValue() >= minRequiredStringSimilarity).max(Map.Entry.comparingByValue()).map(Map.Entry::getKey);
+        int searchLength = normalizedSearchAlias.length();
+        return allDictionaries.parallelStream()
+            .flatMap(dict -> dict.getAliases().stream()
+                .map(knownAlias -> {
+                    String normalizedKnownAlias = knownAlias.trim().toUpperCase();
+                    int knownLength = normalizedKnownAlias.length();
+                    int maxLength = Math.max(searchLength, knownLength);
+                    if (maxLength == 0)
+                        return Map.entry(dict, 1.0);
+                    int maxAllowedDifference = (int) Math.ceil(maxLength * (1.0 - minRequiredStringSimilarity));
+                    double distance = new LevenshteinDistance(maxAllowedDifference).apply(normalizedSearchAlias, normalizedKnownAlias);
+                    if (distance == -1) {
+                        return Map.entry(dict, 0.0);
+                    }
+                    double similarityScore = (maxLength - distance) / maxLength;
+                    return Map.entry(dict, similarityScore);
+                })
+            )
+            .filter(entry -> entry.getValue() >= minRequiredStringSimilarity)
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey);
     }
 
     public ProductDictEntity save(ProductDictEntity productDictEntity) {
         return productDictRepository.save(productDictEntity);
     }
 
-    public List<ProductDictEntity> saveAll(Set<ProductDictEntity> productDictEntities) {
+    public List<ProductDictEntity> saveAll(Collection<ProductDictEntity> productDictEntities) {
         return productDictRepository.saveAll(productDictEntities);
     }
 

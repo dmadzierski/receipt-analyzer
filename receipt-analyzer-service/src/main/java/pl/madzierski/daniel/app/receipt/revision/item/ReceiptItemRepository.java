@@ -2,9 +2,11 @@ package pl.madzierski.daniel.app.receipt.revision.item;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 interface ReceiptItemRepository extends JpaRepository<ReceiptItemEntity, String> {
 
 
@@ -14,8 +16,8 @@ interface ReceiptItemRepository extends JpaRepository<ReceiptItemEntity, String>
                 LEFT JOIN FETCH r.parentItem rp
                 LEFT JOIN FETCH rp.receiptRevision rrp
             WHERE 
-                rr.resolver = 'USER' AND 
-                rrp.resolver != 'USER' AND 
+                rr.resolver = ReceiptResolverStrategyType.USER AND 
+                rrp.resolver != ReceiptResolverStrategyType.USER AND 
                 rr.id = :revisionId AND
                 r.nameDict IS NULL AND
                 rp.nameDict IS NULL 

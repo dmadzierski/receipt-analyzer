@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-
 public interface ReceiptRevisionRepository extends JpaRepository<ReceiptRevisionEntity, String> {
     @Query("SELECT r FROM ReceiptRevisionEntity r LEFT JOIN FETCH r.items ri WHERE r.id = :id")
     ReceiptRevisionEntity findReceiptRevisionEntitiesById(String id);
