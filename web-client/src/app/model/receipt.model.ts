@@ -43,7 +43,7 @@ export interface GetReceiptDetailsResponse {
   id: string
   name: string
   description: string
-  preferredRevision: RevisionDetails
+  preferredRevision?: RevisionDetails
   revisions: Revision[]
   createDate: string
   updateDate: string,

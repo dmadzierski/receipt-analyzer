@@ -41,8 +41,9 @@
 
     </h2>
 
-    <app-revision-details [(revision)]="receiptDetails.preferredRevision"
-                          [contentEditable]="editMode" ></app-revision-details>
+
+    <app-revision-details [(revision)]="receiptDetails.preferredRevision!!"
+                          [contentEditable]="editMode"></app-revision-details>
 
 
   </div>

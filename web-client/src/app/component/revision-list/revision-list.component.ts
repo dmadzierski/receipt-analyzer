@@ -89,10 +89,8 @@ export class RevisionListComponent implements OnChanges {
   }
 
   changeSelected(revisionId: string) {
-    if (this.selectedId !== revisionId) {
-      this.selectedId = revisionId;
-      this.selectedRevisionChange.emit(this.selectedId);
-    }
+    this.selectedId = (this.selectedId === revisionId) ? undefined : revisionId;
+    this.selectedRevisionChange.emit(this.selectedId);
   }
 }
 
