@@ -122,23 +122,33 @@ public class ReceiptRevisionService {
         return revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
     }
 
+    @Transactional
     synchronized public void updateDictByUserRevision(String revisionId) {
-        List<ProductDictEntity> list = receiptItemProvider.findAllMissingAliasesInRevision(revisionId).stream().map(receiptItemEntity -> {
+        Set<ProductDictEntity> dictToSave = new HashSet<>();
+        receiptItemProvider.findAllMissingAliasesInRevision(revisionId).forEach(receiptItemEntity -> {
             String alias = receiptItemEntity.getParentItem().getName();
             String userText = receiptItemEntity.getName();
+            ProductDictEntity resolvedDict;
             Optional<ProductDictEntity> productDictEntityOptional = productDictProvider.findCanonicalName(alias);
             if (productDictEntityOptional.isPresent()) {
-                ProductDictEntity productDictEntity = productDictEntityOptional.get();
-                productDictEntity.addAlias(new ProductAliasEntity(alias));
-                receiptItemEntity.getParentItem().setNameDict(productDictEntity);
-                return productDictEntity;
+                resolvedDict = productDictEntityOptional.get();
+                if (resolvedDict.getAliases().stream().noneMatch(currAlias -> currAlias.getName().equals(alias)))
+                    resolvedDict.addAlias(new ProductAliasEntity(alias));
+                dictToSave.add(resolvedDict);
             } else {
-                ProductDictEntity productDict = ProductDictEntity.builder().name(userText).build();
-                productDict.addAlias(new ProductAliasEntity(userText));
-                productDict.addAlias(new ProductAliasEntity(alias));
-                return productDict;
+                Optional<ProductDictEntity> optionalProductDict = dictToSave.stream().filter(dict -> dict.getAliases().stream().anyMatch(currAlias -> currAlias.getName().equals(userText))).findAny();
+                if (optionalProductDict.isPresent()) {
+                    resolvedDict = optionalProductDict.get();
+                    resolvedDict.addAlias(new ProductAliasEntity(alias));
+                } else {
+                    resolvedDict = ProductDictEntity.builder().name(userText).build();
+                    resolvedDict.addAlias(new ProductAliasEntity(userText));
+                    if (!userText.equals(alias))
+                        resolvedDict.addAlias(new ProductAliasEntity(alias));
+                    dictToSave.add(resolvedDict);
+                }
             }
-        }).toList();
-        productDictProvider.saveAll(list);
+            receiptItemEntity.getParentItem().setNameDict(productDictProvider.save(resolvedDict));
+        });
     }
 }

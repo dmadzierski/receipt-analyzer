@@ -1,15 +1,11 @@
 package pl.madzierski.daniel.app.product_dict.product_alias;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Objects;
 
 
 @Entity
@@ -29,5 +25,21 @@ public class ProductAliasEntity extends BaseEntity {
 
     public ProductAliasEntity(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        ProductAliasEntity that = (ProductAliasEntity) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + Objects.hashCode(name);
+        return result;
     }
 }

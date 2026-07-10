@@ -4,15 +4,15 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.app.product_dict.model.GetProductDictListResponse;
-import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictRequest;
-import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictResponse;
-import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasEntity;
+import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictListRequest;
+import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictListResponse;
 import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasProvider;
+import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasEntity;
+import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemProvider;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -20,6 +20,7 @@ class ProductDictService {
 
     private final ProductDictRepository productDictRepository;
     private final ProductAliasProvider productAliasProvider;
+    private final ReceiptItemProvider receiptItemProvider;
 
     public GetProductDictListResponse getProductDictList() {
         Set<ProductDictEntity> allCacheable = productDictRepository.findAllCacheable();
@@ -31,21 +32,32 @@ class ProductDictService {
     }
 
     @Transactional
-    public UpdateProductDictResponse updateProductDict(UpdateProductDictRequest updateProductDictRequest) {
-        List<String> dictIds = updateProductDictRequest.productDictList();
-        String primaryDictId = dictIds.getFirst();
+    public UpdateProductDictListResponse updateProductDict(UpdateProductDictListRequest updateProductDictListRequest) {
+        return new UpdateProductDictListResponse(updateProductDictListRequest.items().stream().map(updateProductDict -> {
+            List<String> dictIds = updateProductDict.productDictList();
+            String primaryDictId = dictIds.getFirst();
 
-        ProductDictEntity primaryDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_DICT_NOT_FOUND));
-        primaryDict.setName(updateProductDictRequest.canonicalName());
+            ProductDictEntity primaryDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_DICT_NOT_FOUND));
+            primaryDict.setName(updateProductDict.canonicalName().trim());
 
-        if (dictIds.size() > 1) {
-            List<String> productDictIdsListToMerge = dictIds.subList(1, dictIds.size());
-            productAliasProvider.getAliasesByProductDictIdList(productDictIdsListToMerge).forEach(primaryDict::addAlias);
-            productDictRepository.flush();
-            productDictRepository.deleteAllByIdInBatch(productDictIdsListToMerge);
+            if (dictIds.size() > 1) {
+                List<String> productDictIdsListToMerge = dictIds.subList(1, dictIds.size());
+                Set<String> existingAliasNames = new HashSet<>();
+                primaryDict.getAliases().forEach(alias -> existingAliasNames.add(alias.getName()));
+                productAliasProvider.getAliasesByProductDictIdList(productDictIdsListToMerge).forEach(alias -> addAliasIfMissing(primaryDict, existingAliasNames, alias));
+                receiptItemProvider.reassignProductDict(primaryDict, productDictIdsListToMerge);
+                productDictRepository.flush();
+                productDictRepository.deleteAllByIdInBatch(productDictIdsListToMerge);
+            }
+
+            List<UpdateProductDictListResponse.UpdateProductDict.Alias> responseAliases = primaryDict.getAliases().stream().map(alias -> new UpdateProductDictListResponse.UpdateProductDict.Alias(alias.getId(), alias.getName())).toList();
+            return new UpdateProductDictListResponse.UpdateProductDict(primaryDict.getId(), primaryDict.getName(), responseAliases);
+        }).toList());
+    }
+
+    private void addAliasIfMissing(ProductDictEntity primaryDict, Set<String> existingAliasNames, ProductAliasEntity alias) {
+        if (existingAliasNames.add(alias.getName())) {
+            primaryDict.addAlias(alias);
         }
-
-        List<UpdateProductDictResponse.Alias> responseAliases = primaryDict.getAliases().stream().map(alias -> new UpdateProductDictResponse.Alias(alias.getId(), alias.getName())).toList();
-        return new UpdateProductDictResponse(primaryDict.getId(), primaryDict.getName(), responseAliases);
     }
 }

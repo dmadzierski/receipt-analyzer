@@ -99,7 +99,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       WEB_CLIENT_HOST: ${WEB_CLIENT_HOST}
       LOGGING_LEVEL_ROOT: ERROR
-      JPA_DDL_AUTO: create
+      JPA_DDL_AUTO: update
       KEYCLOAK_JWK_SET_URI: http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs
       KEYCLOAK_ISSUER_URI: http://localhost/auth/realms/activiti
       MYSQL_DB_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/receipt-analyzer-service?useSSL=false&serverTimezone=UTC

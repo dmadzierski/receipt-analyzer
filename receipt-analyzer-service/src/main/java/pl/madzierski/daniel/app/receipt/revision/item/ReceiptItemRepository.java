@@ -1,8 +1,10 @@
 package pl.madzierski.daniel.app.receipt.revision.item;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 
 import java.util.List;
 
@@ -24,4 +26,12 @@ interface ReceiptItemRepository extends JpaRepository<ReceiptItemEntity, String>
             """
     )
     List<ReceiptItemEntity> findAllMissingAliasesInRevision(String revisionId);
+
+    @Modifying
+    @Query("""
+            UPDATE ReceiptItemEntity r
+            SET r.nameDict = :primaryDict
+            WHERE r.nameDict.id IN (:productDictIdList)
+            """)
+    int reassignProductDict(ProductDictEntity primaryDict, List<String> productDictIdList);
 }

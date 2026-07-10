@@ -45,7 +45,7 @@ public record GetReceiptDetailsResponse(
         Set<ItemResponse> mappedItems = null;
         if (revisionEntity.getItems() != null) {
             mappedItems = revisionEntity.getItems().stream()
-                    .map(GetReceiptDetailsResponse::itemMapper)
+                    .map(receiptItemEntity -> itemMapper(receiptItemEntity, revisionEntity.getResolver()))
                     .collect(Collectors.toSet());
         }
 
@@ -63,10 +63,14 @@ public record GetReceiptDetailsResponse(
         );
     }
 
-    public static ItemResponse itemMapper(ReceiptItemEntity receiptItemEntity) {
+    public static ItemResponse itemMapper(ReceiptItemEntity receiptItemEntity, ReceiptResolverStrategyType strategy) {
+        String name = receiptItemEntity.getName();
+        if (strategy != ReceiptResolverStrategyType.USER && receiptItemEntity.getNameDict() != null) {
+            name =  receiptItemEntity.getNameDict().getName();
+        }
         return new ItemResponse(
                 receiptItemEntity.getId(),
-                receiptItemEntity.getName(),
+                name,
                 receiptItemEntity.getAmount(),
                 receiptItemEntity.getUnitPrice(),
                 receiptItemEntity.getDiscount(),

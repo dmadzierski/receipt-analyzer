@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pl.madzierski.daniel.app.product_dict.model.GetProductDictListResponse;
-import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictRequest;
-import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictResponse;
+import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictListRequest;
+import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictListResponse;
 
 @AllArgsConstructor
 @RestController
@@ -23,7 +23,7 @@ class ProductDictController {
     }
 
     @PostMapping
-    ResponseEntity<UpdateProductDictResponse> updateProductDict(@RequestBody UpdateProductDictRequest updateProductDictRequest){
-        return ResponseEntity.ok(productDictService.updateProductDict(updateProductDictRequest));
+    ResponseEntity<UpdateProductDictListResponse> updateProductDict(@RequestBody UpdateProductDictListRequest updateProductDictListRequest){
+        return ResponseEntity.ok(productDictService.updateProductDict(updateProductDictListRequest));
     }
 }

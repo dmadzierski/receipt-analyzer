@@ -30,12 +30,6 @@ export enum ResolverStrategy{
   BIEDRONKA_JSON
 }
 
-export interface CreateReceiptBody {
-  name: string;
-  description: string;
-  date: string;
-}
-
 export interface CreateReceiptResponse {
 }
 

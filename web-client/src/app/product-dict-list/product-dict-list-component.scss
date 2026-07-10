@@ -1,0 +1,124 @@
+.toolbar {
+  width: 80%;
+  margin: 16px 10% 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.hint {
+  width: 80%;
+  margin: 0 10% 8px;
+  color: #6b7280;
+}
+
+.dict-list {
+  width: 80%;
+  margin: 0 10% 24px;
+  display: grid;
+  gap: 6px;
+}
+
+.dict-row {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: var(--mat-sys-surface);
+  transition: box-shadow 140ms ease, transform 140ms ease;
+}
+
+.dict-row-active {
+  box-shadow: 0 0 0 2px #1976d2 inset;
+  transform: translateY(-1px);
+}
+
+.dict-row-inner {
+  min-height: 42px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.drag-handle {
+  color: #6b7280;
+  cursor: grab;
+}
+
+.canonical-input {
+  width: 240px;
+  max-width: 35%;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0 0 2px 0;
+}
+
+.canonical-input-editable {
+  border-bottom-color: rgba(0, 0, 0, 0.7);
+}
+
+.canonical-input:focus {
+  outline: none;
+}
+
+.aliases {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.alias-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #111827;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+}
+
+.aliases-empty {
+  color: #6b7280;
+  font-size: 0.875rem;
+  padding-top: 2px;
+}
+
+.badge {
+  flex: 0 0 auto;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f0fe;
+  color: #174ea6;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 8px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.25;
+}
+
+.cdk-drag-animating {
+  transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
+}

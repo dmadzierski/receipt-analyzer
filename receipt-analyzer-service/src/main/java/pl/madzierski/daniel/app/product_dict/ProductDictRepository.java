@@ -13,10 +13,15 @@ import java.util.Set;
 @Repository
 interface ProductDictRepository extends JpaRepository<ProductDictEntity, String> {
 
-    @Query("SELECT d FROM ProductDictEntity d WHERE :alias MEMBER OF d.aliases")
+    @Query("""
+            SELECT d FROM ProductDictEntity d 
+            LEFT JOIN FETCH d.aliases a 
+            WHERE EXISTS (
+                 SELECT 1 FROM ProductAliasEntity a
+                 WHERE a.productDict = d AND a.name = :alias
+            )
+            """)
     Optional<ProductDictEntity> findByAlias(String alias);
-
-    Optional<ProductDictEntity> findProductDictEntityByName(String name);
 
     @Cacheable("allDictionaries")
     @Query("SELECT d FROM ProductDictEntity d LEFT JOIN FETCH d.aliases")

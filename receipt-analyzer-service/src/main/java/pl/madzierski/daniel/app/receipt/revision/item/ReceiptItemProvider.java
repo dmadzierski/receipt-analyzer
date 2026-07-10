@@ -2,6 +2,8 @@ package pl.madzierski.daniel.app.receipt.revision.item;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,5 +29,10 @@ public class ReceiptItemProvider {
 
     public List<ReceiptItemEntity> findAllMissingAliasesInRevision(String revisionId) {
         return receiptItemRepository.findAllMissingAliasesInRevision(revisionId);
+    }
+
+    @Transactional
+    public int reassignProductDict(ProductDictEntity primaryDict, List<String> productDictIdList) {
+        return receiptItemRepository.reassignProductDict(primaryDict, productDictIdList);
     }
 }

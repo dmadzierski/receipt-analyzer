@@ -1,59 +1,195 @@
+import {CommonModule, NgClass} from '@angular/common';
 import {Component} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, DragDropModule} from '@angular/cdk/drag-drop';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow,
-  MatRowDef,
-  MatTable
-} from '@angular/material/table';
-import {Router} from '@angular/router';
-import {GetReceiptResponseItem} from '../model/receipt.model';
-import {GetProductDictListResponse, ProductDict} from '../model/receipt-dict.mode';
+  Alias,
+  GetProductDictListResponse,
+  ProductDict,
+  UpdateProductDictListRequest,
+  UpdateProductDictListRequestItem,
+  UpdateProductDictListResponseItem
+} from '../model/receipt-dict.mode';
 import {ProductDictService} from '../service/product-dict.service';
+
+interface EditableProductDictGroup {
+  primaryId: string;
+  canonicalName: string;
+  aliases: Alias[];
+  mergedDicts: ProductDict[];
+}
 
 @Component({
   selector: 'app-product-dict-list',
   imports: [
-    MatCell,
-    MatCellDef,
-    MatColumnDef,
-    MatHeaderCell,
-    MatHeaderRow,
-    MatHeaderRowDef,
-    MatRow,
-    MatRowDef,
-    MatTable
+    CommonModule,
+    CdkDrag,
+    CdkDragHandle,
+    CdkDropList,
+    DragDropModule,
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    NgClass
   ],
   templateUrl: './product-dict-list-component.html',
   styleUrl: './product-dict-list-component.scss',
 })
 export class ProductDictListComponent {
-  dataSource: ProductDict[] = [];
-  displayedColumns: string[] = ['name', 'aliases'];
+  dataSource: EditableProductDictGroup[] = [];
+  contentEditable = false;
+  activeDragId: string | null = null;
+  activeTargetId: string | null = null;
 
-  constructor(
-    private readonly productDictService: ProductDictService,
-    private readonly router: Router
-  ) {
+  constructor(private readonly productDictService: ProductDictService) {
   }
 
   ngOnInit(): void {
-    this.getWalletList();
+    this.refreshProductDictList();
   }
 
-  private getWalletList() {
+  private refreshProductDictList() {
     this.productDictService
       .getProductDictList()
       .subscribe((result: GetProductDictListResponse) => {
-        this.dataSource = result.items;
+        this.dataSource = result.items.map((item) => this.toGroup(item));
       });
   }
 
-  toReceipts(row: GetReceiptResponseItem) {
-    this.router.navigate(['/wallets/', row.id]);
+  protected saveProductDict() {
+    const request: UpdateProductDictListRequest = {
+      items: this.dataSource.map((group) => this.toRequestItem(group))
+    };
+
+    this.productDictService.updateProductDictList(request).subscribe((result) => {
+      this.dataSource = result.items.map((item) => this.toGroupFromResponse(item));
+      this.contentEditable = false;
+      this.clearDragState();
+    });
+  }
+
+  protected declineEdit() {
+    this.refreshProductDictList();
+    this.contentEditable = false;
+    this.clearDragState();
+  }
+
+  protected doEdit() {
+    this.contentEditable = true;
+  }
+
+  protected onDragStarted(group: EditableProductDictGroup) {
+    if (!this.contentEditable) {
+      return;
+    }
+
+    this.activeDragId = group.primaryId;
+    this.activeTargetId = group.primaryId;
+  }
+
+  protected onDragEnded() {
+    this.clearDragState();
+  }
+
+  protected drop(event: CdkDragDrop<EditableProductDictGroup>, targetGroup: EditableProductDictGroup) {
+    if (!this.contentEditable) {
+      return;
+    }
+
+    const sourceGroup = event.item.data as EditableProductDictGroup;
+
+    if (sourceGroup.primaryId === targetGroup.primaryId) {
+      return;
+    }
+
+    const sourceIndex = this.dataSource.findIndex((group) => group.primaryId === sourceGroup.primaryId);
+    const targetIndex = this.dataSource.findIndex((group) => group.primaryId === targetGroup.primaryId);
+
+    if (sourceIndex < 0 || targetIndex < 0) {
+      return;
+    }
+
+    const source = this.dataSource[sourceIndex];
+    const target = this.dataSource[targetIndex];
+
+    target.aliases = this.mergeAliases(target.aliases, this.collectAliases(source));
+    target.mergedDicts = [...target.mergedDicts, this.toProductDict(source), ...source.mergedDicts];
+    this.dataSource.splice(sourceIndex, 1);
+  }
+
+  protected onDropListEntered(group: EditableProductDictGroup) {
+    if (this.contentEditable && this.activeDragId && this.activeDragId !== group.primaryId) {
+      this.activeTargetId = group.primaryId;
+    }
+  }
+
+  protected onDropListExited(group: EditableProductDictGroup) {
+    if (this.activeTargetId === group.primaryId) {
+      this.activeTargetId = null;
+    }
+  }
+
+  protected canMerge = (drag: CdkDrag<EditableProductDictGroup>, drop: CdkDropList<EditableProductDictGroup>) => {
+    if (!this.contentEditable) {
+      return false;
+    }
+
+    return drag.data.primaryId !== drop.data.primaryId;
+  };
+
+  private toGroup(item: ProductDict): EditableProductDictGroup {
+    return {
+      primaryId: item.id,
+      canonicalName: item.name,
+      aliases: item.aliases.map((alias) => ({...alias})),
+      mergedDicts: []
+    };
+  }
+
+  private toGroupFromResponse(item: UpdateProductDictListResponseItem): EditableProductDictGroup {
+    return {
+      primaryId: item.id,
+      canonicalName: item.name,
+      aliases: item.aliases.map((alias) => ({...alias})),
+      mergedDicts: []
+    };
+  }
+
+  private toProductDict(group: EditableProductDictGroup): ProductDict {
+    return {
+      id: group.primaryId,
+      name: group.canonicalName,
+      aliases: group.aliases.map((alias) => ({...alias}))
+    };
+  }
+
+  private toRequestItem(group: EditableProductDictGroup): UpdateProductDictListRequestItem {
+    return {
+      canonicalName: group.canonicalName,
+      productDictList: [group.primaryId, ...group.mergedDicts.map((dict) => dict.id)]
+    };
+  }
+
+  private collectAliases(group: EditableProductDictGroup): Alias[] {
+    return [...group.aliases, ...group.mergedDicts.flatMap((dict) => dict.aliases)];
+  }
+
+  private mergeAliases(existing: Alias[], incoming: Alias[]): Alias[] {
+    const aliases = new Map<string, Alias>();
+
+    [...existing, ...incoming].forEach((alias) => {
+      if (!aliases.has(alias.alias)) {
+        aliases.set(alias.alias, {...alias});
+      }
+    });
+
+    return [...aliases.values()];
+  }
+
+  private clearDragState() {
+    this.activeDragId = null;
+    this.activeTargetId = null;
   }
 }

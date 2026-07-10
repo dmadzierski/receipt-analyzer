@@ -1,14 +1,69 @@
-<table mat-table [dataSource]="dataSource">
-  <ng-container matColumnDef="position">
-    <th mat-header-cell *matHeaderCellDef> No.</th>
-    <td mat-cell *matCellDef="let element"> {{ element.position }}</td>
-  </ng-container>
+<h2 class="toolbar">
+  <span>Product dictionary</span>
+  <span class="toolbar-actions">
+    @if (contentEditable) {
+      <button mat-icon-button type="button" (click)="saveProductDict()" title="Save">
+        <mat-icon>save</mat-icon>
+      </button>
+      <button mat-icon-button type="button" (click)="declineEdit()" title="Cancel changes">
+        <mat-icon>cancel</mat-icon>
+      </button>
+    } @else {
+      <button mat-icon-button type="button" (click)="doEdit()" title="Edit">
+        <mat-icon>edit</mat-icon>
+      </button>
+    }
+  </span>
+</h2>
 
-  <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef> Name</th>
-    <td mat-cell *matCellDef="let element"> {{ element.name }}</td>
-  </ng-container>
+@if (contentEditable) {
+  <p class="hint">Drag one item onto another to merge them.</p>
+}
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row (click)="toReceipts(row)" *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
+<div class="dict-list" cdkDropListGroup>
+  @for (group of dataSource; track group.primaryId) {
+    <section
+      class="dict-row"
+      cdkDropList
+      [cdkDropListData]="group"
+      [cdkDropListSortingDisabled]="true"
+      [cdkDropListEnterPredicate]="canMerge"
+      (cdkDropListEntered)="onDropListEntered(group)"
+      (cdkDropListExited)="onDropListExited(group)"
+      (cdkDropListDropped)="drop($event, group)"
+      [ngClass]="{'dict-row-active': activeTargetId === group.primaryId && contentEditable}">
+      <div
+        class="dict-row-inner"
+        cdkDrag
+        [cdkDragData]="group"
+        [cdkDragDisabled]="!contentEditable"
+        (cdkDragStarted)="onDragStarted(group)"
+        (cdkDragEnded)="onDragEnded()">
+        @if (contentEditable) {
+          <mat-icon class="drag-handle" cdkDragHandle>
+            drag_indicator
+          </mat-icon>
+        }
+
+        <input
+          class="canonical-input"
+          type="text"
+          [(ngModel)]="group.canonicalName"
+          [ngClass]="{'canonical-input-editable': contentEditable}"
+          [readonly]="!contentEditable"
+          [title]="group.canonicalName"/>
+
+        <div class="aliases">
+          @if (group.aliases.length) {
+            @for (alias of group.aliases; track alias.id) {
+              <span class="alias-pill">{{ alias.alias }}</span>
+            }
+          } @else {
+            <span class="aliases-empty">No aliases</span>
+          }
+        </div>
+        <span class="badge">{{ group.mergedDicts.length + 1 }}</span>
+      </div>
+    </section>
+  }
+</div>

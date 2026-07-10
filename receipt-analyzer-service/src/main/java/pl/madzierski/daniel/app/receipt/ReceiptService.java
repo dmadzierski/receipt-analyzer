@@ -111,7 +111,7 @@ class ReceiptService {
                 .orElse(null);
         ReceiptRevisionEntity fullRevisionEntity = null;
         if (preferredRevisionId != null)
-            fullRevisionEntity = receiptRevisionRepository.findReceiptRevisionEntitiesById(preferredRevisionId);
+            fullRevisionEntity = receiptRevisionRepository.findReceiptRevisionEntitiesById(preferredRevisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_REVISION_NOT_FOUND));
         String fileId = fileGroupProvider.getOriginalPdf(receiptEntity.getId());
         return GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, fullRevisionEntity, fileId);
     }
