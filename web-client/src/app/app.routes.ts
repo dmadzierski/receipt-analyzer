@@ -4,6 +4,7 @@ import {ReceiptDetailsComponent} from './receipt-details/receipt-details.compone
 import {WalletListComponent} from './wallet-list/wallet-list.component';
 import {WalletAddComponent} from './wallet-add/wallet-add.component';
 import {WalletDetailsComponent} from './wallet-details/wallet-details.component';
+import {ProductDictListComponent} from './product-dict-list/product-dict-list-component';
 
 export const routes: Routes = [
   {
@@ -34,6 +35,11 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: 'wallets',
+    pathMatch: 'full',
+  },
+  {
+    path: 'product-dicts',
+    component: ProductDictListComponent,
     pathMatch: 'full',
   }
 ];

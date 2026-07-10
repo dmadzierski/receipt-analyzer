@@ -28,7 +28,7 @@ public class ProductDictProvider {
         return allDictionaries.parallelStream()
             .flatMap(dict -> dict.getAliases().stream()
                 .map(knownAlias -> {
-                    String normalizedKnownAlias = knownAlias.trim().toUpperCase();
+                    String normalizedKnownAlias = knownAlias.getName().trim().toUpperCase();
                     int knownLength = normalizedKnownAlias.length();
                     int maxLength = Math.max(searchLength, knownLength);
                     if (maxLength == 0)

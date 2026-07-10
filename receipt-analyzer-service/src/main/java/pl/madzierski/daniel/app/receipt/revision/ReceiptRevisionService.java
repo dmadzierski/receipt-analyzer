@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 import pl.madzierski.daniel.app.product_dict.ProductDictProvider;
+import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasEntity;
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
 import pl.madzierski.daniel.app.receipt.ReceiptProvider;
 import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemEntity;
@@ -128,11 +129,14 @@ public class ReceiptRevisionService {
             Optional<ProductDictEntity> productDictEntityOptional = productDictProvider.findCanonicalName(alias);
             if (productDictEntityOptional.isPresent()) {
                 ProductDictEntity productDictEntity = productDictEntityOptional.get();
-                productDictEntity.addAlias(alias);
+                productDictEntity.addAlias(new ProductAliasEntity(alias));
                 receiptItemEntity.getParentItem().setNameDict(productDictEntity);
                 return productDictEntity;
             } else {
-                return new ProductDictEntity(userText, Set.of(userText, alias));
+                ProductDictEntity productDict = ProductDictEntity.builder().name(userText).build();
+                productDict.addAlias(new ProductAliasEntity(userText));
+                productDict.addAlias(new ProductAliasEntity(alias));
+                return productDict;
             }
         }).toList();
         productDictProvider.saveAll(list);

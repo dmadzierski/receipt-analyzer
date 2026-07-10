@@ -15,6 +15,7 @@ import {RevisionListComponent} from '../component/revision-list/revision-list.co
 import {MatIcon} from '@angular/material/icon';
 import {RevisionService} from '../service/revision.service';
 import {Observable} from 'rxjs';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-receipt-details',
@@ -28,7 +29,8 @@ import {Observable} from 'rxjs';
     RevisionDetailsComponent,
     PdfViewerComponent,
     RevisionListComponent,
-    MatIcon
+    MatIcon,
+    MatTooltip
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-details.component.html',
@@ -72,8 +74,9 @@ export class ReceiptDetailsComponent implements OnInit {
     return this.revisionService.getRevisionDetails(revisionId);
   }
 
+  // TODO dodać usuwanie ostatniej preferowanej rewizji przy ustawieniu nowej
   protected saveRevision() {
-    this.revisionService.updateRevision(this.receiptDetails.preferredRevision).subscribe(
+    this.revisionService.updateRevision(this.receiptDetails.preferredRevision!!).subscribe(
       {
         next: (revision: RevisionDetails) => {
           this.receiptDetails.preferredRevision = revision;
@@ -85,18 +88,23 @@ export class ReceiptDetailsComponent implements OnInit {
   }
 
   protected declineEdit() {
-    this.refreshRevisionDetails(this.receiptDetails.preferredRevision.id)
+    this.refreshRevisionDetails(this.receiptDetails.preferredRevision?.id!!)
     this.editMode = false
   }
 
   private refreshRevisionDetails(revisionId: string) {
-    this.getRevisionDate(revisionId).subscribe(
-      {
-        next: (revision) => {
-          this.receiptDetails.preferredRevision = revision
+    if (revisionId) {
+      this.getRevisionDate(revisionId).subscribe(
+        {
+          next: (revision) => {
+            this.receiptDetails.preferredRevision = revision
+          }
         }
-      }
-    )
+      )
+    } else {
+      // @ts-ignore
+      this.receiptDetails.preferredRevision = null;
+    }
   }
 
   protected refreshRevision(id: any) {
@@ -106,5 +114,10 @@ export class ReceiptDetailsComponent implements OnInit {
           this.receiptDetails.revisions = revisions;
         }
       })
+  }
+
+  protected refreshAliases() {
+    this.revisionService.updateAliases(this.receiptDetails.preferredRevision?.id!!)
+      .subscribe({})
   }
 }

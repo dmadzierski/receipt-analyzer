@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.file_group.file.FileEntity;
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
@@ -16,6 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 public class FileGroupEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)

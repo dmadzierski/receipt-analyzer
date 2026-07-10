@@ -38,8 +38,8 @@ class RevisionController {
         return ResponseEntity.ok(receiptRevisionService.updateRevision(revisionId, revision));
     }
 
-    @PostMapping("/{revisionId}/aliases")
-    void updateAliasesByUserRevision(@RequestParam String revisionId) {
+    @PostMapping(path = "/{revisionId}/aliases")
+    void updateAliasesByUserRevision(@PathVariable String revisionId) {
         receiptRevisionService.updateDictByUserRevision(revisionId);
     }
 }

@@ -1,13 +1,13 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import Keycloak, {KeycloakProfile} from 'keycloak-js';
-import {RouterOutlet} from '@angular/router';
+import {RouterOutlet, RouterModule} from '@angular/router';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
-  imports: [RouterOutlet]
+  imports: [RouterOutlet, RouterModule]
 })
 export class App implements OnInit {
   profile: KeycloakProfile | undefined;
@@ -17,6 +17,4 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.keycloak.loadUserProfile().then((profile) => (this.profile = profile));
   }
-
-  private readonly http = inject(HttpClient);
 }

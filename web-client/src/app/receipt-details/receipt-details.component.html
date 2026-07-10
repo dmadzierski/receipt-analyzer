@@ -31,15 +31,18 @@
                        (selectedRevisionChange)="handleSelectedRevisionChange($event)"></app-revision-list>
 
 
-    <h2>Revision details
-      @if (this.editMode) {
-        <mat-icon class="icon" (click)="saveRevision()" fontIcon="save"></mat-icon>
-        <mat-icon class="icon" (click)="declineEdit()" fontIcon="cancel"></mat-icon>
-      } @else {
-        <mat-icon class="icon" (click)="doEdit()" fontIcon="edit"></mat-icon>
+      @if (this.receiptDetails.preferredRevision) {
+        <h2>Revision details
+        @if (this.editMode) {
+          <mat-icon class="icon" (click)="saveRevision()" fontIcon="save"></mat-icon>
+          <mat-icon class="icon" (click)="declineEdit()" fontIcon="cancel"></mat-icon>
+        } @else {
+          <mat-icon class="icon" (click)="doEdit()" fontIcon="edit"></mat-icon>
+<!--          TODO dodać strategy type i ukrywać przycisk dla != USER-->
+          <mat-icon class="icon" (click)="refreshAliases()" fontIcon="refresh" matTooltip="Zaktualizacuj słowniki"></mat-icon>
+        }
+        </h2>
       }
-
-    </h2>
 
 
     <app-revision-details [(revision)]="receiptDetails.preferredRevision!!"

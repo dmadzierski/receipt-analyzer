@@ -22,4 +22,8 @@ export class RevisionService {
   updateRevision(revision: RevisionDetails) {
     return this.httpClient.put<RevisionDetails>(`/api/revisions/${revision.id}`, revision)
   }
+
+  updateAliases(id: string) {
+    return this.httpClient.post<null>(`/api/revisions/${id}/aliases`, {})
+  }
 }
