@@ -18,8 +18,8 @@ import java.util.Objects;
 
 @MappedSuperclass
 @EntityListeners({AuditingEntityListener.class})
-@Data
-
+@Setter
+@Getter
 public abstract class BaseEntity {
     @Id
     @UuidGenerator

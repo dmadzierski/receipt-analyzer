@@ -7,8 +7,6 @@ import pl.madzierski.daniel.app.file_group.FileGroupEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
 import pl.madzierski.daniel.app.wallet.WalletEntity;
 
-import java.lang.annotation.Inherited;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,7 +14,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "receipt")
 @Builder
 public class ReceiptEntity extends BaseEntity {

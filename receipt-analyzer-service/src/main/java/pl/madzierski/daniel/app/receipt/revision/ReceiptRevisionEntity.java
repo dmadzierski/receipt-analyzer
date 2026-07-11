@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "receipt_revision")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReceiptRevisionEntity extends BaseEntity {

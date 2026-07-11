@@ -1,7 +1,10 @@
 package pl.madzierski.daniel.app.receipt.revision.item;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
@@ -12,7 +15,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "receipt_item")
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReceiptItemEntity extends BaseEntity {
@@ -22,7 +26,7 @@ public class ReceiptItemEntity extends BaseEntity {
 
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "product_dict_id")
     private ProductDictEntity nameDict;
 
@@ -40,7 +44,7 @@ public class ReceiptItemEntity extends BaseEntity {
     @JoinColumn(name = "parent_item_id")
     private ReceiptItemEntity parentItem;
 
-    @OneToMany(mappedBy = "parentItem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parentItem")
     private Set<ReceiptItemEntity> childItems = new HashSet<>();
 
     @Override
