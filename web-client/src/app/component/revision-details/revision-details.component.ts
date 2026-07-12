@@ -1,10 +1,10 @@
 import {
   ChangeDetectorRef,
-  Component, EventEmitter,
+  Component,
   Input,
   model,
   ModelSignal,
-  OnChanges, Output,
+  OnChanges,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
@@ -114,6 +114,38 @@ export class RevisionDetailsComponent implements OnChanges {
     });
     this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
     this.revision().items = this.data.data
+  }
+
+  protected onKeyDown($event: KeyboardEvent) {
+    if ($event.key !== 'ArrowUp' && $event.key !== 'ArrowDown') {
+      return;
+    }
+
+    const inputElement = $event.target as HTMLInputElement;
+    const currentTd = inputElement.closest('td');
+    const currentRow = inputElement.closest('tr');
+
+    if (!currentTd || !currentRow) {
+      return;
+    }
+
+    $event.preventDefault();
+
+    const cellIndex = Array.from(currentRow.children).indexOf(currentTd);
+
+    const targetRow = $event.key === 'ArrowUp'
+      ? currentRow.previousElementSibling
+      : currentRow.nextElementSibling;
+
+    if (targetRow) {
+      const targetCell = targetRow.children[cellIndex];
+      const targetInput = targetCell?.querySelector('input');
+
+      if (targetInput) {
+        targetInput.focus();
+        targetInput.select();
+      }
+    }
   }
 }
 

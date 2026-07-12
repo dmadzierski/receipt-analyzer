@@ -72,7 +72,7 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Name</th>
         <td mat-cell *matCellDef="let element">
           <input class="table-input" [(ngModel)]="element.name" [readonly]="!contentEditable"
-                 [ngClass]="{'is-editing': contentEditable}"/>
+                 [ngClass]="{'is-editing': contentEditable}" (keydown)="onKeyDown($event)">
         </td>
       </ng-container>
 
@@ -80,7 +80,7 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Amount</th>
         <td mat-cell *matCellDef="let element">
           <input type="number" class="table-input" [(ngModel)]="element.amount" [readonly]="!contentEditable"
-                 [ngClass]="{'is-editing': contentEditable}"/>
+                 [ngClass]="{'is-editing': contentEditable}" (keydown)="onKeyDown($event)"/>
         </td>
       </ng-container>
 
@@ -88,7 +88,7 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Unit Price</th>
         <td mat-cell *matCellDef="let element">
           <input type="number" class="table-input" [(ngModel)]="element.unitPrice" [readonly]="!contentEditable"
-                 [ngClass]="{'is-editing': contentEditable}"/>
+                 [ngClass]="{'is-editing': contentEditable}" (keydown)="onKeyDown($event)"/>
         </td>
       </ng-container>
 
@@ -96,7 +96,7 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Price</th>
         <td mat-cell *matCellDef="let element">
           <input type="number" class="table-input" [(ngModel)]="element.totalPrice" [readonly]="!contentEditable"
-                 [ngClass]="{'is-editing': contentEditable}"/>
+                 [ngClass]="{'is-editing': contentEditable}" (keydown)="onKeyDown($event)"/>
         </td>
       </ng-container>
 
