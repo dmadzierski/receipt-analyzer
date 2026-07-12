@@ -140,12 +140,13 @@ public class ReceiptRevisionService {
                 if (optionalProductDict.isPresent()) {
                     resolvedDict = optionalProductDict.get();
                     resolvedDict.addAlias(new ProductAliasEntity(alias));
+                    receiptItemToProductDictNameMap.get(resolvedDict).add(receiptItemEntity.getParentItem());
                 } else {
                     resolvedDict = ProductDictEntity.builder().name(userText).build();
                     resolvedDict.addAlias(new ProductAliasEntity(userText));
                     if (!userText.equals(alias))
                         resolvedDict.addAlias(new ProductAliasEntity(alias));
-                    receiptItemToProductDictNameMap.computeIfAbsent(resolvedDict, k -> new HashSet<>()).add(receiptItemEntity.getParentItem());
+                    receiptItemToProductDictNameMap.put(resolvedDict, new HashSet<>(Set.of(receiptItemEntity.getParentItem())));
                 }
             }
         });
