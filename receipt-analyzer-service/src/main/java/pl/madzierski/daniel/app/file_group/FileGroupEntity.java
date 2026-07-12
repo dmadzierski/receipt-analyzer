@@ -29,7 +29,7 @@ public class FileGroupEntity extends BaseEntity {
 
     private Boolean isOriginal;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<FileEntity> files = new HashSet<>();
 
 }

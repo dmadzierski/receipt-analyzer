@@ -17,12 +17,11 @@ public class ProductDictProvider {
     private final ProductDictRepository productDictRepository;
 
     public Optional<ProductDictEntity> findCanonicalName(String alias) {
-        Optional<ProductDictEntity> exactMatch = productDictRepository.findByAlias(alias);
-        if (exactMatch.isPresent()) {
-            return exactMatch;
-        }
-
         Set<ProductDictEntity> allDictionaries = productDictRepository.findAllCacheable();
+        Optional<ProductDictEntity> productDictOptional = allDictionaries.stream().filter(productDict -> productDict.getAliases().stream().anyMatch(knownAlias -> knownAlias.getName().equalsIgnoreCase(alias))).findFirst();
+        if (productDictOptional.isPresent())
+            return productDictOptional;
+
         String normalizedSearchAlias = alias.trim().toUpperCase();
         int searchLength = normalizedSearchAlias.length();
         return allDictionaries.parallelStream()

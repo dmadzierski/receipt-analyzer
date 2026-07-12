@@ -124,7 +124,7 @@ public class ReceiptRevisionService {
 
     @Transactional
     synchronized public void updateDictByUserRevision(String revisionId) {
-        Set<ProductDictEntity> dictToSave = new HashSet<>();
+        Map<ProductDictEntity, Collection<ReceiptItemEntity>> receiptItemToProductDictNameMap = new HashMap<>();
         receiptItemProvider.findAllMissingAliasesInRevision(revisionId).forEach(receiptItemEntity -> {
             String alias = receiptItemEntity.getParentItem().getName();
             String userText = receiptItemEntity.getName();
@@ -134,9 +134,9 @@ public class ReceiptRevisionService {
                 resolvedDict = productDictEntityOptional.get();
                 if (resolvedDict.getAliases().stream().noneMatch(currAlias -> currAlias.getName().equals(alias)))
                     resolvedDict.addAlias(new ProductAliasEntity(alias));
-                dictToSave.add(resolvedDict);
+                receiptItemToProductDictNameMap.computeIfAbsent(resolvedDict, k -> new HashSet<>()).add(receiptItemEntity.getParentItem());
             } else {
-                Optional<ProductDictEntity> optionalProductDict = dictToSave.stream().filter(dict -> dict.getAliases().stream().anyMatch(currAlias -> currAlias.getName().equals(userText))).findAny();
+                Optional<ProductDictEntity> optionalProductDict = receiptItemToProductDictNameMap.keySet().stream().filter(dict -> dict.getAliases().stream().anyMatch(currAlias -> currAlias.getName().equals(userText))).findAny();
                 if (optionalProductDict.isPresent()) {
                     resolvedDict = optionalProductDict.get();
                     resolvedDict.addAlias(new ProductAliasEntity(alias));
@@ -145,10 +145,14 @@ public class ReceiptRevisionService {
                     resolvedDict.addAlias(new ProductAliasEntity(userText));
                     if (!userText.equals(alias))
                         resolvedDict.addAlias(new ProductAliasEntity(alias));
-                    dictToSave.add(resolvedDict);
+                    receiptItemToProductDictNameMap.computeIfAbsent(resolvedDict, k -> new HashSet<>()).add(receiptItemEntity.getParentItem());
                 }
             }
-            receiptItemEntity.getParentItem().setNameDict(productDictProvider.save(resolvedDict));
         });
+        productDictProvider.saveAll(receiptItemToProductDictNameMap.keySet());
+        Set<ReceiptItemEntity> itemsToSave = receiptItemToProductDictNameMap.entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream().peek(item -> item.setNameDict(entry.getKey())))
+                .collect(Collectors.toSet());
+        receiptItemProvider.saveAll(itemsToSave);
     }
 }

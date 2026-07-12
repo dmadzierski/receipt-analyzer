@@ -24,6 +24,7 @@ import pl.madzierski.daniel.security.SecurityUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -103,17 +104,8 @@ class ReceiptService {
 
     @Transactional(readOnly = true)
     public GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
-        ReceiptEntity receiptEntity = receiptRepository.findReceiptEntityById(receiptId);
-        String preferredRevisionId = receiptEntity.getReceiptRevisions().stream()
-                .filter(it -> Boolean.TRUE.equals(it.getIsPreferredRevision()))
-                .map(ReceiptRevisionEntity::getId)
-                .findFirst()
-                .orElse(null);
-        ReceiptRevisionEntity fullRevisionEntity = null;
-        if (preferredRevisionId != null)
-            fullRevisionEntity = receiptRevisionRepository.findReceiptRevisionEntitiesById(preferredRevisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_REVISION_NOT_FOUND));
-        String fileId = fileGroupProvider.getOriginalPdf(receiptEntity.getId());
-        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, fullRevisionEntity, fileId);
+        ReceiptEntity receiptEntity = receiptRepository.findReceiptEntityWithItemAndProductDictById(receiptId);
+        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, receiptEntity.getReceiptRevisions().stream().filter(ReceiptRevisionEntity::getIsPreferredRevision).findFirst().orElse(null), Objects.requireNonNull(Objects.requireNonNull(receiptEntity.getFileGroupEntity().stream().findFirst().orElse(null)).getFiles().stream().findFirst().orElse(null)).getId());
     }
 
     public List<GetReceiptRevisionsResponse> getReceiptRevisions(String receiptId) {

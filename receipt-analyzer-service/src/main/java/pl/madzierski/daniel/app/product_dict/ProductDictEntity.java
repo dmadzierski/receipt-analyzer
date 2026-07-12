@@ -21,7 +21,7 @@ public class ProductDictEntity extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<ProductAliasEntity> aliases = new HashSet<>();
 
     public void addAlias(ProductAliasEntity productAlias) {
