@@ -2,6 +2,7 @@ package pl.madzierski.daniel.app.file_group;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,15 +24,15 @@ public class FileGroupProvider {
 
     @Transactional
     public FileGroupEntity saveReceiptFile(ReceiptEntity receipt, MultipartFile file) {
-        FileGroupEntity fileGroupEntity = new FileGroupEntity(FileType.PDF, receipt, true, new HashSet<>());
+        FileType fileType = FileType.invoke(file.getContentType());
+        FileGroupEntity fileGroupEntity = new FileGroupEntity(fileType, receipt, true, new HashSet<>());
         fileGroupEntity = fileGroupRepository.save(fileGroupEntity);
 
         FileEntity fileEntity = new FileEntity(fileGroupEntity, null, null, 0);
         fileGroupEntity.getFiles().add(fileEntity);
         fileEntity = fileProvider.save(fileEntity);
 
-        String fileExtension = getExtension(file.getContentType());
-        String pathInString = createPath(SecurityUtils.getCurrentUserSub(), fileEntity, fileGroupEntity, fileExtension, receipt);
+        String pathInString = createPath(SecurityUtils.getCurrentUserSub(), fileEntity, fileGroupEntity, fileType.getExtension(), receipt);
 
         fileProvider.saveFile(pathInString, file);
         fileEntity.setPath(pathInString);
@@ -40,12 +41,6 @@ public class FileGroupProvider {
         return fileGroupRepository.save(fileGroupEntity);
     }
 
-    private String getExtension(String contentType) {
-        if (MediaType.APPLICATION_PDF_VALUE.equals(contentType)) {
-            return "pdf";
-        }
-        throw new AppRuntimeException(AppRuntimeExceptionMessages.UNHANDLED_MEDIA_TYPE);
-    }
 
     public String createPath(
             String currentUserSub,

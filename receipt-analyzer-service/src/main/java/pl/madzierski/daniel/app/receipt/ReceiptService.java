@@ -91,17 +91,6 @@ class ReceiptService {
         return receiptRepository.save(receipt);
     }
 
-    public GetReceiptListResponse getReceiptList(String walletId) {
-        return new GetReceiptListResponse(
-                receiptRepository.getReceiptList(SecurityUtils.getCurrentUserSub(), walletId).stream().map(receiptEntity -> new GetReceiptListResponse.GetReceiptListItemResponse(
-                        receiptEntity.getId(),
-                        receiptEntity.getName(),
-                        receiptEntity.getDescription(),
-                        receiptEntity.getCreatedDate()
-                )).toList()
-        );
-    }
-
     @Transactional(readOnly = true)
     public GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
         ReceiptEntity receiptEntity = receiptRepository.findReceiptEntityWithItemAndProductDictById(receiptId);

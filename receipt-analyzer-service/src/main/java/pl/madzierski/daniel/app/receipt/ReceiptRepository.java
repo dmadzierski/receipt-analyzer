@@ -21,7 +21,7 @@ public interface ReceiptRepository extends JpaRepository<ReceiptEntity, String> 
         LEFT JOIN FETCH ri.nameDict pd
         LEFT JOIN FETCH r.fileGroupEntity fe
         LEFT JOIN FETCH fe.files f
-        WHERE r.id = :id AND fe.isOriginal = true AND fe.fileType = 'PDF'
+        WHERE r.id = :id AND fe.isOriginal = true
 """)
     ReceiptEntity findReceiptEntityWithItemAndProductDictById(String id);
 
