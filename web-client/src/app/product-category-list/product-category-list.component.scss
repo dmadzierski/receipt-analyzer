@@ -1,0 +1,60 @@
+.toolbar {
+  width: 80%;
+  margin: 16px 10% 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.add-form {
+  width: 80%;
+  margin: 0 10% 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.category-field {
+  flex: 1;
+  min-width: 240px;
+}
+
+table {
+  width: 80%;
+  margin: 0 10% 10px;
+  table-layout: fixed;
+}
+
+.table-input {
+  width: 100%;
+  border-style: none;
+  background-color: var(--mat-sys-surface);
+  font-size: var(--mat-sys-body-medium);
+  text-align: inherit;
+  border-bottom-style: double;
+  border-bottom-color: white;
+}
+
+.table-input:focus,
+.table-input:active {
+  outline: none;
+  background-color: var(--mat-sys-surface);
+  font-size: var(--mat-sys-body-medium);
+}
+
+.table-input-editable {
+  border-bottom-color: black;
+}
+
+.mat-column-name {
+  width: auto;
+}
+
+
+.action-button-warn {
+  border-color: #8b8b8b;
+}
+
+.mat-mdc-table{
+  min-width: auto;
+}

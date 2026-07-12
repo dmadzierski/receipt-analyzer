@@ -53,6 +53,17 @@
           [readonly]="!contentEditable"
           [title]="group.canonicalName"/>
 
+        @if (contentEditable) {
+          <select class="category-select" [(ngModel)]="group.draftCategoryId" [ngModelOptions]="{standalone: true}">
+            <option [ngValue]="null">No category</option>
+            @for (category of productCategories; track category.id) {
+              <option [ngValue]="category.id">{{ category.name }}</option>
+            }
+          </select>
+        } @else {
+          <span class="category-label">{{ getCategoryName(group.draftCategoryId) }}</span>
+        }
+
         <div class="aliases">
           @if (group.aliases.length) {
             @for (alias of group.aliases; track alias.id) {
@@ -62,7 +73,6 @@
             <span class="aliases-empty">No aliases</span>
           }
         </div>
-        <span class="badge">{{ group.mergedDicts.length + 1 }}</span>
       </div>
     </section>
   }

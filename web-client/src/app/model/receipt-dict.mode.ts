@@ -5,6 +5,7 @@ export interface GetProductDictListResponse {
 export interface ProductDict {
   id: string;
   name: string;
+  productCategoryId: string | null;
   aliases: Alias[];
 }
 
@@ -19,6 +20,7 @@ export interface UpdateProductDictListRequest {
 
 export interface UpdateProductDictListRequestItem {
   canonicalName: string;
+  productCategoryId: string | null;
   productDictList: string[];
 }
 
@@ -29,5 +31,6 @@ export interface UpdateProductDictListResponse {
 export interface UpdateProductDictListResponseItem {
   id: string;
   name: string;
+  productCategoryId: string | null;
   aliases: Alias[];
 }

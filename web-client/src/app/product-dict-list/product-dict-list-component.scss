@@ -95,6 +95,21 @@
   padding-top: 2px;
 }
 
+.category-select {
+  min-width: 180px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  background: white;
+}
+
+.category-label {
+  min-width: 180px;
+  padding-top: 2px;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
 .badge {
   flex: 0 0 auto;
   min-width: 28px;

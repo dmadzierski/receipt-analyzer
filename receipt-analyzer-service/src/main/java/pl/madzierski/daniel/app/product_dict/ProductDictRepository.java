@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-interface ProductDictRepository extends JpaRepository<ProductDictEntity, String> {
+public interface ProductDictRepository extends JpaRepository<ProductDictEntity, String> {
 
     @Query("""
             SELECT d FROM ProductDictEntity d 
@@ -34,4 +34,6 @@ interface ProductDictRepository extends JpaRepository<ProductDictEntity, String>
     @Override
     @CacheEvict(value = "allDictionaries", allEntries = true)
     <S extends ProductDictEntity> List<S> saveAll(Iterable<S> entities);
+
+    long countByProductCategory_Id(String productCategoryId);
 }

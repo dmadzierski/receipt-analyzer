@@ -8,6 +8,8 @@ import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictListRequest;
 import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictListResponse;
 import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasProvider;
 import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasEntity;
+import pl.madzierski.daniel.app.product_dict.product_category.ProductCategoryEntity;
+import pl.madzierski.daniel.app.product_dict.product_category.ProductCategoryProvider;
 import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemProvider;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
@@ -21,12 +23,14 @@ class ProductDictService {
     private final ProductDictRepository productDictRepository;
     private final ProductAliasProvider productAliasProvider;
     private final ReceiptItemProvider receiptItemProvider;
+    private final ProductCategoryProvider productCategoryProvider;
 
     public GetProductDictListResponse getProductDictList() {
         Set<ProductDictEntity> allCacheable = productDictRepository.findAllCacheable();
         return new GetProductDictListResponse(allCacheable.stream().map(productDict -> new GetProductDictListResponse.ProductDict(
                 productDict.getId(),
                 productDict.getName(),
+                productDict.getProductCategory() == null ? null : productDict.getProductCategory().getId(),
                 productDict.getAliases().stream().map(alias -> new GetProductDictListResponse.ProductDict.Alias(alias.getId(), alias.getName())).toList()
         )).toList());
     }
@@ -39,6 +43,7 @@ class ProductDictService {
 
             ProductDictEntity primaryDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_DICT_NOT_FOUND));
             primaryDict.setName(updateProductDict.canonicalName().trim());
+            primaryDict.setProductCategory(resolveProductCategory(updateProductDict.productCategoryId()));
 
             if (dictIds.size() > 1) {
                 List<String> productDictIdsListToMerge = dictIds.subList(1, dictIds.size());
@@ -51,8 +56,17 @@ class ProductDictService {
             }
 
             List<UpdateProductDictListResponse.UpdateProductDict.Alias> responseAliases = primaryDict.getAliases().stream().map(alias -> new UpdateProductDictListResponse.UpdateProductDict.Alias(alias.getId(), alias.getName())).toList();
-            return new UpdateProductDictListResponse.UpdateProductDict(primaryDict.getId(), primaryDict.getName(), responseAliases);
+            return new UpdateProductDictListResponse.UpdateProductDict(primaryDict.getId(), primaryDict.getName(), primaryDict.getProductCategory() == null ? null : primaryDict.getProductCategory().getId(), responseAliases);
         }).toList());
+    }
+
+    private ProductCategoryEntity resolveProductCategory(String productCategoryId) {
+        if (productCategoryId == null || productCategoryId.isBlank()) {
+            return null;
+        }
+
+        return productCategoryProvider.findProductCategoryById(productCategoryId)
+                .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
     }
 
     private void addAliasIfMissing(ProductDictEntity primaryDict, Set<String> existingAliasNames, ProductAliasEntity alias) {

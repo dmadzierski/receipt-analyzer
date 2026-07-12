@@ -5,5 +5,5 @@ import java.util.List;
 
 public record UpdateProductDictListRequest(Collection<UpdateProductDict> items) {
 
-    public record UpdateProductDict(String canonicalName, List<String> productDictList) {}
+    public record UpdateProductDict(String canonicalName, String productCategoryId, List<String> productDictList) {}
 }

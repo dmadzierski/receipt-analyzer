@@ -8,6 +8,7 @@ public record GetProductDictListResponse(
     public record ProductDict(
             String id,
             String name,
+            String productCategoryId,
             List<Alias> aliases
     ) {
         public record Alias(String id, String alias) {

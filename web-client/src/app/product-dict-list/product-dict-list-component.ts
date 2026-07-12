@@ -4,6 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, DragDropModule} from '@angular/cdk/drag-drop';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
+import {forkJoin} from 'rxjs';
 import {
   Alias,
   GetProductDictListResponse,
@@ -13,10 +14,13 @@ import {
   UpdateProductDictListResponseItem
 } from '../model/receipt-dict.mode';
 import {ProductDictService} from '../service/product-dict.service';
+import {ProductCategory} from '../model/product-category.model';
+import {ProductCategoryService} from '../service/product-category.service';
 
 interface EditableProductDictGroup {
   primaryId: string;
   canonicalName: string;
+  draftCategoryId: string | null;
   aliases: Alias[];
   mergedDicts: ProductDict[];
 }
@@ -39,15 +43,29 @@ interface EditableProductDictGroup {
 })
 export class ProductDictListComponent {
   dataSource: EditableProductDictGroup[] = [];
+  productCategories: ProductCategory[] = [];
   contentEditable = false;
   activeDragId: string | null = null;
   activeTargetId: string | null = null;
 
-  constructor(private readonly productDictService: ProductDictService) {
+  constructor(
+    private readonly productDictService: ProductDictService,
+    private readonly productCategoryService: ProductCategoryService
+  ) {
   }
 
   ngOnInit(): void {
-    this.refreshProductDictList();
+    this.refreshView();
+  }
+
+  private refreshView() {
+    forkJoin({
+      productDicts: this.productDictService.getProductDictList(),
+      productCategories: this.productCategoryService.getProductCategoryList()
+    }).subscribe(({productDicts, productCategories}) => {
+      this.productCategories = productCategories.items;
+      this.dataSource = productDicts.items.map((item) => this.toGroup(item));
+    });
   }
 
   private refreshProductDictList() {
@@ -143,6 +161,7 @@ export class ProductDictListComponent {
     return {
       primaryId: item.id,
       canonicalName: item.name,
+      draftCategoryId: item.productCategoryId,
       aliases: item.aliases.map((alias) => ({...alias})),
       mergedDicts: []
     };
@@ -152,6 +171,7 @@ export class ProductDictListComponent {
     return {
       primaryId: item.id,
       canonicalName: item.name,
+      draftCategoryId: item.productCategoryId,
       aliases: item.aliases.map((alias) => ({...alias})),
       mergedDicts: []
     };
@@ -161,6 +181,7 @@ export class ProductDictListComponent {
     return {
       id: group.primaryId,
       name: group.canonicalName,
+      productCategoryId: group.draftCategoryId,
       aliases: group.aliases.map((alias) => ({...alias}))
     };
   }
@@ -168,6 +189,7 @@ export class ProductDictListComponent {
   private toRequestItem(group: EditableProductDictGroup): UpdateProductDictListRequestItem {
     return {
       canonicalName: group.canonicalName,
+      productCategoryId: group.draftCategoryId,
       productDictList: [group.primaryId, ...group.mergedDicts.map((dict) => dict.id)]
     };
   }
@@ -191,5 +213,13 @@ export class ProductDictListComponent {
   private clearDragState() {
     this.activeDragId = null;
     this.activeTargetId = null;
+  }
+
+  protected getCategoryName(categoryId: string | null): string {
+    if (!categoryId) {
+      return 'No category';
+    }
+
+    return this.productCategories.find((category) => category.id === categoryId)?.name || 'No category';
   }
 }
