@@ -11,13 +11,7 @@ public class RevisionProvider {
 
     private final ReceiptRevisionRepository revisionRepository;
 
-
-    public ReceiptRevisionRepository getRevisionRepository() {
-        return this.revisionRepository;
-    }
-
-
     public List<ReceiptRevisionEntity> getReceiptRevisions(String receiptId) {
-        return this.getRevisionRepository().findReceiptRevisionEntityByReceiptId(receiptId);
+        return revisionRepository.findReceiptRevisionEntityByReceiptId(receiptId);
     }
 }

@@ -10,11 +10,11 @@ import java.io.File;
 
 @Service
 @AllArgsConstructor
-public class FileService {
+class FileService {
 
     private final FileRepository fileRepository;
 
-    public FileSystemResource getFileReceipt(String receiptFileId) {
+    FileSystemResource getFileReceipt(String receiptFileId) {
         FileEntity fileEntity = fileRepository.findById(receiptFileId)
                 .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_RECEIPT_NOT_FOUND));
         String path = fileEntity.getPath();

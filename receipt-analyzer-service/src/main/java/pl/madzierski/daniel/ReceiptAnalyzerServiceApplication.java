@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 @SpringBootApplication
 @EnableCaching
-public class ReceiptAnalyzerServiceApplication {
+class ReceiptAnalyzerServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ReceiptAnalyzerServiceApplication.class, args);

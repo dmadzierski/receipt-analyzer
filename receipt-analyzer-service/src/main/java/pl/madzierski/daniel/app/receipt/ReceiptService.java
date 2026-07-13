@@ -11,7 +11,6 @@ import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 import pl.madzierski.daniel.app.product_dict.ProductDictProvider;
 import pl.madzierski.daniel.app.receipt.model.*;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
-import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionRepository;
 import pl.madzierski.daniel.app.receipt.revision.RevisionProvider;
 import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemEntity;
 import pl.madzierski.daniel.app.receipt.revision.model.ReceiptRevisionResolveData;
@@ -20,7 +19,6 @@ import pl.madzierski.daniel.app.wallet.WalletEntity;
 import pl.madzierski.daniel.app.wallet.WalletProvider;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
-import pl.madzierski.daniel.security.SecurityUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,7 +32,6 @@ import java.util.stream.Collectors;
 class ReceiptService {
 
     private final ReceiptRepository receiptRepository;
-    private final ReceiptRevisionRepository receiptRevisionRepository;
     private final FileGroupProvider fileGroupProvider;
     private final ReceiptResolverLocatorService receiptResolverLocatorService;
     private final RevisionProvider revisionProvider;
@@ -42,7 +39,7 @@ class ReceiptService {
     private final ProductDictProvider productDictProvider;
 
     @Transactional
-    public CreateReceiptResponse addReceipt(MultipartFile file, CreateReceiptRequest body) {
+    CreateReceiptResponse addReceipt(MultipartFile file, CreateReceiptRequest body) {
         ReceiptEntity receipt = createReceiptEntity(body);
         FileGroupEntity fileGroup = this.fileGroupProvider.saveReceiptFile(receipt, file);
         List<String> paths = fileGroup.getFiles().stream().map(FileEntity::getPath).toList();
@@ -92,12 +89,12 @@ class ReceiptService {
     }
 
     @Transactional(readOnly = true)
-    public GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
+    GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
         ReceiptEntity receiptEntity = receiptRepository.findReceiptEntityWithItemAndProductDictById(receiptId);
         return GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, receiptEntity.getReceiptRevisions().stream().filter(ReceiptRevisionEntity::getIsPreferredRevision).findFirst().orElse(null), Objects.requireNonNull(Objects.requireNonNull(receiptEntity.getFileGroupEntity().stream().findFirst().orElse(null)).getFiles().stream().findFirst().orElse(null)).getId());
     }
 
-    public List<GetReceiptRevisionsResponse> getReceiptRevisions(String receiptId) {
+    List<GetReceiptRevisionsResponse> getReceiptRevisions(String receiptId) {
         return revisionProvider.getReceiptRevisions(receiptId).stream()
                 .map(GetReceiptRevisionsResponse::receiptRevisionMapper)
                 .collect(Collectors.toList());

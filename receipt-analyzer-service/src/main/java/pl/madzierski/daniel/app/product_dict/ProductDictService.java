@@ -25,7 +25,7 @@ class ProductDictService {
     private final ReceiptItemProvider receiptItemProvider;
     private final ProductCategoryProvider productCategoryProvider;
 
-    public GetProductDictListResponse getProductDictList() {
+    GetProductDictListResponse getProductDictList() {
         Set<ProductDictEntity> allCacheable = productDictRepository.findAllCacheable();
         return new GetProductDictListResponse(allCacheable.stream().map(productDict -> new GetProductDictListResponse.ProductDict(
                 productDict.getId(),
@@ -36,7 +36,7 @@ class ProductDictService {
     }
 
     @Transactional
-    public UpdateProductDictListResponse updateProductDict(UpdateProductDictListRequest updateProductDictListRequest) {
+    UpdateProductDictListResponse updateProductDict(UpdateProductDictListRequest updateProductDictListRequest) {
         return new UpdateProductDictListResponse(updateProductDictListRequest.items().stream().map(updateProductDict -> {
             List<String> dictIds = updateProductDict.productDictList();
             String primaryDictId = dictIds.getFirst();

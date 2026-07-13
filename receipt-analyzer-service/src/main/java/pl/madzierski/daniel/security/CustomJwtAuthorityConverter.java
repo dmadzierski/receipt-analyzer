@@ -10,8 +10,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CustomJwtAuthorityConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
-
+class CustomJwtAuthorityConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
     @SuppressWarnings("unchecked")
     public Collection<GrantedAuthority> convert(Jwt jwt) {

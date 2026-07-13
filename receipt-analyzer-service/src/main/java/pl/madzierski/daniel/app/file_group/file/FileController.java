@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/receipt-files")
 @AllArgsConstructor
-public class FileController {
+class FileController {
 
     private final FileService fileService;
 
     @GetMapping(path = "/{receiptFileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> getFileReceipt(@PathVariable String receiptFileId) {
+    ResponseEntity<Resource> getFileReceipt(@PathVariable String receiptFileId) {
         Resource fileReceipt = fileService.getFileReceipt(receiptFileId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileReceipt.getFilename() + "\"")

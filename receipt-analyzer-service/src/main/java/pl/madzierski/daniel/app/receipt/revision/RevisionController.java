@@ -14,27 +14,27 @@ class RevisionController {
 
     private final ReceiptRevisionService receiptRevisionService;
 
-    public RevisionController(ReceiptRevisionService receiptRevisionService) {
+    RevisionController(ReceiptRevisionService receiptRevisionService) {
         this.receiptRevisionService = receiptRevisionService;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AddRevisionResponse> addRevision(@Validated @RequestBody AddRevisionRequest revisionRequest) {
+    ResponseEntity<AddRevisionResponse> addRevision(@Validated @RequestBody AddRevisionRequest revisionRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.addRevision(revisionRequest));
     }
 
     @PostMapping(path = "/{revisionId}/copy", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RevisionCopyResponse> createCopy(@PathVariable String revisionId) {
+    ResponseEntity<RevisionCopyResponse> createCopy(@PathVariable String revisionId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(receiptRevisionService.createRevisionCopy(revisionId));
     }
 
     @GetMapping(path = "/{revisionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetRevisionResponse> getRevision(@PathVariable String revisionId) {
+    ResponseEntity<GetRevisionResponse> getRevision(@PathVariable String revisionId) {
         return ResponseEntity.ok(receiptRevisionService.getRevision(revisionId));
     }
 
     @PutMapping(path = "/{revisionId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UpdateRevisionResponse> updateRevision(@PathVariable String revisionId, @RequestBody UpdateRevisionRequest revision) {
+    ResponseEntity<UpdateRevisionResponse> updateRevision(@PathVariable String revisionId, @RequestBody UpdateRevisionRequest revision) {
         return ResponseEntity.ok(receiptRevisionService.updateRevision(revisionId, revision));
     }
 

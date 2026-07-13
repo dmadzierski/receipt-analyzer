@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ReceiptRevisionRepository extends JpaRepository<ReceiptRevisionEntity, String> {
+interface ReceiptRevisionRepository extends JpaRepository<ReceiptRevisionEntity, String> {
     @Query("SELECT r FROM ReceiptRevisionEntity r LEFT JOIN FETCH r.items ri LEFT JOIN FETCH ri.nameDict nd WHERE r.id = :id")
     Optional<ReceiptRevisionEntity> findReceiptRevisionEntitiesById(String id);
 

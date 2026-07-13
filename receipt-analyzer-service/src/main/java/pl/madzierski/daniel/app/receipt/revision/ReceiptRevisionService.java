@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class ReceiptRevisionService {
+class ReceiptRevisionService {
 
     private final ReceiptRevisionRepository revisionRepository;
     private final ReceiptProvider receiptProvider;
@@ -31,7 +31,7 @@ public class ReceiptRevisionService {
         return new ReceiptRevisionEntity("", "1.0", ReceiptResolverStrategyType.USER, revisionRequest.brand(), revisionRequest.totalPrice(), revisionRequest.payingDate(), revisionRequest.address(), false, false, receiptEntity, null);
     }
 
-    public AddRevisionResponse addRevision(AddRevisionRequest revisionRequest) {
+    AddRevisionResponse addRevision(AddRevisionRequest revisionRequest) {
         ReceiptEntity receiptEntity = receiptProvider.findById(revisionRequest.receiptId()).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
 
         ReceiptRevisionEntity receiptRevisionEntity = getReceiptRevisionEntity(revisionRequest, receiptEntity);
@@ -56,7 +56,7 @@ public class ReceiptRevisionService {
     }
 
     @Transactional
-    public RevisionCopyResponse createRevisionCopy(String revisionId) {
+    RevisionCopyResponse createRevisionCopy(String revisionId) {
         ReceiptRevisionEntity revision = getRevisionById(revisionId);
 
         ReceiptRevisionEntity revisionCopy = new ReceiptRevisionEntity(revision.getName() + "(copy)", "", ReceiptResolverStrategyType.USER, revision.getBrand(), revision.getTotalPrice(), revision.getPayingDate(), revision.getAddress(), false, revision.getIsCorrect(), revision.getReceipt(), revision);
@@ -69,12 +69,12 @@ public class ReceiptRevisionService {
         return new RevisionCopyResponse(savedRevisionCopy.getId());
     }
 
-    public GetRevisionResponse getRevision(String revisionId) {
+    GetRevisionResponse getRevision(String revisionId) {
         return GetRevisionResponse.revisionMapper(revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND)));
     }
 
     @Transactional
-    public UpdateRevisionResponse updateRevision(String revisionId, UpdateRevisionRequest updatedRevision) {
+    UpdateRevisionResponse updateRevision(String revisionId, UpdateRevisionRequest updatedRevision) {
         ReceiptRevisionEntity currentRevision = getRevisionById(revisionId);
 
         if (updatedRevision.brand() != null) currentRevision.setBrand(updatedRevision.brand());
@@ -123,7 +123,7 @@ public class ReceiptRevisionService {
     }
 
     @Transactional
-    synchronized public void updateDictByUserRevision(String revisionId) {
+    synchronized void updateDictByUserRevision(String revisionId) {
         Map<ProductDictEntity, Collection<ReceiptItemEntity>> receiptItemToProductDictNameMap = new HashMap<>();
         receiptItemProvider.findAllMissingAliasesInRevision(revisionId).forEach(receiptItemEntity -> {
             String alias = receiptItemEntity.getParentItem().getName();

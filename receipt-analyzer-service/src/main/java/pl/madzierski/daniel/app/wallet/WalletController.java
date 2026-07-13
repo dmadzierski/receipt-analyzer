@@ -15,22 +15,22 @@ import pl.madzierski.daniel.app.wallet.model.GetWalletListResponse;
 @RestController
 @RequestMapping(path = "/wallets", produces = MediaType.APPLICATION_JSON_VALUE)
 @Validated
-public class WalletController {
+class WalletController {
 
     private final WalletService walletService;
 
     @PostMapping
-    public ResponseEntity<CreateWalletResponse> addWallet(@RequestBody CreateWalletRequest request) {
+    ResponseEntity<CreateWalletResponse> addWallet(@RequestBody CreateWalletRequest request) {
         return ResponseEntity.ok(this.walletService.addWallet(request));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetWalletListResponse> getWallets(){
+    ResponseEntity<GetWalletListResponse> getWallets(){
         return ResponseEntity.ok(this.walletService.getWallets());
     }
 
     @GetMapping(path = "/{walletId}")
-    public ResponseEntity<GetWalletDetailsResponse> getWalletDetails(@PathVariable String walletId){
+    ResponseEntity<GetWalletDetailsResponse> getWalletDetails(@PathVariable String walletId){
         return ResponseEntity.ok(this.walletService.getWalletDetails(walletId));
     }
 }

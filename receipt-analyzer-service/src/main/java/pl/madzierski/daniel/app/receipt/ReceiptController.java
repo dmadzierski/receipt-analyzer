@@ -20,22 +20,22 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/receipts", produces = MediaType.APPLICATION_JSON_VALUE)
 @Validated
-public class ReceiptController {
+class ReceiptController {
 
     private final ReceiptService receiptService;
 
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<CreateReceiptResponse> addReceipt(@RequestPart(value = "file") MultipartFile file, @RequestPart(value = "body") @NotNull CreateReceiptRequest body) {
+    ResponseEntity<CreateReceiptResponse> addReceipt(@RequestPart(value = "file") MultipartFile file, @RequestPart(value = "body") @NotNull CreateReceiptRequest body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.receiptService.addReceipt(file, body));
     }
 
     @GetMapping(path = {"/{receiptId}"})
-    public ResponseEntity<GetReceiptDetailsResponse> getReceiptDetails(@PathVariable @UUID String receiptId) {
+    ResponseEntity<GetReceiptDetailsResponse> getReceiptDetails(@PathVariable @UUID String receiptId) {
         return ResponseEntity.ok(this.receiptService.getReceiptDetails(receiptId));
     }
 
     @GetMapping(path = {"/{receiptId}/revisions"}, produces = {"application/json"})
-    public ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(@PathVariable String receiptId) {
+    ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(@PathVariable String receiptId) {
         return ResponseEntity.ok(this.receiptService.getReceiptRevisions(receiptId));
     }
 }

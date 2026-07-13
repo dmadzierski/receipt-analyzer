@@ -1,6 +1,5 @@
 package pl.madzierski.daniel.app.product_dict;
 
-import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,13 +45,11 @@ public class ProductDictProvider {
             .map(Map.Entry::getKey);
     }
 
-    public ProductDictEntity save(ProductDictEntity productDictEntity) {
-        return productDictRepository.save(productDictEntity);
-    }
-
     public List<ProductDictEntity> saveAll(Collection<ProductDictEntity> productDictEntities) {
         return productDictRepository.saveAll(productDictEntities);
     }
 
-
+    public long countByProductCategory_Id(String id) {
+        return productDictRepository.countProductDictEntitiesByProductCategoryId(id);
+    }
 }
