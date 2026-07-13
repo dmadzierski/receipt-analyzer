@@ -12,16 +12,16 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Create date</mat-label>
-      <input [readonly]="true" matInput [matDatepicker]="picker" [(ngModel)]="receiptDetails.createDate">
-      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-label>Created date</mat-label>
+      <input [readonly]="true" matInput [matDatepicker]="picker" [(ngModel)]="receiptDetails.createdDate">
+      <mat-hint>MM-DD-YYYY</mat-hint>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Update date</mat-label>
       <input [readonly]="true" matInput [matDatepicker]="picker2" [(ngModel)]="receiptDetails.updateDate">
-      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-hint>MM-DD-YYYY</mat-hint>
       <mat-datepicker #picker2></mat-datepicker>
     </mat-form-field>
 

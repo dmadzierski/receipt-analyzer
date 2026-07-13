@@ -16,7 +16,7 @@ public record GetReceiptDetailsResponse(
         String description,
         PreferredRevisionResponse preferredRevision,
         Set<RevisionResponse> revisions,
-        LocalDateTime createDate,
+        LocalDateTime createdDate,
         LocalDateTime updateDate,
         String fileId
 ) {

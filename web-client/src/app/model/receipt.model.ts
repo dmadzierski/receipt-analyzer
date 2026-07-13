@@ -39,7 +39,7 @@ export interface GetReceiptDetailsResponse {
   description: string
   preferredRevision?: RevisionDetails
   revisions: Revision[]
-  createDate: string
+  createdDate: string
   updateDate: string,
   fileId: string
 }

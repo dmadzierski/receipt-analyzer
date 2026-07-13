@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.app.wallet.model;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record GetWalletDetailsResponse(
@@ -12,7 +13,7 @@ public record GetWalletDetailsResponse(
             String id,
             String name,
             String description,
-            java.time.LocalDateTime createDate
+            LocalDateTime createdDate
     ) {
     }
 }

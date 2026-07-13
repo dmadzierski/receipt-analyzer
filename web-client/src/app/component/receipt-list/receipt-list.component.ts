@@ -5,12 +5,13 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {Router, RouterModule} from '@angular/router';
 import {GetReceiptListResponse, GetReceiptResponseItem} from '../../model/receipt.model';
+import {DatePipe} from '@angular/common';
 
 @Component({
   selector: 'receipt-list',
   templateUrl: './receipt-list.component.html',
   styleUrl: './receipt-list.component.scss',
-  imports: [MatTableModule, MatIconModule, MatButtonModule, RouterModule],
+  imports: [MatTableModule, MatIconModule, MatButtonModule, RouterModule, DatePipe],
 })
 export class ReceiptListComponent{
   displayedColumns: string[] = ['name', 'description', 'createDate'];
