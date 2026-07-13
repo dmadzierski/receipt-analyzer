@@ -2,7 +2,6 @@ package pl.madzierski.daniel.app.file_group;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.file_group.file.FileEntity;
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
@@ -19,18 +18,15 @@ import java.util.stream.Collectors;
 @Setter
 public class FileGroupEntity extends BaseEntity {
 
-    @Enumerated(EnumType.STRING)
-    private FileType fileType;
-
-    @ManyToOne
-    @JoinColumn(name = "receipt_id")
-    private ReceiptEntity receipt;
-
-    private Boolean isOriginal;
-
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<FileEntity> files = new HashSet<>();
+    @Enumerated(EnumType.STRING)
+    private FileType fileType;
+    @ManyToOne
+    @JoinColumn(name = "receipt_id")
+    private ReceiptEntity receipt;
+    private Boolean isOriginal;
 
     public void addFile(FileEntity fileEntity) {
         this.files.add(fileEntity);

@@ -18,32 +18,23 @@ import java.util.Set;
 @AllArgsConstructor
 public class ReceiptItemEntity extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReceiptRevisionEntity receiptRevision;
-
-    private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "product_dict_id")
-    private ProductDictEntity nameDict;
-
-    private Double amount;
-
-    private Double unitPrice;
-
-    private Double discount;
-
-    private Double totalPrice;
-
-    private Integer position;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_item_id")
-    private ReceiptItemEntity parentItem;
-
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "parentItem")
     private final Set<ReceiptItemEntity> childItems = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ReceiptRevisionEntity receiptRevision;
+    private String name;
+    @ManyToOne
+    @JoinColumn(name = "product_dict_id")
+    private ProductDictEntity nameDict;
+    private Double amount;
+    private Double unitPrice;
+    private Double discount;
+    private Double totalPrice;
+    private Integer position;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_item_id")
+    private ReceiptItemEntity parentItem;
 
     @Override
     public boolean equals(Object o) {

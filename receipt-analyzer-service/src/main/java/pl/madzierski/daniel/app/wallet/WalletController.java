@@ -1,6 +1,5 @@
 package pl.madzierski.daniel.app.wallet;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +24,12 @@ class WalletController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<GetWalletListResponse> getWallets(){
+    ResponseEntity<GetWalletListResponse> getWallets() {
         return ResponseEntity.ok(this.walletService.getWallets());
     }
 
     @GetMapping(path = "/{walletId}")
-    ResponseEntity<GetWalletDetailsResponse> getWalletDetails(@PathVariable String walletId){
+    ResponseEntity<GetWalletDetailsResponse> getWalletDetails(@PathVariable String walletId) {
         return ResponseEntity.ok(this.walletService.getWalletDetails(walletId));
     }
 }

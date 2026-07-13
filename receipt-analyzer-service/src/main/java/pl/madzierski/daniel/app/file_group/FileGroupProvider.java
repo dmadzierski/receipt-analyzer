@@ -1,19 +1,13 @@
 package pl.madzierski.daniel.app.file_group;
 
 import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pl.madzierski.daniel.app.file_group.file.FileEntity;
 import pl.madzierski.daniel.app.file_group.file.FileProvider;
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
-import pl.madzierski.daniel.exception.AppRuntimeException;
-import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.security.SecurityUtils;
-
-import java.util.HashSet;
 
 @Service
 @AllArgsConstructor

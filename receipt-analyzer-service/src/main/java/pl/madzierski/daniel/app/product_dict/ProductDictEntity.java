@@ -2,7 +2,6 @@ package pl.madzierski.daniel.app.product_dict;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasEntity;
 import pl.madzierski.daniel.app.product_dict.product_category.ProductCategoryEntity;
@@ -21,13 +20,11 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 public class ProductDictEntity extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
-    private String name;
-
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private final Set<ProductAliasEntity> aliases = new HashSet<>();
-
+    @Column(nullable = false, unique = true)
+    private String name;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_category_id")
     private ProductCategoryEntity productCategory;

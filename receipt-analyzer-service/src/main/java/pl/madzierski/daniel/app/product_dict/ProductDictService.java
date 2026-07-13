@@ -6,15 +6,17 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.app.product_dict.model.GetProductDictListResponse;
 import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictListRequest;
 import pl.madzierski.daniel.app.product_dict.model.UpdateProductDictListResponse;
-import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasProvider;
 import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasEntity;
+import pl.madzierski.daniel.app.product_dict.product_alias.ProductAliasProvider;
 import pl.madzierski.daniel.app.product_dict.product_category.ProductCategoryEntity;
 import pl.madzierski.daniel.app.product_dict.product_category.ProductCategoryProvider;
 import pl.madzierski.daniel.app.receipt.revision.item.ReceiptItemProvider;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor

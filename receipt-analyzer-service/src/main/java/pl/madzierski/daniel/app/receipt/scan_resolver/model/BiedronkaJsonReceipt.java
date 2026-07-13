@@ -16,9 +16,14 @@ public record BiedronkaJsonReceipt(
 ) {
 
     public record Header(Image image, HeaderText headerText, HeaderData headerData) {
-        public record Image(String id, String hash, String data) {}
-        public record HeaderText(String headerTextLines) {}
-        public record HeaderData(String tin, Integer docNumber, String date, Integer CPS) {}
+        public record Image(String id, String hash, String data) {
+        }
+
+        public record HeaderText(String headerTextLines) {
+        }
+
+        public record HeaderData(String tin, Integer docNumber, String date, Integer CPS) {
+        }
     }
 
     public record Body(
@@ -34,29 +39,44 @@ public record BiedronkaJsonReceipt(
             SysNumber sysNumber,
             Section section
     ) {
-        public record SellLine(String name, String vatId, Integer price, Integer total, String quantity, Boolean isStorno) {}
-
-        public record DiscountLine(Integer base, Integer value, Boolean isDiscount, Boolean isPercent, Boolean isStorno, String vatId) {}
-
-        public record DiscountSummary(Integer discounts) {}
-
-        public record VatSummary(String currency, List<VatRateSummary> vatRatesSummary) {
-            public record VatRateSummary(String vatId, Integer vatRate, Integer vatSale, Integer vatAmount) {}
+        public record SellLine(String name, String vatId, Integer price, Integer total, String quantity,
+                               Boolean isStorno) {
         }
 
-        public record SumInCurrency(Integer fiscalTotal, Integer totalWithPacks, String currency, Boolean printBig, Boolean printable) {}
+        public record DiscountLine(Integer base, Integer value, Boolean isDiscount, Boolean isPercent, Boolean isStorno,
+                                   String vatId) {
+        }
 
-        public record Payment(String type, Integer amount, String name, String currency) {}
+        public record DiscountSummary(Integer discounts) {
+        }
 
-        public record FiscalFooter(Integer billNumber, String uniqueNumber, String cashNumber, String cashier, Integer CPS, String date) {}
+        public record VatSummary(String currency, List<VatRateSummary> vatRatesSummary) {
+            public record VatRateSummary(String vatId, Integer vatRate, Integer vatSale, Integer vatAmount) {
+            }
+        }
 
-        public record AddLine(Integer id, String data, Integer width, Integer CPS) {}
+        public record SumInCurrency(Integer fiscalTotal, Integer totalWithPacks, String currency, Boolean printBig,
+                                    Boolean printable) {
+        }
 
-        public record Barcode(Integer id, String data) {}
+        public record Payment(String type, Integer amount, String name, String currency) {
+        }
 
-        public record SysNumber(String data, Integer width, Integer CPS) {}
+        public record FiscalFooter(Integer billNumber, String uniqueNumber, String cashNumber, String cashier,
+                                   Integer CPS, String date) {
+        }
 
-        public record Section(Integer type) {}
+        public record AddLine(Integer id, String data, Integer width, Integer CPS) {
+        }
+
+        public record Barcode(Integer id, String data) {
+        }
+
+        public record SysNumber(String data, Integer width, Integer CPS) {
+        }
+
+        public record Section(Integer type) {
+        }
     }
 }
 

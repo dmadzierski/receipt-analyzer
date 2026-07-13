@@ -2,7 +2,6 @@ package pl.madzierski.daniel.app.receipt;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.file_group.FileGroupEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
@@ -24,11 +23,11 @@ public class ReceiptEntity extends BaseEntity {
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "receipt")
     private final Set<ReceiptRevisionEntity> receiptRevisions = new HashSet<>();
-    private String name;
-    private String description;
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "receipt")
     private final Set<FileGroupEntity> fileGroups = new HashSet<>();
+    private String name;
+    private String description;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id")
     private WalletEntity wallet;

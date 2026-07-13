@@ -1,7 +1,10 @@
 package pl.madzierski.daniel.app.product_dict.product_alias;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 

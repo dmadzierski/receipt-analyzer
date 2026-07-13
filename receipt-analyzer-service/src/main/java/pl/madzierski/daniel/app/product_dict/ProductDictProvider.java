@@ -11,9 +11,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductDictProvider {
 
+    private final ProductDictRepository productDictRepository;
     @Value("${product-dict.min-required-similarity}")
     private Double minRequiredStringSimilarity;
-    private final ProductDictRepository productDictRepository;
 
     public Optional<ProductDictEntity> findCanonicalName(String alias) {
         Set<ProductDictEntity> allDictionaries = productDictRepository.findAllCacheable();
@@ -24,25 +24,25 @@ public class ProductDictProvider {
         String normalizedSearchAlias = alias.trim().toUpperCase();
         int searchLength = normalizedSearchAlias.length();
         return allDictionaries.parallelStream()
-            .flatMap(dict -> dict.getAliases().stream()
-                .map(knownAlias -> {
-                    String normalizedKnownAlias = knownAlias.getName().trim().toUpperCase();
-                    int knownLength = normalizedKnownAlias.length();
-                    int maxLength = Math.max(searchLength, knownLength);
-                    if (maxLength == 0)
-                        return Map.entry(dict, 1.0);
-                    int maxAllowedDifference = (int) Math.ceil(maxLength * (1.0 - minRequiredStringSimilarity));
-                    double distance = new LevenshteinDistance(maxAllowedDifference).apply(normalizedSearchAlias, normalizedKnownAlias);
-                    if (distance == -1) {
-                        return Map.entry(dict, 0.0);
-                    }
-                    double similarityScore = (maxLength - distance) / maxLength;
-                    return Map.entry(dict, similarityScore);
-                })
-            )
-            .filter(entry -> entry.getValue() >= minRequiredStringSimilarity)
-            .max(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey);
+                .flatMap(dict -> dict.getAliases().stream()
+                        .map(knownAlias -> {
+                            String normalizedKnownAlias = knownAlias.getName().trim().toUpperCase();
+                            int knownLength = normalizedKnownAlias.length();
+                            int maxLength = Math.max(searchLength, knownLength);
+                            if (maxLength == 0)
+                                return Map.entry(dict, 1.0);
+                            int maxAllowedDifference = (int) Math.ceil(maxLength * (1.0 - minRequiredStringSimilarity));
+                            double distance = new LevenshteinDistance(maxAllowedDifference).apply(normalizedSearchAlias, normalizedKnownAlias);
+                            if (distance == -1) {
+                                return Map.entry(dict, 0.0);
+                            }
+                            double similarityScore = (maxLength - distance) / maxLength;
+                            return Map.entry(dict, similarityScore);
+                        })
+                )
+                .filter(entry -> entry.getValue() >= minRequiredStringSimilarity)
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey);
     }
 
     public List<ProductDictEntity> saveAll(Collection<ProductDictEntity> productDictEntities) {

@@ -66,7 +66,7 @@ public record GetReceiptDetailsResponse(
     public static ItemResponse itemMapper(ReceiptItemEntity receiptItemEntity, ReceiptResolverStrategyType strategy) {
         String name = receiptItemEntity.getName();
         if (strategy != ReceiptResolverStrategyType.USER && receiptItemEntity.getNameDict() != null) {
-            name =  receiptItemEntity.getNameDict().getName();
+            name = receiptItemEntity.getNameDict().getName();
         }
         return new ItemResponse(
                 receiptItemEntity.getId(),

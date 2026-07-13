@@ -23,7 +23,7 @@ class ProductDictController {
     }
 
     @PostMapping
-    ResponseEntity<UpdateProductDictListResponse> updateProductDict(@RequestBody UpdateProductDictListRequest updateProductDictListRequest){
+    ResponseEntity<UpdateProductDictListResponse> updateProductDict(@RequestBody UpdateProductDictListRequest updateProductDictListRequest) {
         return ResponseEntity.ok(productDictService.updateProductDict(updateProductDictListRequest));
     }
 }

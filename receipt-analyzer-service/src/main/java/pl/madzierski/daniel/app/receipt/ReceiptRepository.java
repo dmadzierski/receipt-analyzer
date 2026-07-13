@@ -14,15 +14,15 @@ interface ReceiptRepository extends JpaRepository<ReceiptEntity, String> {
     List<ReceiptEntity> getReceiptList(@Param("userSub") String userSub, String walletId);
 
     @Query(value = """
-        SELECT r
-        FROM ReceiptEntity r
-        LEFT JOIN FETCH r.receiptRevisions rev
-        LEFT JOIN FETCH rev.items ri
-        LEFT JOIN FETCH ri.nameDict pd
-        LEFT JOIN FETCH r.fileGroups fe
-        LEFT JOIN FETCH fe.files f
-        WHERE r.id = :id AND fe.isOriginal = true
-""")
+                    SELECT r
+                    FROM ReceiptEntity r
+                    LEFT JOIN FETCH r.receiptRevisions rev
+                    LEFT JOIN FETCH rev.items ri
+                    LEFT JOIN FETCH ri.nameDict pd
+                    LEFT JOIN FETCH r.fileGroups fe
+                    LEFT JOIN FETCH fe.files f
+                    WHERE r.id = :id AND fe.isOriginal = true
+            """)
     ReceiptEntity findReceiptEntityWithItemAndProductDictById(String id);
 
     List<ReceiptEntity> wallet(WalletEntity wallet);
