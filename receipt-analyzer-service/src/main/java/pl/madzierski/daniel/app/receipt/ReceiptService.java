@@ -77,7 +77,7 @@ class ReceiptService {
         if (revisionData.items() != null) {
             Set<ReceiptItemEntity> items = revisionData.items().stream().map(it -> {
                 Optional<ProductDictEntity> canonicalName = productDictProvider.findCanonicalName(it.name());
-                return new ReceiptItemEntity(revisionEntity, it.name(), canonicalName.orElse(null), it.amount(), it.unitPrice(), it.discount(), it.totalPrice(), it.position(), null, null);
+                return new ReceiptItemEntity(revisionEntity, it.name(), canonicalName.orElse(null), it.amount(), it.unitPrice(), it.discount(), it.totalPrice(), it.position(), null);
             }).collect(Collectors.toSet());
             revisionEntity.addItems(items);
         }
@@ -91,7 +91,7 @@ class ReceiptService {
     @Transactional(readOnly = true)
     GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
         ReceiptEntity receiptEntity = receiptRepository.findReceiptEntityWithItemAndProductDictById(receiptId);
-        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, receiptEntity.getReceiptRevisions().stream().filter(ReceiptRevisionEntity::getIsPreferredRevision).findFirst().orElse(null), Objects.requireNonNull(Objects.requireNonNull(receiptEntity.getFileGroupEntity().stream().findFirst().orElse(null)).getFiles().stream().findFirst().orElse(null)).getId());
+        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptEntity, receiptEntity.getReceiptRevisions().stream().filter(ReceiptRevisionEntity::getIsPreferredRevision).findFirst().orElse(null), Objects.requireNonNull(Objects.requireNonNull(receiptEntity.getFileGroups().stream().findFirst().orElse(null)).getFiles().stream().findFirst().orElse(null)).getId());
     }
 
     List<GetReceiptRevisionsResponse> getReceiptRevisions(String receiptId) {

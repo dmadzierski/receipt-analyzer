@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 interface ReceiptRepository extends JpaRepository<ReceiptEntity, String> {
-    @Query(value = "SELECT * FROM receipt INNER JOIN wallet ON wallet.id = receipt.wallet_id WHERE user_sub = :userSub AND wallet.id = :walletId ORDER BY created_date DESC", nativeQuery = true)
+    @Query(value = "SELECT * FROM receipt INNER JOIN wallet ON wallet.id = receipt.wallet_id WHERE user_sub = :userSub AND wallet.id = :walletId ORDER BY wallet.created_date DESC", nativeQuery = true)
     List<ReceiptEntity> getReceiptList(@Param("userSub") String userSub, String walletId);
 
     @Query(value = """
@@ -19,7 +19,7 @@ interface ReceiptRepository extends JpaRepository<ReceiptEntity, String> {
         LEFT JOIN FETCH r.receiptRevisions rev
         LEFT JOIN FETCH rev.items ri
         LEFT JOIN FETCH ri.nameDict pd
-        LEFT JOIN FETCH r.fileGroupEntity fe
+        LEFT JOIN FETCH r.fileGroups fe
         LEFT JOIN FETCH fe.files f
         WHERE r.id = :id AND fe.isOriginal = true
 """)

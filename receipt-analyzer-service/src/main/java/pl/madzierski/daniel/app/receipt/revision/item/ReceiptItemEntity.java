@@ -1,10 +1,7 @@
 package pl.madzierski.daniel.app.receipt.revision.item;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.product_dict.ProductDictEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
@@ -44,8 +41,9 @@ public class ReceiptItemEntity extends BaseEntity {
     @JoinColumn(name = "parent_item_id")
     private ReceiptItemEntity parentItem;
 
+    @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "parentItem")
-    private Set<ReceiptItemEntity> childItems = new HashSet<>();
+    private final Set<ReceiptItemEntity> childItems = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

@@ -25,11 +25,11 @@ public class FileGroupProvider {
     @Transactional
     public FileGroupEntity saveReceiptFile(ReceiptEntity receipt, MultipartFile file) {
         FileType fileType = FileType.invoke(file.getContentType());
-        FileGroupEntity fileGroupEntity = new FileGroupEntity(fileType, receipt, true, new HashSet<>());
+        FileGroupEntity fileGroupEntity = new FileGroupEntity(fileType, receipt, true);
         fileGroupEntity = fileGroupRepository.save(fileGroupEntity);
 
         FileEntity fileEntity = new FileEntity(fileGroupEntity, null, null, 0);
-        fileGroupEntity.getFiles().add(fileEntity);
+        fileGroupEntity.addFile(fileEntity);
         fileEntity = fileProvider.save(fileEntity);
 
         String pathInString = createPath(SecurityUtils.getCurrentUserSub(), fileEntity, fileGroupEntity, fileType.getExtension(), receipt);
@@ -53,11 +53,4 @@ public class FileGroupProvider {
                 currentUserSub, receipt.getId(), fileEntity.getId(), file.getId(), fileExtension);
     }
 
-    public FileGroupEntity save(FileGroupEntity fileGroupEntity) {
-        return fileGroupRepository.save(fileGroupEntity);
-    }
-
-    public String getOriginalPdf(String receiptId) {
-        return fileGroupRepository.findFirstOriginalPdf(receiptId);
-    }
 }

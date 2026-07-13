@@ -2,6 +2,7 @@ package pl.madzierski.daniel.app.receipt;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.file_group.FileGroupEntity;
 import pl.madzierski.daniel.app.receipt.revision.ReceiptRevisionEntity;
@@ -9,6 +10,7 @@ import pl.madzierski.daniel.app.wallet.WalletEntity;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -24,8 +26,9 @@ public class ReceiptEntity extends BaseEntity {
     private final Set<ReceiptRevisionEntity> receiptRevisions = new HashSet<>();
     private String name;
     private String description;
+    @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "receipt")
-    private Set<FileGroupEntity> fileGroupEntity;
+    private final Set<FileGroupEntity> fileGroups = new HashSet<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id")
     private WalletEntity wallet;
@@ -34,8 +37,7 @@ public class ReceiptEntity extends BaseEntity {
         this.receiptRevisions.add(receiptRevision);
     }
 
-    public void addFileGroup(FileGroupEntity fileGroup) {
-        this.fileGroupEntity.add(fileGroup);
+    public Set<FileGroupEntity> getFileGroups() {
+        return fileGroups.stream().collect(Collectors.toUnmodifiableSet());
     }
-
 }

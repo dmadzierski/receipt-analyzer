@@ -21,13 +21,11 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ReceiptRevisionEntity extends BaseEntity {
 
+    @Getter(AccessLevel.NONE)
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private final Set<ReceiptItemEntity> items = new HashSet<>();
-    @OneToMany(mappedBy = "parentReceiptRevision")
     @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "parentReceiptRevision")
     private final Set<ReceiptRevisionEntity> childReceiptRevisions = new HashSet<>();
     private String name;
     private String revision;

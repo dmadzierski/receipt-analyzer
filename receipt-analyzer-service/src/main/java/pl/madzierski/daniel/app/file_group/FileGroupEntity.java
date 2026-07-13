@@ -1,16 +1,15 @@
 package pl.madzierski.daniel.app.file_group;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import pl.madzierski.daniel.app.common.model.BaseEntity;
 import pl.madzierski.daniel.app.file_group.file.FileEntity;
 import pl.madzierski.daniel.app.receipt.ReceiptEntity;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "receipt_file_group")
@@ -29,7 +28,15 @@ public class FileGroupEntity extends BaseEntity {
 
     private Boolean isOriginal;
 
+    @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<FileEntity> files = new HashSet<>();
+    private final Set<FileEntity> files = new HashSet<>();
 
+    public void addFile(FileEntity fileEntity) {
+        this.files.add(fileEntity);
+    }
+
+    public Set<FileEntity> getFiles() {
+        return files.stream().collect(Collectors.toUnmodifiableSet());
+    }
 }

@@ -45,7 +45,7 @@ class ReceiptRevisionService {
                     parentItem = receiptItemProvider.findById(item.originalItemId()).orElse(null);
                 }
                 ProductDictEntity productDictEntity = productDictProvider.findCanonicalName(item.name()).orElse(null);
-                return new ReceiptItemEntity(null, item.name(), productDictEntity, item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), parentItem, new HashSet<>());
+                return new ReceiptItemEntity(null, item.name(), productDictEntity, item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), parentItem);
             }).collect(Collectors.toSet());
 
             List<ReceiptItemEntity> savedItems = receiptItemProvider.saveAll(mappedItems);
@@ -61,7 +61,7 @@ class ReceiptRevisionService {
 
         ReceiptRevisionEntity revisionCopy = new ReceiptRevisionEntity(revision.getName() + "(copy)", "", ReceiptResolverStrategyType.USER, revision.getBrand(), revision.getTotalPrice(), revision.getPayingDate(), revision.getAddress(), false, revision.getIsCorrect(), revision.getReceipt(), revision);
 
-        Set<ReceiptItemEntity> copiedItems = revision.getItems().stream().map(item -> new ReceiptItemEntity(revisionCopy, item.getName(), item.getNameDict(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item, new HashSet<>())
+        Set<ReceiptItemEntity> copiedItems = revision.getItems().stream().map(item -> new ReceiptItemEntity(revisionCopy, item.getName(), item.getNameDict(), item.getAmount(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getPosition(), item)
         ).collect(Collectors.toSet());
         revisionCopy.addItems(copiedItems);
 
@@ -108,7 +108,7 @@ class ReceiptRevisionService {
                     }
                 } else {
                     ProductDictEntity productDictEntity = productDictProvider.findCanonicalName(incomingItem.name()).orElse(null);
-                    ReceiptItemEntity newItem = new ReceiptItemEntity(currentRevision, incomingItem.name(), productDictEntity, incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null, new HashSet<>());
+                    ReceiptItemEntity newItem = new ReceiptItemEntity(currentRevision, incomingItem.name(), productDictEntity, incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null);
                     currentRevision.addItem(receiptItemProvider.save(newItem));
                 }
             }
