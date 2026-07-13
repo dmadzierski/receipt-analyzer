@@ -1,5 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -30,9 +30,8 @@ import {GetReceiptResponseItem} from '../model/receipt.model';
 })
 export class WalletDetailsComponent implements OnInit {
   constructor(
-    private walletService: WalletService,
-    private readonly router: Router,
-    private route: ActivatedRoute
+    private readonly walletService: WalletService,
+    private readonly route: ActivatedRoute
   ) {
   }
 
@@ -49,7 +48,6 @@ export class WalletDetailsComponent implements OnInit {
         this.walletService.getWalletDetails(walletId).subscribe((res) => {
           this.wallet = res;
         });
-      } else {
       }
     })
   }

@@ -5,8 +5,14 @@ export interface GetProductDictListResponse {
 export interface ProductDict {
   id: string;
   name: string;
-  productCategoryId: string | null;
+  productCategoryId?: string | null;
+  productCategory?: ProductCategoryRef | null;
   aliases: Alias[];
+}
+
+export interface ProductCategoryRef {
+  id: string;
+  name: string;
 }
 
 export interface Alias {

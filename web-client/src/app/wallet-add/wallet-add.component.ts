@@ -5,11 +5,10 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
-import {FileUploadComponent} from '../component/file-upload/file-upload.component';
 import {FormsModule} from '@angular/forms';
 import {WalletService} from '../service/wallet-service';
 import {AddWalletData} from '../model/wallet.model';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-wallet-add',

@@ -1,4 +1,3 @@
-import {WalletService} from '../service/wallet-service';
 import {GetReceiptResponseItem} from './receipt.model';
 
 export interface GetWalletListResponse {

@@ -38,10 +38,10 @@ import {MatTooltip} from '@angular/material/tooltip';
 })
 export class ReceiptDetailsComponent implements OnInit {
   constructor(
-    private receiptService: ReceiptService,
-    private revisionService: RevisionService,
+    private readonly receiptService: ReceiptService,
+    private readonly revisionService: RevisionService,
     private readonly router: Router,
-    private route: ActivatedRoute
+    private readonly route: ActivatedRoute
   ) {
   }
 
@@ -51,14 +51,19 @@ export class ReceiptDetailsComponent implements OnInit {
 
   editMode: boolean = false;
 
+  receiptId: string | null = null;
+
   ngOnInit(): void {
-    const receiptId = this.route.snapshot.paramMap.get('id');
-    if (receiptId) {
-      this.receiptService.getReceiptDetails(receiptId).subscribe((res) => {
-        this.receiptDetails = res;
-        this.receiptFileId = this.receiptDetails.fileId
-      }, () => this.router.navigate(["/"]));
-    } else {
+    this.receiptId = this.route.snapshot.paramMap.get('id');
+    if (this.receiptId) {
+      this.receiptService.getReceiptDetails(this.receiptId).subscribe({
+        next: (res) => {
+          this.receiptDetails = res;
+          this.receiptFileId = this.receiptDetails.fileId
+        }, error: () => {
+          this.router.navigate(["/"]);
+        }
+      });
     }
   }
 
@@ -79,9 +84,8 @@ export class ReceiptDetailsComponent implements OnInit {
     this.revisionService.updateRevision(this.receiptDetails.preferredRevision!!).subscribe(
       {
         next: (revision: RevisionDetails) => {
-          this.receiptDetails.preferredRevision = revision;
           this.editMode = false;
-          this.refreshRevision(this.receiptDetails.id);
+          this.refreshRevisionDetails(revision.id);
         }
       }
     )
@@ -107,7 +111,7 @@ export class ReceiptDetailsComponent implements OnInit {
     }
   }
 
-  protected refreshRevision(id: any) {
+  protected refreshRevisions() {
     this.receiptService.getReceiptRevisions(this.receiptDetails.id)
       .subscribe({
         next: (revisions: Revision[]) => {

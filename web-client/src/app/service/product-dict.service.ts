@@ -3,8 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {
   GetProductDictListResponse,
-  UpdateProductDictListRequest,
-  UpdateProductDictListResponse
+  UpdateProductDictListRequest
 } from '../model/receipt-dict.mode';
 
 @Injectable({
@@ -18,7 +17,7 @@ export class ProductDictService {
     return this.httpClient.get<GetProductDictListResponse>(`/api/product-dicts`);
   }
 
-  updateProductDictList(request: UpdateProductDictListRequest): Observable<UpdateProductDictListResponse> {
-    return this.httpClient.post<UpdateProductDictListResponse>(`/api/product-dicts`, request);
+  updateProductDictList(request: UpdateProductDictListRequest): Observable<void> {
+    return this.httpClient.post<void>(`/api/product-dicts`, request);
   }
 }

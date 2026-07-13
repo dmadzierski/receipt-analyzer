@@ -44,7 +44,7 @@ export class PdfViewerComponent {
       this.totalPages = this.pdfDocument.numPages;
       this.renderPage(this.currentPageNumber);
     } catch (error) {
-      console.error("Error loading PDF:", error);
+      console.error(error);
     }
   }
 

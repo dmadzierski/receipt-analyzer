@@ -98,7 +98,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       WEB_CLIENT_HOST: ${WEB_CLIENT_HOST}
-      LOGGING_LEVEL_ROOT: ERROR
+      LOGGING_LEVEL_ROOT: INFO
       JPA_DDL_AUTO: update
       KEYCLOAK_JWK_SET_URI: http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs
       KEYCLOAK_ISSUER_URI: http://localhost/auth/realms/activiti

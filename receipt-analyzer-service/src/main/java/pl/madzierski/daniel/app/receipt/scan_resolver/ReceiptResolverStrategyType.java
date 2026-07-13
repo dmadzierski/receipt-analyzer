@@ -1,7 +1,0 @@
-package pl.madzierski.daniel.app.receipt.scan_resolver;
-
-public enum ReceiptResolverStrategyType {
-    BIEDRONKA,
-    USER,
-    BIEDRONKA_JSON
-}

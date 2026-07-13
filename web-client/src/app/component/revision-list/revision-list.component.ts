@@ -35,8 +35,8 @@ export class RevisionListComponent implements OnChanges {
   constructor() {
   }
 
-  private revisionService = inject(RevisionService);
-  private receiptService = inject(ReceiptService);
+  private readonly revisionService = inject(RevisionService);
+  private readonly receiptService = inject(ReceiptService);
 
   displayedColumns: string[] = ['selected', 'brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'isPreferredRevision', 'isCorrect', 'actions'];
 
@@ -69,12 +69,11 @@ export class RevisionListComponent implements OnChanges {
 
   duplicateRevision(id: string) {
     if (!id) return;
-
     this.revisionService.copyRevision(id).subscribe({
       next: () => {
         this.refreshData(this.receiptId)
       },
-      error: (err) => console.error('Błąd kopiowania', err)
+      error: (err) => console.error(err)
     });
   }
 

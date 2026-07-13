@@ -1,5 +1,5 @@
 import {CommonModule, NgClass} from '@angular/common';
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, DragDropModule} from '@angular/cdk/drag-drop';
 import {MatButtonModule} from '@angular/material/button';
@@ -10,8 +10,7 @@ import {
   GetProductDictListResponse,
   ProductDict,
   UpdateProductDictListRequest,
-  UpdateProductDictListRequestItem,
-  UpdateProductDictListResponseItem
+  UpdateProductDictListRequestItem
 } from '../model/receipt-dict.mode';
 import {ProductDictService} from '../service/product-dict.service';
 import {ProductCategory} from '../model/product-category.model';
@@ -41,8 +40,9 @@ interface EditableProductDictGroup {
   templateUrl: './product-dict-list-component.html',
   styleUrl: './product-dict-list-component.scss',
 })
-export class ProductDictListComponent {
+export class ProductDictListComponent implements OnInit {
   dataSource: EditableProductDictGroup[] = [];
+  originalDataSource: EditableProductDictGroup[] = [];
   productCategories: ProductCategory[] = [];
   contentEditable = false;
   activeDragId: string | null = null;
@@ -65,6 +65,7 @@ export class ProductDictListComponent {
     }).subscribe(({productDicts, productCategories}) => {
       this.productCategories = productCategories.items;
       this.dataSource = productDicts.items.map((item) => this.toGroup(item));
+      this.originalDataSource = this.cloneGroups(this.dataSource);
     });
   }
 
@@ -73,18 +74,26 @@ export class ProductDictListComponent {
       .getProductDictList()
       .subscribe((result: GetProductDictListResponse) => {
         this.dataSource = result.items.map((item) => this.toGroup(item));
+        this.originalDataSource = this.cloneGroups(this.dataSource);
       });
   }
 
   protected saveProductDict() {
-    const request: UpdateProductDictListRequest = {
-      items: this.dataSource.map((group) => this.toRequestItem(group))
-    };
-
-    this.productDictService.updateProductDictList(request).subscribe((result) => {
-      this.dataSource = result.items.map((item) => this.toGroupFromResponse(item));
+    const changedItems = this.getChangedRequestItems();
+    if (changedItems.length === 0) {
       this.contentEditable = false;
       this.clearDragState();
+      return;
+    }
+
+    const request: UpdateProductDictListRequest = {
+      items: changedItems
+    };
+
+    this.productDictService.updateProductDictList(request).subscribe(() => {
+      this.contentEditable = false;
+      this.clearDragState();
+      this.refreshProductDictList();
     });
   }
 
@@ -96,6 +105,7 @@ export class ProductDictListComponent {
 
   protected doEdit() {
     this.contentEditable = true;
+    this.originalDataSource = this.cloneGroups(this.dataSource);
   }
 
   protected onDragStarted(group: EditableProductDictGroup) {
@@ -161,17 +171,7 @@ export class ProductDictListComponent {
     return {
       primaryId: item.id,
       canonicalName: item.name,
-      draftCategoryId: item.productCategoryId,
-      aliases: item.aliases.map((alias) => ({...alias})),
-      mergedDicts: []
-    };
-  }
-
-  private toGroupFromResponse(item: UpdateProductDictListResponseItem): EditableProductDictGroup {
-    return {
-      primaryId: item.id,
-      canonicalName: item.name,
-      draftCategoryId: item.productCategoryId,
+      draftCategoryId: this.resolveCategoryId(item),
       aliases: item.aliases.map((alias) => ({...alias})),
       mergedDicts: []
     };
@@ -213,6 +213,60 @@ export class ProductDictListComponent {
   private clearDragState() {
     this.activeDragId = null;
     this.activeTargetId = null;
+  }
+
+  private getChangedRequestItems(): UpdateProductDictListRequestItem[] {
+    const originalByPrimaryId = new Map(
+      this.originalDataSource
+        .map((group) => this.toRequestItem(group))
+        .map((item) => [item.productDictList[0], item] as const)
+    );
+
+    return this.dataSource
+      .map((group) => this.toRequestItem(group))
+      .filter((item) => this.hasRequestItemChanged(item, originalByPrimaryId.get(item.productDictList[0])));
+  }
+
+  private hasRequestItemChanged(
+    current: UpdateProductDictListRequestItem,
+    original?: UpdateProductDictListRequestItem
+  ): boolean {
+    if (!original) {
+      return true;
+    }
+
+    if (current.canonicalName !== original.canonicalName) {
+      return true;
+    }
+
+    if (current.productCategoryId !== original.productCategoryId) {
+      return true;
+    }
+
+    if (current.productDictList.length !== original.productDictList.length) {
+      return true;
+    }
+
+    return current.productDictList.some((id, index) => id !== original.productDictList[index]);
+  }
+
+  private cloneGroups(groups: EditableProductDictGroup[]): EditableProductDictGroup[] {
+    return groups.map((group) => ({
+      primaryId: group.primaryId,
+      canonicalName: group.canonicalName,
+      draftCategoryId: group.draftCategoryId,
+      aliases: group.aliases.map((alias) => ({...alias})),
+      mergedDicts: group.mergedDicts.map((dict) => ({
+        id: dict.id,
+        name: dict.name,
+        productCategoryId: this.resolveCategoryId(dict),
+        aliases: dict.aliases.map((alias) => ({...alias}))
+      }))
+    }));
+  }
+
+  private resolveCategoryId(item: ProductDict): string | null {
+    return item.productCategory?.id ?? item.productCategoryId ?? null;
   }
 
   protected getCategoryName(categoryId: string | null): string {

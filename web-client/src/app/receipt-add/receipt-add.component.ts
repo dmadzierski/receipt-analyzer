@@ -40,7 +40,7 @@ export class ReceiptAddComponent {
   }
 
 
-  strategies = Object.keys(ResolverStrategy).filter(key => isNaN(Number(key)));
+  strategies = Object.keys(ResolverStrategy).filter(key => Number.isNaN(Number(key)));
   data: CreateReceiptData = new CreateReceiptData('', '', '', '', ResolverStrategy.BIEDRONKA, []);
 
   create() {
