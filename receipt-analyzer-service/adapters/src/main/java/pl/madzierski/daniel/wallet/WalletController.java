@@ -4,17 +4,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import pl.madzierski.daniel.wallet.WalletFacade;
 import pl.madzierski.daniel.wallet.model.CreateWalletRequest;
 import pl.madzierski.daniel.wallet.model.CreateWalletResponse;
 import pl.madzierski.daniel.wallet.model.GetWalletDetailsResponse;
 import pl.madzierski.daniel.wallet.model.GetWalletListResponse;
-
-import java.nio.file.attribute.UserPrincipal;
 
 @AllArgsConstructor
 @RestController

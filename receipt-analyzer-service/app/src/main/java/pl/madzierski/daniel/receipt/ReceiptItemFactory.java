@@ -1,7 +1,6 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.model.ProductDictDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictQueryEntity;
@@ -10,7 +9,6 @@ import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 
 import java.util.Optional;
 
-@Service
 @RequiredArgsConstructor
 class ReceiptItemFactory {
 

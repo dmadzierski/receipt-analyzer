@@ -1,7 +1,6 @@
 package pl.madzierski.daniel.receipt;
 
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
+import lombok.AllArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pl.madzierski.daniel.exception.AppRuntimeException;
@@ -15,7 +14,6 @@ import pl.madzierski.daniel.product_dict.model.ProductAliasDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictQueryEntity;
 import pl.madzierski.daniel.receipt.model.*;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.receipt.scan_resolver.service.ReceiptResolverLocatorService;
 import pl.madzierski.daniel.wallet.model.WalletQueryEntity;
 
@@ -24,7 +22,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
+@AllArgsConstructor
 public class ReceiptFacade {
 
     private final ReceiptItemRepository receiptItemRepository;
@@ -39,21 +37,6 @@ public class ReceiptFacade {
     private final ReceiptRevisionQueryRepository receiptRevisionQueryRepository;
     private final FileQueryRepository fileQueryRepository;
     private final ProductDictFacade productDictFacade;
-
-    ReceiptFacade(ReceiptItemRepository receiptItemRepository, ReceiptItemQueryRepository receiptItemQueryRepository, ReceiptItemFactory receiptItemFactory, ReceiptRevisionRepository revisionRepository, ReceiptRevisionFactory receiptRevisionFactory, ReceiptRepository receiptRepository, FileFacade fileFacade, ReceiptResolverLocatorService receiptResolverLocatorService, ReceiptQueryRepository receiptQueryRepository, ReceiptRevisionQueryRepository receiptRevisionQueryRepository, FileQueryRepository fileQueryRepository, @Lazy ProductDictFacade productDictFacade) {
-        this.receiptItemRepository = receiptItemRepository;
-        this.receiptItemQueryRepository = receiptItemQueryRepository;
-        this.receiptItemFactory = receiptItemFactory;
-        this.revisionRepository = revisionRepository;
-        this.receiptRevisionFactory = receiptRevisionFactory;
-        this.receiptRepository = receiptRepository;
-        this.fileFacade = fileFacade;
-        this.receiptResolverLocatorService = receiptResolverLocatorService;
-        this.receiptQueryRepository = receiptQueryRepository;
-        this.receiptRevisionQueryRepository = receiptRevisionQueryRepository;
-        this.fileQueryRepository = fileQueryRepository;
-        this.productDictFacade = productDictFacade;
-    }
 
     @Transactional
     CreateReceiptResponse addReceipt(String userSub, MultipartFile file, CreateReceiptRequest body) {
@@ -161,6 +144,7 @@ public class ReceiptFacade {
         }
         return UpdateRevisionResponse.map(toDto(revision), revision.getItems().stream().map(this::toDto).collect(Collectors.toSet()));
     }
+
     public ReceiptItemDto toDto(ReceiptItemEntity item) {
         return ReceiptItemDto.builder().name(item.getName()).amount(item.getAmount()).unitPrice(item.getUnitPrice()).discount(item.getDiscount()).totalPrice(item.getTotalPrice()).position(item.getPosition()).build();
     }

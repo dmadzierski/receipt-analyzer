@@ -1,9 +1,8 @@
 package pl.madzierski.daniel.receipt.scan_resolver.service;
 
+import lombok.AllArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -13,14 +12,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@Service
+@AllArgsConstructor
 public class PDFService {
 
     private final String tmpFilePath;
-
-    public PDFService(@Value("${pdf-service.tmp-dir}") String tmpFilePath) {
-        this.tmpFilePath = tmpFilePath;
-    }
 
     public List<String> dividePdfFileToImages(String pdfFilePath) {
         if (pdfFilePath == null || pdfFilePath.trim().isEmpty()) {

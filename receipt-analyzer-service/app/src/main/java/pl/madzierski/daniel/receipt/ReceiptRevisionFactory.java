@@ -1,13 +1,11 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 
 import java.util.stream.Collectors;
 
-@Service
 @RequiredArgsConstructor
 class ReceiptRevisionFactory {
 

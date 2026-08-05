@@ -3,7 +3,6 @@ package pl.madzierski.daniel.wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import pl.madzierski.daniel.wallet.WalletEntity;
 import pl.madzierski.daniel.wallet.model.WalletDto;
 
 import java.util.Collection;

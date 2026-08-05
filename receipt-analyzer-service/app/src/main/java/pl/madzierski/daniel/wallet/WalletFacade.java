@@ -1,7 +1,6 @@
 package pl.madzierski.daniel.wallet;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import lombok.AllArgsConstructor;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
@@ -11,8 +10,7 @@ import pl.madzierski.daniel.wallet.model.*;
 import java.util.Collection;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class WalletFacade {
 
     private final WalletRepository walletRepository;

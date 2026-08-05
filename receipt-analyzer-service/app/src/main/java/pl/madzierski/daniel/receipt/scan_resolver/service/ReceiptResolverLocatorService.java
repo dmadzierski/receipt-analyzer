@@ -1,17 +1,15 @@
 package pl.madzierski.daniel.receipt.scan_resolver.service;
 
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import pl.madzierski.daniel.exception.AppRuntimeException;
+import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.exception.AppRuntimeException;
 
 import java.util.List;
 
 import static pl.madzierski.daniel.exception.AppRuntimeExceptionMessages.STRATEGY_NOT_FOUND;
 
-@Service
 @AllArgsConstructor
 public class ReceiptResolverLocatorService {
 

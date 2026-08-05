@@ -1,6 +1,6 @@
 package pl.madzierski.daniel.receipt.model;
 
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

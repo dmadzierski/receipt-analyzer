@@ -1,7 +1,7 @@
 package pl.madzierski.daniel.receipt.model;
 
 import jakarta.validation.constraints.NotNull;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
 import java.time.LocalDateTime;
 

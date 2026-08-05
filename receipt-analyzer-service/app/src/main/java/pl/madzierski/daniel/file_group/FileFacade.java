@@ -2,21 +2,19 @@ package pl.madzierski.daniel.file_group;
 
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import pl.madzierski.daniel.exception.AppRuntimeException;
+import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.receipt.model.ReceiptDto;
 import pl.madzierski.daniel.receipt.model.ReceiptQueryEntity;
-import pl.madzierski.daniel.exception.AppRuntimeException;
-import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-@Service
 @AllArgsConstructor
 public class FileFacade {
 

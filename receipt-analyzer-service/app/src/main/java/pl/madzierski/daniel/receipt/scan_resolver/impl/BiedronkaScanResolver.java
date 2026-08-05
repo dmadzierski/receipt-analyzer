@@ -1,16 +1,14 @@
 package pl.madzierski.daniel.receipt.scan_resolver.impl;
 
+import lombok.AllArgsConstructor;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.receipt.scan_resolver.service.PDFService;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
+import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
+import pl.madzierski.daniel.receipt.scan_resolver.service.PDFService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +19,7 @@ import java.util.regex.Pattern;
 
 import static pl.madzierski.daniel.exception.AppRuntimeExceptionMessages.OCR_PROCESSING_ERROR;
 
-@Component
+@AllArgsConstructor
 public class BiedronkaScanResolver implements ReceiptResolverStrategy {
 
     private static final Pattern ITEM_PATTERN_REGEX = Pattern.compile("^(?<name>.*)\\s+(?<ptu>[ABC])\\s+(?<amount>\\d+[\\s.]?\\d+)\\s*[xX]\\s+(?<unitPrice>\\d+[.,\\s]?\\d+)\\s(?<totalPrice>\\d+[.,\\s]\\d+)$");
@@ -35,14 +33,6 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
     private final String tesseractDataPath;
     private final String resolverVersion;
     private final PDFService pdfService;
-
-    @Autowired
-    public BiedronkaScanResolver(@Value("${ocr.tesseract.dataPath}") String tesseractDataPath, @Value("${receipt-resolver-strategy.biedronka.version:1.0}") String resolverVersion, PDFService pdfService) {
-        this.tesseractDataPath = tesseractDataPath;
-        this.resolverVersion = resolverVersion;
-        this.pdfService = pdfService;
-    }
-
 
     @Override
     public ReceiptResolverStrategyType strategy() {

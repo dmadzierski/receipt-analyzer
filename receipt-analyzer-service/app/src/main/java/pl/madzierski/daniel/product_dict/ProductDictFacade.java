@@ -1,19 +1,15 @@
 package pl.madzierski.daniel.product_dict;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.madzierski.daniel.product_dict.model.*;
-import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.product_dict.model.*;
+import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
 import pl.madzierski.daniel.receipt.ReceiptFacade;
 
 import java.util.*;
 
-@Service
 public class ProductDictFacade {
 
     private final ProductDictRepository productDictRepository;
@@ -26,12 +22,12 @@ public class ProductDictFacade {
     private final Double minRequiredStringSimilarity;
 
     ProductDictFacade(ProductDictRepository productDictRepository,
-                             ProductDictQueryRepository productDictQueryRepository,
-                             ProductDictFactory productDictFactory, ProductAliasRepository productAliasRepository,
-                             ProductAliasQueryRepository productAliasQueryRepository,
-                             ProductCategoryRepository productCategoryRepository,
-                             @Lazy ReceiptFacade receiptFacade,
-                             @Value("${product-dict.min-required-similarity}") Double minRequiredStringSimilarity) {
+                      ProductDictQueryRepository productDictQueryRepository,
+                      ProductDictFactory productDictFactory, ProductAliasRepository productAliasRepository,
+                      ProductAliasQueryRepository productAliasQueryRepository,
+                      ProductCategoryRepository productCategoryRepository,
+                      ReceiptFacade receiptFacade,
+                      double minRequiredStringSimilarity) {
         this.productDictRepository = productDictRepository;
         this.productDictQueryRepository = productDictQueryRepository;
         this.productDictFactory = productDictFactory;

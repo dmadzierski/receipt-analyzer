@@ -1,17 +1,14 @@
 package pl.madzierski.daniel.receipt.scan_resolver.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import lombok.AllArgsConstructor;
+import pl.madzierski.daniel.exception.AppRuntimeException;
+import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem;
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.receipt.scan_resolver.model.BiedronkaJsonReceipt;
-import pl.madzierski.daniel.exception.AppRuntimeException;
-import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,25 +17,16 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
-public final class BiedronkaJsonResolver implements ReceiptResolverStrategy {
+@AllArgsConstructor
+public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
 
     public static final String BRAND = "Biedronka";
     private final String resolverVersion;
     private final ObjectMapper objectMapper;
 
-    @Autowired
-    public BiedronkaJsonResolver(@Value("${receipt-resolver-strategy.biedronka.version:1.0}") String resolverVersion, ObjectMapper objectMapper) {
-        this.resolverVersion = resolverVersion;
-        this.objectMapper = objectMapper;
-
-        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
-
     public ReceiptResolverStrategyType strategy() {
         return ReceiptResolverStrategyType.BIEDRONKA_JSON;
     }
-
 
     @Override
     public ReceiptRevisionResolveData execute(List<String> filePaths) {

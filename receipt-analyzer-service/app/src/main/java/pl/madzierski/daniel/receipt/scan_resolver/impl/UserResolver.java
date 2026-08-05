@@ -1,13 +1,13 @@
 package pl.madzierski.daniel.receipt.scan_resolver.impl;
 
-import org.springframework.stereotype.Service;
+import lombok.AllArgsConstructor;
+import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategyType;
 
 import java.util.List;
 
-@Service
+@AllArgsConstructor
 public class UserResolver implements ReceiptResolverStrategy {
 
     @Override
