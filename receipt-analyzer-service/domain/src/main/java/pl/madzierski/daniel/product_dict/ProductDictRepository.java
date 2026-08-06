@@ -1,8 +1,12 @@
 package pl.madzierski.daniel.product_dict;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
 
-@Repository
-interface ProductDictRepository extends JpaRepository<ProductDictEntity, String> {
+interface ProductDictRepository {
+    Optional<ProductDict> findById(String productDictId);
+
+    void deleteAllByIdIn(List<String> productDictIdList);
+
+    <S extends ProductDict> List<S> saveAll(Iterable<S> entities);
 }

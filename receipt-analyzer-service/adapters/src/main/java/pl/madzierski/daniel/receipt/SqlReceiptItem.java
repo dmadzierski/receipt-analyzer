@@ -20,11 +20,11 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners({AuditingEntityListener.class})
-class ReceiptItemEntity {
+class SqlReceiptItem {
 
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "parentItem")
-    private final Set<ReceiptItemEntity> childItems = new HashSet<>();
+    private final Set<SqlReceiptItem> childItems = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -35,7 +35,7 @@ class ReceiptItemEntity {
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;
     @ManyToOne(fetch = FetchType.LAZY)
-    private ReceiptRevisionEntity receiptRevision;
+    private SqlReceiptRevision receiptRevision;
     private String name;
     @ManyToOne
     @JoinColumn(name = "product_dict_id")
@@ -47,14 +47,14 @@ class ReceiptItemEntity {
     private Integer position;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_item_id")
-    private ReceiptItemEntity parentItem;
+    private SqlReceiptItem parentItem;
 
-    public ReceiptItemEntity(String id) {
+    public SqlReceiptItem(String id) {
         this.id = id;
     }
 
-    public ReceiptItemEntity(ReceiptRevisionEntity receiptRevision, String name, ProductDictQueryEntity nameDict, Double amount,
-                             Double unitPrice, Double discount, Double totalPrice, Integer position, ReceiptItemEntity parentItem) {
+    public SqlReceiptItem(SqlReceiptRevision receiptRevision, String name, ProductDictQueryEntity nameDict, Double amount,
+                          Double unitPrice, Double discount, Double totalPrice, Integer position, SqlReceiptItem parentItem) {
         this.receiptRevision = receiptRevision;
         this.name = name;
         this.nameDict = nameDict;
@@ -66,10 +66,22 @@ class ReceiptItemEntity {
         this.parentItem = parentItem;
     }
 
+    public static SqlReceiptItem fromReceiptItem(ReceiptItem item) {
+        SqlReceiptItem sqlReceiptItem = new SqlReceiptItem();
+        sqlReceiptItem.setId(item.getId());
+        sqlReceiptItem.setName(item.getName());
+        sqlReceiptItem.setAmount(item.getAmount());
+        sqlReceiptItem.setUnitPrice(item.getUnitPrice());
+        sqlReceiptItem.setDiscount(item.getDiscount());
+        sqlReceiptItem.setTotalPrice(item.getTotalPrice());
+        sqlReceiptItem.setPosition(item.getPosition());
+        return sqlReceiptItem;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        ReceiptItemEntity that = (ReceiptItemEntity) o;
+        SqlReceiptItem that = (SqlReceiptItem) o;
         return Objects.equals(name, that.name) && Objects.equals(amount, that.amount) && Objects.equals(unitPrice, that.unitPrice) && Objects.equals(discount, that.discount) && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(position, that.position);
     }
 
@@ -78,4 +90,15 @@ class ReceiptItemEntity {
         return Objects.hash(name, amount, unitPrice, discount, totalPrice, position);
     }
 
+    public ReceiptItem toReceiptItem() {
+        ReceiptItem receiptItem = new ReceiptItem();
+        receiptItem.setId(this.id);
+        receiptItem.setName(this.name);
+        receiptItem.setAmount(this.amount);
+        receiptItem.setUnitPrice(this.unitPrice);
+        receiptItem.setDiscount(this.discount);
+        receiptItem.setTotalPrice(this.totalPrice);
+        receiptItem.setPosition(this.position);
+        return receiptItem;
+    }
 }

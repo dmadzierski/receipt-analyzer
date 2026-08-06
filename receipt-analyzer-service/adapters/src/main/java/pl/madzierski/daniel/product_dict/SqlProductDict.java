@@ -19,10 +19,10 @@ import java.util.Set;
 @Table(name = "product_dict")
 @EqualsAndHashCode
 @EntityListeners({AuditingEntityListener.class})
-class ProductDictEntity {
+class SqlProductDict {
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private final Set<ProductAliasEntity> aliases = new HashSet<>();
+    private final Set<SqlProductAlias> aliases = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -36,5 +36,23 @@ class ProductDictEntity {
     private String name;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_category_id")
-    private ProductCategoryEntity productCategory;
+    private SqlProductCategory productCategory;
+
+    public static <S extends ProductDict> SqlProductDict fromProductDict(S s) {
+        SqlProductDict sqlProductDict = new SqlProductDict();
+        sqlProductDict.setId(s.getId());
+        sqlProductDict.setName(s.getName());
+        sqlProductDict.setCreatedDate(s.getCreatedDate());
+        sqlProductDict.setModifiedDate(s.getModifiedDate());
+        return sqlProductDict;
+    }
+
+    public ProductDict toProductDict() {
+        ProductDict productDict = new ProductDict();
+        productDict.setId(this.id);
+        productDict.setName(this.name);
+        productDict.setCreatedDate(this.createdDate);
+        productDict.setModifiedDate(this.modifiedDate);
+        return productDict;
+    }
 }

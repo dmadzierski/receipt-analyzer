@@ -1,10 +1,10 @@
 package pl.madzierski.daniel.file_group;
 
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,22 +12,18 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pl.madzierski.daniel.receipt.model.ReceiptQueryEntity;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "receipt_file_group")
 @NoArgsConstructor
-@Getter
-@Setter
 @EntityListeners({AuditingEntityListener.class})
-class FileGroupEntity {
+public class SqlFileGroup {
 
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final Set<FileEntity> files = new HashSet<>();
+    private final Set<SqlFile> files = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -44,34 +40,19 @@ class FileGroupEntity {
     private ReceiptQueryEntity receipt;
     private Boolean isOriginal;
 
-    public FileGroupEntity(FileType fileType, ReceiptQueryEntity receipt, Boolean isOriginal) {
-        this.fileType = fileType;
-        this.receipt = receipt;
-        this.isOriginal = isOriginal;
+    static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
+        SqlFileGroup sqlFileGroup = new SqlFileGroup();
+        sqlFileGroup.fileType = fileGroup.getFileType();
+        sqlFileGroup.receipt = fileGroup.getReceipt();
+        sqlFileGroup.isOriginal = fileGroup.getIsOriginal();
+        return sqlFileGroup;
     }
 
-    void addFile(FileEntity file) {
-        this.files.add(file);
-    }
-
-    Set<FileEntity> getFiles() {
-        return Collections.unmodifiableSet(this.files);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        FileGroupEntity that = (FileGroupEntity) o;
-        return fileType == that.fileType && Objects.equals(isOriginal, that.isOriginal);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(fileType);
-        result = 31 * result + Objects.hashCode(isOriginal);
-        return result;
+    public FileGroup toFileGroup() {
+        FileGroup fileGroup = new FileGroup();
+        fileGroup.setFileType(this.fileType);
+        fileGroup.setReceipt(this.receipt);
+        fileGroup.setIsOriginal(this.isOriginal);
+        return fileGroup;
     }
 }

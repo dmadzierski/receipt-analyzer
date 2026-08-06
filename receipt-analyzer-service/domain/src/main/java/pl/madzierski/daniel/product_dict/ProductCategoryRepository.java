@@ -1,15 +1,18 @@
 package pl.madzierski.daniel.product_dict;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-interface ProductCategoryRepository extends JpaRepository<ProductCategoryEntity, String> {
-    List<ProductCategoryEntity> findAllByOrderByNameAsc();
+interface ProductCategoryRepository {
+    List<ProductCategory> findAllByOrderByNameAsc();
 
     boolean existsByName(String name);
 
     boolean existsByNameAndIdNot(String name, String id);
+
+    ProductCategory save(ProductCategory productCategory);
+
+    Optional<ProductCategory> findById(String productCategoryId);
+
+    void delete(ProductCategory productCategory);
 }

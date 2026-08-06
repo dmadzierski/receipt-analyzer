@@ -15,13 +15,13 @@ import java.util.Objects;
 
 
 @Entity
-@Table(name = "product_alias")
+@Table(name = "product_category")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @EntityListeners({AuditingEntityListener.class})
-class ProductAliasEntity {
+class SqlProductCategory {
 
     @Id
     @UuidGenerator
@@ -38,16 +38,21 @@ class ProductAliasEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_dict_id", nullable = false)
-    private ProductDictEntity productDict;
+    public static SqlProductCategory formProductCategory(ProductCategory productCategory) {
+        SqlProductCategory sqlProductCategory = new SqlProductCategory();
+        sqlProductCategory.setId(productCategory.getId());
+        sqlProductCategory.setName(productCategory.getName());
+        sqlProductCategory.setCreatedDate(productCategory.getCreatedDate());
+        sqlProductCategory.setModifiedDate(productCategory.getModifiedDate());
+        return sqlProductCategory;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        ProductAliasEntity that = (ProductAliasEntity) o;
+        SqlProductCategory that = (SqlProductCategory) o;
         return Objects.equals(name, that.name);
     }
 
@@ -56,5 +61,14 @@ class ProductAliasEntity {
         int result = super.hashCode();
         result = 31 * result + Objects.hashCode(name);
         return result;
+    }
+
+    public ProductCategory toProductCategory() {
+        ProductCategory productCategory = new ProductCategory();
+        productCategory.setId(this.id);
+        productCategory.setName(this.name);
+        productCategory.setCreatedDate(this.createdDate);
+        productCategory.setModifiedDate(this.modifiedDate);
+        return productCategory;
     }
 }

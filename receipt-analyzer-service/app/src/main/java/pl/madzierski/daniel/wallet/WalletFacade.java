@@ -18,7 +18,7 @@ public class WalletFacade {
     private final ReceiptQueryRepository receiptQueryRepository;
 
     CreateWalletResponse addWallet(CreateWalletRequest request, String userSub) {
-        WalletEntity savedWallet = walletRepository.save(WalletEntity.builder().name(request.name()).userSub(userSub).build());
+        Wallet savedWallet = walletRepository.save(Wallet.builder().name(request.name()).userSub(userSub).build());
         return new CreateWalletResponse(savedWallet.getId(), savedWallet.getName());
     }
 

@@ -21,7 +21,7 @@ import java.util.Set;
 @Table(name = "wallet")
 @Builder
 @EntityListeners({AuditingEntityListener.class})
-class WalletEntity {
+class SqlWallet {
 
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "wallet")
@@ -39,12 +39,22 @@ class WalletEntity {
     @Column(name = "user_sub")
     private String userSub;
 
+    public static SqlWallet fromWallet(Wallet wallet) {
+        return SqlWallet.builder()
+            .id(wallet.getId())
+            .createdDate(wallet.getCreatedDate())
+            .modifiedDate(wallet.getModifiedDate())
+            .name(wallet.getName())
+            .userSub(wallet.getUserSub())
+            .build();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        WalletEntity wallet = (WalletEntity) o;
+        SqlWallet wallet = (SqlWallet) o;
         return Objects.equals(name, wallet.name) && Objects.equals(userSub, wallet.userSub);
     }
 
@@ -54,5 +64,15 @@ class WalletEntity {
         result = 31 * result + Objects.hashCode(name);
         result = 31 * result + Objects.hashCode(userSub);
         return result;
+    }
+
+    public Wallet toWallet() {
+        return Wallet.builder()
+            .id(id)
+            .createdDate(createdDate)
+            .modifiedDate(modifiedDate)
+            .name(name)
+            .userSub(userSub)
+            .build();
     }
 }

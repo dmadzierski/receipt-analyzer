@@ -22,13 +22,13 @@ import java.util.Set;
 @Table(name = "receipt")
 @Builder
 @EntityListeners({AuditingEntityListener.class})
-class ReceiptEntity {
+class SqlReceipt {
 
     @Getter(AccessLevel.NONE)
     @OneToMany
     private final Set<FileGroupQueryEntity> fileGroups = new HashSet<>();
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "receipt")
-    private final Set<ReceiptRevisionEntity> receiptRevisions = new HashSet<>();
+    private final Set<SqlReceiptRevision> receiptRevisions = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -44,7 +44,17 @@ class ReceiptEntity {
     @JoinColumn(name = "wallet_id")
     private WalletQueryEntity wallet;
 
-    public void addRevision(ReceiptRevisionEntity receiptRevision) {
+    public static SqlReceipt fromReceipt(Receipt receipt) {
+        SqlReceipt sqlReceipt = new SqlReceipt();
+        sqlReceipt.setId(receipt.getId());
+        sqlReceipt.setCreatedDate(receipt.getCreatedDate());
+        sqlReceipt.setModifiedDate(receipt.getModifiedDate());
+        sqlReceipt.setName(receipt.getName());
+        sqlReceipt.setDescription(receipt.getDescription());
+        return sqlReceipt;
+    }
+
+    public void addRevision(SqlReceiptRevision receiptRevision) {
         this.receiptRevisions.add(receiptRevision);
     }
 
@@ -53,7 +63,7 @@ class ReceiptEntity {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        ReceiptEntity that = (ReceiptEntity) o;
+        SqlReceipt that = (SqlReceipt) o;
         return Objects.equals(name, that.name) && Objects.equals(description, that.description);
     }
 
@@ -65,4 +75,13 @@ class ReceiptEntity {
         return result;
     }
 
+    public Receipt toReceipt() {
+        Receipt receipt = new Receipt();
+        receipt.setId(id);
+        receipt.setCreatedDate(createdDate);
+        receipt.setModifiedDate(modifiedDate);
+        receipt.setName(name);
+        receipt.setDescription(description);
+        return receipt;
+    }
 }

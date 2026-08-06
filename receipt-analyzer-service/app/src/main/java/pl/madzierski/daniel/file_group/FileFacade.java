@@ -11,7 +11,6 @@ import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.receipt.model.ReceiptDto;
 import pl.madzierski.daniel.receipt.model.ReceiptQueryEntity;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -25,28 +24,28 @@ public class FileFacade {
     public FileGroupDto save(ReceiptDto receiptDto, MultipartFile file, String userSub) {
         FileType fileType = FileType.invoke(file.getContentType());
         ReceiptQueryEntity receiptQueryEntity = new ReceiptQueryEntity(receiptDto.getId(), null);
-        FileGroupEntity fileGroupEntity = new FileGroupEntity(fileType, receiptQueryEntity, true);
-        FileEntity fileEntity = new FileEntity(null, null, fileGroupEntity, null, 0);
-        String pathInString = createPath(userSub, fileEntity, fileGroupEntity, fileType.getExtension(), receiptDto);
+        FileGroup fileGroup = new FileGroup(fileType, receiptQueryEntity, true);
+        File fileEntity = new File(null, null, fileGroup, null, 0);
+        String pathInString = createPath(userSub, fileEntity, fileGroup, fileType.getExtension(), receiptDto);
         fileEntity.setPath(pathInString);
-        fileGroupEntity.addFile(fileEntity);
+        fileGroup.addFile(fileEntity);
         saveFile(pathInString, file);
-        return toDto(fileGroupEntity);
+        return toDto(fileGroup);
     }
 
-    private FileGroupDto toDto(FileGroupEntity fileGroupEntity) {
-        return new FileGroupDto(fileGroupEntity.getFiles().stream().map(this::toDto).collect(Collectors.toSet()));
+    private FileGroupDto toDto(FileGroup fileGroup) {
+        return new FileGroupDto(fileGroup.getFiles().stream().map(this::toDto).collect(Collectors.toSet()));
     }
 
-    private FileDto toDto(FileEntity fileEntity) {
-        return new FileDto(fileEntity.getId(), fileEntity.getPath(), fileEntity.getRawData(), fileEntity.getPartNumber());
+    private FileDto toDto(File file) {
+        return new FileDto(file.getId(), file.getPath(), file.getRawData(), file.getPartNumber());
     }
 
 
     private String createPath(
         String currentUserSub,
-        FileEntity file,
-        FileGroupEntity fileEntity,
+        File file,
+        FileGroup fileEntity,
         String fileExtension,
         ReceiptDto receipt
     ) {
@@ -55,14 +54,14 @@ public class FileFacade {
     }
 
     FileSystemResource getFile(String receiptFileId) {
-        FileEntity fileEntity = fileRepository.findById(receiptFileId)
+        File fileEntity = fileRepository.findById(receiptFileId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_RECEIPT_NOT_FOUND));
         String path = fileEntity.getPath();
         if (path == null) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_RECEIPT_PATH_NOT_FOUND);
         }
 
-        File file = new File(path);
+        java.io.File file = new java.io.File(path);
 
         if (!file.exists()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);
@@ -73,7 +72,7 @@ public class FileFacade {
 
     private void saveFile(String path, MultipartFile file) {
         try {
-            File destFile = new File(path);
+            java.io.File destFile = new java.io.File(path);
             if (destFile.getParentFile() != null) {
                 destFile.getParentFile().mkdirs();
             }

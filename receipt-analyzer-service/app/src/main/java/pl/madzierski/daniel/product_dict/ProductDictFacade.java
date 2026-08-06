@@ -56,10 +56,10 @@ public class ProductDictFacade {
         updateProductDictListRequest.items().forEach(updateProductDict -> {
             List<String> dictIds = updateProductDict.productDictList();
             String primaryDictId = dictIds.getFirst();
-            ProductDictEntity productDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_DICT_NOT_FOUND));
+            ProductDict productDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_DICT_NOT_FOUND));
             productDict.setName(updateProductDict.canonicalName().trim());
             if (updateProductDict.productCategoryId() != null) {
-                ProductCategoryEntity productCategory =
+                ProductCategory productCategory =
                     productCategoryRepository.findById(updateProductDict.productCategoryId()).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
                 productDict.setProductCategory(productCategory);
             }
@@ -67,12 +67,12 @@ public class ProductDictFacade {
                 List<String> productDictIdsListToMerge = dictIds.subList(1, dictIds.size());
                 this.mergeProductAliasesOfProductDictList(productDict.getId(), productDictIdsListToMerge);
                 receiptFacade.reassignProductDict(toDto(productDict), productDictIdsListToMerge);
-                productDictRepository.deleteAllByIdInBatch(productDictIdsListToMerge);
+                productDictRepository.deleteAllByIdIn(productDictIdsListToMerge);
             }
         });
     }
 
-    private ProductDictQueryEntity toDto(ProductDictEntity productDict) {
+    private ProductDictQueryEntity toDto(ProductDict productDict) {
         return new ProductDictQueryEntity(productDict.getId());
     }
 
@@ -132,13 +132,13 @@ public class ProductDictFacade {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_ALREADY_EXISTS);
         }
 
-        ProductCategoryEntity savedProductCategory = productCategoryRepository.save(new ProductCategoryEntity(name));
+        ProductCategory savedProductCategory = productCategoryRepository.save(new ProductCategory(name));
         return new CreateProductCategoryResponse(savedProductCategory.getId(), savedProductCategory.getName());
     }
 
     @Transactional
     UpdateProductCategoryResponse updateProductCategory(String productCategoryId, UpdateProductCategoryRequest request) {
-        ProductCategoryEntity productCategory = productCategoryRepository.findById(productCategoryId)
+        ProductCategory productCategory = productCategoryRepository.findById(productCategoryId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
         String name = request.name().trim();
 
@@ -147,13 +147,13 @@ public class ProductDictFacade {
         }
 
         productCategory.setName(name);
-        ProductCategoryEntity savedProductCategory = productCategoryRepository.save(productCategory);
+        ProductCategory savedProductCategory = productCategoryRepository.save(productCategory);
         return new UpdateProductCategoryResponse(savedProductCategory.getId(), savedProductCategory.getName());
     }
 
     @Transactional
     void deleteProductCategory(String productCategoryId) {
-        ProductCategoryEntity productCategory = productCategoryRepository.findById(productCategoryId)
+        ProductCategory productCategory = productCategoryRepository.findById(productCategoryId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
         if (this.countByProductCategoryId(productCategory.getId()) > 0) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_IN_USE);

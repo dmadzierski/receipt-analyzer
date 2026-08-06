@@ -14,30 +14,30 @@ class ReceiptItemFactory {
 
     private final ProductDictFacade productDictFacade;
 
-    ReceiptItemEntity from(ReceiptItemDto receiptItemDto) {
-        ReceiptItemEntity receiptItemEntity = new ReceiptItemEntity();
-        receiptItemEntity.setId(receiptItemDto.getId());
-        receiptItemEntity.setName(receiptItemDto.getName());
-        receiptItemEntity.setAmount(receiptItemDto.getAmount());
-        receiptItemEntity.setUnitPrice(receiptItemDto.getUnitPrice());
-        receiptItemEntity.setDiscount(receiptItemDto.getDiscount());
-        receiptItemEntity.setTotalPrice(receiptItemDto.getTotalPrice());
-        receiptItemEntity.setPosition(receiptItemDto.getPosition());
+    ReceiptItem from(ReceiptItemDto receiptItemDto) {
+        ReceiptItem receiptItem = new ReceiptItem();
+        receiptItem.setId(receiptItemDto.getId());
+        receiptItem.setName(receiptItemDto.getName());
+        receiptItem.setAmount(receiptItemDto.getAmount());
+        receiptItem.setUnitPrice(receiptItemDto.getUnitPrice());
+        receiptItem.setDiscount(receiptItemDto.getDiscount());
+        receiptItem.setTotalPrice(receiptItemDto.getTotalPrice());
+        receiptItem.setPosition(receiptItemDto.getPosition());
         if (receiptItemDto.getParentItem() != null)
-            receiptItemEntity.setParentItem(from(receiptItemDto.getParentItem()));
-        return receiptItemEntity;
+            receiptItem.setParentItem(from(receiptItemDto.getParentItem()));
+        return receiptItem;
     }
 
-    public ReceiptItemEntity from(ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem resolveDataItem) {
-        ReceiptItemEntity receiptItemEntity = new ReceiptItemEntity();
-        receiptItemEntity.setName(resolveDataItem.name());
-        receiptItemEntity.setAmount(resolveDataItem.amount());
-        receiptItemEntity.setUnitPrice(resolveDataItem.unitPrice());
-        receiptItemEntity.setDiscount(resolveDataItem.discount());
-        receiptItemEntity.setTotalPrice(resolveDataItem.totalPrice());
-        receiptItemEntity.setPosition(resolveDataItem.position());
+    public ReceiptItem from(ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem resolveDataItem) {
+        ReceiptItem receiptItem = new ReceiptItem();
+        receiptItem.setName(resolveDataItem.name());
+        receiptItem.setAmount(resolveDataItem.amount());
+        receiptItem.setUnitPrice(resolveDataItem.unitPrice());
+        receiptItem.setDiscount(resolveDataItem.discount());
+        receiptItem.setTotalPrice(resolveDataItem.totalPrice());
+        receiptItem.setPosition(resolveDataItem.position());
         Optional<ProductDictDto> canonicalName = productDictFacade.findCanonicalName(resolveDataItem.name());
-        receiptItemEntity.setNameDict(canonicalName.map(productDictDto -> new ProductDictQueryEntity(productDictDto.getId())).orElse(null));
-        return receiptItemEntity;
+        receiptItem.setNameDict(canonicalName.map(productDictDto -> new ProductDictQueryEntity(productDictDto.getId())).orElse(null));
+        return receiptItem;
     }
 }
