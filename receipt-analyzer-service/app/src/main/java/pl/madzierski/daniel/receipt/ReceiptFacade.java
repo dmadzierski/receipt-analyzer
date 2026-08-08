@@ -2,7 +2,6 @@ package pl.madzierski.daniel.receipt;
 
 import lombok.AllArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.FileFacade;
@@ -12,11 +11,12 @@ import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.model.ProductAliasDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictDto;
-import pl.madzierski.daniel.product_dict.model.ProductDictQueryEntity;
+import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.*;
 import pl.madzierski.daniel.receipt.scan_resolver.service.ReceiptResolverLocatorService;
-import pl.madzierski.daniel.wallet.model.WalletQueryEntity;
+import pl.madzierski.daniel.wallet.model.WalletQuery;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -39,9 +39,9 @@ public class ReceiptFacade {
     private final ProductDictFacade productDictFacade;
 
     @Transactional
-    CreateReceiptResponse addReceipt(String userSub, MultipartFile file, CreateReceiptRequest body) {
+    CreateReceiptResponse addReceipt(String userSub, InputStream fileInputStream, String fileContentType, CreateReceiptRequest body) {
         Receipt receipt = receiptRepository.save(createReceipt(body));
-        FileGroupDto fileGroup = fileFacade.save(toDto(receipt), file, userSub);
+        FileGroupDto fileGroup = fileFacade.save(toDto(receipt), fileInputStream, fileContentType, userSub);
         List<String> paths = fileGroup.files().stream().map(FileDto::getPath).toList();
         if (paths.isEmpty()) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
         ReceiptRevisionResolveData revisionData = receiptResolverLocatorService.resolve(paths, body.strategy());
@@ -58,7 +58,7 @@ public class ReceiptFacade {
 
     private Receipt createReceipt(CreateReceiptRequest body) {
         String name = body.name() != null && !body.name().trim().isEmpty() ? body.name() : LocalDateTime.now(ZoneId.systemDefault()).toString();
-        return Receipt.builder().name(name).description(body.description()).wallet(new WalletQueryEntity(body.walletId())).build();
+        return Receipt.builder().name(name).description(body.description()).wallet(new WalletQuery(body.walletId())).build();
     }
 
     @Transactional(readOnly = true)
@@ -136,7 +136,7 @@ public class ReceiptFacade {
                         receiptItemRepository.save(entity);
                     });
                 } else {
-                    ProductDictQueryEntity productDict = productDictFacade.findCanonicalName(incomingItem.name()).map(item -> new ProductDictQueryEntity(item.getId())).orElse(null);
+                    ProductDictQuery productDict = productDictFacade.findCanonicalName(incomingItem.name()).map(item -> new ProductDictQuery(item.getId())).orElse(null);
                     ReceiptItem newItem = new ReceiptItem(revision, incomingItem.name(), productDict, incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null);
                     receiptItemRepository.save(newItem);
                 }
@@ -203,14 +203,14 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    public void reassignProductDict(ProductDictQueryEntity primaryDict, List<String> productDictIdList) {
+    public void reassignProductDict(ProductDictQuery primaryDict, List<String> productDictIdList) {
         receiptItemRepository.reassignProductDict(primaryDict, productDictIdList);
     }
 
     public void updateItemsProductDict(Map<ProductDictDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap) {
         receiptItemRepository.saveAll(receiptItemToProductDictNameMap.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(receiptItemDto -> {
             ReceiptItem item = receiptItemFactory.from(receiptItemDto);
-            item.setNameDict(new ProductDictQueryEntity(entry.getKey().getId()));
+            item.setNameDict(new ProductDictQuery(entry.getKey().getId()));
             return item;
         })).collect(Collectors.toSet()));
     }

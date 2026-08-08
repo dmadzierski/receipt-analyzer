@@ -3,7 +3,7 @@ package pl.madzierski.daniel.file_group;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.madzierski.daniel.receipt.model.ReceiptQueryEntity;
+import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -21,10 +21,10 @@ class FileGroup {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private FileType fileType;
-    private ReceiptQueryEntity receipt;
+    private ReceiptQuery receipt;
     private Boolean isOriginal;
 
-    public FileGroup(FileType fileType, ReceiptQueryEntity receipt, Boolean isOriginal) {
+    public FileGroup(FileType fileType, ReceiptQuery receipt, Boolean isOriginal) {
         this.fileType = fileType;
         this.receipt = receipt;
         this.isOriginal = isOriginal;

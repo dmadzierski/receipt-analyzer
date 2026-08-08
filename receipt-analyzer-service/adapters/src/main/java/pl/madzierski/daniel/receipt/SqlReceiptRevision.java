@@ -22,12 +22,7 @@ import java.util.Set;
 @EntityListeners({AuditingEntityListener.class})
 @Builder
 class SqlReceiptRevision {
-    @Getter(AccessLevel.NONE)
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
-    private final Set<SqlReceiptItem> items = new HashSet<>();
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "parentReceiptRevision")
-    private final Set<SqlReceiptRevision> childReceiptRevisions = new HashSet<>();
+
     @Id
     @UuidGenerator
     private String id;
@@ -51,6 +46,12 @@ class SqlReceiptRevision {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_receipt_revision_id")
     private SqlReceiptRevision parentReceiptRevision;
+    @Getter(AccessLevel.NONE)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
+    private final Set<SqlReceiptItem> items = new HashSet<>();
+    @Getter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "parentReceiptRevision")
+    private final Set<SqlReceiptRevision> childReceiptRevisions = new HashSet<>();
 
     public static SqlReceiptRevision fromReceiptRevision(ReceiptRevision revision) {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();

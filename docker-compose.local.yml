@@ -47,11 +47,11 @@ services:
       KC_HTTP_ENABLED: true
       KC_PROXY: EDGE
       KC_SPI_COOKIE_SAMESITE_LEGACY_SAMESITE_VALUE: none
-#      LOGGING_LEVEL_ROOT: INFO
+      #      LOGGING_LEVEL_ROOT: INFO
       KC_HEALTH_ENABLED: true
     command: start-dev
     healthcheck:
-      test: ["CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?"]
+      test: [ "CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -74,7 +74,7 @@ services:
       keycloak:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "service", "nginx", "status"]
+      test: [ "CMD", "service", "nginx", "status" ]
       interval: 5s
       timeout: 5s
       retries: 10

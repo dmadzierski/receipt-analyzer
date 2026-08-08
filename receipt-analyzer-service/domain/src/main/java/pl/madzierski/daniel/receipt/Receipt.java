@@ -1,8 +1,8 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.*;
-import pl.madzierski.daniel.file_group.model.FileGroupQueryEntity;
-import pl.madzierski.daniel.wallet.model.WalletQueryEntity;
+import pl.madzierski.daniel.file_group.model.FileGroupQuery;
+import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -16,14 +16,14 @@ import java.util.Set;
 @Builder
 class Receipt {
 
-    private final Set<FileGroupQueryEntity> fileGroups = new HashSet<>();
+    private final Set<FileGroupQuery> fileGroups = new HashSet<>();
     private final Set<ReceiptRevision> receiptRevisions = new HashSet<>();
     private String id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
     private String description;
-    private WalletQueryEntity wallet;
+    private WalletQuery wallet;
 
     public void addRevision(ReceiptRevision receiptRevision) {
         this.receiptRevisions.add(receiptRevision);

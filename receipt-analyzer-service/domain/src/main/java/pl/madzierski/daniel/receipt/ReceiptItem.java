@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.madzierski.daniel.product_dict.model.ProductDictQueryEntity;
+import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -23,7 +23,7 @@ class ReceiptItem {
     private LocalDateTime modifiedDate;
     private ReceiptRevision receiptRevision;
     private String name;
-    private ProductDictQueryEntity nameDict;
+    private ProductDictQuery nameDict;
     private Double amount;
     private Double unitPrice;
     private Double discount;
@@ -35,7 +35,7 @@ class ReceiptItem {
         this.id = id;
     }
 
-    public ReceiptItem(ReceiptRevision receiptRevision, String name, ProductDictQueryEntity nameDict, Double amount,
+    public ReceiptItem(ReceiptRevision receiptRevision, String name, ProductDictQuery nameDict, Double amount,
                        Double unitPrice, Double discount, Double totalPrice, Integer position, ReceiptItem parentItem) {
         this.receiptRevision = receiptRevision;
         this.name = name;

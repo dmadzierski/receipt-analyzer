@@ -72,8 +72,8 @@ public class ProductDictFacade {
         });
     }
 
-    private ProductDictQueryEntity toDto(ProductDict productDict) {
-        return new ProductDictQueryEntity(productDict.getId());
+    private ProductDictQuery toDto(ProductDict productDict) {
+        return new ProductDictQuery(productDict.getId());
     }
 
 

@@ -1,21 +1,13 @@
 package pl.madzierski.daniel.wallet.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Objects;
 
-@Entity
-@Table(name = "wallet")
 @NoArgsConstructor
 @AllArgsConstructor
-public class WalletQueryEntity {
-    @Id
-    @UuidGenerator
+public class WalletQuery {
     private String id;
 
     @Override
@@ -23,7 +15,7 @@ public class WalletQueryEntity {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        WalletQueryEntity that = (WalletQueryEntity) o;
+        WalletQuery that = (WalletQuery) o;
         return Objects.equals(id, that.id);
     }
 

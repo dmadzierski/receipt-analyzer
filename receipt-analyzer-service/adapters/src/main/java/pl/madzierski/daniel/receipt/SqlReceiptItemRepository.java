@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import pl.madzierski.daniel.product_dict.model.ProductDictQueryEntity;
+import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +19,7 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
         SET r.nameDict = :dict
         WHERE r.nameDict.id IN (:productDictIdList)
         """)
-    void reassignProductDict(ProductDictQueryEntity dict, List<String> productDictIdList);
+    void reassignProductDict(ProductDictQuery dict, List<String> productDictIdList);
 
 }
 
@@ -30,7 +30,7 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     private final SqlReceiptItemRepository repository;
 
     @Override
-    public void reassignProductDict(ProductDictQueryEntity dict, List<String> productDictIdList) {
+    public void reassignProductDict(ProductDictQuery dict, List<String> productDictIdList) {
         this.repository.reassignProductDict(dict, productDictIdList);
     }
 

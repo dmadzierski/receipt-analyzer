@@ -9,7 +9,7 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import pl.madzierski.daniel.receipt.model.ReceiptQueryEntity;
+import pl.madzierski.daniel.receipt.SqlReceiptQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -21,9 +21,6 @@ import java.util.Set;
 @EntityListeners({AuditingEntityListener.class})
 public class SqlFileGroup {
 
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final Set<SqlFile> files = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -37,13 +34,16 @@ public class SqlFileGroup {
     private FileType fileType;
     @ManyToOne
     @JoinColumn(name = "receipt_id")
-    private ReceiptQueryEntity receipt;
+    private SqlReceiptQuery receipt;
     private Boolean isOriginal;
+    @Getter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final Set<SqlFile> files = new HashSet<>();
 
     static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
         SqlFileGroup sqlFileGroup = new SqlFileGroup();
         sqlFileGroup.fileType = fileGroup.getFileType();
-        sqlFileGroup.receipt = fileGroup.getReceipt();
+        sqlFileGroup.receipt = SqlReceiptQuery.fromReceipt(fileGroup.getReceipt());
         sqlFileGroup.isOriginal = fileGroup.getIsOriginal();
         return sqlFileGroup;
     }
@@ -51,7 +51,7 @@ public class SqlFileGroup {
     public FileGroup toFileGroup() {
         FileGroup fileGroup = new FileGroup();
         fileGroup.setFileType(this.fileType);
-        fileGroup.setReceipt(this.receipt);
+        fileGroup.setReceipt(this.receipt.toReceipt());
         fileGroup.setIsOriginal(this.isOriginal);
         return fileGroup;
     }

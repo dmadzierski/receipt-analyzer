@@ -6,7 +6,8 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import pl.madzierski.daniel.receipt.model.ReceiptQueryEntity;
+import pl.madzierski.daniel.receipt.SqlReceiptQuery;
+import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -23,9 +24,6 @@ import java.util.Set;
 @EntityListeners({AuditingEntityListener.class})
 class SqlWallet {
 
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "wallet")
-    private final Set<ReceiptQueryEntity> receipts = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -38,6 +36,10 @@ class SqlWallet {
     private String name;
     @Column(name = "user_sub")
     private String userSub;
+    @Getter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "wallet")
+    private final Set<SqlReceiptQuery> receipts = new HashSet<>();
+
 
     public static SqlWallet fromWallet(Wallet wallet) {
         return SqlWallet.builder()

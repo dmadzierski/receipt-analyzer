@@ -6,7 +6,7 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import pl.madzierski.daniel.product_dict.model.ProductDictQueryEntity;
+import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -22,9 +22,6 @@ import java.util.Set;
 @EntityListeners({AuditingEntityListener.class})
 class SqlReceiptItem {
 
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "parentItem")
-    private final Set<SqlReceiptItem> childItems = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -39,7 +36,7 @@ class SqlReceiptItem {
     private String name;
     @ManyToOne
     @JoinColumn(name = "product_dict_id")
-    private ProductDictQueryEntity nameDict;
+    private SqlProductDictQuery nameDict;
     private Double amount;
     private Double unitPrice;
     private Double discount;
@@ -48,23 +45,9 @@ class SqlReceiptItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_item_id")
     private SqlReceiptItem parentItem;
-
-    public SqlReceiptItem(String id) {
-        this.id = id;
-    }
-
-    public SqlReceiptItem(SqlReceiptRevision receiptRevision, String name, ProductDictQueryEntity nameDict, Double amount,
-                          Double unitPrice, Double discount, Double totalPrice, Integer position, SqlReceiptItem parentItem) {
-        this.receiptRevision = receiptRevision;
-        this.name = name;
-        this.nameDict = nameDict;
-        this.amount = amount;
-        this.unitPrice = unitPrice;
-        this.discount = discount;
-        this.totalPrice = totalPrice;
-        this.position = position;
-        this.parentItem = parentItem;
-    }
+    @Getter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "parentItem")
+    private final Set<SqlReceiptItem> childItems = new HashSet<>();
 
     public static SqlReceiptItem fromReceiptItem(ReceiptItem item) {
         SqlReceiptItem sqlReceiptItem = new SqlReceiptItem();

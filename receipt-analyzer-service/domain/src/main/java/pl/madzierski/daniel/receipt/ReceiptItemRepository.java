@@ -1,12 +1,12 @@
 package pl.madzierski.daniel.receipt;
 
-import pl.madzierski.daniel.product_dict.model.ProductDictQueryEntity;
+import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
 import java.util.List;
 
 interface ReceiptItemRepository {
 
-    void reassignProductDict(ProductDictQueryEntity dict, List<String> productDictIdList);
+    void reassignProductDict(ProductDictQuery dict, List<String> productDictIdList);
 
     ReceiptItem save(ReceiptItem newItem);
 

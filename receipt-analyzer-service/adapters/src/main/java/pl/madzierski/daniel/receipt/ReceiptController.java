@@ -16,6 +16,7 @@ import pl.madzierski.daniel.receipt.model.CreateReceiptResponse;
 import pl.madzierski.daniel.receipt.model.GetReceiptDetailsResponse;
 import pl.madzierski.daniel.receipt.model.GetReceiptRevisionsResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 @AllArgsConstructor
@@ -27,8 +28,9 @@ class ReceiptController {
     private final ReceiptFacade receiptFacade;
 
     @PostMapping(consumes = {"multipart/form-data"})
-    ResponseEntity<CreateReceiptResponse> addReceipt(@AuthenticationPrincipal Jwt jwt, @RequestPart(value = "file") MultipartFile file, @RequestPart(value = "body") @NotNull CreateReceiptRequest body) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.receiptFacade.addReceipt(jwt.getSubject(), file,
+    ResponseEntity<CreateReceiptResponse> addReceipt(@AuthenticationPrincipal Jwt jwt, @RequestPart(value = "file") MultipartFile file, @RequestPart(value = "body") @NotNull CreateReceiptRequest body) throws IOException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.receiptFacade.addReceipt(jwt.getSubject(),
+            file.getInputStream(), file.getContentType(),
             body));
     }
 

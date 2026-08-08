@@ -6,8 +6,8 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import pl.madzierski.daniel.file_group.model.FileGroupQueryEntity;
-import pl.madzierski.daniel.wallet.model.WalletQueryEntity;
+import pl.madzierski.daniel.file_group.SqlFileGroupQuery;
+import pl.madzierski.daniel.wallet.SqlWalletQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -24,11 +24,6 @@ import java.util.Set;
 @EntityListeners({AuditingEntityListener.class})
 class SqlReceipt {
 
-    @Getter(AccessLevel.NONE)
-    @OneToMany
-    private final Set<FileGroupQueryEntity> fileGroups = new HashSet<>();
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "receipt")
-    private final Set<SqlReceiptRevision> receiptRevisions = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -42,7 +37,12 @@ class SqlReceipt {
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id")
-    private WalletQueryEntity wallet;
+    private SqlWalletQuery wallet;
+    @Getter(AccessLevel.NONE)
+    @OneToMany
+    private final Set<SqlFileGroupQuery> fileGroups = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "receipt")
+    private final Set<SqlReceiptRevision> receiptRevisions = new HashSet<>();
 
     public static SqlReceipt fromReceipt(Receipt receipt) {
         SqlReceipt sqlReceipt = new SqlReceipt();

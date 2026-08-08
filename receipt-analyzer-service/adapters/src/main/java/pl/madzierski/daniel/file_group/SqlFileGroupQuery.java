@@ -1,17 +1,18 @@
-package pl.madzierski.daniel.product_dict.model;
+package pl.madzierski.daniel.file_group;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
 
 @Entity
-@Table(name = "product_dict")
-@AllArgsConstructor
+@Table(name = "receipt_file_group")
 @NoArgsConstructor
-public class ProductDictQueryEntity {
-
+@AllArgsConstructor
+public class SqlFileGroupQuery {
     @Id
+    @UuidGenerator
     private String id;
 }

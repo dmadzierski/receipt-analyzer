@@ -3,12 +3,12 @@ package pl.madzierski.daniel.receipt;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pl.madzierski.daniel.wallet.model.WalletQueryEntity;
+import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.util.List;
 
 interface SqlReceiptRepository extends JpaRepository<SqlReceipt, String> {
-    List<SqlReceipt> wallet(WalletQueryEntity wallet);
+    List<SqlReceipt> wallet(WalletQuery wallet);
 }
 
 @AllArgsConstructor

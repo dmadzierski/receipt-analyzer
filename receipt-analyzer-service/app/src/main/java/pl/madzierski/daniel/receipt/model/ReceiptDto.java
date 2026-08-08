@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
-import pl.madzierski.daniel.wallet.model.WalletQueryEntity;
+import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -21,5 +21,5 @@ public class ReceiptDto {
     private LocalDateTime modifiedDate;
     private String name;
     private String description;
-    private WalletQueryEntity wallet;
+    private WalletQuery wallet;
 }
