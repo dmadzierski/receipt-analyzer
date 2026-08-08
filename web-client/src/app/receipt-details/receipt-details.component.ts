@@ -37,6 +37,11 @@ import {MatTooltip} from '@angular/material/tooltip';
   styleUrl: './receipt-details.component.scss',
 })
 export class ReceiptDetailsComponent implements OnInit {
+  receiptDetails = {} as GetReceiptDetailsResponse;
+  receiptFileId: string = '';
+  editMode: boolean = false;
+  receiptId: string | null = null;
+
   constructor(
     private readonly receiptService: ReceiptService,
     private readonly revisionService: RevisionService,
@@ -44,14 +49,6 @@ export class ReceiptDetailsComponent implements OnInit {
     private readonly route: ActivatedRoute
   ) {
   }
-
-  receiptDetails = {} as GetReceiptDetailsResponse;
-
-  receiptFileId: string = '';
-
-  editMode: boolean = false;
-
-  receiptId: string | null = null;
 
   ngOnInit(): void {
     this.receiptId = this.route.snapshot.paramMap.get('id');
@@ -96,6 +93,20 @@ export class ReceiptDetailsComponent implements OnInit {
     this.editMode = false
   }
 
+  protected refreshRevisions() {
+    this.receiptService.getReceiptRevisions(this.receiptDetails.id)
+      .subscribe({
+        next: (revisions: Revision[]) => {
+          this.receiptDetails.revisions = revisions;
+        }
+      })
+  }
+
+  protected refreshAliases() {
+    this.revisionService.updateAliases(this.receiptDetails.preferredRevision?.id!!)
+      .subscribe({})
+  }
+
   private refreshRevisionDetails(revisionId: string) {
     if (revisionId) {
       this.getRevisionDate(revisionId).subscribe(
@@ -109,19 +120,5 @@ export class ReceiptDetailsComponent implements OnInit {
       // @ts-ignore
       this.receiptDetails.preferredRevision = null;
     }
-  }
-
-  protected refreshRevisions() {
-    this.receiptService.getReceiptRevisions(this.receiptDetails.id)
-      .subscribe({
-        next: (revisions: Revision[]) => {
-          this.receiptDetails.revisions = revisions;
-        }
-      })
-  }
-
-  protected refreshAliases() {
-    this.revisionService.updateAliases(this.receiptDetails.preferredRevision?.id!!)
-      .subscribe({})
   }
 }

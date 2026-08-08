@@ -3,6 +3,7 @@ import {GetReceiptResponseItem} from './receipt.model';
 export interface GetWalletListResponse {
   items: GetWalletListResponseItem[];
 }
+
 export interface GetWalletListResponseItem {
   id: string;
   name: string;
@@ -11,8 +12,10 @@ export interface GetWalletListResponseItem {
 export class AddWalletData {
   constructor(
     public name: string,
-  ) {}
+  ) {
+  }
 }
+
 export interface AddWalletResponse {
   id: string;
   name: string;

@@ -1,68 +1,69 @@
 @if (revisions) {
-  <table mat-table matSort [dataSource]="data" matSortActive="createdDate" matSortDirection="asc" matSortDisableClear>
+  <table [dataSource]="data" mat-table matSort matSortActive="createdDate" matSortDirection="asc" matSortDisableClear>
 
     <ng-container matColumnDef="selected">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Selected</th>
-      <td mat-cell *matCellDef="let element">
-        <mat-checkbox [checked]="element.id === this.selectedId" [disabled]="false" (click)="changeSelected(element.id)"></mat-checkbox>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Selected</th>
+      <td *matCellDef="let element" mat-cell>
+        <mat-checkbox (click)="changeSelected(element.id)" [checked]="element.id === this.selectedId"
+                      [disabled]="false"></mat-checkbox>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="resolver">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-      <td mat-cell *matCellDef="let element">{{ element.resolver }}</td>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Name</th>
+      <td *matCellDef="let element" mat-cell>{{ element.resolver }}</td>
     </ng-container>
 
     <ng-container matColumnDef="createdDate">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Create date</th>
-      <td mat-cell *matCellDef="let element">{{ element.createdDate | date:'dd/MM/yyyy' }}</td>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Create date</th>
+      <td *matCellDef="let element" mat-cell>{{ element.createdDate | date:'dd/MM/yyyy' }}</td>
     </ng-container>
 
     <ng-container matColumnDef="brand">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Brand</th>
-      <td mat-cell *matCellDef="let element">{{ element.brand }}</td>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Brand</th>
+      <td *matCellDef="let element" mat-cell>{{ element.brand }}</td>
     </ng-container>
 
     <ng-container matColumnDef="totalPrice">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Total price</th>
-      <td mat-cell *matCellDef="let element">{{ element.totalPrice }}</td>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Total price</th>
+      <td *matCellDef="let element" mat-cell>{{ element.totalPrice }}</td>
     </ng-container>
 
     <ng-container matColumnDef="payingDate">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Payment date</th>
-      <td mat-cell *matCellDef="let element">{{ element.payingDate | date:'dd/MM/yyyy' }}</td>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Payment date</th>
+      <td *matCellDef="let element" mat-cell>{{ element.payingDate | date:'dd/MM/yyyy' }}</td>
     </ng-container>
 
     <ng-container matColumnDef="address">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
-      <td mat-cell *matCellDef="let element">{{ element.address }}</td>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Address</th>
+      <td *matCellDef="let element" mat-cell>{{ element.address }}</td>
     </ng-container>
 
     <ng-container matColumnDef="isPreferredRevision">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Preferred</th>
-      <td mat-cell *matCellDef="let element">
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Preferred</th>
+      <td *matCellDef="let element" mat-cell>
         <mat-checkbox [checked]="element.isPreferredRevision" [disabled]="true"></mat-checkbox>
       </td>
     </ng-container>
 
 
     <ng-container matColumnDef="isCorrect">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Correct</th>
-      <td mat-cell *matCellDef="let element">
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Correct</th>
+      <td *matCellDef="let element" mat-cell>
         <mat-checkbox [checked]="element.isCorrect" [disabled]="true"></mat-checkbox>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef> Actions </th>
-      <td mat-cell *matCellDef="let element">
-        <button mat-icon-button color="primary" (click)="duplicateRevision(element.id)" title="Utwórz kopię">
+      <th *matHeaderCellDef mat-header-cell> Actions</th>
+      <td *matCellDef="let element" mat-cell>
+        <button (click)="duplicateRevision(element.id)" color="primary" mat-icon-button title="Utwórz kopię">
           <mat-icon>content_copy</mat-icon>
         </button>
       </td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let _; columns: displayedColumns;"></tr>
+    <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+    <tr *matRowDef="let _; columns: displayedColumns;" mat-row></tr>
   </table>
 }

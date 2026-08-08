@@ -1,7 +1,6 @@
 import {Component, inject, OnInit} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 import Keycloak, {KeycloakProfile} from 'keycloak-js';
-import {RouterOutlet, RouterModule} from '@angular/router';
+import {RouterModule, RouterOutlet} from '@angular/router';
 
 @Component({
   selector: 'app-root',

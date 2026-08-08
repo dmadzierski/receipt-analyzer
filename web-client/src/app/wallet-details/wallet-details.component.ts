@@ -29,17 +29,17 @@ import {GetReceiptResponseItem} from '../model/receipt.model';
   styleUrl: './wallet-details.component.scss',
 })
 export class WalletDetailsComponent implements OnInit {
-  constructor(
-    private readonly walletService: WalletService,
-    private readonly route: ActivatedRoute
-  ) {
-  }
-
   public wallet: WalletDetails = {
     id: '',
     name: '',
     receipts: []
   };
+
+  constructor(
+    private readonly walletService: WalletService,
+    private readonly route: ActivatedRoute
+  ) {
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {

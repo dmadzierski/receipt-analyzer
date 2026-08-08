@@ -13,11 +13,11 @@ export class PdfViewerComponent {
 
   @ViewChild("pdfContainer", {static: true})
   pdfContainer!: ElementRef<HTMLDivElement>;
+  totalPages = 0;
+  currentPage = 1;
   private pdfDocument: any;
   private currentPageNumber = 1;
   private scale = 1.5;
-  totalPages = 0;
-  currentPage = 1;
 
   private _receiptFileId: string = '';
 

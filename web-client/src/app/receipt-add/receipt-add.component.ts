@@ -29,6 +29,8 @@ import {ActivatedRoute} from '@angular/router';
 })
 export class ReceiptAddComponent {
 
+  strategies = Object.keys(ResolverStrategy).filter(key => Number.isNaN(Number(key)));
+  data: CreateReceiptData = new CreateReceiptData('', '', '', '', ResolverStrategy.BIEDRONKA, []);
   private walletId: string = '';
 
   constructor(private readonly receiptService: ReceiptService,
@@ -38,10 +40,6 @@ export class ReceiptAddComponent {
       this.walletId = params['walletId'];
     })
   }
-
-
-  strategies = Object.keys(ResolverStrategy).filter(key => Number.isNaN(Number(key)));
-  data: CreateReceiptData = new CreateReceiptData('', '', '', '', ResolverStrategy.BIEDRONKA, []);
 
   create() {
     console.log(this.data);

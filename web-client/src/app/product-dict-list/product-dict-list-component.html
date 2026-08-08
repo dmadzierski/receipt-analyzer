@@ -2,14 +2,14 @@
   <span>Product dictionary</span>
   <span class="toolbar-actions">
     @if (contentEditable) {
-      <button mat-icon-button type="button" (click)="saveProductDict()" title="Save">
+      <button (click)="saveProductDict()" mat-icon-button title="Save" type="button">
         <mat-icon>save</mat-icon>
       </button>
-      <button mat-icon-button type="button" (click)="declineEdit()" title="Cancel changes">
+      <button (click)="declineEdit()" mat-icon-button title="Cancel changes" type="button">
         <mat-icon>cancel</mat-icon>
       </button>
     } @else {
-      <button mat-icon-button type="button" (click)="doEdit()" title="Edit">
+      <button (click)="doEdit()" mat-icon-button title="Edit" type="button">
         <mat-icon>edit</mat-icon>
       </button>
     }
@@ -20,41 +20,41 @@
   <p class="hint">Drag one item onto another to merge them.</p>
 }
 
-<div class="dict-list" cdkDropListGroup>
+<div cdkDropListGroup class="dict-list">
   @for (group of dataSource; track group.primaryId) {
     <section
-      class="dict-row"
-      cdkDropList
-      [cdkDropListData]="group"
-      [cdkDropListSortingDisabled]="true"
-      [cdkDropListEnterPredicate]="canMerge"
+      (cdkDropListDropped)="drop($event, group)"
       (cdkDropListEntered)="onDropListEntered(group)"
       (cdkDropListExited)="onDropListExited(group)"
-      (cdkDropListDropped)="drop($event, group)"
-      [ngClass]="{'dict-row-active': activeTargetId === group.primaryId && contentEditable}">
+      [cdkDropListData]="group"
+      [cdkDropListEnterPredicate]="canMerge"
+      [cdkDropListSortingDisabled]="true"
+      [ngClass]="{'dict-row-active': activeTargetId === group.primaryId && contentEditable}"
+      cdkDropList
+      class="dict-row">
       <div
-        class="dict-row-inner"
-        cdkDrag
+        (cdkDragEnded)="onDragEnded()"
+        (cdkDragStarted)="onDragStarted(group)"
         [cdkDragData]="group"
         [cdkDragDisabled]="!contentEditable"
-        (cdkDragStarted)="onDragStarted(group)"
-        (cdkDragEnded)="onDragEnded()">
+        cdkDrag
+        class="dict-row-inner">
         @if (contentEditable) {
-          <mat-icon class="drag-handle" cdkDragHandle>
+          <mat-icon cdkDragHandle class="drag-handle">
             drag_indicator
           </mat-icon>
         }
 
         <input
-          class="canonical-input"
-          type="text"
           [(ngModel)]="group.canonicalName"
           [ngClass]="{'canonical-input-editable': contentEditable}"
           [readonly]="!contentEditable"
-          [title]="group.canonicalName"/>
+          [title]="group.canonicalName"
+          class="canonical-input"
+          type="text"/>
 
         @if (contentEditable) {
-          <select class="category-select" [(ngModel)]="group.draftCategoryId" [ngModelOptions]="{standalone: true}">
+          <select [(ngModel)]="group.draftCategoryId" [ngModelOptions]="{standalone: true}" class="category-select">
             <option [ngValue]="null">No category</option>
             @for (category of productCategories; track category.id) {
               <option [ngValue]="category.id">{{ category.name }}</option>

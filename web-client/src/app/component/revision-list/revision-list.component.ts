@@ -32,31 +32,25 @@ import {ReceiptService} from '../../service/receipt.service';
   styleUrl: './revision-list.component.scss',
 })
 export class RevisionListComponent implements OnChanges {
-  constructor() {
-  }
-
+  displayedColumns: string[] = ['selected', 'brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'isPreferredRevision', 'isCorrect', 'actions'];
+  @Input()
+  revisions: Revision[] = {} as Revision[];
+  @Input()
+  receiptId: string = '';
+  @Output() selectedRevisionChange = new EventEmitter<string>();
+  public selectedId: string | undefined = 'init';
+  data = new MatTableDataSource({} as Revision[]);
   private readonly revisionService = inject(RevisionService);
   private readonly receiptService = inject(ReceiptService);
 
-  displayedColumns: string[] = ['selected', 'brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'isPreferredRevision', 'isCorrect', 'actions'];
-
-  @Input()
-  revisions: Revision[] = {} as Revision[];
-
-  @Input()
-  receiptId: string = '';
-
-  @Output() selectedRevisionChange = new EventEmitter<string>();
-
-  public selectedId: string | undefined = 'init';
+  constructor() {
+  }
 
   @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (sort) {
       this.data.sort = sort;
     }
   }
-
-  data = new MatTableDataSource({} as Revision[]);
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['revisions'] && this.revisions) {

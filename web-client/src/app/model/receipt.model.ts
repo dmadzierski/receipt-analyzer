@@ -24,7 +24,7 @@ export class CreateReceiptData {
   }
 }
 
-export enum ResolverStrategy{
+export enum ResolverStrategy {
   BIEDRONKA,
   USER,
   BIEDRONKA_JSON

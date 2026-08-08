@@ -58,26 +58,6 @@ export class ProductDictListComponent implements OnInit {
     this.refreshView();
   }
 
-  private refreshView() {
-    forkJoin({
-      productDicts: this.productDictService.getProductDictList(),
-      productCategories: this.productCategoryService.getProductCategoryList()
-    }).subscribe(({productDicts, productCategories}) => {
-      this.productCategories = productCategories.items;
-      this.dataSource = productDicts.items.map((item) => this.toGroup(item));
-      this.originalDataSource = this.cloneGroups(this.dataSource);
-    });
-  }
-
-  private refreshProductDictList() {
-    this.productDictService
-      .getProductDictList()
-      .subscribe((result: GetProductDictListResponse) => {
-        this.dataSource = result.items.map((item) => this.toGroup(item));
-        this.originalDataSource = this.cloneGroups(this.dataSource);
-      });
-  }
-
   protected saveProductDict() {
     const changedItems = this.getChangedRequestItems();
     if (changedItems.length === 0) {
@@ -166,6 +146,34 @@ export class ProductDictListComponent implements OnInit {
 
     return drag.data.primaryId !== drop.data.primaryId;
   };
+
+  protected getCategoryName(categoryId: string | null): string {
+    if (!categoryId) {
+      return 'No category';
+    }
+
+    return this.productCategories.find((category) => category.id === categoryId)?.name || 'No category';
+  }
+
+  private refreshView() {
+    forkJoin({
+      productDicts: this.productDictService.getProductDictList(),
+      productCategories: this.productCategoryService.getProductCategoryList()
+    }).subscribe(({productDicts, productCategories}) => {
+      this.productCategories = productCategories.items;
+      this.dataSource = productDicts.items.map((item) => this.toGroup(item));
+      this.originalDataSource = this.cloneGroups(this.dataSource);
+    });
+  }
+
+  private refreshProductDictList() {
+    this.productDictService
+      .getProductDictList()
+      .subscribe((result: GetProductDictListResponse) => {
+        this.dataSource = result.items.map((item) => this.toGroup(item));
+        this.originalDataSource = this.cloneGroups(this.dataSource);
+      });
+  }
 
   private toGroup(item: ProductDict): EditableProductDictGroup {
     return {
@@ -267,13 +275,5 @@ export class ProductDictListComponent implements OnInit {
 
   private resolveCategoryId(item: ProductDict): string | null {
     return item.productCategory?.id ?? item.productCategoryId ?? null;
-  }
-
-  protected getCategoryName(categoryId: string | null): string {
-    if (!categoryId) {
-      return 'No category';
-    }
-
-    return this.productCategories.find((category) => category.id === categoryId)?.name || 'No category';
   }
 }

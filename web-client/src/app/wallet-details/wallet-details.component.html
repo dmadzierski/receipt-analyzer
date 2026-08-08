@@ -3,7 +3,7 @@
     <h1>Wallet data</h1>
     <mat-form-field>
       <mat-label>Wallet name</mat-label>
-      <input [readonly]="true" matInput maxlength="30" [(ngModel)]="wallet.name"/>
+      <input [(ngModel)]="wallet.name" [readonly]="true" matInput maxlength="30"/>
     </mat-form-field>
 
     <receipt-list [dataSource]="getReceipts()" [walletId]="wallet.id"></receipt-list>

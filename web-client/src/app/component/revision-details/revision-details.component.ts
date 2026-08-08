@@ -46,15 +46,14 @@ import {MatCheckbox} from '@angular/material/checkbox';
   styleUrl: './revision-details.component.scss',
 })
 export class RevisionDetailsComponent implements OnChanges {
-  constructor(private cdr: ChangeDetectorRef) {
-  }
-
   displayedColumns: string[] = ['position', 'name', 'amount', 'unitPrice', 'totalPrice', 'actions'];
-
   revision: ModelSignal<RevisionDetails> = model({} as RevisionDetails)
-
   @Input()
   contentEditable: boolean = false;
+  data = new MatTableDataSource({} as Item[]);
+
+  constructor(private cdr: ChangeDetectorRef) {
+  }
 
   @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (sort) {
@@ -64,8 +63,6 @@ export class RevisionDetailsComponent implements OnChanges {
       this.cdr.detectChanges();
     }
   }
-
-  data = new MatTableDataSource({} as Item[]);
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['revision'] && this.revision()?.items) {
@@ -108,14 +105,6 @@ export class RevisionDetailsComponent implements OnChanges {
     this.updatePositions();
   }
 
-  private updatePositions() {
-    this.data.data.forEach((item, index) => {
-      item.position = index + 1;
-    });
-    this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
-    this.revision().items = this.data.data
-  }
-
   protected onKeyDown($event: KeyboardEvent) {
     if ($event.key !== 'ArrowUp' && $event.key !== 'ArrowDown') {
       return;
@@ -146,6 +135,14 @@ export class RevisionDetailsComponent implements OnChanges {
         targetInput.select();
       }
     }
+  }
+
+  private updatePositions() {
+    this.data.data.forEach((item, index) => {
+      item.position = index + 1;
+    });
+    this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
+    this.revision().items = this.data.data
   }
 }
 

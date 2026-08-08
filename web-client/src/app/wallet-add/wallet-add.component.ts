@@ -26,13 +26,13 @@ import {Router} from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WalletAddComponent {
+  data: AddWalletData = new AddWalletData('');
+
   constructor(
     private readonly walletService: WalletService,
     private readonly router: Router,
-    ) {
+  ) {
   }
-
-  data: AddWalletData = new AddWalletData('');
 
   create() {
     console.log(this.data);

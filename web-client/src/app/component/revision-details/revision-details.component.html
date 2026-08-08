@@ -3,25 +3,25 @@
 
     <mat-form-field>
       <mat-label>Brand name</mat-label>
-      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision().brand"/>
+      <input [(ngModel)]="revision().brand" [readonly]="!contentEditable" matInput maxlength="30"/>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Total price</mat-label>
-      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision().totalPrice"/>
+      <input [(ngModel)]="revision().totalPrice" [readonly]="!contentEditable" matInput maxlength="30"/>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Created date</mat-label>
-      <input [readonly]="!contentEditable" matInput [matDatepicker]="picker" [(ngModel)]="revision().payingDate">
+      <input [(ngModel)]="revision().payingDate" [matDatepicker]="picker" [readonly]="!contentEditable" matInput>
       <mat-hint>MM/DD/YYYY</mat-hint>
-      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker [disabled]="!contentEditable" #picker></mat-datepicker>
+      <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
+      <mat-datepicker #picker [disabled]="!contentEditable"></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Address</mat-label>
-      <input [readonly]="!contentEditable" matInput maxlength="30" [(ngModel)]="revision().address"/>
+      <input [(ngModel)]="revision().address" [readonly]="!contentEditable" matInput maxlength="30"/>
     </mat-form-field>
 
     <div class="revision-checkboxes-container">
@@ -41,18 +41,18 @@
 
     <h3>Items</h3>
 
-    <table mat-table
-           [dataSource]="data"
-           matSort
-           cdkDropList
-           [matSortDisabled]="contentEditable"
+    <table (cdkDropListDropped)="drop($event)"
            [cdkDropListData]="data.data"
-           (cdkDropListDropped)="drop($event)"
-           class="mat-elevation-z8">
+           [dataSource]="data"
+           [matSortDisabled]="contentEditable"
+           cdkDropList
+           class="mat-elevation-z8"
+           mat-table
+           matSort>
 
       <ng-container matColumnDef="position">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> No.</th>
-        <td mat-cell *matCellDef="let element">
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> No.</th>
+        <td *matCellDef="let element" mat-cell>
           <div style="display: flex; align-items: center;">
             @if (contentEditable) {
               <mat-icon
@@ -62,64 +62,64 @@
               </mat-icon>
             }
 
-            <input matInput class="table-input" [readonly]="true" [value]="element.position"
+            <input [readonly]="true" [value]="element.position" class="table-input" matInput
                    style="width: 30px; text-align: center;">
           </div>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Name</th>
-        <td mat-cell *matCellDef="let element">
-          <input class="table-input" [(ngModel)]="element.name" [readonly]="!contentEditable"
-                 [ngClass]="{'is-editing': contentEditable}" (keydown)="onKeyDown($event)">
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> Name</th>
+        <td *matCellDef="let element" mat-cell>
+          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.name" [ngClass]="{'is-editing': contentEditable}"
+                 [readonly]="!contentEditable" class="table-input">
         </td>
       </ng-container>
 
       <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Amount</th>
-        <td mat-cell *matCellDef="let element">
-          <input type="number" class="table-input" [(ngModel)]="element.amount" [readonly]="!contentEditable"
-                 [ngClass]="{'is-editing': contentEditable}" (keydown)="onKeyDown($event)"/>
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> Amount</th>
+        <td *matCellDef="let element" mat-cell>
+          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.amount" [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
+                 class="table-input" type="number"/>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="unitPrice">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Unit Price</th>
-        <td mat-cell *matCellDef="let element">
-          <input type="number" class="table-input" [(ngModel)]="element.unitPrice" [readonly]="!contentEditable"
-                 [ngClass]="{'is-editing': contentEditable}" (keydown)="onKeyDown($event)"/>
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> Unit Price</th>
+        <td *matCellDef="let element" mat-cell>
+          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.unitPrice" [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
+                 class="table-input" type="number"/>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="totalPrice">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Price</th>
-        <td mat-cell *matCellDef="let element">
-          <input type="number" class="table-input" [(ngModel)]="element.totalPrice" [readonly]="!contentEditable"
-                 [ngClass]="{'is-editing': contentEditable}" (keydown)="onKeyDown($event)"/>
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> Total Price</th>
+        <td *matCellDef="let element" mat-cell>
+          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.totalPrice" [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
+                 class="table-input" type="number"/>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let element; let i = index">
+        <th *matHeaderCellDef mat-header-cell></th>
+        <td *matCellDef="let element; let i = index" mat-cell>
           <div *ngIf="contentEditable" style="display: flex; gap: 5px;">
-            <button mat-icon-button color="primary" (click)="addRowAfter(i)">
+            <button (click)="addRowAfter(i)" color="primary" mat-icon-button>
               <mat-icon>add_circle</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="removeRow(i)">
+            <button (click)="removeRow(i)" color="warn" mat-icon-button>
               <mat-icon>delete</mat-icon>
             </button>
           </div>
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
 
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+      <tr *matRowDef="let row; columns: displayedColumns;" [cdkDragData]="row"
+          [cdkDragDisabled]="!contentEditable"
           cdkDrag
-          [cdkDragData]="row"
-          [cdkDragDisabled]="!contentEditable">
+          mat-row>
 
         <div *cdkDragPlaceholder class="custom-placeholder"></div>
       </tr>

@@ -1,3 +1,3 @@
-export interface CreateRevisionCopy{
+export interface CreateRevisionCopy {
   revisionId?: string
 }

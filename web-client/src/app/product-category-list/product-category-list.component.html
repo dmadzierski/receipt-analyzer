@@ -2,30 +2,30 @@
   <h2>Product categories</h2>
 </div>
 
-<form class="add-form" (ngSubmit)="addCategory()">
+<form (ngSubmit)="addCategory()" class="add-form">
   <mat-form-field class="category-field" subscriptSizing="dynamic">
     <mat-label>Category name</mat-label>
     <input
+      [(ngModel)]="newCategoryName"
       matInput
-      type="text"
       name="newCategoryName"
-      [(ngModel)]="newCategoryName"/>
+      type="text"/>
   </mat-form-field>
-  <button mat-raised-button color="primary" type="submit">Add</button>
+  <button color="primary" mat-raised-button type="submit">Add</button>
 </form>
 
-<table mat-table [dataSource]="dataSource">
+<table [dataSource]="dataSource" mat-table>
   <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef>Name</th>
-    <td mat-cell *matCellDef="let element">
+    <th *matHeaderCellDef mat-header-cell>Name</th>
+    <td *matCellDef="let element" mat-cell>
       @if (editingId === element.id) {
         <input
-          matInput
-          class="table-input"
-          type="text"
-          name="draftName-{{ element.id }}"
           [(ngModel)]="element.draftName"
-          [ngClass]="{'table-input-editable': editingId === element.id}"/>
+          [ngClass]="{'table-input-editable': editingId === element.id}"
+          class="table-input"
+          matInput
+          name="draftName-{{ element.id }}"
+          type="text"/>
       } @else {
         {{ element.name }}
       }
@@ -33,26 +33,27 @@
   </ng-container>
 
   <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef>Actions</th>
-    <td mat-cell *matCellDef="let element" class="actions">
+    <th *matHeaderCellDef mat-header-cell>Actions</th>
+    <td *matCellDef="let element" class="actions" mat-cell>
       @if (editingId === element.id) {
-        <button mat-stroked-button type="button" class="action-button" (click)="saveCategory(element)">
+        <button (click)="saveCategory(element)" class="action-button" mat-stroked-button type="button">
           Save
         </button>
-        <button mat-stroked-button type="button" class="action-button" (click)="cancelEdit()">
+        <button (click)="cancelEdit()" class="action-button" mat-stroked-button type="button">
           Cancel
         </button>
       } @else {
-        <button mat-stroked-button type="button" class="action-button" (click)="startEdit(element)">
+        <button (click)="startEdit(element)" class="action-button" mat-stroked-button type="button">
           Edit
         </button>
-        <button mat-stroked-button type="button" class="action-button action-button-warn" color="warn" (click)="deleteCategory(element)">
+        <button (click)="deleteCategory(element)" class="action-button action-button-warn" color="warn" mat-stroked-button
+                type="button">
           Delete
         </button>
       }
     </td>
   </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+  <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
 </table>

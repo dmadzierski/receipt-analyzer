@@ -2,10 +2,10 @@
   <h1>Enter receipt data</h1>
   <mat-form-field>
     <mat-label>Enter receipt name</mat-label>
-    <input matInput maxlength="30" [(ngModel)]="data.name"/>
+    <input [(ngModel)]="data.name" matInput maxlength="30"/>
   </mat-form-field>
 
-  <button matButton="outlined" (click)="create()">Create</button>
+  <button (click)="create()" matButton="outlined">Create</button>
 
 
 </div>

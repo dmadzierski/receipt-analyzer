@@ -1,10 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {
-  GetProductDictListResponse,
-  UpdateProductDictListRequest
-} from '../model/receipt-dict.mode';
+import {GetProductDictListResponse, UpdateProductDictListRequest} from '../model/receipt-dict.mode';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +10,7 @@ export class ProductDictService {
   private readonly httpClient = inject(HttpClient);
 
 
-  getProductDictList(): Observable<GetProductDictListResponse>{
+  getProductDictList(): Observable<GetProductDictListResponse> {
     return this.httpClient.get<GetProductDictListResponse>(`/api/product-dicts`);
   }
 

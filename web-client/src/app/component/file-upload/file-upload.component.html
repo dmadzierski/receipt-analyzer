@@ -1,6 +1,6 @@
-<input type="file" style="display: none" #fileInput (change)="onFileSelected($event)">
+<input #fileInput (change)="onFileSelected($event)" style="display: none" type="file">
 
-<button class="add-attachment" mat-raised-button color="primary" (click)="fileInput.click()">
+<button (click)="fileInput.click()" class="add-attachment" color="primary" mat-raised-button>
   <mat-icon>attach_file</mat-icon>
   <span>Add attachment</span>
 </button>

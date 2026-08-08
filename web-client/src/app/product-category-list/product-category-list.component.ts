@@ -6,7 +6,11 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatTableModule} from '@angular/material/table';
-import {CreateProductCategoryRequest, ProductCategory, UpdateProductCategoryRequest} from '../model/product-category.model';
+import {
+  CreateProductCategoryRequest,
+  ProductCategory,
+  UpdateProductCategoryRequest
+} from '../model/product-category.model';
 import {ProductCategoryService} from '../service/product-category.service';
 
 interface EditableProductCategory extends ProductCategory {

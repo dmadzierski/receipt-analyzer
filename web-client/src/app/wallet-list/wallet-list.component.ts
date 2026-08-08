@@ -27,15 +27,15 @@ export class WalletListComponent implements OnInit {
     this.getWalletList();
   }
 
+  toReceipts(row: GetReceiptResponseItem) {
+    this.router.navigate(['/wallets/', row.id]);
+  }
+
   private getWalletList() {
     this.walletService
       .getWalletList()
       .subscribe((result: GetWalletListResponse) => {
         this.dataSource = result.items;
       });
-  }
-
-  toReceipts(row: GetReceiptResponseItem) {
-    this.router.navigate(['/wallets/', row.id]);
   }
 }
