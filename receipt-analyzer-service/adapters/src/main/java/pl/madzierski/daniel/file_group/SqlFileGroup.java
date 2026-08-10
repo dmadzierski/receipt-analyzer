@@ -19,7 +19,7 @@ import java.util.Set;
 @Table(name = "receipt_file_group")
 @NoArgsConstructor
 @EntityListeners({AuditingEntityListener.class})
-public class SqlFileGroup {
+class SqlFileGroup {
 
     @Id
     @UuidGenerator
