@@ -51,6 +51,7 @@ class SqlReceipt {
         sqlReceipt.setModifiedDate(receipt.getModifiedDate());
         sqlReceipt.setName(receipt.getName());
         sqlReceipt.setDescription(receipt.getDescription());
+        sqlReceipt.setWallet(SqlWalletQuery.fromWalletQuery(receipt.getWallet()));
         return sqlReceipt;
     }
 

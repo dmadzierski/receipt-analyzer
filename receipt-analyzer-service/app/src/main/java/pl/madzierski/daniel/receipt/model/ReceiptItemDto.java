@@ -17,4 +17,15 @@ public class ReceiptItemDto {
     private Double totalPrice;
     private Integer position;
     private ReceiptItemDto parentItem;
+
+    public ReceiptItemDto(String id, String productDictId, String name, Double amount, Double unitPrice, Double discount, Double totalPrice, Integer position) {
+        this.id = id;
+        this.productDictId = productDictId;
+        this.name = name;
+        this.amount = amount;
+        this.unitPrice = unitPrice;
+        this.discount = discount;
+        this.totalPrice = totalPrice;
+        this.position = position;
+    }
 }

@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface ReceiptQueryRepository {
     Collection<ReceiptDto> getWalletReceipts(String walletId);
 
-    Optional<ReceiptDto> findReceiptEntityById(String receiptId);
+    Optional<ReceiptDto> findById(String receiptId);
 }

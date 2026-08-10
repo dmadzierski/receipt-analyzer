@@ -10,8 +10,12 @@ import java.util.Optional;
 
 public interface SqlReceiptQueryRepository extends ReceiptQueryRepository, Repository<SqlReceipt, String> {
 
-    @Query(value = "SELECT r FROM SqlReceipt r WHERE r.wallet.id = :walletId")
+    @Query(value = "SELECT new pl.madzierski.daniel.receipt.model.ReceiptDto(r.id, r.createdDate, r.modifiedDate, r" +
+        ".name, r.description, null) FROM SqlReceipt r WHERE r.wallet.id = " +
+        ":walletId")
     Collection<ReceiptDto> getWalletReceipts(@Param("walletId") String walletId);
 
-    Optional<ReceiptDto> findReceiptEntityById(@Param("receiptId") String receiptId);
+    @Query(value = "SELECT new pl.madzierski.daniel.receipt.model.ReceiptDto(r.id, r.createdDate, r.modifiedDate, r" +
+        ".name, r.description, null) FROM SqlReceipt r WHERE r.id = :receiptId")
+    Optional<ReceiptDto> findById(@Param("receiptId") String receiptId);
 }

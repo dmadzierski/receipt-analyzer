@@ -65,6 +65,7 @@ class SqlReceiptRevision {
         sqlReceiptRevision.setPayingDate(revision.getPayingDate());
         sqlReceiptRevision.setIsPreferredRevision(revision.getIsPreferredRevision());
         sqlReceiptRevision.setIsCorrect(revision.getIsCorrect());
+        sqlReceiptRevision.setReceipt(SqlReceipt.fromReceipt(revision.getReceipt()));
         return sqlReceiptRevision;
     }
 

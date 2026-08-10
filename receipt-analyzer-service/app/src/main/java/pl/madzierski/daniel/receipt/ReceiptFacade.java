@@ -47,7 +47,6 @@ public class ReceiptFacade {
         ReceiptRevisionResolveData revisionData = receiptResolverLocatorService.resolve(paths, body.strategy());
         ReceiptRevision revision = receiptRevisionFactory.from(revisionData);
         revision.setReceipt(receipt);
-        receipt.addRevision(revision);
         revisionRepository.save(revision);
         return new CreateReceiptResponse(receipt.getId(), receipt.getName(), receipt.getDescription());
     }
@@ -63,7 +62,7 @@ public class ReceiptFacade {
 
     @Transactional(readOnly = true)
     GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
-        ReceiptDto receiptDto = receiptQueryRepository.findReceiptEntityById(receiptId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
+        ReceiptDto receiptDto = receiptQueryRepository.findById(receiptId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
         List<ReceiptRevisionDto> receiptRevisionList = receiptRevisionQueryRepository.getRevisionsByReceiptId(receiptId);
         String fileId = fileQueryRepository.findOriginalPdf(receiptId).map(FileDto::getId).orElse(null);
         Collection<ReceiptItemDto> itemListDto = Collections.emptyList();

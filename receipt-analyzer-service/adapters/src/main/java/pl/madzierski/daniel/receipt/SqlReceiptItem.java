@@ -58,6 +58,7 @@ class SqlReceiptItem {
         sqlReceiptItem.setDiscount(item.getDiscount());
         sqlReceiptItem.setTotalPrice(item.getTotalPrice());
         sqlReceiptItem.setPosition(item.getPosition());
+        sqlReceiptItem.setReceiptRevision(SqlReceiptRevision.fromReceiptRevision(item.getReceiptRevision()));
         return sqlReceiptItem;
     }
 

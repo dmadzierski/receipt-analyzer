@@ -6,6 +6,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
+import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.util.Objects;
 
@@ -17,6 +18,10 @@ public class SqlWalletQuery {
     @Id
     @UuidGenerator
     private String id;
+
+    public static SqlWalletQuery fromWalletQuery(WalletQuery wallet) {
+        return new SqlWalletQuery(wallet.getId());
+    }
 
     @Override
     public boolean equals(Object o) {
