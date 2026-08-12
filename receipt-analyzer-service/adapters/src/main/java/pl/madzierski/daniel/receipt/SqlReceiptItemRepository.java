@@ -35,11 +35,6 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     }
 
     @Override
-    public ReceiptItem save(ReceiptItem item) {
-        return this.repository.save(SqlReceiptItem.fromReceiptItem(item)).toReceiptItem();
-    }
-
-    @Override
     public void deleteAllByIdIn(List<String> ids) {
         this.repository.deleteAllById(ids);
     }

@@ -1,7 +1,6 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.AllArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
@@ -89,7 +88,15 @@ public class ReceiptFacade {
     }
 
     private static ReceiptRevision copyRevisionWithItems(ReceiptRevision revision) {
-        ReceiptRevision revisionCopy = ReceiptRevision.builder().name(revision.getName() + "(copy)").resolver(ReceiptResolverStrategyType.USER).brand(revision.getBrand()).totalPrice(revision.getTotalPrice()).payingDate(revision.getPayingDate()).address(revision.getAddress()).isPreferredRevision(false).isCorrect(revision.getIsCorrect()).receipt(revision.getReceipt()).parentReceiptRevision(revision).build();
+        ReceiptRevision revisionCopy = ReceiptRevision.builder().name(revision.getName() + "(copy)")
+            .resolver(ReceiptResolverStrategyType.USER)
+            .brand(revision.getBrand())
+            .totalPrice(revision.getTotalPrice()).payingDate(revision.getPayingDate())
+            .address(revision.getAddress()).isPreferredRevision(false)
+            .isCorrect(revision.getIsCorrect())
+            .receipt(revision.getReceipt())
+            .parentReceiptRevision(revision)
+            .build();
         revisionCopy.setItems(revision.getItems().stream().map(item -> {
             ReceiptItem newItem = new ReceiptItem();
             newItem.setName(item.getName());
@@ -123,12 +130,9 @@ public class ReceiptFacade {
         if (updatedRevisionRequest.isPreferredRevision() != null)
             revision.setIsPreferredRevision(updatedRevisionRequest.isPreferredRevision());
         if (updatedRevisionRequest.isCorrect() != null) revision.setIsCorrect(updatedRevisionRequest.isCorrect());
-        revisionRepository.save(revision);
         if (updatedRevisionRequest.items() != null && revision.getResolver() == ReceiptResolverStrategyType.USER) {
             Set<String> incomingIds = updatedRevisionRequest.items().stream().map(UpdateRevisionRequest.ItemRequest::id).filter(Objects::nonNull).collect(Collectors.toSet());
-
             receiptItemRepository.deleteAllByIdIn(revision.getItems().stream().map(ReceiptItem::getId).filter(id -> !incomingIds.contains(id)).toList());
-
             for (UpdateRevisionRequest.ItemRequest incomingItem : updatedRevisionRequest.items()) {
                 if (incomingItem.id() != null && !incomingItem.id().trim().isEmpty()) {
                     revision.getItems().stream().filter(entity -> incomingItem.id().equals(entity.getId())).findFirst().ifPresent(entity -> {
@@ -138,15 +142,15 @@ public class ReceiptFacade {
                         entity.setTotalPrice(incomingItem.totalPrice());
                         entity.setPosition(incomingItem.position());
                         if (incomingItem.discount() != null) entity.setDiscount(incomingItem.discount());
-                        receiptItemRepository.save(entity);
                     });
                 } else {
                     ProductDictQuery productDict = productDictFacade.findCanonicalName(incomingItem.name()).map(item -> new ProductDictQuery(item.getId())).orElse(null);
                     ReceiptItem newItem = new ReceiptItem(revision, incomingItem.name(), productDict, incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null);
-                    receiptItemRepository.save(newItem);
+                    revision.addItem(newItem);
                 }
             }
         }
+        revisionRepository.save(revision);
         return UpdateRevisionResponse.map(toDto(revision), revision.getItems().stream().map(this::toDto).collect(Collectors.toSet()));
     }
 
@@ -189,18 +193,6 @@ public class ReceiptFacade {
         });
         productDictFacade.saveAll(receiptItemToProductDictNameMap.keySet());
         this.updateItemsProductDict(receiptItemToProductDictNameMap);
-    }
-
-
-    public void save(ReceiptRevisionDto receiptRevision) {
-        ReceiptRevision receiptRevisionEntity = receiptRevisionFactory.from(receiptRevision);
-        revisionRepository.save(receiptRevisionEntity);
-        Collection<ReceiptItemDto> items = receiptRevision.getItems();
-        receiptItemRepository.saveAll(items.stream().map(receiptItemDto -> {
-            ReceiptItem item = receiptItemFactory.from(receiptItemDto);
-            item.setReceiptRevision(receiptRevisionEntity);
-            return item;
-        }).collect(Collectors.toSet()));
     }
 
     public List<ReceiptItemDto> findAllMissingAliasesInRevision(String revisionId) {

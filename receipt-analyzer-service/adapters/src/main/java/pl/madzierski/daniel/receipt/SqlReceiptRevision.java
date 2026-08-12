@@ -57,13 +57,12 @@ class SqlReceiptRevision {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();
         sqlReceiptRevision.setId(revision.getId());
         sqlReceiptRevision.setName(revision.getName());
-        sqlReceiptRevision.setCreatedDate(revision.getCreatedDate());
-        sqlReceiptRevision.setModifiedDate(revision.getModifiedDate());
         sqlReceiptRevision.setAddress(revision.getAddress());
         sqlReceiptRevision.setBrand(revision.getBrand());
         sqlReceiptRevision.setTotalPrice(revision.getTotalPrice());
         sqlReceiptRevision.setPayingDate(revision.getPayingDate());
         sqlReceiptRevision.setIsPreferredRevision(revision.getIsPreferredRevision());
+        sqlReceiptRevision.setResolver(revision.getResolver());
         sqlReceiptRevision.setIsCorrect(revision.getIsCorrect());
         sqlReceiptRevision.setReceipt(revision.getReceipt() != null ? SqlReceipt.fromReceipt(revision.getReceipt()) : null);
         sqlReceiptRevision.setItems(revision.getItems() != null ? new HashSet<>(revision.getItems().stream().map(SqlReceiptItem::fromReceiptItem).toList()) : Collections.emptySet());
@@ -96,6 +95,7 @@ class SqlReceiptRevision {
             .isPreferredRevision(isPreferredRevision)
             .isCorrect(isCorrect)
             .receipt(receipt != null ? receipt.toReceipt() : null)
+            .resolver(resolver)
             .items(Collections.unmodifiableSet(items.stream().map(SqlReceiptItem::toReceiptItem).collect(java.util.stream.Collectors.toSet())))
             .build();
     }

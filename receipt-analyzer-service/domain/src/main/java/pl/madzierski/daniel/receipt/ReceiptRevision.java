@@ -50,4 +50,8 @@ class ReceiptRevision {
     public void addItems(Set<ReceiptItem> items) {
         this.items.addAll(items);
     }
+
+    public void addItem(ReceiptItem newItem) {
+        this.items.add(newItem);
+    }
 }
