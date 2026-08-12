@@ -9,9 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "receipt_item")
@@ -58,7 +56,7 @@ class SqlReceiptItem {
         sqlReceiptItem.setDiscount(item.getDiscount());
         sqlReceiptItem.setTotalPrice(item.getTotalPrice());
         sqlReceiptItem.setPosition(item.getPosition());
-        sqlReceiptItem.setReceiptRevision(SqlReceiptRevision.fromReceiptRevision(item.getReceiptRevision()));
+        sqlReceiptItem.setParentItem(item.getParentItem() != null ? SqlReceiptItem.fromReceiptItem(item.getParentItem()) : null);
         return sqlReceiptItem;
     }
 

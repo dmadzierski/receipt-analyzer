@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.AllArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
@@ -81,10 +82,15 @@ public class ReceiptFacade {
 
     @Transactional
     RevisionCopyResponse createRevisionCopy(String revisionId) {
-        ReceiptRevision revision = revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
-        ReceiptRevision revisionCopy = ReceiptRevision.builder().name(revision.getName() + "(copy)").resolver(ReceiptResolverStrategyType.USER).brand(revision.getBrand()).totalPrice(revision.getTotalPrice()).payingDate(revision.getPayingDate()).address(revision.getAddress()).isPreferredRevision(false).isCorrect(revision.getIsCorrect()).receipt(revision.getReceipt()).parentReceiptRevision(revision).build();
+        ReceiptRevision revision = revisionRepository.findByIdWithItems(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+        ReceiptRevision revisionCopy = copyRevisionWithItems(revision);
         revisionRepository.save(revisionCopy);
-        revision.getItems().forEach(item -> {
+        return new RevisionCopyResponse(revisionCopy.getId());
+    }
+
+    private static ReceiptRevision copyRevisionWithItems(ReceiptRevision revision) {
+        ReceiptRevision revisionCopy = ReceiptRevision.builder().name(revision.getName() + "(copy)").resolver(ReceiptResolverStrategyType.USER).brand(revision.getBrand()).totalPrice(revision.getTotalPrice()).payingDate(revision.getPayingDate()).address(revision.getAddress()).isPreferredRevision(false).isCorrect(revision.getIsCorrect()).receipt(revision.getReceipt()).parentReceiptRevision(revision).build();
+        revisionCopy.setItems(revision.getItems().stream().map(item -> {
             ReceiptItem newItem = new ReceiptItem();
             newItem.setName(item.getName());
             newItem.setAmount(item.getAmount());
@@ -95,9 +101,9 @@ public class ReceiptFacade {
             newItem.setDiscount(item.getDiscount());
             newItem.setParentItem(new ReceiptItem(item.getId()));
             if (item.getParentItem() != null) newItem.setNameDict(item.getNameDict());
-            receiptItemRepository.save(newItem);
-        });
-        return new RevisionCopyResponse(revisionCopy.getId());
+            return newItem;
+        }).collect(Collectors.toSet()));
+        return revisionCopy;
     }
 
     @Transactional(readOnly = true)
@@ -109,7 +115,7 @@ public class ReceiptFacade {
 
     @Transactional
     UpdateRevisionResponse updateRevision(String revisionId, UpdateRevisionRequest updatedRevisionRequest) {
-        ReceiptRevision revision = revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+        ReceiptRevision revision = revisionRepository.findByIdWithItems(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         if (updatedRevisionRequest.brand() != null) revision.setBrand(updatedRevisionRequest.brand());
         if (updatedRevisionRequest.totalPrice() != null) revision.setTotalPrice(updatedRevisionRequest.totalPrice());
         if (updatedRevisionRequest.payingDate() != null) revision.setPayingDate(updatedRevisionRequest.payingDate());

@@ -2,6 +2,7 @@ package pl.madzierski.daniel.receipt;
 
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +11,8 @@ import java.util.Optional;
 interface SqlReceiptRevisionRepository extends CrudRepository<SqlReceiptRevision, String> {
     SqlReceiptRevision save(SqlReceiptRevision revision);
 
-    Optional<SqlReceiptRevision> findById(String revisionId);
+    @Query("SELECT r FROM SqlReceiptRevision r LEFT JOIN FETCH r.items WHERE r.id = :revisionId")
+    Optional<SqlReceiptRevision> findByIdWithItems(String revisionId);
 }
 
 @AllArgsConstructor
@@ -24,7 +26,7 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     }
 
     @Override
-    public Optional<ReceiptRevision> findById(String revisionId) {
-        return repository.findById(revisionId).map(SqlReceiptRevision::toReceiptRevision);
+    public Optional<ReceiptRevision> findByIdWithItems(String revisionId) {
+        return repository.findByIdWithItems(revisionId).map(SqlReceiptRevision::toReceiptRevision);
     }
 }

@@ -48,10 +48,10 @@ class SqlReceiptRevision {
     private SqlReceiptRevision parentReceiptRevision;
     @Getter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
-    private final Set<SqlReceiptItem> items = new HashSet<>();
+    private Set<SqlReceiptItem> items = new HashSet<>();
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "parentReceiptRevision")
-    private final Set<SqlReceiptRevision> childReceiptRevisions = new HashSet<>();
+    private Set<SqlReceiptRevision> childReceiptRevisions = new HashSet<>();
 
     public static SqlReceiptRevision fromReceiptRevision(ReceiptRevision revision) {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();
@@ -65,12 +65,10 @@ class SqlReceiptRevision {
         sqlReceiptRevision.setPayingDate(revision.getPayingDate());
         sqlReceiptRevision.setIsPreferredRevision(revision.getIsPreferredRevision());
         sqlReceiptRevision.setIsCorrect(revision.getIsCorrect());
-        sqlReceiptRevision.setReceipt(SqlReceipt.fromReceipt(revision.getReceipt()));
+        sqlReceiptRevision.setReceipt(revision.getReceipt() != null ? SqlReceipt.fromReceipt(revision.getReceipt()) : null);
+        sqlReceiptRevision.setItems(revision.getItems() != null ? new HashSet<>(revision.getItems().stream().map(SqlReceiptItem::fromReceiptItem).toList()) : Collections.emptySet());
+        sqlReceiptRevision.items.forEach(item -> item.setReceiptRevision(sqlReceiptRevision));
         return sqlReceiptRevision;
-    }
-
-    public Set<SqlReceiptItem> getItems() {
-        return Collections.unmodifiableSet(items);
     }
 
     @Override
@@ -85,10 +83,6 @@ class SqlReceiptRevision {
         return Objects.hash(name, revision, resolver, brand, totalPrice, payingDate, address, isPreferredRevision, isCorrect);
     }
 
-    public void addItems(Set<SqlReceiptItem> items) {
-        this.items.addAll(items);
-    }
-
     public ReceiptRevision toReceiptRevision() {
         return ReceiptRevision.builder()
             .id(id)
@@ -101,6 +95,8 @@ class SqlReceiptRevision {
             .payingDate(payingDate)
             .isPreferredRevision(isPreferredRevision)
             .isCorrect(isCorrect)
+            .receipt(receipt != null ? receipt.toReceipt() : null)
+            .items(Collections.unmodifiableSet(items.stream().map(SqlReceiptItem::toReceiptItem).collect(java.util.stream.Collectors.toSet())))
             .build();
     }
 }

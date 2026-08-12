@@ -14,8 +14,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 class ReceiptRevision {
-    private final Set<ReceiptItem> items = new HashSet<>();
-    private final Set<ReceiptRevision> childReceiptRevisions = new HashSet<>();
     private String id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
@@ -30,6 +28,8 @@ class ReceiptRevision {
     private Boolean isCorrect;
     private Receipt receipt;
     private ReceiptRevision parentReceiptRevision;
+    private Set<ReceiptItem> items = new HashSet<>();
+    private Set<ReceiptRevision> childReceiptRevisions = new HashSet<>();
 
     public Set<ReceiptItem> getItems() {
         return Collections.unmodifiableSet(items);

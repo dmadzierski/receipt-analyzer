@@ -51,12 +51,8 @@ class SqlReceipt {
         sqlReceipt.setModifiedDate(receipt.getModifiedDate());
         sqlReceipt.setName(receipt.getName());
         sqlReceipt.setDescription(receipt.getDescription());
-        sqlReceipt.setWallet(SqlWalletQuery.fromWalletQuery(receipt.getWallet()));
+        sqlReceipt.setWallet(receipt.getWallet() != null ? SqlWalletQuery.fromWalletQuery(receipt.getWallet()) : null);
         return sqlReceipt;
-    }
-
-    public void addRevision(SqlReceiptRevision receiptRevision) {
-        this.receiptRevisions.add(receiptRevision);
     }
 
     @Override
