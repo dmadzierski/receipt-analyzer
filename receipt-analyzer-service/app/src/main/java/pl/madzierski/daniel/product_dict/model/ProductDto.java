@@ -11,13 +11,13 @@ import java.util.Collection;
 @NoArgsConstructor
 @Getter
 @Builder
-public class ProductDictDto {
+public class ProductDto {
 
     private String id;
     private String name;
     private Collection<ProductAliasDto> aliases;
 
-    public ProductDictDto(String id) {
+    public ProductDto(String id) {
         this.id = id;
     }
 

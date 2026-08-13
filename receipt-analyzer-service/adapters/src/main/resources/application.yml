@@ -41,6 +41,8 @@ logging:
 receipt-resolver-strategy:
   biedronka:
     version: 1.0
+  biedronka-json:
+      version: 1.0
 
 pdf-service:
   tmp-dir: /app/pdf-service-tmp

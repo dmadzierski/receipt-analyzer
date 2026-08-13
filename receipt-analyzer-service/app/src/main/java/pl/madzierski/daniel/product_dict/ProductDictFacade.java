@@ -77,11 +77,11 @@ public class ProductDictFacade {
     }
 
 
-    public Optional<ProductDictDto> findCanonicalName(String alias) {
+    public Optional<ProductDto> findCanonicalName(String alias) {
         Set<ProductAliasDto> allAliases = productAliasQueryRepository.findAllAliases();
         Optional<ProductAliasDto> productDictOptional = allAliases.stream().filter(aliasDto -> aliasDto.getName().equalsIgnoreCase(alias)).findFirst();
         if (productDictOptional.isPresent())
-            return Optional.of(new ProductDictDto(productDictOptional.get().getId()));
+            return Optional.of(new ProductDto(productDictOptional.get().getId()));
 
         String normalizedSearchAlias = alias.trim().toUpperCase();
         int searchLength = normalizedSearchAlias.length();
@@ -103,14 +103,14 @@ public class ProductDictFacade {
             )
             .filter(entry -> entry.getValue() >= minRequiredStringSimilarity)
             .max(Map.Entry.comparingByValue())
-            .map(productAliasDtoDoubleEntry -> new ProductDictDto(productAliasDtoDoubleEntry.getKey().getProductDictId()));
+            .map(productAliasDtoDoubleEntry -> new ProductDto(productAliasDtoDoubleEntry.getKey().getProductDictId()));
     }
 
     public void mergeProductAliasesOfProductDictList(String productDictId, List<String> productDictIdsListToMerge) {
         productAliasRepository.reassignAliasesToProductDict(productDictId, productDictIdsListToMerge);
     }
 
-    public void saveAll(Collection<ProductDictDto> productDictEntities) {
+    public void saveAll(Collection<ProductDto> productDictEntities) {
         productDictRepository.saveAll(productDictEntities.stream().map(productDictFactory::from).toList());
     }
 

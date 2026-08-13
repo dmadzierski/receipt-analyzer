@@ -2,7 +2,7 @@ package pl.madzierski.daniel.receipt;
 
 import lombok.RequiredArgsConstructor;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
-import pl.madzierski.daniel.product_dict.model.ProductDictDto;
+import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptItemDto;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
@@ -36,7 +36,7 @@ class ReceiptItemFactory {
         receiptItem.setDiscount(resolveDataItem.discount());
         receiptItem.setTotalPrice(resolveDataItem.totalPrice());
         receiptItem.setPosition(resolveDataItem.position());
-        Optional<ProductDictDto> canonicalName = productDictFacade.findCanonicalName(resolveDataItem.name());
+        Optional<ProductDto> canonicalName = productDictFacade.findCanonicalName(resolveDataItem.name());
         receiptItem.setNameDict(canonicalName.map(productDictDto -> new ProductDictQuery(productDictDto.getId())).orElse(null));
         return receiptItem;
     }

@@ -6,8 +6,8 @@ import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCat
 
 import java.util.Set;
 
-public interface SqlProductDictQueryRepository extends ProductDictQueryRepository, Repository<SqlProductDict, String> {
-    @Query("SELECT d FROM SqlProductDict d LEFT JOIN FETCH d.aliases LEFT JOIN FETCH d.productCategory")
+public interface SqlProductDictQueryRepository extends ProductDictQueryRepository, Repository<SqlProduct, String> {
+    @Query("SELECT d FROM SqlProduct d LEFT JOIN FETCH d.aliases LEFT JOIN FETCH d.productCategory")
     Set<ProductDictWithAliasesAndCategoryProjection> findAllWithCategoryAndAliases();
 
     long countProductDictEntitiesByProductCategoryId(String productCategoryId);

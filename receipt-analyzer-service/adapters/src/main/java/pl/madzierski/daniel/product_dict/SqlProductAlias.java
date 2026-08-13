@@ -40,7 +40,7 @@ class SqlProductAlias {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_dict_id", nullable = false)
-    private SqlProductDict productDict;
+    private SqlProduct productDict;
 
     @Override
     public boolean equals(Object o) {

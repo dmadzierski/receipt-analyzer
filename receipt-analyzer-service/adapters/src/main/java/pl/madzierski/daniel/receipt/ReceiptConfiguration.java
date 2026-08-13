@@ -50,7 +50,7 @@ class ReceiptConfiguration {
     }
 
     @Bean
-    BiedronkaJsonResolver biedronkaJsonResolver(@Value("${receipt-resolver-strategy.biedronka.version:1.0}") String resolverVersion, ObjectMapper objectMapper) {
+    BiedronkaJsonResolver biedronkaJsonResolver(@Value("${receipt-resolver-strategy.biedronka-json.version:1.0}") String resolverVersion, ObjectMapper objectMapper) {
         return new BiedronkaJsonResolver(resolverVersion, objectMapper);
     }
 

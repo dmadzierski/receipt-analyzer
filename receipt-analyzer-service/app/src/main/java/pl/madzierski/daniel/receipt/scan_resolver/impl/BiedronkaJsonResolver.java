@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @AllArgsConstructor
 public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
@@ -23,6 +25,8 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
     public static final String BRAND = "Biedronka";
     private final String resolverVersion;
     private final ObjectMapper objectMapper;
+    private static final Pattern NAME_PATTERN = Pattern.compile("^(?<name>.*)\\w*[ABC]");
+    private static final String NAME_GROUP_NAME = "name";
 
     public ReceiptResolverStrategyType strategy() {
         return ReceiptResolverStrategyType.BIEDRONKA_JSON;
@@ -75,11 +79,19 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
     }
 
     private ReceiptRevisionResolveDataItem getReceiptRevisionResolveDataItem(BiedronkaJsonReceipt.Body.SellLine sellLine, Integer position) {
-        String name = sellLine.name();
+        String name = extractName(sellLine);
         Double amount = parseDouble(sellLine.quantity());
         Double unitPrice = sellLine.price() != null ? sellLine.price() / 100.0 : null;
         Double totalPrice = sellLine.total() != null ? sellLine.total() / 100.0 : null;
         return new ReceiptRevisionResolveDataItem(name, amount, unitPrice, null, totalPrice, position);
+    }
+
+    private String extractName(BiedronkaJsonReceipt.Body.SellLine sellLine) {
+        Matcher matcher = NAME_PATTERN.matcher(sellLine.name());
+        if (matcher.matches()) {
+            return matcher.group(NAME_GROUP_NAME).trim();
+        }
+        return null;
     }
 
     private ReceiptRevisionResolveDataItem getReceiptRevisionResolveDataItem(ReceiptRevisionResolveDataItem lastItem, BiedronkaJsonReceipt.Body.DiscountLine discountLine) {

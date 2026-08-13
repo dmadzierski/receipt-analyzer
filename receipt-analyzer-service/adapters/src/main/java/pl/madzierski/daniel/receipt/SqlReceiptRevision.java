@@ -34,6 +34,7 @@ class SqlReceiptRevision {
     private LocalDateTime modifiedDate;
     private String name;
     private String revision;
+    @Enumerated(EnumType.STRING)
     private ReceiptResolverStrategyType resolver;
     private String brand;
     private Double totalPrice;

@@ -10,7 +10,7 @@ import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.model.ProductAliasDto;
-import pl.madzierski.daniel.product_dict.model.ProductDictDto;
+import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.*;
 import pl.madzierski.daniel.receipt.scan_resolver.service.ReceiptResolverLocatorService;
@@ -166,25 +166,25 @@ public class ReceiptFacade {
 
     @Transactional
     synchronized void updateDictByUserRevision(String revisionId) {
-        Map<ProductDictDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap = new HashMap<>();
+        Map<ProductDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap = new HashMap<>();
         this.findAllMissingAliasesInRevision(revisionId).forEach(receiptItem -> {
             String alias = receiptItem.getParentItem().getName();
             String userText = receiptItem.getName();
-            ProductDictDto resolvedDict;
-            Optional<ProductDictDto> productDictEntityOptional = productDictFacade.findCanonicalName(alias);
+            ProductDto resolvedDict;
+            Optional<ProductDto> productDictEntityOptional = productDictFacade.findCanonicalName(alias);
             if (productDictEntityOptional.isPresent()) {
                 resolvedDict = productDictEntityOptional.get();
                 if (resolvedDict.getAliases().stream().noneMatch(currAlias -> currAlias.getName().equals(alias)))
                     resolvedDict.addAlias(ProductAliasDto.builder().name(alias).build());
                 receiptItemToProductDictNameMap.computeIfAbsent(resolvedDict, k -> new HashSet<>()).add(receiptItem.getParentItem());
             } else {
-                Optional<ProductDictDto> optionalProductDict = receiptItemToProductDictNameMap.keySet().stream().filter(dict -> dict.getAliases().stream().anyMatch(currAlias -> currAlias.getName().equals(userText))).findAny();
+                Optional<ProductDto> optionalProductDict = receiptItemToProductDictNameMap.keySet().stream().filter(dict -> dict.getAliases().stream().anyMatch(currAlias -> currAlias.getName().equals(userText))).findAny();
                 if (optionalProductDict.isPresent()) {
                     resolvedDict = optionalProductDict.get();
                     resolvedDict.addAlias(ProductAliasDto.builder().name(alias).build());
                     receiptItemToProductDictNameMap.get(resolvedDict).add(receiptItem.getParentItem());
                 } else {
-                    resolvedDict = ProductDictDto.builder().name(userText).build();
+                    resolvedDict = ProductDto.builder().name(userText).build();
                     resolvedDict.addAlias(ProductAliasDto.builder().name(userText).build());
                     if (!userText.equals(alias)) resolvedDict.addAlias(ProductAliasDto.builder().name(alias).build());
                     receiptItemToProductDictNameMap.put(resolvedDict, new HashSet<>(Set.of(receiptItem.getParentItem())));
@@ -204,7 +204,7 @@ public class ReceiptFacade {
         receiptItemRepository.reassignProductDict(primaryDict, productDictIdList);
     }
 
-    public void updateItemsProductDict(Map<ProductDictDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap) {
+    public void updateItemsProductDict(Map<ProductDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap) {
         receiptItemRepository.saveAll(receiptItemToProductDictNameMap.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(receiptItemDto -> {
             ReceiptItem item = receiptItemFactory.from(receiptItemDto);
             item.setNameDict(new ProductDictQuery(entry.getKey().getId()));
