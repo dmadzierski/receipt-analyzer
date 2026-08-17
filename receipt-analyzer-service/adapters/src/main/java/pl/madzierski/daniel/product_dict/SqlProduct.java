@@ -20,9 +20,6 @@ import java.util.Set;
 @EqualsAndHashCode
 @EntityListeners({AuditingEntityListener.class})
 class SqlProduct {
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private final Set<SqlProductAlias> aliases = new HashSet<>();
     @Id
     @UuidGenerator
     private String id;
@@ -37,6 +34,9 @@ class SqlProduct {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_category_id")
     private SqlProductCategory productCategory;
+    @Getter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private final Set<SqlProductAlias> aliases = new HashSet<>();
 
     public static <S extends ProductDict> SqlProduct fromProductDict(S s) {
         SqlProduct sqlProduct = new SqlProduct();

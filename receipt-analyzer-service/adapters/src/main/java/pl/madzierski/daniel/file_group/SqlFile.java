@@ -2,6 +2,7 @@ package pl.madzierski.daniel.file_group;
 
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "receipt_file")
 @EntityListeners({AuditingEntityListener.class})
+@Setter
 @NoArgsConstructor
 class SqlFile {
 
@@ -36,7 +38,6 @@ class SqlFile {
         SqlFile sqlFile = new SqlFile();
         sqlFile.id = file.getId();
         sqlFile.path = file.getPath();
-        sqlFile.fileGroup = SqlFileGroup.fromFileGroup(file.getFileGroup());
         sqlFile.rawData = file.getRawData();
         sqlFile.partNumber = file.getPartNumber();
         return sqlFile;
@@ -46,9 +47,9 @@ class SqlFile {
         File file = new File();
         file.setId(this.id);
         file.setPath(this.path);
-        file.setFileGroup(this.fileGroup.toFileGroup());
         file.setRawData(this.rawData);
         file.setPartNumber(this.partNumber);
         return file;
     }
+
 }

@@ -27,11 +27,12 @@ public class FileFacade {
         FileType fileType = FileType.invoke(contentType);
         ReceiptQuery receiptQueryEntity = new ReceiptQuery(receiptDto.getId(), null);
         FileGroup fileGroup = new FileGroup(fileType, receiptQueryEntity, true);
-        File fileEntity = new File(null, null, fileGroup, null, 0);
+        File fileEntity = new File(fileGroup, 0);
         String pathInString = createPath(userSub, fileEntity, fileGroup, fileType.getExtension(), receiptDto);
         fileEntity.setPath(pathInString);
         fileGroup.addFile(fileEntity);
         saveFile(pathInString, file);
+        fileRepository.save(fileGroup);
         return toDto(fileGroup);
     }
 
@@ -42,7 +43,6 @@ public class FileFacade {
     private FileDto toDto(File file) {
         return new FileDto(file.getId(), file.getPath(), file.getRawData(), file.getPartNumber());
     }
-
 
     private String createPath(
         String currentUserSub,

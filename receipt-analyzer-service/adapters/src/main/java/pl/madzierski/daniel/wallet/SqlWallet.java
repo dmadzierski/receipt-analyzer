@@ -36,10 +36,6 @@ class SqlWallet {
     private String name;
     @Column(name = "user_sub")
     private String userSub;
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "wallet")
-    private final Set<SqlReceiptQuery> receipts = new HashSet<>();
-
 
     public static SqlWallet fromWallet(Wallet wallet) {
         return SqlWallet.builder()

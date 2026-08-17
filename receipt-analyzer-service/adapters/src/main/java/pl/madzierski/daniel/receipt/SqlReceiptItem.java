@@ -34,8 +34,8 @@ class SqlReceiptItem {
     private SqlReceiptRevision receiptRevision;
     private String name;
     @ManyToOne
-    @JoinColumn(name = "product_dict_id")
-    private SqlProductDictQuery nameDict;
+    @JoinColumn(name = "product_id")
+    private SqlProductDictQuery product;
     @Column(precision = 10, scale = 2)
     private BigDecimal amount;
     @Column(precision = 10, scale = 2)

@@ -9,9 +9,9 @@ import java.util.List;
 interface SqlProductAliasRepository extends Repository<SqlProductAlias, String> {
 
     @Query(value = """
-        UPDATE product_alias
-        SET product_dict_id = :targetProductDictId
-        WHERE product_dict_id IN (:productDictIdsToMerge)
+        UPDATE product
+        SET product_id = :targetProductDictId
+        WHERE product_id IN (:productDictIdsToMerge)
         """, nativeQuery = true)
     void reassignAliasesToProductDict(String targetProductDictId, List<String> productDictIdsToMerge);
 }

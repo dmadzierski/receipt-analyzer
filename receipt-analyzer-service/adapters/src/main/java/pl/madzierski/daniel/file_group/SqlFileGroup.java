@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -14,16 +15,32 @@ import pl.madzierski.daniel.receipt.SqlReceiptQuery;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "receipt_file_group")
 @NoArgsConstructor
+@Setter
 @EntityListeners({AuditingEntityListener.class})
 class SqlFileGroup {
+    public static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
+        SqlFileGroup sqlFileGroup = new SqlFileGroup();
+        sqlFileGroup.setId(fileGroup.getId());
+        sqlFileGroup.setCreatedDate(fileGroup.getCreatedDate());
+        sqlFileGroup.setModifiedDate(fileGroup.getModifiedDate());
+        sqlFileGroup.setFileType(fileGroup.getFileType());
+        sqlFileGroup.setIsOriginal(fileGroup.getIsOriginal());
+        sqlFileGroup.setReceipt(fileGroup.getReceipt() != null ? new SqlReceiptQuery(fileGroup.getReceipt().getId()) :
+            null);
+        sqlFileGroup.addFiles(fileGroup.getFiles().stream().map(SqlFile::fromFile).collect(Collectors.toSet()));
+        sqlFileGroup.files.forEach(sqlFile -> sqlFile.setFileGroup(sqlFileGroup));
+        return sqlFileGroup;
+    }
 
     @Id
     @UuidGenerator
     private String id;
+
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
@@ -40,19 +57,19 @@ class SqlFileGroup {
     @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<SqlFile> files = new HashSet<>();
 
-    static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
-        SqlFileGroup sqlFileGroup = new SqlFileGroup();
-        sqlFileGroup.fileType = fileGroup.getFileType();
-        sqlFileGroup.receipt = SqlReceiptQuery.fromReceipt(fileGroup.getReceipt());
-        sqlFileGroup.isOriginal = fileGroup.getIsOriginal();
-        return sqlFileGroup;
+    private void addFiles(Set<SqlFile> collect) {
+        this.files.addAll(collect);
     }
 
-    public FileGroup toFileGroup() {
+    public FileGroup toFileGroupDto() {
         FileGroup fileGroup = new FileGroup();
         fileGroup.setFileType(this.fileType);
         fileGroup.setReceipt(this.receipt.toReceipt());
         fileGroup.setIsOriginal(this.isOriginal);
+        fileGroup.setCreatedDate(this.createdDate);
+        fileGroup.setModifiedDate(this.modifiedDate);
+        fileGroup.setId(id);
+        fileGroup.addFiles(this.files.stream().map(SqlFile::toFile).collect(Collectors.toSet()));
         return fileGroup;
     }
 }

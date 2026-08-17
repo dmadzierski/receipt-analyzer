@@ -38,9 +38,6 @@ class SqlReceipt {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id")
     private SqlWalletQuery wallet;
-    @Getter(AccessLevel.NONE)
-    @OneToMany
-    private final Set<SqlFileGroupQuery> fileGroups = new HashSet<>();
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "receipt")
     private final Set<SqlReceiptRevision> receiptRevisions = new HashSet<>();
 

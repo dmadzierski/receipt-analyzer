@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "product_dict")
+@Table(name = "product")
 @AllArgsConstructor
 @NoArgsConstructor
 public class SqlProductDictQuery {

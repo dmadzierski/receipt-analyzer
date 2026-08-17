@@ -19,9 +19,6 @@ public class SqlReceiptQuery {
     @Id
     @UuidGenerator
     private String id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "wallet_id")
-    private SqlWalletQuery wallet;
 
     public static SqlReceiptQuery fromReceipt(ReceiptQuery receipt) {
         SqlReceiptQuery sqlReceiptQuery = new SqlReceiptQuery();

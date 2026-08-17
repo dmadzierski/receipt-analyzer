@@ -16,8 +16,8 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
     @Modifying
     @Query("""
         UPDATE SqlReceiptItem r
-        SET r.nameDict = :dict
-        WHERE r.nameDict.id IN (:productDictIdList)
+        SET r.product = :dict
+        WHERE r.product.id IN (:productDictIdList)
         """)
     void reassignProductDict(ProductDictQuery dict, List<String> productDictIdList);
 

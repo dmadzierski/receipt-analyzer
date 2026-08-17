@@ -28,6 +28,11 @@ class File {
         this.partNumber = partNumber;
     }
 
+    public File(FileGroup fileGroup, Integer partNumber) {
+        this.fileGroup = fileGroup;
+        this.partNumber = partNumber;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

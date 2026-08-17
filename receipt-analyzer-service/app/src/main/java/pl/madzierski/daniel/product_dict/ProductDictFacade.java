@@ -56,7 +56,7 @@ public class ProductDictFacade {
         updateProductDictListRequest.items().forEach(updateProductDict -> {
             List<String> dictIds = updateProductDict.productDictList();
             String primaryDictId = dictIds.getFirst();
-            ProductDict productDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_DICT_NOT_FOUND));
+            ProductDict productDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
             productDict.setName(updateProductDict.canonicalName().trim());
             if (updateProductDict.productCategoryId() != null) {
                 ProductCategory productCategory =

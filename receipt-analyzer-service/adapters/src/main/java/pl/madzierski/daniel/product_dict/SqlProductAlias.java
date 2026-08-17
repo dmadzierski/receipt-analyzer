@@ -39,7 +39,7 @@ class SqlProductAlias {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_dict_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private SqlProduct productDict;
 
     @Override

@@ -16,13 +16,13 @@ import java.util.Set;
 @Setter
 class FileGroup {
 
-    private final Set<File> files = new HashSet<>();
     private String id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private FileType fileType;
     private ReceiptQuery receipt;
     private Boolean isOriginal;
+    private final Set<File> files = new HashSet<>();
 
     public FileGroup(FileType fileType, ReceiptQuery receipt, Boolean isOriginal) {
         this.fileType = fileType;
@@ -32,6 +32,10 @@ class FileGroup {
 
     void addFile(File file) {
         this.files.add(file);
+    }
+
+    public void addFiles(Set<File> collect) {
+        this.files.addAll(collect);
     }
 
     Set<File> getFiles() {
