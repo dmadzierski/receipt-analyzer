@@ -12,6 +12,7 @@ import pl.madzierski.daniel.receipt.scan_resolver.model.BiedronkaJsonReceipt;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -72,17 +73,17 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
             }
         }
 
-        Double totalPrice =
-            result.receipt().body().stream().filter(b -> b.sumInCurrency() != null).findFirst().map(b -> b.sumInCurrency().fiscalTotal()).orElse(0) / 100.0;
+        BigDecimal totalPrice =
+            BigDecimal.valueOf(result.receipt().body().stream().filter(b -> b.sumInCurrency() != null).findFirst().map(b -> b.sumInCurrency().fiscalTotal()).orElse(0), 0).divide(BigDecimal.valueOf(100, 0));
         return new ReceiptRevisionResolveData(resolverVersion, BRAND, items, files, null, null, this.strategy(),
             totalPrice);
     }
 
     private ReceiptRevisionResolveDataItem getReceiptRevisionResolveDataItem(BiedronkaJsonReceipt.Body.SellLine sellLine, Integer position) {
         String name = extractName(sellLine);
-        Double amount = parseDouble(sellLine.quantity());
-        Double unitPrice = sellLine.price() != null ? sellLine.price() / 100.0 : null;
-        Double totalPrice = sellLine.total() != null ? sellLine.total() / 100.0 : null;
+        BigDecimal amount = parseBigDecimal(sellLine.quantity());
+        BigDecimal unitPrice = sellLine.price() != null ? BigDecimal.valueOf(sellLine.price() / 100.0) : null;
+        BigDecimal totalPrice = sellLine.total() != null ? BigDecimal.valueOf(sellLine.total() / 100.0) : null;
         return new ReceiptRevisionResolveDataItem(name, amount, unitPrice, null, totalPrice, position);
     }
 
@@ -95,15 +96,15 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
     }
 
     private ReceiptRevisionResolveDataItem getReceiptRevisionResolveDataItem(ReceiptRevisionResolveDataItem lastItem, BiedronkaJsonReceipt.Body.DiscountLine discountLine) {
-        Double discount = discountLine.value() != null ? discountLine.value() / 100.0 : 0.0;
-        Double newTotalPrice = lastItem.totalPrice() - discount;
+        BigDecimal discount = BigDecimal.valueOf(discountLine.value() != null ? discountLine.value() / 100.0 : 0.0);
+        BigDecimal newTotalPrice = lastItem.totalPrice().subtract(discount);
         return new ReceiptRevisionResolveDataItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), discount, newTotalPrice, lastItem.position());
     }
 
-    private Double parseDouble(String valStr) {
+    private BigDecimal parseBigDecimal(String valStr) {
         if (valStr == null) return null;
         try {
-            return Double.parseDouble(valStr.replace(" ", ".").replace(",", "."));
+            return BigDecimal.valueOf(Double.parseDouble(valStr.replace(" ", ".").replace(",", ".")));
         } catch (NumberFormatException e) {
             return null;
         }

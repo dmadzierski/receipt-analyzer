@@ -2,6 +2,7 @@ package pl.madzierski.daniel.receipt.model;
 
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record GetReceiptRevisionsResponse(
@@ -9,7 +10,7 @@ public record GetReceiptRevisionsResponse(
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
     String brand,
-    Double totalPrice,
+    BigDecimal totalPrice,
     LocalDateTime payingDate,
     String address,
     Boolean isPreferredRevision,

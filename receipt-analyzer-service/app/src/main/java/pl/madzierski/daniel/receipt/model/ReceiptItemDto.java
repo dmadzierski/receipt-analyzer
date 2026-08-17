@@ -2,6 +2,8 @@ package pl.madzierski.daniel.receipt.model;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -11,14 +13,14 @@ public class ReceiptItemDto {
     private String id;
     private String productDictId;
     private String name;
-    private Double amount;
-    private Double unitPrice;
-    private Double discount;
-    private Double totalPrice;
+    private BigDecimal amount;
+    private BigDecimal unitPrice;
+    private BigDecimal discount;
+    private BigDecimal totalPrice;
     private Integer position;
     private ReceiptItemDto parentItem;
 
-    public ReceiptItemDto(String id, String productDictId, String name, Double amount, Double unitPrice, Double discount, Double totalPrice, Integer position) {
+    public ReceiptItemDto(String id, String productDictId, String name, BigDecimal amount, BigDecimal unitPrice, BigDecimal discount, BigDecimal totalPrice, Integer position) {
         this.id = id;
         this.productDictId = productDictId;
         this.name = name;

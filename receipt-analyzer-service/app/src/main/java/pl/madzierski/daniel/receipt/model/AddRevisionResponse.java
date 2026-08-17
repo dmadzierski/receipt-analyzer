@@ -2,6 +2,7 @@ package pl.madzierski.daniel.receipt.model;
 
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,7 @@ public record AddRevisionResponse(
     String receiptId,
     LocalDateTime createdDate,
     String brand,
-    Double totalPrice,
+    BigDecimal totalPrice,
     LocalDateTime payingDate,
     String address,
     Set<AddRevisionItemResponse> items
@@ -53,10 +54,10 @@ public record AddRevisionResponse(
     public record AddRevisionItemResponse(
         String id,
         String name,
-        Double amount,
-        Double unitPrice,
-        Double discount,
-        Double totalPrice,
+        BigDecimal amount,
+        BigDecimal unitPrice,
+        BigDecimal discount,
+        BigDecimal totalPrice,
         Integer position,
         String originalItemId
     ) {

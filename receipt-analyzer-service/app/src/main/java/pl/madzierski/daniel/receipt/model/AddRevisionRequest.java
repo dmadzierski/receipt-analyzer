@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.receipt.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -7,7 +8,7 @@ public record AddRevisionRequest(
     String receiptId,
     LocalDateTime createdDate,
     String brand,
-    Double totalPrice,
+    BigDecimal totalPrice,
     LocalDateTime payingDate,
     String address,
     Set<AddRevisionItemRequest> items
@@ -15,10 +16,10 @@ public record AddRevisionRequest(
     public record AddRevisionItemRequest(
         String id,
         String name,
-        Double amount,
-        Double unitPrice,
-        Double discount,
-        Double totalPrice,
+        BigDecimal amount,
+        BigDecimal unitPrice,
+        BigDecimal discount,
+        BigDecimal totalPrice,
         Integer position,
         String originalItemId
     ) {

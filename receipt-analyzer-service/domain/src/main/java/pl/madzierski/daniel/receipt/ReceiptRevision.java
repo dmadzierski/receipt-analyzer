@@ -2,6 +2,7 @@ package pl.madzierski.daniel.receipt;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,7 +22,7 @@ class ReceiptRevision {
     private String revision;
     private ReceiptResolverStrategyType resolver;
     private String brand;
-    private Double totalPrice;
+    private BigDecimal totalPrice;
     private LocalDateTime payingDate;
     private String address;
     private Boolean isPreferredRevision;

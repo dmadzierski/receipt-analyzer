@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -35,10 +36,14 @@ class SqlReceiptItem {
     @ManyToOne
     @JoinColumn(name = "product_dict_id")
     private SqlProductDictQuery nameDict;
-    private Double amount;
-    private Double unitPrice;
-    private Double discount;
-    private Double totalPrice;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal amount;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal unitPrice;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal discount;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal totalPrice;
     private Integer position;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_item_id")

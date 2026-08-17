@@ -11,9 +11,11 @@ import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
 import pl.madzierski.daniel.receipt.scan_resolver.service.PDFService;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,12 +119,12 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
             } else if (discountMatcher.matches()) {
                 if (!items.isEmpty()) {
                     ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem lastItem = items.getLast();
-                    Double discount = parseDouble(getValueFromGroup(discountMatcher, "discount"));
+                    BigDecimal discount = parseBigDecimal(getValueFromGroup(discountMatcher, "discount"));
                     items.set(items.size() - 1, new ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), discount, lastItem.totalPrice(), lastItem.position()));
                 }
             } else if (discountedPriceMatcher.matches() && !items.isEmpty()) {
                 ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem lastItem = items.getLast();
-                Double totalPrice = parseDouble(getValueFromGroup(discountedPriceMatcher, "totalPrice"));
+                BigDecimal totalPrice = parseBigDecimal(getValueFromGroup(discountedPriceMatcher, "totalPrice"));
                 items.set(items.size() - 1, new ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), lastItem.discount(), totalPrice, lastItem.position()));
             }
         }
@@ -132,9 +134,9 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
             items.set(i, new ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), i + 1));
         }
 
-        double totalPrice = items.stream()
-            .mapToDouble(it -> it.totalPrice() != null ? it.totalPrice() : 0.0)
-            .sum();
+        BigDecimal totalPrice = items.stream()
+            .map(it -> it.totalPrice() != null ? it.totalPrice() : BigDecimal.ZERO)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new ReceiptRevisionResolveData(resolverVersion, "Biedronka", items, receiptFileList, null, null,
             strategy(), totalPrice);
@@ -146,9 +148,9 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
             name = name.replaceAll("(?<=\\d)9(?=\\s|$)", "g");
         }
 
-        Double amount = parseDouble(getValueFromGroup(matcher, "amount"));
-        Double unitPrice = parseDouble(getValueFromGroup(matcher, "unitPrice"));
-        Double totalPrice = parseDouble(getValueFromGroup(matcher, "totalPrice"));
+        BigDecimal amount = parseBigDecimal(getValueFromGroup(matcher, "amount"));
+        BigDecimal unitPrice = parseBigDecimal(getValueFromGroup(matcher, "unitPrice"));
+        BigDecimal totalPrice = parseBigDecimal(getValueFromGroup(matcher, "totalPrice"));
 
         return new ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(name, amount, unitPrice, null, totalPrice, index);
     }
@@ -161,10 +163,10 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
         }
     }
 
-    private Double parseDouble(String valStr) {
+    private BigDecimal parseBigDecimal(String valStr) {
         if (valStr == null) return null;
         try {
-            return Double.parseDouble(valStr.replace(" ", ".").replace(",", "."));
+            return new BigDecimal(valStr.replace(" ", ".").replace(",", "."));
         } catch (NumberFormatException e) {
             return null;
         }

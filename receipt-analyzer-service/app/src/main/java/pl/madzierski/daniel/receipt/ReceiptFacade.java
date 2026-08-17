@@ -17,6 +17,7 @@ import pl.madzierski.daniel.receipt.scan_resolver.service.ReceiptResolverLocator
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -145,7 +146,9 @@ public class ReceiptFacade {
                     });
                 } else {
                     ProductDictQuery productDict = productDictFacade.findCanonicalName(incomingItem.name()).map(item -> new ProductDictQuery(item.getId())).orElse(null);
-                    ReceiptItem newItem = new ReceiptItem(revision, incomingItem.name(), productDict, incomingItem.amount(), incomingItem.unitPrice(), 0.0, incomingItem.totalPrice(), incomingItem.position(), null);
+                    ReceiptItem newItem = new ReceiptItem(revision, incomingItem.name(), productDict,
+                        incomingItem.amount(), incomingItem.unitPrice(), BigDecimal.ZERO, incomingItem.totalPrice(),
+                        incomingItem.position(), null);
                     revision.addItem(newItem);
                 }
             }

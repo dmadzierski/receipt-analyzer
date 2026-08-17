@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
@@ -17,7 +18,7 @@ public class ReceiptRevisionDto {
     private String name;
     private ReceiptResolverStrategyType resolver;
     private String brand;
-    private Double totalPrice;
+    private BigDecimal totalPrice;
     private LocalDateTime payingDate;
     private String address;
     private Boolean isPreferredRevision;

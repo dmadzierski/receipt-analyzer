@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -24,10 +25,10 @@ class ReceiptItem {
     private ReceiptRevision receiptRevision;
     private String name;
     private ProductDictQuery nameDict;
-    private Double amount;
-    private Double unitPrice;
-    private Double discount;
-    private Double totalPrice;
+    private BigDecimal amount;
+    private BigDecimal unitPrice;
+    private BigDecimal discount;
+    private BigDecimal totalPrice;
     private Integer position;
     private ReceiptItem parentItem;
 
@@ -35,8 +36,8 @@ class ReceiptItem {
         this.id = id;
     }
 
-    public ReceiptItem(ReceiptRevision receiptRevision, String name, ProductDictQuery nameDict, Double amount,
-                       Double unitPrice, Double discount, Double totalPrice, Integer position, ReceiptItem parentItem) {
+    public ReceiptItem(ReceiptRevision receiptRevision, String name, ProductDictQuery nameDict, BigDecimal amount,
+                       BigDecimal unitPrice, BigDecimal discount, BigDecimal totalPrice, Integer position, ReceiptItem parentItem) {
         this.receiptRevision = receiptRevision;
         this.name = name;
         this.nameDict = nameDict;

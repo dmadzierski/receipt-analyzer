@@ -3,6 +3,7 @@ package pl.madzierski.daniel.receipt.model;
 import lombok.Builder;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,14 +16,14 @@ public record ReceiptRevisionResolveData(
     LocalDateTime payingDate,
     String address,
     ReceiptResolverStrategyType strategy,
-    Double totalPrice
+    BigDecimal totalPrice
 ) {
     public record ReceiptRevisionResolveDataItem(
         String name,
-        Double amount,
-        Double unitPrice,
-        Double discount,
-        Double totalPrice,
+        BigDecimal amount,
+        BigDecimal unitPrice,
+        BigDecimal discount,
+        BigDecimal totalPrice,
         Integer position
     ) {
     }
