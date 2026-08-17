@@ -25,7 +25,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
 
     private static final Pattern ITEM_PATTERN_REGEX = Pattern.compile("^(?<name>.*)\\s+(?<ptu>[ABC])\\s+(?<amount>\\d+[\\s.]?\\d+)\\s*[xX]\\s+(?<unitPrice>\\d+[.,\\s]?\\d+)\\s(?<totalPrice>\\d+[.,\\s]\\d+)$");
     private static final Pattern ITEM_PATTERN_WITHOUT_PTU_REGEX = Pattern.compile("^(?<name>.*)\\s+(?<amount>\\d+[\\s.]?\\d+)\\s*[xX]\\s+(?<unitPrice>\\d+[.,\\s]?\\d+)\\s(?<totalPrice>\\d+[.,\\s]\\d+)$");
-    private static final Pattern DISCOUNT_PATTERN_REGEX = Pattern.compile("^Rabat -(?<discount>\\d+[.,\\s]\\d+)$");
+    private static final Pattern DISCOUNT_PATTERN_REGEX = Pattern.compile("^Rabat [-—]{1,2}(?<discount>\\d+[.,\\s]\\d+)$");
     private static final Pattern DISCOUNTED_PRICE_REGEX = Pattern.compile("^(?<totalPrice>\\d+[.,\\s]\\d+)$");
     private static final Pattern PRICE_SUFFIX_REGEX = Pattern.compile("\\d+[.,\\s]?\\d{2}$");
     private static final Pattern START_ITEM_INDEX_REGEX = Pattern.compile("Nazwa PTU Ilość Cena Wartość", Pattern.CASE_INSENSITIVE);
