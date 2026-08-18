@@ -6,7 +6,7 @@ export interface GetReceiptResponseItem {
   id: string;
   name: string;
   description: string;
-  createDate: Date;
+  createdDate: Date;
 }
 
 export interface GetReceiptDetailsResponse {
