@@ -10,14 +10,13 @@ import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.model.ProductAliasDto;
-import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
+import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.receipt.model.*;
 import pl.madzierski.daniel.receipt.scan_resolver.service.ReceiptResolverLocatorService;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -74,7 +73,7 @@ public class ReceiptFacade {
     }
 
     @Transactional(readOnly = true)
-    public List<GetReceiptRevisionsResponse> getReceiptRevisions(String receiptId) {
+    List<GetReceiptRevisionsResponse> getReceiptRevisions(String receiptId) {
         List<ReceiptRevisionDto> receiptRevisionEntitiesByReceiptId = receiptRevisionQueryRepository.getRevisionsByReceiptId(receiptId);
         return receiptRevisionEntitiesByReceiptId.stream().map(GetReceiptRevisionsResponse::receiptRevisionMapper).toList();
     }
@@ -140,15 +139,13 @@ public class ReceiptFacade {
                         entity.setName(incomingItem.name());
                         entity.setAmount(incomingItem.amount());
                         entity.setUnitPrice(incomingItem.unitPrice());
+                        entity.setDiscount(incomingItem.discount());
                         entity.setTotalPrice(incomingItem.totalPrice());
                         entity.setPosition(incomingItem.position());
-                        if (incomingItem.discount() != null) entity.setDiscount(incomingItem.discount());
                     });
                 } else {
                     ProductDictQuery productDict = productDictFacade.findCanonicalName(incomingItem.name()).map(item -> new ProductDictQuery(item.getId())).orElse(null);
-                    ReceiptItem newItem = new ReceiptItem(revision, incomingItem.name(), productDict,
-                        incomingItem.amount(), incomingItem.unitPrice(), BigDecimal.ZERO, incomingItem.totalPrice(),
-                        incomingItem.position(), null);
+                    ReceiptItem newItem = new ReceiptItem(revision, incomingItem.name(), productDict, incomingItem.amount(), incomingItem.unitPrice(), incomingItem.discount(), incomingItem.totalPrice(), incomingItem.position(), null);
                     revision.addItem(newItem);
                 }
             }
@@ -157,20 +154,19 @@ public class ReceiptFacade {
         return UpdateRevisionResponse.map(toDto(revision), revision.getItems().stream().map(this::toDto).collect(Collectors.toSet()));
     }
 
-    public ReceiptItemDto toDto(ReceiptItem item) {
+    private ReceiptItemDto toDto(ReceiptItem item) {
         return ReceiptItemDto.builder().name(item.getName()).amount(item.getAmount()).unitPrice(item.getUnitPrice()).discount(item.getDiscount()).totalPrice(item.getTotalPrice()).position(item.getPosition()).build();
     }
 
 
-    ReceiptRevisionDto toDto(ReceiptRevision revision) {
+    private ReceiptRevisionDto toDto(ReceiptRevision revision) {
         return ReceiptRevisionDto.builder().id(revision.getId()).createdDate(revision.getCreatedDate()).name(revision.getName()).resolver(revision.getResolver()).brand(revision.getBrand()).totalPrice(revision.getTotalPrice()).payingDate(revision.getPayingDate()).address(revision.getAddress()).isPreferredRevision(revision.getIsPreferredRevision()).isCorrect(revision.getIsCorrect()).build();
     }
-
 
     @Transactional
     synchronized void updateDictByUserRevision(String revisionId) {
         Map<ProductDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap = new HashMap<>();
-        this.findAllMissingAliasesInRevision(revisionId).forEach(receiptItem -> {
+        this.receiptItemQueryRepository.findAllMissingAliasesInRevision(revisionId).forEach(receiptItem -> {
             String alias = receiptItem.getParentItem().getName();
             String userText = receiptItem.getName();
             ProductDto resolvedDict;
@@ -198,16 +194,12 @@ public class ReceiptFacade {
         this.updateItemsProductDict(receiptItemToProductDictNameMap);
     }
 
-    public List<ReceiptItemDto> findAllMissingAliasesInRevision(String revisionId) {
-        return receiptItemQueryRepository.findAllMissingAliasesInRevision(revisionId);
-    }
-
     @Transactional
     public void reassignProductDict(ProductDictQuery primaryDict, List<String> productDictIdList) {
         receiptItemRepository.reassignProductDict(primaryDict, productDictIdList);
     }
 
-    public void updateItemsProductDict(Map<ProductDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap) {
+    private void updateItemsProductDict(Map<ProductDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap) {
         receiptItemRepository.saveAll(receiptItemToProductDictNameMap.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(receiptItemDto -> {
             ReceiptItem item = receiptItemFactory.from(receiptItemDto);
             item.setNameDict(new ProductDictQuery(entry.getKey().getId()));

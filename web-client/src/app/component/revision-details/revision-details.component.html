@@ -9,6 +9,9 @@
     <mat-form-field>
       <mat-label>Total price</mat-label>
       <input [(ngModel)]="revision().totalPrice" [readonly]="!contentEditable" matInput maxlength="30"/>
+    @if (contentEditable && isTotalReceiptPriceInValid()) {
+      <mat-icon class="error-icon" matTooltip="Calcaulation error">error</mat-icon>
+    }
     </mat-form-field>
 
     <mat-form-field>
@@ -79,7 +82,8 @@
       <ng-container matColumnDef="amount">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Amount</th>
         <td *matCellDef="let element" mat-cell>
-          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.amount" [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
+          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.amount" [ngClass]="{'is-editing': contentEditable}"
+                 [readonly]="!contentEditable"
                  class="table-input" type="number"/>
         </td>
       </ng-container>
@@ -87,7 +91,8 @@
       <ng-container matColumnDef="unitPrice">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Unit Price</th>
         <td *matCellDef="let element" mat-cell>
-          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.unitPrice" [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
+          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.unitPrice"
+                 [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
                  class="table-input" type="number"/>
         </td>
       </ng-container>
@@ -95,7 +100,17 @@
       <ng-container matColumnDef="totalPrice">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Total Price</th>
         <td *matCellDef="let element" mat-cell>
-          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.totalPrice" [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
+          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.totalPrice"
+                 [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
+                 class="table-input" type="number"/>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="discount">
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> Discount</th>
+        <td *matCellDef="let element" mat-cell>
+          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.discount"
+                 [ngClass]="{'is-editing': contentEditable}" [readonly]="!contentEditable"
                  class="table-input" type="number"/>
         </td>
       </ng-container>
@@ -103,14 +118,17 @@
       <ng-container matColumnDef="actions">
         <th *matHeaderCellDef mat-header-cell></th>
         <td *matCellDef="let element; let i = index" mat-cell>
-          <div *ngIf="contentEditable" style="display: flex; gap: 5px;">
-            <button (click)="addRowAfter(i)" color="primary" mat-icon-button>
-              <mat-icon>add_circle</mat-icon>
-            </button>
-            <button (click)="removeRow(i)" color="warn" mat-icon-button>
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
+            <div style="display: flex; gap: 5px; align-items: center;">
+              <button (click)="addRowAfter(i)" color="primary" mat-icon-button>
+                <mat-icon>add_circle</mat-icon>
+              </button>
+              <button (click)="removeRow(i)" color="warn" mat-icon-button>
+                <mat-icon>delete</mat-icon>
+              </button>
+              @if (isItemInvalid(element)) {
+                <mat-icon class="error-icon" matTooltip="Calcaulation error">error</mat-icon>
+              }
+            </div>
         </td>
       </ng-container>
 

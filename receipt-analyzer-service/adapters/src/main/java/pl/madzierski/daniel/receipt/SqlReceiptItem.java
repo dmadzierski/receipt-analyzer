@@ -36,7 +36,7 @@ class SqlReceiptItem {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private SqlProductDictQuery product;
-    @Column(precision = 10, scale = 2)
+    @Column(precision = 10, scale = 3)
     private BigDecimal amount;
     @Column(precision = 10, scale = 2)
     private BigDecimal unitPrice;

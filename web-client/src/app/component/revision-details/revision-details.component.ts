@@ -28,6 +28,8 @@ import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from '@angular/m
 import {CommonModule, NgClass} from '@angular/common';
 import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 import {MatCheckbox} from '@angular/material/checkbox';
+import {MatTooltip} from '@angular/material/tooltip';
+import Decimal from 'decimal.js';
 
 @Component({
   selector: 'app-revision-details',
@@ -40,19 +42,40 @@ import {MatCheckbox} from '@angular/material/checkbox';
     DragDropModule,
     MatTable,
     DragDropModule,
-    MatTableModule, MatIconModule, MatButtonModule, RouterModule, MatSortHeader, MatSort, MatFormField, MatInput, MatLabel, ReactiveFormsModule, FormsModule, MatDatepicker, MatDatepickerInput, MatHint, MatDatepickerToggle, MatSuffix, NgClass, MatCheckbox
+    MatTableModule, MatIconModule, MatButtonModule, RouterModule, MatSortHeader, MatSort, MatFormField, MatInput, MatLabel, ReactiveFormsModule, FormsModule, MatDatepicker, MatDatepickerInput, MatHint, MatDatepickerToggle, MatSuffix, NgClass, MatCheckbox, MatTooltip
   ],
   templateUrl: './revision-details.component.html',
   styleUrl: './revision-details.component.scss',
 })
 export class RevisionDetailsComponent implements OnChanges {
-  displayedColumns: string[] = ['position', 'name', 'amount', 'unitPrice', 'totalPrice', 'actions'];
+  displayedColumns: string[] = ['position', 'name', 'amount', 'unitPrice', 'totalPrice', 'discount', 'actions'];
   revision: ModelSignal<RevisionDetails> = model({} as RevisionDetails)
   @Input()
   contentEditable: boolean = false;
   data = new MatTableDataSource({} as Item[]);
 
   constructor(private cdr: ChangeDetectorRef) {
+  }
+
+  isItemInvalid(item: Item): boolean {
+    try {
+      const toDecimal = (value: any) => {
+        const str = String(value).replace(',', '.');
+        return new Decimal(str);
+      };
+
+      const discount = toDecimal(item.discount || 0);
+      const amount = toDecimal(item.amount);
+      const unitPrice = toDecimal(item.unitPrice);
+      const totalPrice = toDecimal(item.totalPrice);
+
+      const expected = amount.times(unitPrice).minus(discount);
+      const diff = expected.minus(totalPrice).abs();
+
+      return diff.greaterThan(new Decimal('0.05'));
+    } catch {
+      return false;
+    }
   }
 
   @ViewChild(MatSort) set matSort(sort: MatSort) {
@@ -144,6 +167,35 @@ export class RevisionDetailsComponent implements OnChanges {
     this.data.data = [...this.data.data].sort((a, b) => a.position - b.position);
     this.revision().items = this.data.data
   }
+
+  protected isTotalReceiptPriceInValid() {
+    try {
+      const totalPrice = this.data.data.reduce((sum, item) => {
+        const discount = this.toDecimal(item.discount || 0);
+        const amount = this.toDecimal(item.amount);
+        const unitPrice = this.toDecimal(item.unitPrice);
+
+        const itemTotal = amount.times(unitPrice).minus(discount);
+
+        return sum.plus(itemTotal);
+      }, this.toDecimal(0));
+
+      const expected = this.toDecimal(this.revision().totalPrice);
+      const diff = expected.minus(totalPrice).abs();
+
+      console.log(totalPrice.toString());
+
+      return diff.greaterThan(new Decimal('0.05'));
+    } catch {
+      return false;
+    }
+  }
+
+  private toDecimal(value: any): Decimal {
+    const str = String(value).replace(',', '.');
+    return new Decimal(str);
+  };
+
 }
 
 
