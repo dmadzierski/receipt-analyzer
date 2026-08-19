@@ -12,7 +12,7 @@ public record UpdateRevisionRequest(
     LocalDateTime createdDate,
     String brand,
     BigDecimal totalPrice,
-    LocalDateTime payingDate,
+    LocalDateTime paymentDate,
     String address,
     Boolean isPreferredRevision,
     Boolean isCorrect,

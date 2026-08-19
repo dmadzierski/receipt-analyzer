@@ -6,7 +6,7 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import pl.madzierski.daniel.file_group.SqlFileGroupQuery;
+import pl.madzierski.daniel.store.SqlStoreQuery;
 import pl.madzierski.daniel.wallet.SqlWalletQuery;
 
 import java.time.LocalDateTime;
@@ -40,6 +40,9 @@ class SqlReceipt {
     private SqlWalletQuery wallet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "receipt")
     private final Set<SqlReceiptRevision> receiptRevisions = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private SqlStoreQuery store;
 
     public static SqlReceipt fromReceipt(Receipt receipt) {
         SqlReceipt sqlReceipt = new SqlReceipt();
@@ -49,6 +52,7 @@ class SqlReceipt {
         sqlReceipt.setName(receipt.getName());
         sqlReceipt.setDescription(receipt.getDescription());
         sqlReceipt.setWallet(receipt.getWallet() != null ? SqlWalletQuery.fromWalletQuery(receipt.getWallet()) : null);
+        sqlReceipt.setStore(receipt.getStore() != null ? SqlStoreQuery.fromStoreQuery(receipt.getStore()) : null);
         return sqlReceipt;
     }
 

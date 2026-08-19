@@ -32,7 +32,7 @@ import {ReceiptService} from '../../service/receipt.service';
   styleUrl: './revision-list.component.scss',
 })
 export class RevisionListComponent implements OnChanges {
-  displayedColumns: string[] = ['selected', 'brand', 'resolver', 'createdDate', 'totalPrice', 'payingDate', 'address', 'isPreferredRevision', 'isCorrect', 'actions'];
+  displayedColumns: string[] = ['selected', 'resolver', 'createdDate', 'totalPrice', 'paymentDate', 'isPreferredRevision', 'isCorrect', 'actions'];
   @Input()
   revisions: Revision[] = {} as Revision[];
   @Input()

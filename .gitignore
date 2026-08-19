@@ -30,7 +30,6 @@ build/
 .env
 
 /uploads/
-/web-client/
 
 /test-data/
 /receipt-analyzer-service/.gradle/**

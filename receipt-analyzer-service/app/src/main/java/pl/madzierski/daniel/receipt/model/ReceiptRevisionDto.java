@@ -17,10 +17,8 @@ public class ReceiptRevisionDto {
     private LocalDateTime createdDate;
     private String name;
     private ReceiptResolverStrategyType resolver;
-    private String brand;
     private BigDecimal totalPrice;
-    private LocalDateTime payingDate;
-    private String address;
+    private LocalDateTime paymentDate;
     private Boolean isPreferredRevision;
     private Boolean isCorrect;
     private Collection<ReceiptItemDto> items;

@@ -9,6 +9,7 @@ import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.file_group.FileQueryRepository;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
+import pl.madzierski.daniel.store.StoreQueryRepository;
 import pl.madzierski.daniel.receipt.scan_resolver.impl.BiedronkaJsonResolver;
 import pl.madzierski.daniel.receipt.scan_resolver.impl.BiedronkaScanResolver;
 import pl.madzierski.daniel.receipt.scan_resolver.impl.UserResolver;
@@ -30,6 +31,7 @@ class ReceiptConfiguration {
         ReceiptQueryRepository receiptQueryRepository,
         ReceiptRevisionQueryRepository receiptRevisionQueryRepository,
         FileQueryRepository fileQueryRepository,
+        StoreQueryRepository storeQueryRepository,
         @Lazy ProductDictFacade productDictFacade
     ) {
         ReceiptItemFactory receiptItemFactory = new ReceiptItemFactory(productDictFacade);
@@ -45,6 +47,7 @@ class ReceiptConfiguration {
             receiptQueryRepository,
             receiptRevisionQueryRepository,
             fileQueryRepository,
+            storeQueryRepository,
             productDictFacade
         );
     }

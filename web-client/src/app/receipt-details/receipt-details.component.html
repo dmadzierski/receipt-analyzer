@@ -11,19 +11,16 @@
       <input [(ngModel)]="receiptDetails.description" [readonly]="true" matInput maxlength="30"/>
     </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>Created date</mat-label>
-      <input [(ngModel)]="receiptDetails.createdDate" [matDatepicker]="picker" [readonly]="true" matInput>
-      <mat-hint>MM-DD-YYYY</mat-hint>
-      <mat-datepicker #picker></mat-datepicker>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Update date</mat-label>
-      <input [(ngModel)]="receiptDetails.updateDate" [matDatepicker]="picker2" [readonly]="true" matInput>
-      <mat-hint>MM-DD-YYYY</mat-hint>
-      <mat-datepicker #picker2></mat-datepicker>
-    </mat-form-field>
+    @if (receiptDetails.store) {
+      <mat-form-field>
+        <mat-label>Store</mat-label>
+        <input
+          [ngModel]="receiptDetails.store.brand + ' - ' + receiptDetails.store.address + ', ' + receiptDetails.store.city + ' ' + receiptDetails.store.postalCode + ', ' + receiptDetails.store.country"
+          [readonly]="true"
+          matInput
+        />
+      </mat-form-field>
+    }
 
     <h2>Revisions</h2>
 
@@ -32,17 +29,16 @@
 
 
     @if (this.receiptDetails.preferredRevision) {
-      <h2>Revision details
-        @if (this.editMode) {
-          <mat-icon (click)="saveRevision()" class="icon" fontIcon="save"></mat-icon>
-          <mat-icon (click)="declineEdit()" class="icon" fontIcon="cancel"></mat-icon>
-        } @else {
-          <mat-icon (click)="doEdit()" class="icon" fontIcon="edit"></mat-icon>
-          <!--          TODO dodać strategy type i ukrywać przycisk dla != USER-->
-          <mat-icon (click)="refreshAliases()" class="icon" fontIcon="refresh"
-                    matTooltip="Update dicts"></mat-icon>
-        }
-      </h2>
+    <h2>Revision details
+      @if (this.editMode) {
+      <mat-icon (click)="saveRevision()" class="icon" fontIcon="save"></mat-icon>
+      <mat-icon (click)="declineEdit()" class="icon" fontIcon="cancel"></mat-icon>
+      } @else {
+      <mat-icon (click)="doEdit()" class="icon" fontIcon="edit"></mat-icon>
+      <mat-icon (click)="refreshAliases()" class="icon" fontIcon="refresh"
+                matTooltip="Update dicts"></mat-icon>
+      }
+    </h2>
     }
 
 

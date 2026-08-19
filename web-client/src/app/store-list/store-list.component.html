@@ -1,0 +1,45 @@
+<div class="toolbar">
+  <h2>Stores</h2>
+</div>
+
+<form (ngSubmit)="search()" class="search-form">
+  <mat-form-field class="search-field" subscriptSizing="dynamic">
+    <mat-label>Search store</mat-label>
+    <input
+      [(ngModel)]="searchText"
+      matInput
+      name="searchText"
+      type="text"/>
+  </mat-form-field>
+  <button color="primary" mat-raised-button type="submit">Search</button>
+</form>
+
+<table [dataSource]="dataSource" mat-table>
+  <ng-container matColumnDef="brand">
+    <th *matHeaderCellDef mat-header-cell>Brand</th>
+    <td *matCellDef="let element" mat-cell>{{ element.brand }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="address">
+    <th *matHeaderCellDef mat-header-cell>Address</th>
+    <td *matCellDef="let element" mat-cell>{{ element.address }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="city">
+    <th *matHeaderCellDef mat-header-cell>City</th>
+    <td *matCellDef="let element" mat-cell>{{ element.city }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="postalCode">
+    <th *matHeaderCellDef mat-header-cell>Postal code</th>
+    <td *matCellDef="let element" mat-cell>{{ element.postalCode }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="country">
+    <th *matHeaderCellDef mat-header-cell>Country</th>
+    <td *matCellDef="let element" mat-cell>{{ element.country }}</td>
+  </ng-container>
+
+  <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+  <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
+</table>

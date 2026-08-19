@@ -2,11 +2,6 @@
   @if (revision()) {
 
     <mat-form-field>
-      <mat-label>Brand name</mat-label>
-      <input [(ngModel)]="revision().brand" [readonly]="!contentEditable" matInput maxlength="30"/>
-    </mat-form-field>
-
-    <mat-form-field>
       <mat-label>Total price</mat-label>
       <input [(ngModel)]="revision().totalPrice" [readonly]="!contentEditable" matInput maxlength="30"/>
     @if (contentEditable && isTotalReceiptPriceInValid()) {
@@ -15,16 +10,11 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Created date</mat-label>
-      <input [(ngModel)]="revision().payingDate" [matDatepicker]="picker" [readonly]="!contentEditable" matInput>
+      <mat-label>Payment date</mat-label>
+      <input [(ngModel)]="revision().paymentDate" [matDatepicker]="picker" [readonly]="!contentEditable" matInput>
       <mat-hint>MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
       <mat-datepicker #picker [disabled]="!contentEditable"></mat-datepicker>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Address</mat-label>
-      <input [(ngModel)]="revision().address" [readonly]="!contentEditable" matInput maxlength="30"/>
     </mat-form-field>
 
     <div class="revision-checkboxes-container">

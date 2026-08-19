@@ -12,10 +12,8 @@ public record UpdateRevisionResponse(
     String id,
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
-    String brand,
     BigDecimal totalPrice,
-    LocalDateTime payingDate,
-    String address,
+    LocalDateTime paymentDate,
     Boolean isPreferredRevision,
     Boolean isCorrect,
     Set<ItemResponse> items
@@ -29,10 +27,8 @@ public record UpdateRevisionResponse(
             revision.getId(),
             revision.getResolver(),
             revision.getCreatedDate(),
-            revision.getBrand(),
             revision.getTotalPrice(),
-            revision.getPayingDate(),
-            revision.getAddress(),
+            revision.getPaymentDate(),
             revision.getIsPreferredRevision(),
             revision.getIsCorrect(),
             mappedItems

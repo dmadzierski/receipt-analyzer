@@ -32,9 +32,9 @@ export class ReceiptService {
           JSON.stringify({
             name: data.name,
             description: data.description,
-            date: data.date,
             strategy: data.strategy,
             walletId: data.walletId,
+            storeId: data.storeId,
           }),
         ],
         'body.json',

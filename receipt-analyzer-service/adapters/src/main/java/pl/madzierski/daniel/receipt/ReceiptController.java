@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.receipt;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.hibernate.validator.constraints.UUID;
@@ -28,7 +29,9 @@ class ReceiptController {
     private final ReceiptFacade receiptFacade;
 
     @PostMapping(consumes = {"multipart/form-data"})
-    ResponseEntity<CreateReceiptResponse> addReceipt(@AuthenticationPrincipal Jwt jwt, @RequestPart(value = "file") MultipartFile file, @RequestPart(value = "body") @NotNull CreateReceiptRequest body) throws IOException {
+    ResponseEntity<CreateReceiptResponse> addReceipt(@AuthenticationPrincipal Jwt jwt,
+                                                      @RequestPart(value = "file") MultipartFile file,
+                                                     @RequestPart(value = "body") @NotNull @Valid CreateReceiptRequest body) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.receiptFacade.addReceipt(jwt.getSubject(),
             file.getInputStream(), file.getContentType(),
             body));
@@ -40,7 +43,7 @@ class ReceiptController {
     }
 
     @GetMapping(path = {"/{receiptId}/revisions"}, produces = {"application/json"})
-    ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(@PathVariable String receiptId) {
+    ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(@PathVariable @UUID String receiptId) {
         return ResponseEntity.ok(this.receiptFacade.getReceiptRevisions(receiptId));
     }
 }

@@ -9,10 +9,8 @@ public record GetReceiptRevisionsResponse(
     String id,
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
-    String brand,
     BigDecimal totalPrice,
-    LocalDateTime payingDate,
-    String address,
+    LocalDateTime paymentDate,
     Boolean isPreferredRevision,
     Boolean isCorrect
 ) {
@@ -21,10 +19,8 @@ public record GetReceiptRevisionsResponse(
             revision.getId(),
             revision.getResolver(),
             revision.getCreatedDate(),
-            revision.getBrand(),
             revision.getTotalPrice(),
-            revision.getPayingDate(),
-            revision.getAddress(),
+            revision.getPaymentDate(),
             revision.getIsPreferredRevision(),
             revision.getIsCorrect()
         );

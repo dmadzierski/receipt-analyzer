@@ -17,10 +17,8 @@ class ReceiptRevisionFactory {
         receiptRevision.setName(receiptRevisionDto.getName());
         receiptRevision.setRevision(receiptRevisionDto.getRevision());
         receiptRevision.setResolver(receiptRevisionDto.getResolver());
-        receiptRevision.setBrand(receiptRevisionDto.getBrand());
         receiptRevision.setTotalPrice(receiptRevisionDto.getTotalPrice());
-        receiptRevision.setPayingDate(receiptRevisionDto.getPayingDate());
-        receiptRevision.setAddress(receiptRevisionDto.getAddress());
+        receiptRevision.setPaymentDate(receiptRevisionDto.getPaymentDate());
         receiptRevision.setIsPreferredRevision(receiptRevisionDto.getIsPreferredRevision());
         receiptRevision.setIsCorrect(receiptRevisionDto.getIsCorrect());
         return receiptRevision;
@@ -32,7 +30,7 @@ class ReceiptRevisionFactory {
         receiptRevision.setResolver(receiptRevisionDto.strategy());
         receiptRevision.setBrand(receiptRevisionDto.brand());
         receiptRevision.setTotalPrice(receiptRevisionDto.totalPrice());
-        receiptRevision.setPayingDate(receiptRevisionDto.payingDate());
+        receiptRevision.setPaymentDate(receiptRevisionDto.paymentDate());
         receiptRevision.setAddress(receiptRevisionDto.address());
         receiptRevision.setIsPreferredRevision(false);
         receiptRevision.setIsCorrect(false);

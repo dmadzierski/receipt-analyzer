@@ -1,0 +1,23 @@
+<mat-form-field style="width: 100%;">
+  <mat-label>{{ label }}</mat-label>
+  <input
+    [ngModel]="value"
+    (ngModelChange)="onInputChange($event)"
+    [matAutocomplete]="storeAutocomplete"
+    matInput
+    maxlength="50"
+  />
+  <mat-autocomplete #storeAutocomplete="matAutocomplete">
+    @for (store of options; track store.id) {
+      <mat-option [value]="displayValue(store)" (onSelectionChange)="selectOption(store)">
+        {{ displayValue(store) }}
+      </mat-option>
+    }
+
+    @if (value.trim().length >= minLength && options.length === 0) {
+      <mat-option [value]="value" (onSelectionChange)="createNew.emit(value)">
+        Create new store
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

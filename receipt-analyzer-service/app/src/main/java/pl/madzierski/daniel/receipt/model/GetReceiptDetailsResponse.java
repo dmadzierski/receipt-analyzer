@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.receipt.model;
 
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,14 +18,16 @@ public record GetReceiptDetailsResponse(
     Set<RevisionResponse> revisions,
     LocalDateTime createdDate,
     LocalDateTime updateDate,
-    String fileId
+    String fileId,
+    StoreDetailsResponse store
 ) {
     public static GetReceiptDetailsResponse receiptDetailsMapper(
         ReceiptDto receiptEntity,
         ReceiptRevisionDto preferredRevisionEntity,
         String fileId,
         Collection<ReceiptItemDto> items,
-        Collection<ReceiptRevisionDto> revisions
+        Collection<ReceiptRevisionDto> revisions,
+        StoreDetailsResponse store
     ) {
         return new GetReceiptDetailsResponse(
             receiptEntity.getId(),
@@ -34,7 +37,8 @@ public record GetReceiptDetailsResponse(
             receiptRevisionMapper(revisions),
             receiptEntity.getCreatedDate(),
             receiptEntity.getModifiedDate(),
-            fileId
+            fileId,
+            store
         );
     }
 
@@ -54,10 +58,8 @@ public record GetReceiptDetailsResponse(
             revisionEntity.getId(),
             revisionEntity.getResolver(),
             revisionEntity.getCreatedDate(),
-            revisionEntity.getBrand(),
             revisionEntity.getTotalPrice(),
-            revisionEntity.getPayingDate(),
-            revisionEntity.getAddress(),
+            revisionEntity.getPaymentDate(),
             revisionEntity.getIsPreferredRevision(),
             revisionEntity.getIsCorrect(),
             mappedItems
@@ -84,10 +86,8 @@ public record GetReceiptDetailsResponse(
                     it.getId(),
                     it.getResolver(),
                     it.getCreatedDate(),
-                    it.getBrand(),
                     it.getTotalPrice(),
-                    it.getPayingDate(),
-                    it.getAddress(),
+                    it.getPaymentDate(),
                     it.getIsPreferredRevision(),
                     it.getIsCorrect()
                 ))
@@ -111,10 +111,8 @@ public record GetReceiptDetailsResponse(
         String id,
         ReceiptResolverStrategyType resolver,
         LocalDateTime createdDate,
-        String brand,
         BigDecimal totalPrice,
-        LocalDateTime payingDate,
-        String address,
+        LocalDateTime paymentDate,
         Boolean isPreferredRevision,
         Boolean isCorrect,
         Set<ItemResponse> items
@@ -125,10 +123,8 @@ public record GetReceiptDetailsResponse(
         String id,
         ReceiptResolverStrategyType resolver,
         LocalDateTime createdDate,
-        String brand,
         BigDecimal totalPrice,
-        LocalDateTime payingDate,
-        String address,
+        LocalDateTime paymentDate,
         Boolean isPreferredRevision,
         Boolean isCorrect
     ) {

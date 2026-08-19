@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.time.LocalDateTime;
@@ -19,4 +20,9 @@ public class ReceiptDto {
     private String name;
     private String description;
     private WalletQuery wallet;
+    private StoreQuery store;
+
+    public ReceiptDto(String id, LocalDateTime createdDate, LocalDateTime modifiedDate, String name, String description, WalletQuery wallet) {
+        this(id, createdDate, modifiedDate, name, description, wallet, null);
+    }
 }

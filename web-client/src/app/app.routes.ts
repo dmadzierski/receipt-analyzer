@@ -6,6 +6,7 @@ import {WalletAddComponent} from './wallet-add/wallet-add.component';
 import {WalletDetailsComponent} from './wallet-details/wallet-details.component';
 import {ProductDictListComponent} from './product-dict-list/product-dict-list-component';
 import {ProductCategoryListComponent} from './product-category-list/product-category-list.component';
+import {StoreListComponent} from './store-list/store-list.component';
 
 export const routes: Routes = [
   {
@@ -46,6 +47,11 @@ export const routes: Routes = [
   {
     path: 'product-categories',
     component: ProductCategoryListComponent,
+    pathMatch: 'full',
+  },
+  {
+    path: 'stores',
+    component: StoreListComponent,
     pathMatch: 'full',
   }
 ];

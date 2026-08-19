@@ -8,7 +8,6 @@ import pl.madzierski.daniel.wallet.model.WalletQuery;
 import java.util.List;
 
 interface SqlReceiptRepository extends JpaRepository<SqlReceipt, String> {
-    List<SqlReceipt> wallet(WalletQuery wallet);
 }
 
 @AllArgsConstructor

@@ -11,14 +11,6 @@
   </mat-form-field>
 
   <mat-form-field>
-    <mat-label>Choose a date</mat-label>
-    <input [(ngModel)]="data.date" [matDatepicker]="picker" matInput>
-    <mat-hint>MM/DD/YYYY</mat-hint>
-    <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
-    <mat-datepicker #picker></mat-datepicker>
-  </mat-form-field>
-
-  <mat-form-field>
     <mat-label>Select strategy</mat-label>
     <mat-select [(ngModel)]="data.strategy">
       @for (strategy of strategies; track strategy) {
@@ -28,6 +20,14 @@
       }
     </mat-select>
   </mat-form-field>
+
+  <app-store-autocomplete
+    [value]="storeSearchText"
+    [options]="stores"
+    (valueChange)="storeSearchText = $event; searchStores()"
+    (optionSelected)="selectStore($event)"
+    (createNew)="openCreateStoreDialog()"
+  ></app-store-autocomplete>
 
   <file-upload [files]="data.files"></file-upload>
 

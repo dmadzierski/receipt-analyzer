@@ -5,6 +5,7 @@ dependencies {
     implementation(libs.commons.text)
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.data.jpa)
+    implementation("jakarta.validation:jakarta.validation-api:4.0.0-M1")
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 }

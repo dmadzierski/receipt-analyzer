@@ -9,7 +9,7 @@ public record AddRevisionRequest(
     LocalDateTime createdDate,
     String brand,
     BigDecimal totalPrice,
-    LocalDateTime payingDate,
+    LocalDateTime paymentDate,
     String address,
     Set<AddRevisionItemRequest> items
 ) {

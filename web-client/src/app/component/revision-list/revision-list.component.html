@@ -10,7 +10,7 @@
     </ng-container>
 
     <ng-container matColumnDef="resolver">
-      <th *matHeaderCellDef mat-header-cell mat-sort-header>Name</th>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header>Resolver</th>
       <td *matCellDef="let element" mat-cell>{{ element.resolver }}</td>
     </ng-container>
 
@@ -19,24 +19,14 @@
       <td *matCellDef="let element" mat-cell>{{ element.createdDate | date:'dd/MM/yyyy' }}</td>
     </ng-container>
 
-    <ng-container matColumnDef="brand">
-      <th *matHeaderCellDef mat-header-cell mat-sort-header>Brand</th>
-      <td *matCellDef="let element" mat-cell>{{ element.brand }}</td>
-    </ng-container>
-
     <ng-container matColumnDef="totalPrice">
       <th *matHeaderCellDef mat-header-cell mat-sort-header>Total price</th>
       <td *matCellDef="let element" mat-cell>{{ element.totalPrice }}</td>
     </ng-container>
 
-    <ng-container matColumnDef="payingDate">
+    <ng-container matColumnDef="paymentDate">
       <th *matHeaderCellDef mat-header-cell mat-sort-header>Payment date</th>
-      <td *matCellDef="let element" mat-cell>{{ element.payingDate | date:'dd/MM/yyyy' }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="address">
-      <th *matHeaderCellDef mat-header-cell mat-sort-header>Address</th>
-      <td *matCellDef="let element" mat-cell>{{ element.address }}</td>
+      <td *matCellDef="let element" mat-cell>{{ element.paymentDate | date:'dd/MM/yyyy' }}</td>
     </ng-container>
 
     <ng-container matColumnDef="isPreferredRevision">

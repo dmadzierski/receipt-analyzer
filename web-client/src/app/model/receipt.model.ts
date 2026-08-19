@@ -9,17 +9,14 @@ export interface GetReceiptResponseItem {
   createdDate: Date;
 }
 
-export interface GetReceiptDetailsResponse {
-}
-
 export class CreateReceiptData {
   constructor(
     public walletId: string,
     public name: string,
     public description: string,
-    public date: string,
     public strategy: ResolverStrategy,
-    public files: File[]
+    public files: File[],
+    public storeId: string = '',
   ) {
   }
 }
@@ -33,6 +30,15 @@ export enum ResolverStrategy {
 export interface CreateReceiptResponse {
 }
 
+export interface StoreDetails {
+  id: string;
+  brand: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
 export interface GetReceiptDetailsResponse {
   id: string
   name: string
@@ -42,6 +48,7 @@ export interface GetReceiptDetailsResponse {
   createdDate: string
   updateDate: string,
   fileId: string
+  store?: StoreDetails
 }
 
 export interface RevisionDetails {
@@ -50,7 +57,7 @@ export interface RevisionDetails {
   createdDate: string
   brand: string
   totalPrice: Number
-  payingDate: string
+  paymentDate: string
   address: string
   isPreferredRevision: boolean
   isCorrect: boolean
@@ -80,7 +87,7 @@ export interface Revision {
   createdDate: string
   brand: string
   totalPrice: Number
-  payingDate: string
+  paymentDate: string
   address: string
   isPreferredRevision: boolean
   isCorrect: boolean

@@ -13,7 +13,7 @@ public record ReceiptRevisionResolveData(
     String brand,
     List<ReceiptRevisionResolveDataItem> items,
     List<ReceiptRevisionResolveDataFile> files,
-    LocalDateTime payingDate,
+    LocalDateTime paymentDate,
     String address,
     ReceiptResolverStrategyType strategy,
     BigDecimal totalPrice

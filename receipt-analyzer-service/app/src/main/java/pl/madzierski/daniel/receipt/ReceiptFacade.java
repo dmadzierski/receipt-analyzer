@@ -14,6 +14,9 @@ import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.receipt.model.*;
 import pl.madzierski.daniel.receipt.scan_resolver.service.ReceiptResolverLocatorService;
+import pl.madzierski.daniel.store.StoreQueryRepository;
+import pl.madzierski.daniel.store.model.StoreDetailsResponse;
+import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.io.InputStream;
@@ -36,6 +39,7 @@ public class ReceiptFacade {
     private final ReceiptQueryRepository receiptQueryRepository;
     private final ReceiptRevisionQueryRepository receiptRevisionQueryRepository;
     private final FileQueryRepository fileQueryRepository;
+    private final StoreQueryRepository storeQueryRepository;
     private final ProductDictFacade productDictFacade;
 
     @Transactional
@@ -57,7 +61,7 @@ public class ReceiptFacade {
 
     private Receipt createReceipt(CreateReceiptRequest body) {
         String name = body.name() != null && !body.name().trim().isEmpty() ? body.name() : LocalDateTime.now(ZoneId.systemDefault()).toString();
-        return Receipt.builder().name(name).description(body.description()).wallet(new WalletQuery(body.walletId())).build();
+        return Receipt.builder().name(name).description(body.description()).wallet(new WalletQuery(body.walletId())).store(new StoreQuery(body.storeId())).build();
     }
 
     @Transactional(readOnly = true)
@@ -69,7 +73,10 @@ public class ReceiptFacade {
         String preferredRevisionId = receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).map(ReceiptRevisionDto::getId).findFirst().orElse(null);
         if (preferredRevisionId != null)
             itemListDto = receiptItemQueryRepository.findReceiptItemsByRevisionId(preferredRevisionId);
-        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptDto, receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).findFirst().orElse(null), fileId, itemListDto, receiptRevisionList);
+        StoreDetailsResponse store = receiptDto.getStore() == null ? null : storeQueryRepository.findStoreById(receiptDto.getStore().getId())
+            .map(StoreDetailsResponse::storeMapper)
+            .orElse(null);
+        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptDto, receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).findFirst().orElse(null), fileId, itemListDto, receiptRevisionList, store);
     }
 
     @Transactional(readOnly = true)
@@ -90,9 +97,9 @@ public class ReceiptFacade {
     private static ReceiptRevision copyRevisionWithItems(ReceiptRevision revision) {
         ReceiptRevision revisionCopy = ReceiptRevision.builder().name(revision.getName() + "(copy)")
             .resolver(ReceiptResolverStrategyType.USER)
-            .brand(revision.getBrand())
-            .totalPrice(revision.getTotalPrice()).payingDate(revision.getPayingDate())
             .address(revision.getAddress()).isPreferredRevision(false)
+            .totalPrice(revision.getTotalPrice())
+            .paymentDate(revision.getPaymentDate())
             .isCorrect(revision.getIsCorrect())
             .receipt(revision.getReceipt())
             .parentReceiptRevision(revision)
@@ -125,7 +132,7 @@ public class ReceiptFacade {
         ReceiptRevision revision = revisionRepository.findByIdWithItems(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         if (updatedRevisionRequest.brand() != null) revision.setBrand(updatedRevisionRequest.brand());
         if (updatedRevisionRequest.totalPrice() != null) revision.setTotalPrice(updatedRevisionRequest.totalPrice());
-        if (updatedRevisionRequest.payingDate() != null) revision.setPayingDate(updatedRevisionRequest.payingDate());
+        if (updatedRevisionRequest.paymentDate() != null) revision.setPaymentDate(updatedRevisionRequest.paymentDate());
         if (updatedRevisionRequest.address() != null) revision.setAddress(updatedRevisionRequest.address());
         if (updatedRevisionRequest.isPreferredRevision() != null)
             revision.setIsPreferredRevision(updatedRevisionRequest.isPreferredRevision());
@@ -160,7 +167,7 @@ public class ReceiptFacade {
 
 
     private ReceiptRevisionDto toDto(ReceiptRevision revision) {
-        return ReceiptRevisionDto.builder().id(revision.getId()).createdDate(revision.getCreatedDate()).name(revision.getName()).resolver(revision.getResolver()).brand(revision.getBrand()).totalPrice(revision.getTotalPrice()).payingDate(revision.getPayingDate()).address(revision.getAddress()).isPreferredRevision(revision.getIsPreferredRevision()).isCorrect(revision.getIsCorrect()).build();
+        return ReceiptRevisionDto.builder().id(revision.getId()).createdDate(revision.getCreatedDate()).name(revision.getName()).resolver(revision.getResolver()).totalPrice(revision.getTotalPrice()).paymentDate(revision.getPaymentDate()).isPreferredRevision(revision.getIsPreferredRevision()).isCorrect(revision.getIsCorrect()).build();
     }
 
     @Transactional

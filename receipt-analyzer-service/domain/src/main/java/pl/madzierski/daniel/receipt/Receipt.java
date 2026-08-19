@@ -2,6 +2,7 @@ package pl.madzierski.daniel.receipt;
 
 import lombok.*;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
+import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.time.LocalDateTime;
@@ -24,10 +25,7 @@ class Receipt {
     private String name;
     private String description;
     private WalletQuery wallet;
-
-    public void addRevision(ReceiptRevision receiptRevision) {
-        this.receiptRevisions.add(receiptRevision);
-    }
+    private StoreQuery store;
 
     @Override
     public boolean equals(Object o) {
@@ -35,7 +33,7 @@ class Receipt {
         if (!super.equals(o)) return false;
 
         Receipt that = (Receipt) o;
-        return Objects.equals(name, that.name) && Objects.equals(description, that.description);
+        return Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(wallet, that.wallet) && Objects.equals(store, that.store);
     }
 
     @Override
@@ -43,6 +41,8 @@ class Receipt {
         int result = super.hashCode();
         result = 31 * result + Objects.hashCode(name);
         result = 31 * result + Objects.hashCode(description);
+        result = 31 * result + Objects.hashCode(wallet);
+        result = 31 * result + Objects.hashCode(store);
         return result;
     }
 

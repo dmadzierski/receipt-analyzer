@@ -37,10 +37,8 @@ class SqlReceiptRevision {
     private String revision;
     @Enumerated(EnumType.STRING)
     private ReceiptResolverStrategyType resolver;
-    private String brand;
     private BigDecimal totalPrice;
-    private LocalDateTime payingDate;
-    private String address;
+    private LocalDateTime paymentDate;
     private Boolean isPreferredRevision;
     private Boolean isCorrect;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -59,10 +57,8 @@ class SqlReceiptRevision {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();
         sqlReceiptRevision.setId(revision.getId());
         sqlReceiptRevision.setName(revision.getName());
-        sqlReceiptRevision.setAddress(revision.getAddress());
-        sqlReceiptRevision.setBrand(revision.getBrand());
         sqlReceiptRevision.setTotalPrice(revision.getTotalPrice());
-        sqlReceiptRevision.setPayingDate(revision.getPayingDate());
+        sqlReceiptRevision.setPaymentDate(revision.getPaymentDate());
         sqlReceiptRevision.setIsPreferredRevision(revision.getIsPreferredRevision());
         sqlReceiptRevision.setResolver(revision.getResolver());
         sqlReceiptRevision.setIsCorrect(revision.getIsCorrect());
@@ -76,12 +72,12 @@ class SqlReceiptRevision {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         SqlReceiptRevision that = (SqlReceiptRevision) o;
-        return Objects.equals(name, that.name) && Objects.equals(revision, that.revision) && resolver == that.resolver && Objects.equals(brand, that.brand) && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(payingDate, that.payingDate) && Objects.equals(address, that.address) && Objects.equals(isPreferredRevision, that.isPreferredRevision) && Objects.equals(isCorrect, that.isCorrect);
+        return Objects.equals(name, that.name) && Objects.equals(revision, that.revision) && resolver == that.resolver && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(paymentDate, that.paymentDate) && Objects.equals(isPreferredRevision, that.isPreferredRevision) && Objects.equals(isCorrect, that.isCorrect);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, revision, resolver, brand, totalPrice, payingDate, address, isPreferredRevision, isCorrect);
+        return Objects.hash(name, revision, resolver, totalPrice, paymentDate, isPreferredRevision, isCorrect);
     }
 
     public ReceiptRevision toReceiptRevision() {
@@ -90,10 +86,8 @@ class SqlReceiptRevision {
             .name(name)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
-            .address(address)
-            .brand(brand)
             .totalPrice(totalPrice)
-            .payingDate(payingDate)
+            .paymentDate(paymentDate)
             .isPreferredRevision(isPreferredRevision)
             .isCorrect(isCorrect)
             .receipt(receipt != null ? receipt.toReceipt() : null)

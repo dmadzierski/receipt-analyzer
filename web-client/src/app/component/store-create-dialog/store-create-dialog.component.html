@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>Create store</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Brand name</mat-label>
+    <input
+      [(ngModel)]="brandSearchText"
+      (ngModelChange)="searchBrands()"
+      [matAutocomplete]="brandAutocomplete"
+      matInput
+      maxlength="50"
+    />
+    <mat-autocomplete #brandAutocomplete="matAutocomplete">
+      @for (brand of brandOptions; track brand.id) {
+        <mat-option [value]="brand.name" (onSelectionChange)="selectBrand(brand)">
+          {{ brand.name }}
+        </mat-option>
+      }
+
+      @if (brandSearchText.trim().length >= 3 && brandOptions.length === 0) {
+        <mat-option [value]="brandSearchText" (onSelectionChange)="model.brandName = brandSearchText; model.storeBrandId = null;">
+          Create new brand: {{ brandSearchText }}
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Address</mat-label>
+    <input [(ngModel)]="model.address" matInput maxlength="100"/>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>City</mat-label>
+    <input [(ngModel)]="model.city" matInput maxlength="50"/>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Postal code</mat-label>
+    <input [(ngModel)]="model.postalCode" matInput maxlength="20"/>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Country</mat-label>
+    <input [(ngModel)]="model.country" matInput maxlength="50"/>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="save()">Create</button>
+</mat-dialog-actions>

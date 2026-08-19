@@ -1,0 +1,42 @@
+.toolbar {
+  width: 80%;
+  margin: 16px 10% 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-form {
+  width: 80%;
+  margin: 0 10% 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 240px;
+}
+
+h2 {
+  margin: 0;
+}
+
+table {
+  width: 80%;
+  margin: 0 10% 10px;
+  table-layout: fixed;
+}
+
+.mat-column-brand,
+.mat-column-address,
+.mat-column-city,
+.mat-column-postalCode,
+.mat-column-country {
+  min-width: 120px;
+}
+
+.mat-mdc-table {
+  min-width: auto;
+}
