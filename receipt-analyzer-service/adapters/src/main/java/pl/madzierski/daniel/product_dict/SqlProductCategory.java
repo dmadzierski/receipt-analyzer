@@ -9,9 +9,11 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.user.SqlUser;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 
 
 @Entity
@@ -37,6 +39,13 @@ class SqlProductCategory {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private SqlUser user;
+
+    @ManyToMany(mappedBy = "categories")
+    private Set<SqlProductDict> productDictList;
 
     public static SqlProductCategory formProductCategory(ProductCategory productCategory) {
         SqlProductCategory sqlProductCategory = new SqlProductCategory();

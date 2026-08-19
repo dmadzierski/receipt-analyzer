@@ -11,7 +11,7 @@ import {
   ProductDict,
   UpdateProductDictListRequest,
   UpdateProductDictListRequestItem
-} from '../model/receipt-dict.mode';
+} from '../model/receipt-dict.model';
 import {ProductDictService} from '../service/product-dict.service';
 import {ProductCategory} from '../model/product-category.model';
 import {ProductCategoryService} from '../service/product-category.service';

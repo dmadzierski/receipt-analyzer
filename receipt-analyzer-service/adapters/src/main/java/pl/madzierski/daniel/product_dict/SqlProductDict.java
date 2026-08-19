@@ -19,7 +19,7 @@ import java.util.Set;
 @Table(name = "product")
 @EqualsAndHashCode
 @EntityListeners({AuditingEntityListener.class})
-class SqlProduct {
+class SqlProductDict {
     @Id
     @UuidGenerator
     private String id;
@@ -31,20 +31,25 @@ class SqlProduct {
     private LocalDateTime modifiedDate;
     @Column(nullable = false, unique = true)
     private String name;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_category_id")
-    private SqlProductCategory productCategory;
+    @Getter(AccessLevel.NONE)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "product_category_mapping",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private final Set<SqlProductCategory> categories = new HashSet<>();
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private final Set<SqlProductAlias> aliases = new HashSet<>();
 
-    public static <S extends ProductDict> SqlProduct fromProductDict(S s) {
-        SqlProduct sqlProduct = new SqlProduct();
-        sqlProduct.setId(s.getId());
-        sqlProduct.setName(s.getName());
-        sqlProduct.setCreatedDate(s.getCreatedDate());
-        sqlProduct.setModifiedDate(s.getModifiedDate());
-        return sqlProduct;
+    public static <S extends ProductDict> SqlProductDict fromProductDict(S s) {
+        SqlProductDict sqlProductDict = new SqlProductDict();
+        sqlProductDict.setId(s.getId());
+        sqlProductDict.setName(s.getName());
+        sqlProductDict.setCreatedDate(s.getCreatedDate());
+        sqlProductDict.setModifiedDate(s.getModifiedDate());
+        return sqlProductDict;
     }
 
     public ProductDict toProductDict() {

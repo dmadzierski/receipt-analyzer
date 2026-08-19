@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {GetProductDictListResponse, UpdateProductDictListRequest} from '../model/receipt-dict.mode';
+import {GetProductDictListResponse, UpdateProductDictListRequest} from '../model/receipt-dict.model';
 
 @Injectable({
   providedIn: 'root',

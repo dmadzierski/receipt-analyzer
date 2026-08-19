@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-interface SqlProductDictRepository extends JpaRepository<SqlProduct, String> {
+interface SqlProductDictRepository extends JpaRepository<SqlProductDict, String> {
 }
 
 @Repository
@@ -19,7 +19,7 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
 
     @Override
     public Optional<ProductDict> findById(String productDictId) {
-        return repository.findById(productDictId).map(SqlProduct::toProductDict);
+        return repository.findById(productDictId).map(SqlProductDict::toProductDict);
     }
 
     @Override
@@ -29,7 +29,7 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
 
     @Override
     public <S extends ProductDict> List<S> saveAll(Iterable<S> entities) {
-        return (List<S>) repository.saveAll(((List<S>) entities).stream().map(SqlProduct::fromProductDict).toList()).stream().map(SqlProduct::toProductDict)
+        return (List<S>) repository.saveAll(((List<S>) entities).stream().map(SqlProductDict::fromProductDict).toList()).stream().map(SqlProductDict::toProductDict)
             .toList();
     }
 }

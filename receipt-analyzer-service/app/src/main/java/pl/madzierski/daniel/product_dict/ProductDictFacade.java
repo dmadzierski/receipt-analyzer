@@ -115,7 +115,7 @@ public class ProductDictFacade {
     }
 
     public long countByProductCategoryId(String id) {
-        return productDictQueryRepository.countProductDictEntitiesByProductCategoryId(id);
+        return productDictQueryRepository.countProductDictEntitiesByCategoriesIdIn(Set.of(id));
     }
 
     GetProductCategoryListResponse getProductCategoryList() {

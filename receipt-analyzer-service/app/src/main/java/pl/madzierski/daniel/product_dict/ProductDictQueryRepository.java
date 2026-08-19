@@ -7,5 +7,5 @@ import java.util.Set;
 public interface ProductDictQueryRepository {
     Set<ProductDictWithAliasesAndCategoryProjection> findAllWithCategoryAndAliases();
 
-    long countProductDictEntitiesByProductCategoryId(String productCategoryId);
+    long countProductDictEntitiesByCategoriesIdIn(Set<String> productCategoryIds);
 }

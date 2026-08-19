@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.product_dict;
+package pl.madzierski.daniel.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,17 +11,15 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
-
 
 @Entity
-@Table(name = "product_alias")
+@Table(name = "user")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @EntityListeners({AuditingEntityListener.class})
-class SqlProductAlias {
+public class SqlUser {
 
     @Id
     @UuidGenerator
@@ -35,26 +33,6 @@ class SqlProductAlias {
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;
 
-    @Column(nullable = false, unique = true)
-    private String name;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private SqlProductDict productDict;
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        SqlProductAlias that = (SqlProductAlias) o;
-        return Objects.equals(name, that.name);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(name);
-        return result;
-    }
+    @Column(name = "user_sub", nullable = false, unique = true)
+    private String userSub;
 }
