@@ -12,10 +12,10 @@ import java.util.Set;
 @Setter
 @EqualsAndHashCode
 class ProductDict {
-    private final Set<ProductAlias> aliases = new HashSet<>();
+    private Set<ProductAlias> aliases = new HashSet<>();
     private String id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
-    private ProductCategory productCategory;
+    private Set<ProductCategory> productCategories = new HashSet<>();
 }

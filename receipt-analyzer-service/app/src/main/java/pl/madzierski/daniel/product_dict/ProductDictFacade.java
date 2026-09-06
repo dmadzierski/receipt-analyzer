@@ -43,10 +43,10 @@ public class ProductDictFacade {
         return new GetProductDictListResponse(allWithCategoryAndAliases.stream().map(productDict -> new GetProductDictListResponse.ProductDict(
             productDict.getId(),
             productDict.getName(),
-            productDict.getProductCategory() == null ? null : new GetProductDictListResponse.ProductDict.ProductCategory(
-                productDict.getProductCategory().getId(),
-                productDict.getProductCategory().getName()
-            ),
+            productDict.getCategories().stream().map(category -> new GetProductDictListResponse.ProductDict.ProductCategory(
+                category.getId(),
+                category.getName()
+            )).toList(),
             productDict.getAliases().stream().map(alias -> new GetProductDictListResponse.ProductDict.Alias(alias.getId(), alias.getName())).toList()
         )).toList());
     }
@@ -61,7 +61,7 @@ public class ProductDictFacade {
             if (updateProductDict.productCategoryId() != null) {
                 ProductCategory productCategory =
                     productCategoryRepository.findById(updateProductDict.productCategoryId()).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
-                productDict.setProductCategory(productCategory);
+                productDict.setProductCategories(Set.of(productCategory));
             }
             if (dictIds.size() > 1) {
                 List<String> productDictIdsListToMerge = dictIds.subList(1, dictIds.size());

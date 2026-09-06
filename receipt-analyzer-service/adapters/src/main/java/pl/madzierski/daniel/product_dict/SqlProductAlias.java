@@ -57,4 +57,25 @@ class SqlProductAlias {
         result = 31 * result + Objects.hashCode(name);
         return result;
     }
+
+    public static SqlProductAlias fromProductAlias(ProductAlias productAlias, SqlProductDict sqlProductDict) {
+        return new SqlProductAlias(
+            productAlias.getId(),
+            productAlias.getCreatedDate(),
+            productAlias.getModifiedDate(),
+            productAlias.getName(),
+            sqlProductDict
+        );
+    }
+
+    public ProductAlias toProductAlias() {
+        return new ProductAlias(
+            this.id,
+            this.createdDate,
+            this.modifiedDate,
+            this.name,
+            null
+//            this.productDict != null ? this.productDict.toProductDict() : null
+        );
+    }
 }

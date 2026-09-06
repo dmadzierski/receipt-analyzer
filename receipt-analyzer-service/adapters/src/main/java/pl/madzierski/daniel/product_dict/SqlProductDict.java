@@ -49,6 +49,8 @@ class SqlProductDict {
         sqlProductDict.setName(s.getName());
         sqlProductDict.setCreatedDate(s.getCreatedDate());
         sqlProductDict.setModifiedDate(s.getModifiedDate());
+        sqlProductDict.aliases.addAll(s.getAliases().stream().map(productAlias -> SqlProductAlias.fromProductAlias(productAlias, sqlProductDict)).toList());
+        sqlProductDict.categories.addAll(s.getProductCategories().stream().map(SqlProductCategory::fromProductCategory).toList());
         return sqlProductDict;
     }
 
@@ -58,6 +60,8 @@ class SqlProductDict {
         productDict.setName(this.name);
         productDict.setCreatedDate(this.createdDate);
         productDict.setModifiedDate(this.modifiedDate);
+        productDict.getAliases().addAll(this.aliases.stream().map(SqlProductAlias::toProductAlias).toList());
+        productDict.getProductCategories().addAll(this.categories.stream().map(SqlProductCategory::toProductCategory).toList());
         return productDict;
     }
 }

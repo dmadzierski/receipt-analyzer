@@ -8,7 +8,7 @@ public record GetProductDictListResponse(
     public record ProductDict(
         String id,
         String name,
-        ProductCategory productCategory,
+        List<ProductCategory> productCategories,
         List<Alias> aliases
     ) {
         public record ProductCategory(String id, String name) {

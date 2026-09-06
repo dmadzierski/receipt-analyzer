@@ -15,17 +15,34 @@ class ProductDictConfiguration {
         ProductAliasRepository productAliasRepository,
         ProductAliasQueryRepository productAliasQueryRepository,
         ProductCategoryRepository productCategoryRepository,
+        ProductCategoryFactory productCategoryFactory,
+        ProductAliasFactory productAliasFactory,
         @Lazy ReceiptFacade receiptFacade,
         @Value("${product-dict.min-required-similarity}") Double minRequiredStringSimilarity) {
         return new ProductDictFacade(
             productDictRepository,
             productDictQueryRepository,
-            new ProductDictFactory(),
+            productDictFactory(productCategoryFactory, productAliasFactory),
             productAliasRepository,
             productAliasQueryRepository,
             productCategoryRepository,
             receiptFacade,
             minRequiredStringSimilarity
         );
+    }
+
+    @Bean
+    ProductCategoryFactory productCategoryFactory() {
+        return new ProductCategoryFactory();
+    }
+
+    @Bean
+    ProductAliasFactory productAliasFactory() {
+        return new ProductAliasFactory();
+    }
+
+    @Bean
+    ProductDictFactory productDictFactory(ProductCategoryFactory productCategoryFactory, ProductAliasFactory productAliasFactory) {
+        return new ProductDictFactory(productCategoryFactory, productAliasFactory);
     }
 }

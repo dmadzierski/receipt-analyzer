@@ -8,7 +8,7 @@ public interface ProductDictWithAliasesAndCategoryProjection {
 
     String getName();
 
-    ProductCategory getProductCategory();
+    Set<ProductCategory> getCategories();
 
     Set<Alias> getAliases();
 

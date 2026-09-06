@@ -86,6 +86,7 @@ class SqlReceiptItem {
         receiptItem.setDiscount(this.discount);
         receiptItem.setTotalPrice(this.totalPrice);
         receiptItem.setPosition(this.position);
+        receiptItem.setParentItem(this.parentItem != null ? this.parentItem.toReceiptItem() : null);
         return receiptItem;
     }
 }

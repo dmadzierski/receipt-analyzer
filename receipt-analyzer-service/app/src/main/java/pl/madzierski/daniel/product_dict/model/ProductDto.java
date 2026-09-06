@@ -5,7 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +16,8 @@ public class ProductDto {
 
     private String id;
     private String name;
-    private Collection<ProductAliasDto> aliases;
+    private final Set<ProductAliasDto> aliases = new HashSet<>();
+    private final Set<ProductCategoryDto> productCategories = new HashSet<>();
 
     public ProductDto(String id) {
         this.id = id;

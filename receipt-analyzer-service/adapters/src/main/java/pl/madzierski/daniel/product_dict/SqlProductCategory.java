@@ -80,4 +80,15 @@ class SqlProductCategory {
         productCategory.setModifiedDate(this.modifiedDate);
         return productCategory;
     }
+
+    public static SqlProductCategory fromProductCategory(ProductCategory productCategory) {
+        return new SqlProductCategory(
+            productCategory.getId(),
+            productCategory.getCreatedDate(),
+            productCategory.getModifiedDate(),
+            productCategory.getName(),
+            null,
+            null
+        );
+    }
 }
