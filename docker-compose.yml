@@ -14,6 +14,11 @@ services:
     volumes:
       - receipt_analyzer_mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 1s
+      retries: 20
     networks:
       - app-network
 
@@ -22,7 +27,8 @@ services:
     container_name: keycloak
     restart: always
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       KC_LOG_LEVEL_ORG_KEYCLOAK: ALL
       KC_DB: mysql
@@ -41,10 +47,15 @@ services:
       KC_HTTP_ENABLED: true
       KC_PROXY: EDGE
       KC_SPI_COOKIE_SAMESITE_LEGACY_SAMESITE_VALUE: none
-      KEYCLOAK_ISSUER_URI: http://${HOST_IP}/auth/realms/activiti
-      KEYCLOAK_JWK_SET_URI: http://${DOCKER_IP}/auth/realms/activiti/protocol/openid-connect/certs
-      LOGGING_LEVEL_ROOT: INFO
+      #      LOGGING_LEVEL_ROOT: INFO
+      KC_HEALTH_ENABLED: true
     command: start-dev
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     ports:
       - "8081:8080"
     networks:
@@ -60,7 +71,14 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     command: [ nginx-debug, '-g', 'daemon off;' ]
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "service", "nginx", "status" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     networks:
       - app-network
 
@@ -74,29 +92,27 @@ services:
       - "5005:5005"
     environment:
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n"
-      RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_TOKEN}
+      RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID}
       DOCKER_IP: $(DOCKER_IP)
-      MYSQL_HOST: ${MYSQL_HOST}
-      MYSQL_POST: ${MYSQL_PORT}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       WEB_CLIENT_HOST: ${WEB_CLIENT_HOST}
+      LOGGING_LEVEL_ROOT: INFO
+      JPA_DDL_AUTO: update
+      KEYCLOAK_JWK_SET_URI: http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER_URI: http://localhost/auth/realms/activiti
+      MYSQL_DB_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/receipt-analyzer-service?useSSL=false&serverTimezone=UTC
     depends_on:
-      - keycloak
-      - nginx
+      keycloak:
+        condition: service_healthy
+      nginx:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     networks:
       - app-network
     volumes:
       - ./uploads:/app/uploads
-
-  web-client:
-    build:
-      context: ./web-client
-      dockerfile: Dockerfile
-    pull_policy: build
-    container_name: web-client
-    networks:
-      - app-network
 
 volumes:
   receipt_analyzer_mysql_data:
