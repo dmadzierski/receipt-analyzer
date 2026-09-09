@@ -28,7 +28,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     }
 
     @Override
-    public boolean existsByName(String name) {
+    public boolean existsByNameAndUser(String name, String userSub) {
         return this.repository.existsByName(name);
     }
 

@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.product_dict;
 
+import lombok.AllArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
@@ -7,9 +8,12 @@ import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.product_dict.model.*;
 import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
 import pl.madzierski.daniel.receipt.ReceiptFacade;
+import pl.madzierski.daniel.user.UserQueryRepository;
+import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.*;
 
+@AllArgsConstructor
 public class ProductDictFacade {
 
     private final ProductDictRepository productDictRepository;
@@ -20,23 +24,7 @@ public class ProductDictFacade {
     private final ProductCategoryRepository productCategoryRepository;
     private final ReceiptFacade receiptFacade;
     private final Double minRequiredStringSimilarity;
-
-    ProductDictFacade(ProductDictRepository productDictRepository,
-                      ProductDictQueryRepository productDictQueryRepository,
-                      ProductDictFactory productDictFactory, ProductAliasRepository productAliasRepository,
-                      ProductAliasQueryRepository productAliasQueryRepository,
-                      ProductCategoryRepository productCategoryRepository,
-                      ReceiptFacade receiptFacade,
-                      double minRequiredStringSimilarity) {
-        this.productDictRepository = productDictRepository;
-        this.productDictQueryRepository = productDictQueryRepository;
-        this.productDictFactory = productDictFactory;
-        this.productAliasRepository = productAliasRepository;
-        this.productAliasQueryRepository = productAliasQueryRepository;
-        this.productCategoryRepository = productCategoryRepository;
-        this.receiptFacade = receiptFacade;
-        this.minRequiredStringSimilarity = minRequiredStringSimilarity;
-    }
+    private final UserQueryRepository userQueryRepository;
 
     GetProductDictListResponse getProductDictList() {
         Set<ProductDictWithAliasesAndCategoryProjection> allWithCategoryAndAliases = productDictQueryRepository.findAllWithCategoryAndAliases();
@@ -126,13 +114,12 @@ public class ProductDictFacade {
     }
 
     @Transactional
-    CreateProductCategoryResponse addProductCategory(CreateProductCategoryRequest request) {
+    CreateProductCategoryResponse addProductCategory(String userSub, CreateProductCategoryRequest request) {
         String name = request.name().trim();
-        if (productCategoryRepository.existsByName(name)) {
+        if (productCategoryRepository.existsByNameAndUser(name, userSub))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_ALREADY_EXISTS);
-        }
-
-        ProductCategory savedProductCategory = productCategoryRepository.save(new ProductCategory(name));
+        UserQuery user = userQueryRepository.findUserByUserSub(userSub).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.USER_NOT_FOUND));
+        ProductCategory savedProductCategory = productCategoryRepository.save(new ProductCategory(name, user));
         return new CreateProductCategoryResponse(savedProductCategory.getId(), savedProductCategory.getName());
     }
 

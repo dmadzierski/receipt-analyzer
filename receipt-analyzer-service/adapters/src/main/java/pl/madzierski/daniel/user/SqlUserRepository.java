@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 interface SqlUserRepository extends JpaRepository<SqlUser, String> {
+    Optional<SqlUser> findByUserSub(String userSub);
 }
 
 
@@ -24,6 +25,6 @@ class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findUserByUserSub(String userSub) {
-        return repository.findById(userSub).map(SqlUser::toUser);
+        return repository.findByUserSub(userSub).map(SqlUser::toUser);
     }
 }

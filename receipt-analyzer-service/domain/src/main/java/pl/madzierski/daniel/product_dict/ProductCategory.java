@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -19,10 +20,11 @@ class ProductCategory {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
+    private UserQuery user;
 
-
-    public ProductCategory(String name) {
+    public ProductCategory(String name, UserQuery user) {
         this.name = name;
+        this.user = user;
     }
 
     @Override

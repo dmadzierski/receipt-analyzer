@@ -9,7 +9,7 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import pl.madzierski.daniel.user.SqlUser;
+import pl.madzierski.daniel.user.SqlUserQuery;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -42,7 +42,7 @@ class SqlProductCategory {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private SqlUser user;
+    private SqlUserQuery user;
 
     @ManyToMany(mappedBy = "categories")
     private Set<SqlProductDict> productDictList;
@@ -53,6 +53,7 @@ class SqlProductCategory {
         sqlProductCategory.setName(productCategory.getName());
         sqlProductCategory.setCreatedDate(productCategory.getCreatedDate());
         sqlProductCategory.setModifiedDate(productCategory.getModifiedDate());
+        sqlProductCategory.setUser(productCategory.getUser() != null ? SqlUserQuery.fromUserQuery(productCategory.getUser()) : null);
         return sqlProductCategory;
     }
 

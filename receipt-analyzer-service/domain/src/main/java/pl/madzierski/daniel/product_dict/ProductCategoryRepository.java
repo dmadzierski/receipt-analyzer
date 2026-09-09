@@ -6,7 +6,7 @@ import java.util.Optional;
 interface ProductCategoryRepository {
     List<ProductCategory> findAllByOrderByNameAsc();
 
-    boolean existsByName(String name);
+    boolean existsByNameAndUser(String name, String userSub);
 
     boolean existsByNameAndIdNot(String name, String id);
 
