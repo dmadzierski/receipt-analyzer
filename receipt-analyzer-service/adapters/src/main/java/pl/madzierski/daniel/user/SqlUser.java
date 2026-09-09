@@ -35,4 +35,22 @@ public class SqlUser {
 
     @Column(name = "user_sub", nullable = false, unique = true)
     private String userSub;
+
+    public static SqlUser fromUser(User user) {
+        return new SqlUser(
+            user.getId(),
+            user.getCreatedDate(),
+            user.getModifiedDate(),
+            user.getUserSub()
+        );
+    }
+
+    public User toUser() {
+        return new User(
+            this.id,
+            this.userSub,
+            this.createdDate,
+            this.modifiedDate
+        );
+    }
 }
