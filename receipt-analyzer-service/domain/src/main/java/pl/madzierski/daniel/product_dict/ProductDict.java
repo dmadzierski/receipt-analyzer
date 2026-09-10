@@ -18,4 +18,12 @@ class ProductDict {
     private LocalDateTime modifiedDate;
     private String name;
     private Set<ProductCategory> productCategories = new HashSet<>();
+
+    public void addAlias(ProductAlias productAlias) {
+        this.aliases.add(productAlias);
+    }
+
+    public void addProductCategory(ProductCategory productCategory) {
+        this.productCategories.add(productCategory);
+    }
 }

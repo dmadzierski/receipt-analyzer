@@ -6,6 +6,8 @@ export interface ProductDict {
   id: string;
   name: string;
   productCategoryId?: string | null;
+  productCategoryIds?: string[] | null;
+  productCategories?: ProductCategoryRef[] | null;
   productCategory?: ProductCategoryRef | null;
   aliases: Alias[];
 }
@@ -26,7 +28,7 @@ export interface UpdateProductDictListRequest {
 
 export interface UpdateProductDictListRequestItem {
   canonicalName: string;
-  productCategoryId: string | null;
+  productCategoryIds: string[];
   productDictList: string[];
 }
 

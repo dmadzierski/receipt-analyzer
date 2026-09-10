@@ -54,14 +54,18 @@
           type="text"/>
 
         @if (contentEditable) {
-          <select [(ngModel)]="group.draftCategoryId" [ngModelOptions]="{standalone: true}" class="category-select">
-            <option [ngValue]="null">No category</option>
-            @for (category of productCategories; track category.id) {
-              <option [ngValue]="category.id">{{ category.name }}</option>
-            }
-          </select>
+          <mat-form-field appearance="outline" class="category-select">
+            <mat-select [(ngModel)]="group.categoryIds" [ngModelOptions]="{standalone: true}" disableOptionCentering multiple>
+              <mat-select-trigger>
+                {{ getCategoryNames(group.categoryIds) }}
+              </mat-select-trigger>
+              @for (category of productCategories; track category.id) {
+                <mat-option [value]="category.id">{{ category.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
         } @else {
-          <span class="category-label">{{ getCategoryName(group.draftCategoryId) }}</span>
+          <span class="category-label">{{ getCategoryNames(group.categoryIds) }}</span>
         }
 
         <div class="aliases">

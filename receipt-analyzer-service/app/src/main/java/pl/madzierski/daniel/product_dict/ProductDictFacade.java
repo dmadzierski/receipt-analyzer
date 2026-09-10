@@ -12,6 +12,7 @@ import pl.madzierski.daniel.user.UserQueryRepository;
 import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class ProductDictFacade {
@@ -45,11 +46,20 @@ public class ProductDictFacade {
             List<String> dictIds = updateProductDict.productDictList();
             String primaryDictId = dictIds.getFirst();
             ProductDict productDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
-            productDict.setName(updateProductDict.canonicalName().trim());
-            if (updateProductDict.productCategoryId() != null) {
-                ProductCategory productCategory =
-                    productCategoryRepository.findById(updateProductDict.productCategoryId()).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
-                productDict.setProductCategories(Set.of(productCategory));
+            String trimmedName = updateProductDict.canonicalName().trim();
+            if (!productDict.getName().equals(trimmedName)) {
+                productDict.setName(trimmedName);
+                productDict.addAlias(ProductAlias.builder().name(trimmedName).build());
+            }
+            if (!compareProductCategories(updateProductDict, productDict)) {
+                if (updateProductDict.productCategoryIds() != null) {
+                    productDict.setProductCategories(
+                        updateProductDict.productCategoryIds().stream().map(categoryId -> productCategoryRepository.findById(categoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND))).collect(Collectors.toSet())
+                    );
+                }
+                else {
+                    productDict.setProductCategories(Collections.emptySet());
+                }
             }
             if (dictIds.size() > 1) {
                 List<String> productDictIdsListToMerge = dictIds.subList(1, dictIds.size());
@@ -57,7 +67,14 @@ public class ProductDictFacade {
                 receiptFacade.reassignProductDict(toDto(productDict), productDictIdsListToMerge);
                 productDictRepository.deleteAllByIdIn(productDictIdsListToMerge);
             }
+            productDictRepository.save(productDict);
         });
+    }
+
+    private static boolean compareProductCategories(UpdateProductDictListRequest.UpdateProductDict updateProductDict, ProductDict productDict) {
+        return Objects.equals(productDict.getProductCategories() != null ?
+                productDict.getProductCategories().stream().map(ProductCategory::getId).collect(Collectors.toSet()) : Collections.emptySet(),
+            updateProductDict.productCategoryIds() != null ? new HashSet<>(updateProductDict.productCategoryIds()) : Collections.emptySet());
     }
 
     private ProductDictQuery toDto(ProductDict productDict) {

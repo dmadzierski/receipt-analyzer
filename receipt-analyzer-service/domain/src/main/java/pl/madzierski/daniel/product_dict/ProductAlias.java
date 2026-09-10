@@ -1,9 +1,6 @@
 package pl.madzierski.daniel.product_dict;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -13,6 +10,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 class ProductAlias {
 
     private String id;

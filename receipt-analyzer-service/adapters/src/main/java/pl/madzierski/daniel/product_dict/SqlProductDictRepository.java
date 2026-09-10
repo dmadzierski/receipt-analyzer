@@ -32,4 +32,9 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
         return (List<S>) repository.saveAll(((List<S>) entities).stream().map(SqlProductDict::fromProductDict).toList()).stream().map(SqlProductDict::toProductDict)
             .toList();
     }
+
+    @Override
+    public void save(ProductDict productDict) {
+        repository.save(SqlProductDict.fromProductDict(productDict));
+    }
 }

@@ -3,7 +3,9 @@ import {Component, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, DragDropModule} from '@angular/cdk/drag-drop';
 import {MatButtonModule} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
+import {MatSelectModule} from '@angular/material/select';
 import {forkJoin} from 'rxjs';
 import {
   Alias,
@@ -19,7 +21,7 @@ import {ProductCategoryService} from '../service/product-category.service';
 interface EditableProductDictGroup {
   primaryId: string;
   canonicalName: string;
-  draftCategoryId: string | null;
+  categoryIds: string[];
   aliases: Alias[];
   mergedDicts: ProductDict[];
 }
@@ -34,7 +36,9 @@ interface EditableProductDictGroup {
     DragDropModule,
     FormsModule,
     MatButtonModule,
+    MatFormFieldModule,
     MatIconModule,
+    MatSelectModule,
     NgClass
   ],
   templateUrl: './product-dict-list-component.html',
@@ -147,12 +151,16 @@ export class ProductDictListComponent implements OnInit {
     return drag.data.primaryId !== drop.data.primaryId;
   };
 
-  protected getCategoryName(categoryId: string | null): string {
-    if (!categoryId) {
+  protected getCategoryNames(categoryIds: string[]): string {
+    if (categoryIds.length === 0) {
       return 'No category';
     }
 
-    return this.productCategories.find((category) => category.id === categoryId)?.name || 'No category';
+    const names = categoryIds
+      .map((categoryId) => this.productCategories.find((category) => category.id === categoryId)?.name)
+      .filter((name): name is string => !!name);
+
+    return names.length > 0 ? names.join(', ') : 'No category';
   }
 
   private refreshView() {
@@ -179,7 +187,7 @@ export class ProductDictListComponent implements OnInit {
     return {
       primaryId: item.id,
       canonicalName: item.name,
-      draftCategoryId: this.resolveCategoryId(item),
+      categoryIds: this.resolveCategoryIds(item),
       aliases: item.aliases.map((alias) => ({...alias})),
       mergedDicts: []
     };
@@ -189,7 +197,7 @@ export class ProductDictListComponent implements OnInit {
     return {
       id: group.primaryId,
       name: group.canonicalName,
-      productCategoryId: group.draftCategoryId,
+      productCategoryIds: [...group.categoryIds],
       aliases: group.aliases.map((alias) => ({...alias}))
     };
   }
@@ -197,7 +205,7 @@ export class ProductDictListComponent implements OnInit {
   private toRequestItem(group: EditableProductDictGroup): UpdateProductDictListRequestItem {
     return {
       canonicalName: group.canonicalName,
-      productCategoryId: group.draftCategoryId,
+      productCategoryIds: [...group.categoryIds],
       productDictList: [group.primaryId, ...group.mergedDicts.map((dict) => dict.id)]
     };
   }
@@ -247,7 +255,11 @@ export class ProductDictListComponent implements OnInit {
       return true;
     }
 
-    if (current.productCategoryId !== original.productCategoryId) {
+    if (current.productCategoryIds.length !== original.productCategoryIds.length) {
+      return true;
+    }
+
+    if (current.productCategoryIds.some((id, index) => id !== original.productCategoryIds[index])) {
       return true;
     }
 
@@ -262,18 +274,34 @@ export class ProductDictListComponent implements OnInit {
     return groups.map((group) => ({
       primaryId: group.primaryId,
       canonicalName: group.canonicalName,
-      draftCategoryId: group.draftCategoryId,
+      categoryIds: [...group.categoryIds],
       aliases: group.aliases.map((alias) => ({...alias})),
       mergedDicts: group.mergedDicts.map((dict) => ({
         id: dict.id,
         name: dict.name,
-        productCategoryId: this.resolveCategoryId(dict),
+        productCategoryIds: this.resolveCategoryIds(dict),
         aliases: dict.aliases.map((alias) => ({...alias}))
       }))
     }));
   }
 
-  private resolveCategoryId(item: ProductDict): string | null {
-    return item.productCategory?.id ?? item.productCategoryId ?? null;
+  private resolveCategoryIds(item: ProductDict): string[] {
+    if (item.productCategories && item.productCategories.length > 0) {
+      return item.productCategories.map((category) => category.id);
+    }
+
+    if (item.productCategoryIds && item.productCategoryIds.length > 0) {
+      return [...item.productCategoryIds];
+    }
+
+    if (item.productCategory?.id) {
+      return [item.productCategory.id];
+    }
+
+    if (item.productCategoryId) {
+      return [item.productCategoryId];
+    }
+
+    return [];
   }
 }

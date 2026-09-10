@@ -96,18 +96,47 @@
 }
 
 .category-select {
-  min-width: 180px;
-  padding: 4px 6px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.24);
-  background: white;
+  min-width: 220px;
+  width: 220px;
+  max-width: 220px;
+  margin-top: -8px;
+  margin-bottom: -14px;
+  --mat-form-field-container-height: 32px;
+  --mat-form-field-container-vertical-padding: 4px;
+}
+
+.category-select .mat-mdc-text-field-wrapper {
+  border-radius: 8px;
+}
+
+.category-select .mat-mdc-form-field-infix {
+  min-height: 32px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.category-select .mat-mdc-select-trigger {
+  color: #374151;
+  font-size: 0.875rem;
+  line-height: 1.2;
 }
 
 .category-label {
-  min-width: 180px;
-  padding-top: 2px;
+  min-width: 220px;
+  width: 220px;
+  max-width: 220px;
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
   color: #374151;
   font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .badge {
