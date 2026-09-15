@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.product_dict;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
@@ -8,8 +9,9 @@ import java.util.List;
 
 interface SqlProductAliasRepository extends Repository<SqlProductAlias, String> {
 
+    @Modifying
     @Query(value = """
-        UPDATE product
+        UPDATE product_alias
         SET product_id = :targetProductDictId
         WHERE product_id IN (:productDictIdsToMerge)
         """, nativeQuery = true)

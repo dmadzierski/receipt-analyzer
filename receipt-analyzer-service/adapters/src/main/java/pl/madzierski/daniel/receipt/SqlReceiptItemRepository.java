@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
 import java.util.List;
@@ -21,7 +22,7 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
         SET r.product = :dict
         WHERE r.product.id IN (:productDictIdList)
         """)
-    void reassignProductDict(ProductDictQuery dict, List<String> productDictIdList);
+    void reassignProductDict(SqlProductDictQuery dict, List<String> productDictIdList);
 
 }
 
@@ -34,7 +35,7 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
 
     @Override
     public void reassignProductDict(ProductDictQuery dict, List<String> productDictIdList) {
-        this.receiptItemRepository.reassignProductDict(dict, productDictIdList);
+        this.receiptItemRepository.reassignProductDict(SqlProductDictQuery.fromProductDict(dict), productDictIdList);
     }
 
     @Override
