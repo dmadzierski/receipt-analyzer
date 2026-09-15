@@ -2,8 +2,8 @@ package pl.madzierski.daniel.receipt;
 
 import lombok.RequiredArgsConstructor;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
-import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
+import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.receipt.model.ReceiptItemDto;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 
@@ -14,7 +14,7 @@ class ReceiptItemFactory {
 
     private final ProductDictFacade productDictFacade;
 
-    ReceiptItem from(ReceiptItemDto receiptItemDto) {
+    ReceiptItem from(ReceiptItemDto receiptItemDto, ReceiptRevision receiptRevision) {
         ReceiptItem receiptItem = new ReceiptItem();
         receiptItem.setId(receiptItemDto.getId());
         receiptItem.setName(receiptItemDto.getName());
@@ -23,8 +23,11 @@ class ReceiptItemFactory {
         receiptItem.setDiscount(receiptItemDto.getDiscount());
         receiptItem.setTotalPrice(receiptItemDto.getTotalPrice());
         receiptItem.setPosition(receiptItemDto.getPosition());
+        receiptItem.setReceiptRevision(receiptRevision);
+        if (receiptItemDto.getProductDictId() != null)
+            receiptItem.setNameDict(new ProductDictQuery(receiptItemDto.getProductDictId()));
         if (receiptItemDto.getParentItem() != null)
-            receiptItem.setParentItem(from(receiptItemDto.getParentItem()));
+            receiptItem.setParentItem(from(receiptItemDto.getParentItem(), null));
         return receiptItem;
     }
 

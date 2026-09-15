@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.exception.AppRuntimeException;
+import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
 import java.util.List;
@@ -27,26 +29,27 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
 @Repository
 class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
 
-    private final SqlReceiptItemRepository repository;
+    private final SqlReceiptItemRepository receiptItemRepository;
+    private final SqlReceiptRevisionRepository receiptRevisionRepository;
 
     @Override
     public void reassignProductDict(ProductDictQuery dict, List<String> productDictIdList) {
-        this.repository.reassignProductDict(dict, productDictIdList);
+        this.receiptItemRepository.reassignProductDict(dict, productDictIdList);
     }
 
     @Override
     public void deleteAllByIdIn(List<String> ids) {
-        this.repository.deleteAllById(ids);
+        this.receiptItemRepository.deleteAllById(ids);
     }
 
     @Override
-    public <S extends ReceiptItem> List<S> saveAll(Iterable<S> entities) {
-        return (List<S>) this.repository.saveAll(
-                StreamSupport.stream(entities.spliterator(), false)
-                    .map(SqlReceiptItem::fromReceiptItem)
-                    .collect(Collectors.toList())
-            ).stream()
-            .map(SqlReceiptItem::toReceiptItem)
-            .collect(Collectors.toList());
+    public <S extends ReceiptItem> void saveAll(Iterable<S> entities) {
+        SqlReceiptRevision sqlReceiptRevision = this.receiptRevisionRepository.findById(entities.iterator().next().getReceiptRevision().getId())
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_REVISION_NOT_FOUND));
+        this.receiptItemRepository.saveAll(
+            StreamSupport.stream(entities.spliterator(), false)
+                .map(item -> SqlReceiptItem.fromReceiptItem(item, sqlReceiptRevision))
+                .collect(Collectors.toList())
+        );
     }
 }

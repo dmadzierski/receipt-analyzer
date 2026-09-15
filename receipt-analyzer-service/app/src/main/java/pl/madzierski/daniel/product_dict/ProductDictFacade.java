@@ -29,15 +29,7 @@ public class ProductDictFacade {
 
     GetProductDictListResponse getProductDictList() {
         Set<ProductDictWithAliasesAndCategoryProjection> allWithCategoryAndAliases = productDictQueryRepository.findAllWithCategoryAndAliases();
-        return new GetProductDictListResponse(allWithCategoryAndAliases.stream().map(productDict -> new GetProductDictListResponse.ProductDict(
-            productDict.getId(),
-            productDict.getName(),
-            productDict.getCategories().stream().map(category -> new GetProductDictListResponse.ProductDict.ProductCategory(
-                category.getId(),
-                category.getName()
-            )).toList(),
-            productDict.getAliases().stream().map(alias -> new GetProductDictListResponse.ProductDict.Alias(alias.getId(), alias.getName())).toList()
-        )).toList());
+        return new GetProductDictListResponse(allWithCategoryAndAliases.stream().map(productDict -> new GetProductDictListResponse.ProductDict(productDict.getId(), productDict.getName(), productDict.getCategories().stream().map(category -> new GetProductDictListResponse.ProductDict.ProductCategory(category.getId(), category.getName())).toList(), productDict.getAliases().stream().map(alias -> new GetProductDictListResponse.ProductDict.Alias(alias.getId(), alias.getName())).toList())).toList());
     }
 
     @Transactional
@@ -53,11 +45,8 @@ public class ProductDictFacade {
             }
             if (!compareProductCategories(updateProductDict, productDict)) {
                 if (updateProductDict.productCategoryIds() != null) {
-                    productDict.setProductCategories(
-                        updateProductDict.productCategoryIds().stream().map(categoryId -> productCategoryRepository.findById(categoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND))).collect(Collectors.toSet())
-                    );
-                }
-                else {
+                    productDict.setProductCategories(updateProductDict.productCategoryIds().stream().map(categoryId -> productCategoryRepository.findById(categoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND))).collect(Collectors.toSet()));
+                } else {
                     productDict.setProductCategories(Collections.emptySet());
                 }
             }
@@ -72,9 +61,7 @@ public class ProductDictFacade {
     }
 
     private static boolean compareProductCategories(UpdateProductDictListRequest.UpdateProductDict updateProductDict, ProductDict productDict) {
-        return Objects.equals(productDict.getProductCategories() != null ?
-                productDict.getProductCategories().stream().map(ProductCategory::getId).collect(Collectors.toSet()) : Collections.emptySet(),
-            updateProductDict.productCategoryIds() != null ? new HashSet<>(updateProductDict.productCategoryIds()) : Collections.emptySet());
+        return Objects.equals(productDict.getProductCategories() != null ? productDict.getProductCategories().stream().map(ProductCategory::getId).collect(Collectors.toSet()) : Collections.emptySet(), updateProductDict.productCategoryIds() != null ? new HashSet<>(updateProductDict.productCategoryIds()) : Collections.emptySet());
     }
 
     private ProductDictQuery toDto(ProductDict productDict) {
@@ -83,32 +70,25 @@ public class ProductDictFacade {
 
 
     public Optional<ProductDto> findCanonicalName(String alias) {
-        Set<ProductAliasDto> allAliases = productAliasQueryRepository.findAllAliases();
-        Optional<ProductAliasDto> productDictOptional = allAliases.stream().filter(aliasDto -> aliasDto.getName().equalsIgnoreCase(alias)).findFirst();
-        if (productDictOptional.isPresent())
-            return Optional.of(new ProductDto(productDictOptional.get().getId()));
+        List<ProductDto> productDtoList = productDictQueryRepository.findAllProduct(alias);
+        Optional<ProductDto> exactMatch = productDtoList.stream().filter(productDto -> productDto.getAliases().stream().anyMatch(productAliasDto -> productAliasDto.getName().equalsIgnoreCase(alias))).findAny();
+        if (exactMatch.isPresent()) return exactMatch;
 
         String normalizedSearchAlias = alias.trim().toUpperCase();
         int searchLength = normalizedSearchAlias.length();
-        return allAliases.parallelStream()
-            .map(aliasDto -> {
-                    String normalizedKnownAlias = aliasDto.getName().trim().toUpperCase();
-                    int knownLength = normalizedKnownAlias.length();
-                    int maxLength = Math.max(searchLength, knownLength);
-                    if (maxLength == 0)
-                        return Map.entry(aliasDto, 1.0);
-                    int maxAllowedDifference = (int) Math.ceil(maxLength * (1.0 - minRequiredStringSimilarity));
-                    double distance = new LevenshteinDistance(maxAllowedDifference).apply(normalizedSearchAlias, normalizedKnownAlias);
-                    if (distance == -1) {
-                        return Map.entry(aliasDto, 0.0);
-                    }
-                    double similarityScore = (maxLength - distance) / maxLength;
-                    return Map.entry(aliasDto, similarityScore);
-                }
-            )
-            .filter(entry -> entry.getValue() >= minRequiredStringSimilarity)
-            .max(Map.Entry.comparingByValue())
-            .map(productAliasDtoDoubleEntry -> new ProductDto(productAliasDtoDoubleEntry.getKey().getProductDictId()));
+        return productDtoList.parallelStream().flatMap(productDto -> productDto.getAliases().stream().map(aliasDto -> {
+            String normalizedKnownAlias = aliasDto.getName().trim().toUpperCase();
+            int knownLength = normalizedKnownAlias.length();
+            int maxLength = Math.max(searchLength, knownLength);
+            if (maxLength == 0) return Map.entry(productDto, 1.0);
+            int maxAllowedDifference = (int) Math.ceil(maxLength * (1.0 - minRequiredStringSimilarity));
+            double distance = new LevenshteinDistance(maxAllowedDifference).apply(normalizedSearchAlias, normalizedKnownAlias);
+            if (distance == -1) {
+                return Map.entry(productDto, 0.0);
+            }
+            double similarityScore = (maxLength - distance) / maxLength;
+            return Map.entry(productDto, similarityScore);
+        })).filter(entry -> entry.getValue() >= minRequiredStringSimilarity).max(Map.Entry.comparingByValue()).map(Map.Entry::getKey);
     }
 
     public void mergeProductAliasesOfProductDictList(String productDictId, List<String> productDictIdsListToMerge) {
@@ -124,9 +104,7 @@ public class ProductDictFacade {
     }
 
     GetProductCategoryListResponse getProductCategoryList() {
-        List<GetProductCategoryListResponse.ProductCategory> items = productCategoryRepository.findAllByOrderByNameAsc().stream()
-            .map(productCategory -> new GetProductCategoryListResponse.ProductCategory(productCategory.getId(), productCategory.getName()))
-            .toList();
+        List<GetProductCategoryListResponse.ProductCategory> items = productCategoryRepository.findAllByOrderByNameAsc().stream().map(productCategory -> new GetProductCategoryListResponse.ProductCategory(productCategory.getId(), productCategory.getName())).toList();
         return new GetProductCategoryListResponse(items);
     }
 
@@ -142,8 +120,7 @@ public class ProductDictFacade {
 
     @Transactional
     UpdateProductCategoryResponse updateProductCategory(String productCategoryId, UpdateProductCategoryRequest request) {
-        ProductCategory productCategory = productCategoryRepository.findById(productCategoryId)
-            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
+        ProductCategory productCategory = productCategoryRepository.findById(productCategoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
         String name = request.name().trim();
 
         if (!productCategory.getName().equals(name) && productCategoryRepository.existsByNameAndIdNot(name, productCategoryId)) {
@@ -157,8 +134,7 @@ public class ProductDictFacade {
 
     @Transactional
     void deleteProductCategory(String productCategoryId) {
-        ProductCategory productCategory = productCategoryRepository.findById(productCategoryId)
-            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
+        ProductCategory productCategory = productCategoryRepository.findById(productCategoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
         if (this.countByProductCategoryId(productCategory.getId()) > 0) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_IN_USE);
         }

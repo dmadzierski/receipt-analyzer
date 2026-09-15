@@ -36,6 +36,11 @@ class ReceiptRevisionController {
 
     @PostMapping(path = "/{revisionId}/aliases")
     void updateAliasesByUserRevision(@PathVariable String revisionId) {
-        receiptFacade.updateDictByUserRevision(revisionId);
+        receiptFacade.updateAliasesByUserRevision(revisionId);
+    }
+
+    @PostMapping(path = "/{revisionId}/update-product-dict")
+    void updateProductDictInRevisionItems(@PathVariable String revisionId) {
+        receiptFacade.updateProductDictInRevisionItems(revisionId);
     }
 }

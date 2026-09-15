@@ -107,6 +107,11 @@ export class ReceiptDetailsComponent implements OnInit {
       .subscribe({})
   }
 
+  protected refreshProductDict() {
+    this.revisionService.updateProductDict(this.receiptDetails.preferredRevision?.id!!)
+      .subscribe({})
+  }
+
   private refreshRevisionDetails(revisionId: string) {
     if (revisionId) {
       this.getRevisionDate(revisionId).subscribe(

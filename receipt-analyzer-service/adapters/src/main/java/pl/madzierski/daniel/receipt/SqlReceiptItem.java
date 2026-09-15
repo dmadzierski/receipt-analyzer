@@ -65,6 +65,24 @@ class SqlReceiptItem {
         return sqlReceiptItem;
     }
 
+    public static SqlReceiptItem fromReceiptItem(ReceiptItem item, SqlReceiptRevision receiptRevision) {
+        SqlReceiptItem sqlReceiptItem = new SqlReceiptItem();
+        sqlReceiptItem.setId(item.getId());
+        sqlReceiptItem.setName(item.getName());
+        sqlReceiptItem.setAmount(item.getAmount());
+        sqlReceiptItem.setUnitPrice(item.getUnitPrice());
+        sqlReceiptItem.setDiscount(item.getDiscount());
+        sqlReceiptItem.setTotalPrice(item.getTotalPrice());
+        sqlReceiptItem.setPosition(item.getPosition());
+        sqlReceiptItem.setParentItem(item.getParentItem() != null ?
+            SqlReceiptItem.fromReceiptItem(item.getParentItem(), null) : null);
+        if(item.getNameDict() != null) {
+            sqlReceiptItem.setProduct(SqlProductDictQuery.fromProductDict(item.getNameDict()));
+        }
+        sqlReceiptItem.setReceiptRevision(receiptRevision);
+        return sqlReceiptItem;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

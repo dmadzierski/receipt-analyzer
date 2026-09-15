@@ -7,4 +7,6 @@ interface ReceiptRevisionRepository {
     ReceiptRevision save(ReceiptRevision revision);
 
     Optional<ReceiptRevision> findByIdWithItems(String revisionId);
+
+    Optional<ReceiptRevision> findById(String revisionId);
 }

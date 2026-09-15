@@ -33,4 +33,9 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     public Optional<ReceiptRevision> findByIdWithItems(String revisionId) {
         return repository.findByIdWithItems(revisionId).map(SqlReceiptRevision::toReceiptRevision);
     }
+
+    @Override
+    public Optional<ReceiptRevision> findById(String revisionId) {
+        return repository.findById(revisionId).map(SqlReceiptRevision::toReceiptRevision);
+    }
 }

@@ -10,13 +10,13 @@ import java.util.List;
 public interface SqlReceiptItemQueryRepository extends ReceiptItemQueryRepository, JpaRepository<SqlReceiptItem, String> {
 
     @Query(nativeQuery = true, value = """
-            SELECT ri.id AS id, ri.product_id as productDictId, IF(rr.resolver = 1, ri.name, COALESCE(pd.name, ri.name)) AS name, ri.amount AS amount, ri.unit_price AS unitPrice, ri.discount as discount, ri.total_price AS totalPrice, ri.position AS position
+            SELECT ri.id AS id, ri.product_id as productDictId, IF(rr.resolver = 'USER', ri.name, COALESCE(pd.name, ri.name)) AS name, ri.amount AS amount, ri.unit_price AS unitPrice, ri.discount as discount, ri.total_price AS totalPrice, ri.position AS position
             FROM receipt_item ri
             LEFT JOIN receipt_revision rr ON ri.receipt_revision_id = rr.id
             LEFT JOIN product pd ON pd.id = ri.product_id
             WHERE ri.receipt_revision_id = :revisionId
         """)
-    Collection<ReceiptItemDto> findReceiptItemsByRevisionId(String revisionId);
+    List<ReceiptItemDto> findReceiptItemsByRevisionId(String revisionId);
 
 
     @Query(value = """

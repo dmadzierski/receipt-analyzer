@@ -172,7 +172,7 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    synchronized void updateDictByUserRevision(String revisionId) {
+    synchronized void updateAliasesByUserRevision(String revisionId) {
         Map<ProductDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap = new HashMap<>();
         this.receiptItemQueryRepository.findAllMissingAliasesInRevision(revisionId).forEach(receiptItem -> {
             String alias = receiptItem.getParentItem().getName();
@@ -198,8 +198,10 @@ public class ReceiptFacade {
                 }
             }
         });
-        productDictFacade.saveAll(receiptItemToProductDictNameMap.keySet());
-        this.updateItemsProductDict(receiptItemToProductDictNameMap);
+        if(!receiptItemToProductDictNameMap.isEmpty()){
+            productDictFacade.saveAll(receiptItemToProductDictNameMap.keySet());
+            this.updateItemsProductDict(receiptItemToProductDictNameMap, revisionId);
+        }
     }
 
     @Transactional
@@ -207,11 +209,19 @@ public class ReceiptFacade {
         receiptItemRepository.reassignProductDict(primaryDict, productDictIdList);
     }
 
-    private void updateItemsProductDict(Map<ProductDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap) {
+    private void updateItemsProductDict(Map<ProductDto, Collection<ReceiptItemDto>> receiptItemToProductDictNameMap, String revisionId) {
+        ReceiptRevision receiptRevision = revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         receiptItemRepository.saveAll(receiptItemToProductDictNameMap.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(receiptItemDto -> {
-            ReceiptItem item = receiptItemFactory.from(receiptItemDto);
+            ReceiptItem item = receiptItemFactory.from(receiptItemDto, receiptRevision);
             item.setNameDict(new ProductDictQuery(entry.getKey().getId()));
             return item;
         })).collect(Collectors.toSet()));
+    }
+
+    void updateProductDictInRevisionItems(String revisionId) {
+        ReceiptRevision receiptRevision = revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+        receiptItemRepository.saveAll(
+            receiptItemQueryRepository.findReceiptItemsByRevisionId(revisionId).stream().peek(item -> productDictFacade.findCanonicalName(item.getName()).ifPresent(productDict -> item.setProductDictId(productDict.getId()))).collect(Collectors.toSet()).stream()
+                .map(item -> receiptItemFactory.from(item, receiptRevision)).collect(Collectors.toSet()));
     }
 }

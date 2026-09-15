@@ -35,8 +35,10 @@
       <mat-icon (click)="declineEdit()" class="icon" fontIcon="cancel"></mat-icon>
       } @else {
       <mat-icon (click)="doEdit()" class="icon" fontIcon="edit"></mat-icon>
-      <mat-icon (click)="refreshAliases()" class="icon" fontIcon="refresh"
-                matTooltip="Update dicts"></mat-icon>
+      <mat-icon (click)="refreshAliases()" class="icon" fontIcon="sync"
+                matTooltip="Update aliases"></mat-icon>
+      <mat-icon (click)="refreshProductDict()" class="icon" fontIcon="refresh"
+                matTooltip="Update product dict"></mat-icon>
       }
     </h2>
     }

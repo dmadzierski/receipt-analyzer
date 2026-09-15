@@ -10,5 +10,5 @@ interface ReceiptItemRepository {
 
     void deleteAllByIdIn(List<String> ids);
 
-    <S extends ReceiptItem> List<S> saveAll(Iterable<S> entities);
+    <S extends ReceiptItem> void saveAll(Iterable<S> entities);
 }

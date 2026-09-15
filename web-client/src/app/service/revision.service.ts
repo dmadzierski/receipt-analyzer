@@ -26,4 +26,8 @@ export class RevisionService {
   updateAliases(id: string) {
     return this.httpClient.post<null>(`/api/revisions/${id}/aliases`, {})
   }
+
+  updateProductDict(id: string) {
+    return this.httpClient.post<null>(`/api/revisions/${id}/update-product-dict`, {})
+  }
 }
