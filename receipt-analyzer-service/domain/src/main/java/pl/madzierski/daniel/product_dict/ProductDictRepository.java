@@ -8,7 +8,7 @@ interface ProductDictRepository {
 
     void deleteAllByIdIn(List<String> productDictIdList);
 
-    <S extends ProductDict> List<S> saveAll(Iterable<S> entities);
+    List<ProductDict> saveAll(List<ProductDict> entities);
 
     void save(ProductDict productDict);
 }

@@ -76,9 +76,8 @@ class SqlReceiptItem {
         sqlReceiptItem.setPosition(item.getPosition());
         sqlReceiptItem.setParentItem(item.getParentItem() != null ?
             SqlReceiptItem.fromReceiptItem(item.getParentItem(), null) : null);
-        if(item.getNameDict() != null) {
+        if(item.getNameDict() != null)
             sqlReceiptItem.setProduct(SqlProductDictQuery.fromProductDict(item.getNameDict()));
-        }
         sqlReceiptItem.setReceiptRevision(receiptRevision);
         return sqlReceiptItem;
     }

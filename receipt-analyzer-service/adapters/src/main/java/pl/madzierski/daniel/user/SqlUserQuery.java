@@ -38,4 +38,11 @@ public class SqlUserQuery {
         result = 31 * result + Objects.hashCode(id);
         return result;
     }
+
+    public UserQuery toUserQuery() {
+        return UserQuery.builder()
+            .id(id)
+            .build();
+    }
+
 }

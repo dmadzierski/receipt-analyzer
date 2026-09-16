@@ -5,6 +5,9 @@ import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
 import pl.madzierski.daniel.receipt.model.ReceiptDto;
+import pl.madzierski.daniel.user.UserFacade;
+import pl.madzierski.daniel.user.model.UserDto;
+import pl.madzierski.daniel.user.model.UserQuery;
 import pl.madzierski.daniel.wallet.model.*;
 
 import java.util.Collection;
@@ -16,15 +19,18 @@ public class WalletFacade {
     private final WalletRepository walletRepository;
     private final WalletQueryRepository walletQueryRepository;
     private final ReceiptQueryRepository receiptQueryRepository;
+    private final UserFacade userFacade;
 
     CreateWalletResponse addWallet(CreateWalletRequest request, String userSub) {
-        Wallet savedWallet = walletRepository.save(Wallet.builder().name(request.name()).userSub(userSub).build());
+        UserDto user = userFacade.getUser(userSub);
+        Wallet savedWallet = walletRepository.save(Wallet.builder().name(request.name()).user(UserQuery.builder().id(user.id()).build()).build());
         return new CreateWalletResponse(savedWallet.getId(), savedWallet.getName());
     }
 
     GetWalletListResponse getWallets(String userSub) {
+        UserDto user = userFacade.getUser(userSub);
         List<GetWalletListResponse.GetWalletListResponseItem> wallets =
-            walletQueryRepository.findAllByUserSub(userSub).stream().map(wallet -> new GetWalletListResponse.GetWalletListResponseItem(wallet.getId(), wallet.getName())).toList();
+            walletQueryRepository.findAllByUser(user.id()).stream().map(wallet -> new GetWalletListResponse.GetWalletListResponseItem(wallet.getId(), wallet.getName())).toList();
         return new GetWalletListResponse(wallets);
     }
 

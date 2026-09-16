@@ -2,6 +2,7 @@ package pl.madzierski.daniel.wallet;
 
 import lombok.*;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
+import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -20,7 +21,7 @@ class Wallet {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
-    private String userSub;
+    private UserQuery user;
 
     @Override
     public boolean equals(Object o) {
@@ -28,14 +29,14 @@ class Wallet {
         if (!super.equals(o)) return false;
 
         Wallet wallet = (Wallet) o;
-        return Objects.equals(name, wallet.name) && Objects.equals(userSub, wallet.userSub);
+        return Objects.equals(name, wallet.name) && Objects.equals(user, wallet.user);
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + Objects.hashCode(name);
-        result = 31 * result + Objects.hashCode(userSub);
+        result = 31 * result + Objects.hashCode(user);
         return result;
     }
 }

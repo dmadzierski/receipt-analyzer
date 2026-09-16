@@ -45,7 +45,7 @@ public class ReceiptFacade {
     @Transactional
     CreateReceiptResponse addReceipt(String userSub, InputStream fileInputStream, String fileContentType, CreateReceiptRequest body) {
         Receipt receipt = receiptRepository.save(createReceipt(body));
-        FileGroupDto fileGroup = fileFacade.save(toDto(receipt), fileInputStream, fileContentType, userSub);
+        FileGroupDto fileGroup = fileFacade.save(new ReceiptDto(receipt.getId(), receipt.getCreatedDate(), receipt.getModifiedDate(), receipt.getName(), receipt.getDescription(), receipt.getWallet()), fileInputStream, fileContentType, userSub);
         List<String> paths = fileGroup.files().stream().map(FileDto::getPath).toList();
         if (paths.isEmpty()) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
         ReceiptRevisionResolveData revisionData = receiptResolverLocatorService.resolve(paths, body.strategy());
@@ -53,10 +53,6 @@ public class ReceiptFacade {
         revision.setReceipt(receipt);
         revisionRepository.save(revision);
         return new CreateReceiptResponse(receipt.getId(), receipt.getName(), receipt.getDescription());
-    }
-
-    private ReceiptDto toDto(Receipt receipt) {
-        return new ReceiptDto(receipt.getId(), receipt.getCreatedDate(), receipt.getModifiedDate(), receipt.getName(), receipt.getDescription(), receipt.getWallet());
     }
 
     private Receipt createReceipt(CreateReceiptRequest body) {
@@ -73,9 +69,7 @@ public class ReceiptFacade {
         String preferredRevisionId = receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).map(ReceiptRevisionDto::getId).findFirst().orElse(null);
         if (preferredRevisionId != null)
             itemListDto = receiptItemQueryRepository.findReceiptItemsByRevisionId(preferredRevisionId);
-        StoreDetailsResponse store = receiptDto.getStore() == null ? null : storeQueryRepository.findStoreById(receiptDto.getStore().getId())
-            .map(StoreDetailsResponse::storeMapper)
-            .orElse(null);
+        StoreDetailsResponse store = receiptDto.getStore() == null ? null : storeQueryRepository.findStoreById(receiptDto.getStore().getId()).map(StoreDetailsResponse::storeMapper).orElse(null);
         return GetReceiptDetailsResponse.receiptDetailsMapper(receiptDto, receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).findFirst().orElse(null), fileId, itemListDto, receiptRevisionList, store);
     }
 
@@ -94,16 +88,8 @@ public class ReceiptFacade {
         return new RevisionCopyResponse(revisionCopy.getId());
     }
 
-    private static ReceiptRevision copyRevisionWithItems(ReceiptRevision revision) {
-        ReceiptRevision revisionCopy = ReceiptRevision.builder().name(revision.getName() + "(copy)")
-            .resolver(ReceiptResolverStrategyType.USER)
-            .address(revision.getAddress()).isPreferredRevision(false)
-            .totalPrice(revision.getTotalPrice())
-            .paymentDate(revision.getPaymentDate())
-            .isCorrect(revision.getIsCorrect())
-            .receipt(revision.getReceipt())
-            .parentReceiptRevision(revision)
-            .build();
+    private ReceiptRevision copyRevisionWithItems(ReceiptRevision revision) {
+        ReceiptRevision revisionCopy = ReceiptRevision.builder().name(revision.getName() + "(copy)").resolver(ReceiptResolverStrategyType.USER).address(revision.getAddress()).isPreferredRevision(false).totalPrice(revision.getTotalPrice()).paymentDate(revision.getPaymentDate()).isCorrect(revision.getIsCorrect()).receipt(revision.getReceipt()).parentReceiptRevision(revision).build();
         revisionCopy.setItems(revision.getItems().stream().map(item -> {
             ReceiptItem newItem = new ReceiptItem();
             newItem.setName(item.getName());
@@ -198,9 +184,10 @@ public class ReceiptFacade {
                 }
             }
         });
-        if(!receiptItemToProductDictNameMap.isEmpty()){
-            productDictFacade.saveAll(receiptItemToProductDictNameMap.keySet());
-            this.updateItemsProductDict(receiptItemToProductDictNameMap, revisionId);
+        if (!receiptItemToProductDictNameMap.isEmpty()) {
+            List<ProductDto> productDtoList = productDictFacade.saveAll(receiptItemToProductDictNameMap.keySet());
+            Map<ProductDto, Collection<ReceiptItemDto>> persistedProductDictMap = receiptItemToProductDictNameMap.entrySet().stream().collect(Collectors.toMap(entry -> productDtoList.stream().filter(productDto -> Objects.equals(productDto.getName(), entry.getKey().getName())).findFirst().orElse(entry.getKey()), Map.Entry::getValue));
+            this.updateItemsProductDict(persistedProductDictMap, revisionId);
         }
     }
 
@@ -215,13 +202,11 @@ public class ReceiptFacade {
             ReceiptItem item = receiptItemFactory.from(receiptItemDto, receiptRevision);
             item.setNameDict(new ProductDictQuery(entry.getKey().getId()));
             return item;
-        })).collect(Collectors.toSet()));
+        })).toList(), revisionId);
     }
 
     void updateProductDictInRevisionItems(String revisionId) {
         ReceiptRevision receiptRevision = revisionRepository.findById(revisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
-        receiptItemRepository.saveAll(
-            receiptItemQueryRepository.findReceiptItemsByRevisionId(revisionId).stream().peek(item -> productDictFacade.findCanonicalName(item.getName()).ifPresent(productDict -> item.setProductDictId(productDict.getId()))).collect(Collectors.toSet()).stream()
-                .map(item -> receiptItemFactory.from(item, receiptRevision)).collect(Collectors.toSet()));
+        receiptItemRepository.saveAll(receiptItemQueryRepository.findReceiptItemsByRevisionId(revisionId).stream().peek(item -> productDictFacade.findCanonicalName(item.getName()).ifPresent(productDict -> item.setProductDictId(productDict.getId()))).collect(Collectors.toSet()).stream().map(item -> receiptItemFactory.from(item, receiptRevision)).toList(), revisionId);
     }
 }

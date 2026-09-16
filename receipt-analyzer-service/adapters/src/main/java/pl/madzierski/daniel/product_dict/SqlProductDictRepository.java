@@ -28,9 +28,8 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
     }
 
     @Override
-    public <S extends ProductDict> List<S> saveAll(Iterable<S> entities) {
-        return (List<S>) repository.saveAll(((List<S>) entities).stream().map(SqlProductDict::fromProductDict).toList()).stream().map(SqlProductDict::toProductDict)
-            .toList();
+    public List<ProductDict> saveAll(List<ProductDict> entities) {
+        return repository.saveAll(entities.stream().map(SqlProductDict::fromProductDict).toList()).stream().map(SqlProductDict::toProductDict).toList();
     }
 
     @Override

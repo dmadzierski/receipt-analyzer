@@ -53,7 +53,7 @@ public class ProductDictFacade {
             if (dictIds.size() > 1) {
                 List<String> productDictIdsListToMerge = dictIds.subList(1, dictIds.size());
                 this.mergeProductAliasesOfProductDictList(productDict.getId(), productDictIdsListToMerge);
-                receiptFacade.reassignProductDict(toDto(productDict), productDictIdsListToMerge);
+                receiptFacade.reassignProductDict(new ProductDictQuery(productDict.getId()), productDictIdsListToMerge);
                 productDictRepository.deleteAllByIdIn(productDictIdsListToMerge);
             }
             productDictRepository.save(productDict);
@@ -63,11 +63,6 @@ public class ProductDictFacade {
     private static boolean compareProductCategories(UpdateProductDictListRequest.UpdateProductDict updateProductDict, ProductDict productDict) {
         return Objects.equals(productDict.getProductCategories() != null ? productDict.getProductCategories().stream().map(ProductCategory::getId).collect(Collectors.toSet()) : Collections.emptySet(), updateProductDict.productCategoryIds() != null ? new HashSet<>(updateProductDict.productCategoryIds()) : Collections.emptySet());
     }
-
-    private ProductDictQuery toDto(ProductDict productDict) {
-        return new ProductDictQuery(productDict.getId());
-    }
-
 
     public Optional<ProductDto> findCanonicalName(String alias) {
         List<ProductDto> productDtoList = productDictQueryRepository.findAllProduct(alias);
@@ -95,9 +90,11 @@ public class ProductDictFacade {
         productAliasRepository.reassignAliasesToProductDict(productDictId, productDictIdsListToMerge);
     }
 
-    public void saveAll(Collection<ProductDto> productDictEntities) {
-        productDictRepository.saveAll(productDictEntities.stream().map(productDictFactory::from).toList());
+    public List<ProductDto> saveAll(Set<ProductDto> productDictEntities) {
+        return productDictRepository.saveAll(productDictEntities.stream().map(productDictFactory::from).toList())
+            .stream().map(product -> ProductDto.builder().id(product.getId()).name(product.getName()).build()).toList();
     }
+
 
     public long countByProductCategoryId(String id) {
         return productDictQueryRepository.countProductDictEntitiesByCategoriesIdIn(Set.of(id));

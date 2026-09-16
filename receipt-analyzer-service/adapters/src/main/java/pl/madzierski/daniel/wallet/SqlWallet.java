@@ -6,13 +6,10 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import pl.madzierski.daniel.receipt.SqlReceiptQuery;
-import pl.madzierski.daniel.receipt.model.ReceiptQuery;
+import pl.madzierski.daniel.user.SqlUserQuery;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,8 +31,9 @@ class SqlWallet {
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;
     private String name;
-    @Column(name = "user_sub")
-    private String userSub;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private SqlUserQuery user;
 
     public static SqlWallet fromWallet(Wallet wallet) {
         return SqlWallet.builder()
@@ -43,7 +41,7 @@ class SqlWallet {
             .createdDate(wallet.getCreatedDate())
             .modifiedDate(wallet.getModifiedDate())
             .name(wallet.getName())
-            .userSub(wallet.getUserSub())
+            .user(SqlUserQuery.fromUserQuery(wallet.getUser()))
             .build();
     }
 
@@ -53,14 +51,14 @@ class SqlWallet {
         if (!super.equals(o)) return false;
 
         SqlWallet wallet = (SqlWallet) o;
-        return Objects.equals(name, wallet.name) && Objects.equals(userSub, wallet.userSub);
+        return Objects.equals(name, wallet.name) && Objects.equals(user, wallet.user);
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + Objects.hashCode(name);
-        result = 31 * result + Objects.hashCode(userSub);
+        result = 31 * result + Objects.hashCode(user);
         return result;
     }
 
@@ -70,7 +68,7 @@ class SqlWallet {
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
             .name(name)
-            .userSub(userSub)
+            .user(user.toUserQuery())
             .build();
     }
 }

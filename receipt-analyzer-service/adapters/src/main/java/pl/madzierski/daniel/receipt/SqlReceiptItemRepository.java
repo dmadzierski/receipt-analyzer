@@ -11,8 +11,8 @@ import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String> {
 
@@ -44,13 +44,11 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     }
 
     @Override
-    public <S extends ReceiptItem> void saveAll(Iterable<S> entities) {
-        SqlReceiptRevision sqlReceiptRevision = this.receiptRevisionRepository.findById(entities.iterator().next().getReceiptRevision().getId())
-            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_REVISION_NOT_FOUND));
-        this.receiptItemRepository.saveAll(
-            StreamSupport.stream(entities.spliterator(), false)
-                .map(item -> SqlReceiptItem.fromReceiptItem(item, sqlReceiptRevision))
-                .collect(Collectors.toList())
-        );
+    public List<ReceiptItem> saveAll(List<ReceiptItem> entities, String receiptRevisionId) {
+        SqlReceiptRevision sqlReceiptRevision =
+            this.receiptRevisionRepository.findById(receiptRevisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_REVISION_NOT_FOUND));
+        this.receiptItemRepository.flush();
+        return receiptItemRepository.saveAll(entities.stream().map(item -> SqlReceiptItem.fromReceiptItem(item,
+            sqlReceiptRevision)).collect(Collectors.toSet())).stream().map(SqlReceiptItem::toReceiptItem).toList();
     }
 }
