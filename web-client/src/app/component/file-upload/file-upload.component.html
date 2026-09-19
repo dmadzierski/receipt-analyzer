@@ -9,7 +9,14 @@
   <strong>Select file:</strong>
   <mat-list>
     @for (file of files; track $index) {
-      <mat-list-item>{{ file.name }}</mat-list-item>
+      <mat-list-item>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <span>{{ file.name }}</span>
+          <button (click)="removeFile($index)" color="warn" mat-icon-button type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </mat-list-item>
     }
   </mat-list>
 </div>

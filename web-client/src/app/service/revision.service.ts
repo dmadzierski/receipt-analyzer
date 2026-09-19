@@ -1,7 +1,7 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {CreateReceiptResponse, RevisionDetails,} from '../model/receipt.model';
+import {RevisionDetails,} from '../model/receipt.model';
 import {CreateRevisionCopy} from '../model/revision.model';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class RevisionService {
 
 
   copyRevision(revisionCopy: string): Observable<CreateRevisionCopy> {
-    return this.httpClient.post<CreateReceiptResponse>(`/api/revisions/${revisionCopy}/copy`, {});
+    return this.httpClient.post<CreateRevisionCopy>(`/api/revisions/${revisionCopy}/copy`, {});
   }
 
   getRevisionDetails(revisionId: string) {

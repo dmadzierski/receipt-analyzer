@@ -1,37 +1,41 @@
 <div class="form-container">
-  <h1>Enter receipt data</h1>
-  <mat-form-field>
-    <mat-label>Enter receipt name</mat-label>
-    <input [(ngModel)]="data.name" matInput maxlength="30"/>
-  </mat-form-field>
+  @if (creationSucceeded) {
+    <h1>Receipt created</h1>
+    <p>Your receipt was created successfully.</p>
+    <button (click)="goToReceipt()" matButton="outlined">Open receipt</button>
+  } @else {
+    <h1>Enter receipt data</h1>
+    <mat-form-field>
+      <mat-label>Enter receipt name</mat-label>
+      <input [(ngModel)]="data.name" matInput maxlength="30"/>
+    </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Enter description</mat-label>
-    <input [(ngModel)]="data.description" matInput maxlength="30"/>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Enter description</mat-label>
+      <input [(ngModel)]="data.description" matInput maxlength="30"/>
+    </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Select strategy</mat-label>
-    <mat-select [(ngModel)]="data.strategy">
-      @for (strategy of strategies; track strategy) {
-        <mat-option [value]="strategy">
-          {{ strategy }}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Select strategy</mat-label>
+      <mat-select [(ngModel)]="data.strategy">
+        @for (strategy of strategies; track strategy) {
+          <mat-option [value]="strategy">
+            {{ strategy }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
-  <app-store-autocomplete
-    [value]="storeSearchText"
-    [options]="stores"
-    (valueChange)="storeSearchText = $event; searchStores()"
-    (optionSelected)="selectStore($event)"
-    (createNew)="openCreateStoreDialog()"
-  ></app-store-autocomplete>
+    <app-store-autocomplete
+      [value]="storeSearchText"
+      [options]="stores"
+      (valueChange)="storeSearchText = $event; searchStores()"
+      (optionSelected)="selectStore($event)"
+      (createNew)="openCreateStoreDialog()"
+    ></app-store-autocomplete>
 
-  <file-upload [files]="data.files"></file-upload>
+    <file-upload [files]="data.files"></file-upload>
 
-  <button (click)="create()" matButton="outlined">Create</button>
-
-
+    <button (click)="create()" matButton="outlined">Create</button>
+  }
 </div>

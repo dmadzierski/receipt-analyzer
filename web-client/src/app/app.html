@@ -1,18 +1,12 @@
-<nav class="navbar navbar-expand-lg bg-dark text-light">
-  <div class="container-fluid">
-    <a [routerLink]="['/wallets']" class="navbar-brand text-light" routerLinkActive="active">Wallets</a>
-    <a [routerLink]="['/product-dicts']" class="navbar-brand text-light" routerLinkActive="active">Product dict</a>
-    <a [routerLink]="['/product-categories']" class="navbar-brand text-light" routerLinkActive="active">Categories</a>
-    <a [routerLink]="['/stores']" class="navbar-brand text-light" routerLinkActive="active">Stores</a>
-    <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
-            data-bs-target="#navbarSupportedContent" data-bs-toggle="collapse" type="button">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-      </ul>
-      Witaj {{ (profile?.firstName || '') + ' ' + (profile?.lastName || '') }}!
-    </div>
+<nav class="app-navbar">
+  <div class="app-navbar__links">
+    <a [routerLink]="['/wallets']" class="app-navbar__link" routerLinkActive="active">Wallets</a>
+    <a [routerLink]="['/product-dicts']" class="app-navbar__link" routerLinkActive="active">Product dict</a>
+    <a [routerLink]="['/product-categories']" class="app-navbar__link" routerLinkActive="active">Categories</a>
+    <a [routerLink]="['/stores']" class="app-navbar__link" routerLinkActive="active">Stores</a>
+  </div>
+  <div class="app-navbar__profile">
+    Witaj {{ (profile?.firstName || '') + ' ' + (profile?.lastName || '') }}!
   </div>
 </nav>
 <router-outlet></router-outlet>

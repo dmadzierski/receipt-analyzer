@@ -11,7 +11,7 @@ import {StoreService} from '../service/store.service';
 import {CreateReceiptData, ResolverStrategy} from '../model/receipt.model';
 import {CreateStoreResponse, GetStoreListResponseItem} from '../model/store.model';
 import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime, distinctUntilChanged, map, of, Subject, switchMap} from 'rxjs';
 import {StoreCreateDialogComponent} from '../component/store-create-dialog/store-create-dialog.component';
 
@@ -38,12 +38,15 @@ export class ReceiptAddComponent {
   stores: GetStoreListResponseItem[] = [];
   data: CreateReceiptData = new CreateReceiptData('', '', '', ResolverStrategy.BIEDRONKA, []);
   storeSearchText = '';
+  createdReceiptId = '';
+  creationSucceeded = false;
   private readonly storeSearchSubject = new Subject<string>();
   private walletId: string = '';
 
   constructor(private readonly receiptService: ReceiptService,
               private readonly storeService: StoreService,
               private readonly activatedRoute: ActivatedRoute,
+              private readonly router: Router,
               private readonly dialog: MatDialog,
   ) {
     this.activatedRoute.params.subscribe(params => {
@@ -114,15 +117,17 @@ export class ReceiptAddComponent {
     });
   }
 
-  private loadStores(query: string = ''): void {
-    this.storeSearchSubject.next(query);
-  }
-
   create() {
-    console.log(this.data);
     this.data.walletId = this.walletId;
     this.receiptService.addReceipt(this.data).subscribe((res) => {
-      console.log(res);
+      this.createdReceiptId = res.id ?? '';
+      this.creationSucceeded = true;
     });
+  }
+
+  goToReceipt(): void {
+    if (this.createdReceiptId) {
+      this.router.navigate(['/receipts', this.createdReceiptId]);
+    }
   }
 }

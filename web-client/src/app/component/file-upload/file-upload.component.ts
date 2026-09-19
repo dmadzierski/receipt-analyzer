@@ -20,23 +20,20 @@ import {MatToolbarModule} from '@angular/material/toolbar';
   styleUrls: ['./file-upload.component.scss'],
 })
 export class FileUploadComponent {
-  currentFile?: File;
-
   @Input()
   files: File[] = [];
-
-  constructor() {
-  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-
       this.files.push(file);
-
-      console.log('Select file:', file);
+      input.value = '';
     }
+  }
+
+  removeFile(index: number): void {
+    this.files.splice(index, 1);
   }
 }
