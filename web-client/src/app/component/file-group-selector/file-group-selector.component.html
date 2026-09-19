@@ -1,0 +1,10 @@
+<mat-form-field class="file-group-selector">
+  <mat-label>File group</mat-label>
+  <mat-select [value]="selectedFileGroupId" (selectionChange)="onSelectionChange($event.value)">
+    @for (group of fileGroups; track group.id) {
+      <mat-option [value]="group.id">
+        {{ group.fileType }} @if (group.isOriginal) { (original) } @else { (copy) }
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>

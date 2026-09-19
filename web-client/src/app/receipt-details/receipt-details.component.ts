@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ReceiptService} from '../service/receipt.service';
-import {GetReceiptDetailsResponse, Revision, RevisionDetails} from '../model/receipt.model';
+import {FileGroup, GetReceiptDetailsResponse, Revision, RevisionDetails} from '../model/receipt.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -16,6 +16,7 @@ import {MatIcon} from '@angular/material/icon';
 import {RevisionService} from '../service/revision.service';
 import {Observable} from 'rxjs';
 import {MatTooltip} from '@angular/material/tooltip';
+import {FileGroupSelectorComponent} from '../component/file-group-selector/file-group-selector.component';
 
 @Component({
   selector: 'app-receipt-details',
@@ -30,7 +31,8 @@ import {MatTooltip} from '@angular/material/tooltip';
     PdfViewerComponent,
     RevisionListComponent,
     MatIcon,
-    MatTooltip
+    MatTooltip,
+    FileGroupSelectorComponent
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-details.component.html',
@@ -39,6 +41,8 @@ import {MatTooltip} from '@angular/material/tooltip';
 export class ReceiptDetailsComponent implements OnInit {
   receiptDetails = {} as GetReceiptDetailsResponse;
   receiptFileId: string = '';
+  fileGroups: FileGroup[] = [];
+  selectedFileGroupId: string = '';
   editMode: boolean = false;
   receiptId: string | null = null;
 
@@ -56,12 +60,30 @@ export class ReceiptDetailsComponent implements OnInit {
       this.receiptService.getReceiptDetails(this.receiptId).subscribe({
         next: (res) => {
           this.receiptDetails = res;
-          this.receiptFileId = this.receiptDetails.fileId
+          this.fileGroups = res.fileGroups ?? [];
+          this.selectPdfFile();
         }, error: () => {
           this.router.navigate(["/"]);
         }
       });
     }
+  }
+
+  selectPdfFile(fileGroupId?: string): void {
+    const preferredGroup = fileGroupId
+      ? this.fileGroups.find(group => group.id === fileGroupId)
+      : this.fileGroups.find(group => group.fileType === 'PDF' && group.isOriginal);
+
+    const group = preferredGroup ?? this.fileGroups.find(group => group.fileType === 'PDF');
+    if (!group || !group.files?.length) {
+      this.receiptFileId = '';
+      this.selectedFileGroupId = '';
+      return;
+    }
+
+    const pdfFile = group.files.find(file => file.path?.toLowerCase().endsWith('.pdf')) ?? group.files[0];
+    this.receiptFileId = pdfFile?.id ?? '';
+    this.selectedFileGroupId = group.id;
   }
 
   doEdit() {

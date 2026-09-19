@@ -50,6 +50,18 @@
 
   </div>
   <div class="right-panel">
-    <app-pdf-viewer receiptFileId="{{this.receiptFileId}}"></app-pdf-viewer>
+    @if (fileGroups.length > 0) {
+      <app-file-group-selector
+        [fileGroups]="fileGroups"
+        [selectedFileGroupId]="selectedFileGroupId"
+        (fileGroupChange)="selectPdfFile($event)"
+      ></app-file-group-selector>
+    }
+
+    @if (receiptFileId) {
+      <app-pdf-viewer [receiptFileId]="receiptFileId"></app-pdf-viewer>
+    } @else {
+      <div>No PDF file available</div>
+    }
   </div>
 </div>

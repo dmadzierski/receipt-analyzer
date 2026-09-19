@@ -47,8 +47,15 @@ export interface GetReceiptDetailsResponse {
   revisions: Revision[]
   createdDate: string
   updateDate: string,
-  fileId: string
+  fileGroups?: FileGroup[]
   store?: StoreDetails
+}
+
+export interface FileGroup {
+  id: string
+  fileType: string
+  isOriginal: boolean
+  files: ReceiptFile[]
 }
 
 export interface RevisionDetails {
