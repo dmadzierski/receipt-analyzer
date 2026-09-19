@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pl.madzierski.daniel.receipt.SqlReceiptQuery;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @Table(name = "receipt_file_group")
 @NoArgsConstructor
 @Setter
+@Getter
 @EntityListeners({AuditingEntityListener.class})
 class SqlFileGroup {
     public static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
@@ -61,7 +63,11 @@ class SqlFileGroup {
         this.files.addAll(collect);
     }
 
-    public FileGroup toFileGroupDto() {
+    Set<SqlFile> getFiles() {
+        return Collections.unmodifiableSet(files);
+    }
+
+    public FileGroup toFileGroup() {
         FileGroup fileGroup = new FileGroup();
         fileGroup.setFileType(this.fileType);
         fileGroup.setReceipt(this.receipt.toReceipt());

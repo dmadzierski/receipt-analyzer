@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-enum FileType {
+public enum FileType {
     PDF("application/pdf", "pdf"),
     JSON("application/json", "json");
 

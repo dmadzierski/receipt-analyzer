@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import pl.madzierski.daniel.file_group.FileFacade;
+import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
 import pl.madzierski.daniel.file_group.FileQueryRepository;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
@@ -32,7 +33,8 @@ class ReceiptConfiguration {
         ReceiptRevisionQueryRepository receiptRevisionQueryRepository,
         FileQueryRepository fileQueryRepository,
         StoreQueryRepository storeQueryRepository,
-        @Lazy ProductDictFacade productDictFacade
+        @Lazy ProductDictFacade productDictFacade,
+        FileGroupQueryRepository fileGroupQueryRepository
     ) {
         ReceiptItemFactory receiptItemFactory = new ReceiptItemFactory(productDictFacade);
         return new ReceiptFacade(
@@ -48,7 +50,8 @@ class ReceiptConfiguration {
             receiptRevisionQueryRepository,
             fileQueryRepository,
             storeQueryRepository,
-            productDictFacade
+            productDictFacade,
+            fileGroupQueryRepository
         );
     }
 

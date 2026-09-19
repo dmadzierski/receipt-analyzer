@@ -1,5 +1,7 @@
 package pl.madzierski.daniel.receipt.model;
 
+import pl.madzierski.daniel.file_group.model.FileDto;
+import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 
@@ -7,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,13 +21,48 @@ public record GetReceiptDetailsResponse(
     Set<RevisionResponse> revisions,
     LocalDateTime createdDate,
     LocalDateTime updateDate,
-    String fileId,
+    List<FileGroupResponse> fileGroups,
     StoreDetailsResponse store
 ) {
+
+    public record FileGroupResponse(
+        String id,
+        String fileType,
+        boolean isOriginal,
+        Set<FileResponse> files
+    ) {
+        public record FileResponse(
+            String id,
+            String path,
+            Integer partNumber
+        ) {
+            public static FileResponse fileMapper(FileDto file) {
+                return new FileResponse(
+                    file.getId(),
+                    file.getPath(),
+                    file.getPartNumber()
+                );
+            }
+        }
+
+    }
+
+    public static FileGroupResponse fileGroupMapper(FileGroupDto fileGroup) {
+        return new FileGroupResponse(
+            fileGroup.id(),
+            fileGroup.fileType().name(),
+            fileGroup.isOriginal(),
+            fileGroup.files()
+                .stream()
+                .map(FileGroupResponse.FileResponse::fileMapper)
+                .collect(Collectors.toSet())
+        );
+    }
+
     public static GetReceiptDetailsResponse receiptDetailsMapper(
         ReceiptDto receiptEntity,
         ReceiptRevisionDto preferredRevisionEntity,
-        String fileId,
+        List<FileGroupDto> fileGroups,
         Collection<ReceiptItemDto> items,
         Collection<ReceiptRevisionDto> revisions,
         StoreDetailsResponse store
@@ -37,7 +75,9 @@ public record GetReceiptDetailsResponse(
             receiptRevisionMapper(revisions),
             receiptEntity.getCreatedDate(),
             receiptEntity.getModifiedDate(),
-            fileId,
+            fileGroups.stream()
+                .map(GetReceiptDetailsResponse::fileGroupMapper)
+                .toList(),
             store
         );
     }

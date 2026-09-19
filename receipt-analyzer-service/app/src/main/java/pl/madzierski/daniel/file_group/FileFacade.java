@@ -37,7 +37,10 @@ public class FileFacade {
     }
 
     private FileGroupDto toDto(FileGroup fileGroup) {
-        return new FileGroupDto(fileGroup.getFiles().stream().map(this::toDto).collect(Collectors.toSet()));
+        return new FileGroupDto(fileGroup.getId(),
+            fileGroup.getFileType(),
+            fileGroup.getIsOriginal(),
+            fileGroup.getFiles().stream().map(this::toDto).collect(Collectors.toSet()));
     }
 
     private FileDto toDto(File file) {

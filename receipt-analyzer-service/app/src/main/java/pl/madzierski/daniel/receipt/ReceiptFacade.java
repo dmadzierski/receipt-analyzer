@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.FileFacade;
+import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
 import pl.madzierski.daniel.file_group.FileQueryRepository;
 import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
@@ -41,6 +42,7 @@ public class ReceiptFacade {
     private final FileQueryRepository fileQueryRepository;
     private final StoreQueryRepository storeQueryRepository;
     private final ProductDictFacade productDictFacade;
+    private final FileGroupQueryRepository fileGroupQueryRepository;
 
     @Transactional
     CreateReceiptResponse addReceipt(String userSub, InputStream fileInputStream, String fileContentType, CreateReceiptRequest body) {
@@ -64,13 +66,14 @@ public class ReceiptFacade {
     GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
         ReceiptDto receiptDto = receiptQueryRepository.findById(receiptId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
         List<ReceiptRevisionDto> receiptRevisionList = receiptRevisionQueryRepository.getRevisionsByReceiptId(receiptId);
-        String fileId = fileQueryRepository.findOriginalPdf(receiptId).map(FileDto::getId).orElse(null);
+//        String fileId = fileQueryRepository.findOriginalPdf(receiptId).map(FileDto::getId).orElse(null);
+        List<FileGroupDto> fileGroups = fileGroupQueryRepository.findAllByReceiptId(receiptId);
         Collection<ReceiptItemDto> itemListDto = Collections.emptyList();
         String preferredRevisionId = receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).map(ReceiptRevisionDto::getId).findFirst().orElse(null);
         if (preferredRevisionId != null)
             itemListDto = receiptItemQueryRepository.findReceiptItemsByRevisionId(preferredRevisionId);
         StoreDetailsResponse store = receiptDto.getStore() == null ? null : storeQueryRepository.findStoreById(receiptDto.getStore().getId()).map(StoreDetailsResponse::storeMapper).orElse(null);
-        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptDto, receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).findFirst().orElse(null), fileId, itemListDto, receiptRevisionList, store);
+        return GetReceiptDetailsResponse.receiptDetailsMapper(receiptDto, receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).findFirst().orElse(null), fileGroups, itemListDto, receiptRevisionList, store);
     }
 
     @Transactional(readOnly = true)

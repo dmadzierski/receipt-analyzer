@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 class FileController {
 
-    public static final String ATTACHMENT_FILENAME_TEMPLATE = "attachment; filename=\"%s\"";
+    private static final String ATTACHMENT_FILENAME_TEMPLATE = "attachment; filename=\"%s\"";
     private final FileFacade fileFacade;
 
     @GetMapping(path = "/{receiptFileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)

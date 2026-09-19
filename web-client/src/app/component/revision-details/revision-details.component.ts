@@ -52,7 +52,7 @@ export class RevisionDetailsComponent implements OnChanges {
   revision: ModelSignal<RevisionDetails> = model({} as RevisionDetails)
   @Input()
   contentEditable: boolean = false;
-  data = new MatTableDataSource({} as Item[]);
+  data = new MatTableDataSource<Item>([]);
 
   constructor(private cdr: ChangeDetectorRef) {
   }
