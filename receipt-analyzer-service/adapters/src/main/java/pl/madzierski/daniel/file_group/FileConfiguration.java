@@ -6,7 +6,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 class FileConfiguration {
     @Bean
-    FileFacade fileFacade(final FileRepository fileRepository) {
-        return new FileFacade(fileRepository);
+    FileFacade fileFacade(final FileRepository fileRepository,
+                          final FileGroupQueryRepository fileGroupQueryRepository, final FileGroupRepository fileGroupRepository) {
+        return new FileFacade(fileRepository, fileGroupQueryRepository, fileGroupRepository);
     }
 }

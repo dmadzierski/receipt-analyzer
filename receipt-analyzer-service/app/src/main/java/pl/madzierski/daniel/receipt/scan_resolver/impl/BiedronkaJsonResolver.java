@@ -13,6 +13,7 @@ import pl.madzierski.daniel.receipt.scan_resolver.model.BiedronkaJsonReceipt;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -34,29 +35,27 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
     }
 
     @Override
-    public ReceiptRevisionResolveData execute(List<String> filePaths) {
-        if (filePaths == null || filePaths.size() != 1) {
+    public ReceiptRevisionResolveData execute(List<byte[]> files) {
+        if (files == null || files.size() != 1) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.INVALID_INPUT_AMOUNT_OF_INPUT_FILES);
         }
-        String filePath = filePaths.getFirst();
-        File jsonFile = new File(filePath);
+        byte[] fileBytes = files.getFirst();
         BiedronkaJsonReceipt receipt;
         String rawData;
 
         try {
-            receipt = objectMapper.readValue(jsonFile, BiedronkaJsonReceipt.class);
-            rawData = Files.readString(Path.of(filePath));
+            receipt = objectMapper.readValue(fileBytes, BiedronkaJsonReceipt.class);
+            rawData = new String(fileBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.JSON_PARSING_ERROR);
         }
         Result result = new Result(receipt, rawData);
 
-        List<ReceiptRevisionResolveData.ReceiptRevisionResolveDataFile> files = List.of(new ReceiptRevisionResolveData.ReceiptRevisionResolveDataFile(filePath, 0, result.rawData()));
         List<ReceiptRevisionResolveDataItem> items = new ArrayList<>();
         int position = 1;
 
         if (result.receipt().body() == null)
-            return new ReceiptRevisionResolveData(resolverVersion, BRAND, items, files, null, null, this.strategy(),
+            return new ReceiptRevisionResolveData(resolverVersion, BRAND, items, null, null, this.strategy(),
                 null);
 
         for (BiedronkaJsonReceipt.Body bodyItem : result.receipt().body()) {
@@ -75,7 +74,7 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
 
         BigDecimal totalPrice =
             BigDecimal.valueOf(result.receipt().body().stream().filter(b -> b.sumInCurrency() != null).findFirst().map(b -> b.sumInCurrency().fiscalTotal()).orElse(0), 0).divide(BigDecimal.valueOf(100, 0));
-        return new ReceiptRevisionResolveData(resolverVersion, BRAND, items, files, null, null, this.strategy(),
+        return new ReceiptRevisionResolveData(resolverVersion, BRAND, items, null, null, this.strategy(),
             totalPrice);
     }
 

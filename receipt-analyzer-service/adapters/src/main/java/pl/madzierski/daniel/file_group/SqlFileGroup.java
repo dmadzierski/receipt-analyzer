@@ -25,24 +25,9 @@ import java.util.stream.Collectors;
 @Getter
 @EntityListeners({AuditingEntityListener.class})
 class SqlFileGroup {
-    public static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
-        SqlFileGroup sqlFileGroup = new SqlFileGroup();
-        sqlFileGroup.setId(fileGroup.getId());
-        sqlFileGroup.setCreatedDate(fileGroup.getCreatedDate());
-        sqlFileGroup.setModifiedDate(fileGroup.getModifiedDate());
-        sqlFileGroup.setFileType(fileGroup.getFileType());
-        sqlFileGroup.setIsOriginal(fileGroup.getIsOriginal());
-        sqlFileGroup.setReceipt(fileGroup.getReceipt() != null ? new SqlReceiptQuery(fileGroup.getReceipt().getId()) :
-            null);
-        sqlFileGroup.addFiles(fileGroup.getFiles().stream().map(SqlFile::fromFile).collect(Collectors.toSet()));
-        sqlFileGroup.files.forEach(sqlFile -> sqlFile.setFileGroup(sqlFileGroup));
-        return sqlFileGroup;
-    }
-
     @Id
     @UuidGenerator
     private String id;
-
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
@@ -58,6 +43,20 @@ class SqlFileGroup {
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<SqlFile> files = new HashSet<>();
+
+    public static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
+        SqlFileGroup sqlFileGroup = new SqlFileGroup();
+        sqlFileGroup.setId(fileGroup.getId());
+        sqlFileGroup.setCreatedDate(fileGroup.getCreatedDate());
+        sqlFileGroup.setModifiedDate(fileGroup.getModifiedDate());
+        sqlFileGroup.setFileType(fileGroup.getFileType());
+        sqlFileGroup.setIsOriginal(fileGroup.getIsOriginal());
+        sqlFileGroup.setReceipt(fileGroup.getReceipt() != null ? new SqlReceiptQuery(fileGroup.getReceipt().getId()) :
+            null);
+        sqlFileGroup.addFiles(fileGroup.getFiles().stream().map((File file) -> SqlFile.fromFile(file, sqlFileGroup)).collect(Collectors.toSet()));
+        sqlFileGroup.files.forEach(sqlFile -> sqlFile.setFileGroup(sqlFileGroup));
+        return sqlFileGroup;
+    }
 
     private void addFiles(Set<SqlFile> collect) {
         this.files.addAll(collect);
@@ -75,7 +74,7 @@ class SqlFileGroup {
         fileGroup.setCreatedDate(this.createdDate);
         fileGroup.setModifiedDate(this.modifiedDate);
         fileGroup.setId(id);
-        fileGroup.addFiles(this.files.stream().map(SqlFile::toFile).collect(Collectors.toSet()));
+        fileGroup.addFiles(this.files.stream().map((SqlFile file) -> file.toFile(fileGroup)).collect(Collectors.toSet()));
         return fileGroup;
     }
 }

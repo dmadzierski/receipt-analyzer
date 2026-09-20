@@ -6,6 +6,7 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.file_group.SqlFileGroupQuery;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -52,6 +53,9 @@ class SqlReceiptRevision {
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "parentReceiptRevision")
     private Set<SqlReceiptRevision> childReceiptRevisions = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_file_group_id")
+    private SqlFileGroupQuery sourceFileGroup;
 
     public static SqlReceiptRevision fromReceiptRevision(ReceiptRevision revision) {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();
@@ -62,9 +66,15 @@ class SqlReceiptRevision {
         sqlReceiptRevision.setIsPreferredRevision(revision.getIsPreferredRevision());
         sqlReceiptRevision.setResolver(revision.getResolver());
         sqlReceiptRevision.setIsCorrect(revision.getIsCorrect());
-        sqlReceiptRevision.setReceipt(revision.getReceipt() != null ? SqlReceipt.fromReceipt(revision.getReceipt()) : null);
-        sqlReceiptRevision.setItems(revision.getItems() != null ? new HashSet<>(revision.getItems().stream().map(SqlReceiptItem::fromReceiptItem).toList()) : Collections.emptySet());
+        sqlReceiptRevision.setReceipt(SqlReceipt.fromReceipt(revision.getReceipt()));
+        sqlReceiptRevision.setItems(revision.getItems() != null ? new HashSet<>(revision.getItems()
+            .stream()
+            .map(SqlReceiptItem::fromReceiptItem)
+            .toList()) : Collections.emptySet());
         sqlReceiptRevision.items.forEach(item -> item.setReceiptRevision(sqlReceiptRevision));
+        if (revision.getSourceFileGroup() != null) {
+            sqlReceiptRevision.setSourceFileGroup(SqlFileGroupQuery.fromFileGroupQuery(revision.getSourceFileGroup()));
+        }
         return sqlReceiptRevision;
     }
 
@@ -92,7 +102,9 @@ class SqlReceiptRevision {
             .isCorrect(isCorrect)
             .receipt(receipt != null ? receipt.toReceipt() : null)
             .resolver(resolver)
-            .items(Collections.unmodifiableSet(items.stream().map(SqlReceiptItem::toReceiptItem).collect(java.util.stream.Collectors.toSet())))
+            .items(Collections.unmodifiableSet(items.stream()
+                .map(SqlReceiptItem::toReceiptItem)
+                .collect(java.util.stream.Collectors.toSet())))
             .build();
     }
 }

@@ -12,10 +12,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pl.madzierski.daniel.receipt.model.CreateReceiptRequest;
-import pl.madzierski.daniel.receipt.model.CreateReceiptResponse;
-import pl.madzierski.daniel.receipt.model.GetReceiptDetailsResponse;
-import pl.madzierski.daniel.receipt.model.GetReceiptRevisionsResponse;
+import pl.madzierski.daniel.receipt.model.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,4 +46,12 @@ class ReceiptController {
     ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(@PathVariable @UUID String receiptId) {
         return ResponseEntity.ok(this.receiptFacade.getReceiptRevisions(receiptId));
     }
+
+    @PostMapping(path = "/{receiptId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces =
+        MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<CreateRevisionResponse> createRevision(@PathVariable String receiptId,
+                                                          @RequestBody CreateRevisionRequest createRevisionRequest) {
+        return ResponseEntity.ok(receiptFacade.createRevision(receiptId, createRevisionRequest));
+    }
+
 }

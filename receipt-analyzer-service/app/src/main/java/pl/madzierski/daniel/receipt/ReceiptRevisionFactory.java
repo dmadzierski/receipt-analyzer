@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.RequiredArgsConstructor;
+import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 
@@ -34,8 +35,13 @@ class ReceiptRevisionFactory {
         receiptRevision.setAddress(receiptRevisionDto.address());
         receiptRevision.setIsPreferredRevision(false);
         receiptRevision.setIsCorrect(false);
-        receiptRevision.addItems(receiptRevisionDto.items().stream().map(receiptItemFactory::from)
-            .collect(Collectors.toSet()));
+        if (receiptRevisionDto.items() != null && !receiptRevisionDto.items()
+            .isEmpty()) {
+            receiptRevision.addItems(receiptRevisionDto.items()
+                .stream()
+                .map(receiptItemFactory::from)
+                .collect(Collectors.toSet()));
+        }
         return receiptRevision;
     }
 }

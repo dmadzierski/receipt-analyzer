@@ -107,3 +107,12 @@ export interface Revision {
   isPreferredRevision: boolean
   isCorrect: boolean
 }
+
+export interface CreateRevisionRequest{
+  fileGroupId: string
+  strategy: ResolverStrategy,
+}
+
+export interface CreateRevisionResponse{
+
+}

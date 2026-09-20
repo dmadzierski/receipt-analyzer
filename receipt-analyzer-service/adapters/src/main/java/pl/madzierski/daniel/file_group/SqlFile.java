@@ -36,21 +36,23 @@ class SqlFile {
     private String rawData;
     private Integer partNumber;
 
-    static SqlFile fromFile(File file) {
+    static SqlFile fromFile(File file, SqlFileGroup fileGroup) {
         SqlFile sqlFile = new SqlFile();
         sqlFile.id = file.getId();
         sqlFile.path = file.getPath();
         sqlFile.rawData = file.getRawData();
         sqlFile.partNumber = file.getPartNumber();
+        sqlFile.fileGroup = fileGroup;
         return sqlFile;
     }
 
-    File toFile() {
+    File toFile(FileGroup fileGroup) {
         File file = new File();
         file.setId(this.id);
         file.setPath(this.path);
         file.setRawData(this.rawData);
         file.setPartNumber(this.partNumber);
+        file.setFileGroup(fileGroup);
         return file;
     }
 

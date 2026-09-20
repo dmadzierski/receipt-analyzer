@@ -1,7 +1,13 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {CreateReceiptData, CreateReceiptResponse, GetReceiptDetailsResponse, Revision,} from '../model/receipt.model';
+import {
+  CreateReceiptData,
+  CreateReceiptResponse,
+  CreateRevisionRequest, CreateRevisionResponse,
+  GetReceiptDetailsResponse,
+  Revision,
+} from '../model/receipt.model';
 
 @Injectable({
   providedIn: 'root',
@@ -49,4 +55,7 @@ export class ReceiptService {
     return this.httpClient.get<Revision[]>(`/api/receipts/${receiptId}/revisions`)
   }
 
+  createRevision(receiptId: string, body :CreateRevisionRequest) {
+    return this.httpClient.post<CreateRevisionResponse>(`/api/receipts/${receiptId}`, body);
+  }
 }

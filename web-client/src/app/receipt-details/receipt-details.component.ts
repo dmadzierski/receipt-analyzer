@@ -1,6 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 import {ReceiptService} from '../service/receipt.service';
-import {FileGroup, GetReceiptDetailsResponse, Revision, RevisionDetails} from '../model/receipt.model';
+import {
+  CreateRevisionRequest,
+  FileGroup,
+  GetReceiptDetailsResponse,
+  ResolverStrategy,
+  Revision,
+  RevisionDetails
+} from '../model/receipt.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -42,12 +49,14 @@ import {AddFilesDialogComponent} from '../component/add-files-dialog/add-files-d
   styleUrl: './receipt-details.component.scss',
 })
 export class ReceiptDetailsComponent implements OnInit {
+  strategies = Object.keys(ResolverStrategy).filter(key => Number.isNaN(Number(key)));
   receiptDetails = {} as GetReceiptDetailsResponse;
   receiptFileId: string = '';
   fileGroups: FileGroup[] = [];
   selectedFileGroupId: string = '';
   editMode: boolean = false;
-  receiptId: string | null = null;
+  receiptId: string = '';
+  createRevisionData: CreateRevisionRequest = {} as CreateRevisionRequest;
 
   constructor(
     private readonly receiptService: ReceiptService,
@@ -59,7 +68,7 @@ export class ReceiptDetailsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.receiptId = this.route.snapshot.paramMap.get('id');
+    this.receiptId = this.route.snapshot.paramMap.get('id') ?? '';
     if (this.receiptId) {
       this.receiptService.getReceiptDetails(this.receiptId).subscribe({
         next: (res) => {
@@ -178,5 +187,17 @@ export class ReceiptDetailsComponent implements OnInit {
         this.selectPdfFile(this.selectedFileGroupId);
       }
     });
+  }
+
+  createRevision(): void {
+    this.createRevisionData.fileGroupId = this.selectedFileGroupId
+    if (this.createRevisionData.fileGroupId == null || this.createRevisionData.strategy == null) {
+      return;
+    }
+
+    this.receiptService.createRevision(this.receiptId, this.createRevisionData).subscribe({
+      next: (_) => {
+      }
+    })
   }
 }

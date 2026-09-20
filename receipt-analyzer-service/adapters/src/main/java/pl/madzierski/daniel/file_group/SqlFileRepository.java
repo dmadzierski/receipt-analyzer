@@ -1,12 +1,13 @@
 package pl.madzierski.daniel.file_group;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 
 import java.util.Optional;
 
-interface SqlFileRepository extends Repository<SqlFile, String> {
+interface SqlFileRepository extends JpaRepository<SqlFile, String> {
     Optional<SqlFile> findById(String fileId);
 }
 @AllArgsConstructor
@@ -14,15 +15,15 @@ interface SqlFileRepository extends Repository<SqlFile, String> {
 class FileRepositoryImpl implements FileRepository {
 
     private final SqlFileRepository fileRepository;
-    private final SqlFileGroupRepository fileGroupRepository;
 
     @Override
     public Optional<File> findById(String fileId) {
-        return fileRepository.findById(fileId).map(SqlFile::toFile);
+        return fileRepository.findById(fileId).map((SqlFile file) -> file.toFile(file.getFileGroup().toFileGroup()));
     }
 
     @Override
-    public FileGroup save(FileGroup fileGroup) {
-        return this.fileGroupRepository.save(SqlFileGroup.fromFileGroup(fileGroup)).toFileGroup();
+    public File save(File fileEntity) {
+        return fileRepository.save(SqlFile.fromFile(fileEntity, SqlFileGroup.fromFileGroup(fileEntity.getFileGroup()))).toFile(fileEntity.getFileGroup());
     }
+
 }

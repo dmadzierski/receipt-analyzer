@@ -15,10 +15,10 @@ public class ReceiptResolverLocatorService {
 
     private List<ReceiptResolverStrategy> strategyMap;
 
-    public ReceiptRevisionResolveData resolve(List<String> filePaths, ReceiptResolverStrategyType strategyType) {
+    public ReceiptRevisionResolveData resolve(List<byte[]> files, ReceiptResolverStrategyType strategyType) {
         return strategyMap.stream()
             .filter((currStrategyType -> currStrategyType.strategy().equals(strategyType)))
             .findFirst()
-            .orElseThrow(() -> new AppRuntimeException(STRATEGY_NOT_FOUND)).execute(filePaths);
+            .orElseThrow(() -> new AppRuntimeException(STRATEGY_NOT_FOUND)).execute(files);
     }
 }

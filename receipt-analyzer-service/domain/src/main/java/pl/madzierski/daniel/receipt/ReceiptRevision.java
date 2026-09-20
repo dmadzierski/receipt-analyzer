@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.*;
+import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ class ReceiptRevision {
     private ReceiptRevision parentReceiptRevision;
     private Set<ReceiptItem> items = new HashSet<>();
     private Set<ReceiptRevision> childReceiptRevisions = new HashSet<>();
+    private FileGroupQuery sourceFileGroup;
 
     public Set<ReceiptItem> getItems() {
         return Collections.unmodifiableSet(items);

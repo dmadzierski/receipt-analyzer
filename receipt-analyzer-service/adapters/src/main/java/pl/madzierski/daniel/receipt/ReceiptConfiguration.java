@@ -31,7 +31,6 @@ class ReceiptConfiguration {
         List<ReceiptResolverStrategy> strategyMap,
         ReceiptQueryRepository receiptQueryRepository,
         ReceiptRevisionQueryRepository receiptRevisionQueryRepository,
-        FileQueryRepository fileQueryRepository,
         StoreQueryRepository storeQueryRepository,
         @Lazy ProductDictFacade productDictFacade,
         FileGroupQueryRepository fileGroupQueryRepository
@@ -48,7 +47,6 @@ class ReceiptConfiguration {
             new ReceiptResolverLocatorService(strategyMap),
             receiptQueryRepository,
             receiptRevisionQueryRepository,
-            fileQueryRepository,
             storeQueryRepository,
             productDictFacade,
             fileGroupQueryRepository

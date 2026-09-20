@@ -10,7 +10,10 @@ import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
 import pl.madzierski.daniel.receipt.scan_resolver.service.PDFService;
 
-import java.io.File;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,27 +45,28 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
 
 
     @Override
-    public ReceiptRevisionResolveData execute(List<String> filePaths) {
-        if (filePaths == null || filePaths.size() != 1) {
+    public ReceiptRevisionResolveData execute(List<byte[]> files) {
+        if (files == null || files.size() != 1) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.INVALID_INPUT_AMOUNT_OF_INPUT_FILES);
         }
-        String filePath = filePaths.getFirst();
-        List<String> pdfPaths = pdfService.dividePdfFileToImages(filePath);
-        List<ReceiptRevisionResolveData.ReceiptRevisionResolveDataFile> receiptFileList = new ArrayList<>();
+        byte[] file = files.getFirst();
+        List<byte[]> imagesData = pdfService.dividePdfFileToImages(file);
         List<String> rawDataList = new ArrayList<>();
 
-        for (int i = 0; i < pdfPaths.size(); i++) {
-            String pdfPath = pdfPaths.get(i);
-            String rawData = extractTextFromImage(pdfPath);
-            receiptFileList.add(new ReceiptRevisionResolveData.ReceiptRevisionResolveDataFile(pdfPath, i, rawData));
-
+        for (byte[] imageData : imagesData) {
+            String rawData = extractTextFromImage(imageData);
             String[] lines = rawData.split("\n");
-            rawDataList.addAll(Arrays.asList(lines).subList(0, lines.length - 1));
+
+            if (lines.length > 0) {
+                rawDataList.addAll(Arrays.asList(lines)
+                    .subList(0, lines.length - 1));
+            }
         }
 
         int startItemsIndex = -1;
         for (int i = 0; i < rawDataList.size(); i++) {
-            if (START_ITEM_INDEX_REGEX.matcher(rawDataList.get(i)).find()) {
+            if (START_ITEM_INDEX_REGEX.matcher(rawDataList.get(i))
+                .find()) {
                 startItemsIndex = i + 1;
                 break;
             }
@@ -70,7 +74,8 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
 
         int lastItemIndex = -1;
         for (int i = 0; i < rawDataList.size(); i++) {
-            if (LAST_ITEM_INDEX_REGEX.matcher(rawDataList.get(i)).find()) {
+            if (LAST_ITEM_INDEX_REGEX.matcher(rawDataList.get(i))
+                .find()) {
                 lastItemIndex = i;
                 break;
             }
@@ -87,9 +92,11 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
         for (String line : rawItemList) {
             String trimmedLine = line.trim();
             if (trimmedLine.isEmpty()) continue;
-            if (PAGE_INFO_REGEX.matcher(trimmedLine).matches()) continue;
+            if (PAGE_INFO_REGEX.matcher(trimmedLine)
+                .matches()) continue;
 
-            if (PRICE_SUFFIX_REGEX.matcher(trimmedLine).find()) {
+            if (PRICE_SUFFIX_REGEX.matcher(trimmedLine)
+                .find()) {
                 if (!nameBuffer.isEmpty()) {
                     String cleanLine = trimmedLine.replaceAll("^.*?(?=\\d[.,]\\d{3}|[ABC]\\s)", "");
                     mergedItemList.add(nameBuffer + " " + cleanLine);
@@ -137,7 +144,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
             .map(it -> it.totalPrice() != null ? it.totalPrice() : BigDecimal.ZERO)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new ReceiptRevisionResolveData(resolverVersion, "Biedronka", items, receiptFileList, null, null,
+        return new ReceiptRevisionResolveData(resolverVersion, "Biedronka", items, null, null,
             strategy(), totalPrice);
     }
 
@@ -165,22 +172,24 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
     private BigDecimal parseBigDecimal(String valStr) {
         if (valStr == null) return null;
         try {
-            return new BigDecimal(valStr.replace(" ", ".").replace(",", "."));
+            return new BigDecimal(valStr.replace(" ", ".")
+                .replace(",", "."));
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
-    public String extractTextFromImage(String imagePath) {
+    public String extractTextFromImage(byte[] imagePath) {
         Tesseract tesseract = new Tesseract();
         tesseract.setDatapath(tesseractDataPath);
         tesseract.setLanguage("pol+eng");
         tesseract.setPageSegMode(6);
         tesseract.setOcrEngineMode(0);
 
-        try {
-            return tesseract.doOCR(new File(imagePath));
-        } catch (TesseractException e) {
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(imagePath)) {
+            BufferedImage image = ImageIO.read(bais);
+            return tesseract.doOCR(image);
+        } catch (TesseractException | IOException e) {
             throw new AppRuntimeException(OCR_PROCESSING_ERROR);
         }
     }

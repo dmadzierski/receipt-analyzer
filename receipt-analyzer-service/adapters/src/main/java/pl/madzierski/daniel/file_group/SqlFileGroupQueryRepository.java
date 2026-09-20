@@ -9,6 +9,7 @@ import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 interface SqlFileGroupQueryRepository extends JpaRepository<SqlFileGroup, String> {
@@ -46,5 +47,23 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
                 .isOriginal(it.getIsOriginal())
                 .build())
             .toList();
+    }
+
+    @Override
+    public Optional<FileGroupDto> findFileGroupWithFiles(String fileGroupId) {
+        return sqlFileGroupQueryRepository.findById(fileGroupId)
+            .map(it -> FileGroupDto.builder()
+                .id(it.getId())
+                .fileType(it.getFileType())
+                .files(it.getFiles()
+                    .stream()
+                    .map(file -> FileDto.builder()
+                        .id(file.getId())
+                        .path(file.getPath())
+                        .partNumber(file.getPartNumber())
+                        .build())
+                    .collect(Collectors.toSet()))
+                .isOriginal(it.getIsOriginal())
+                .build());
     }
 }

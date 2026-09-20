@@ -16,7 +16,7 @@ public class UserResolver implements ReceiptResolverStrategy {
     }
 
     @Override
-    public ReceiptRevisionResolveData execute(List<String> filePath) {
-        return ReceiptRevisionResolveData.builder().build();
+    public ReceiptRevisionResolveData execute(List<byte[]> files) {
+        return ReceiptRevisionResolveData.builder().strategy(strategy()).build();
     }
 }

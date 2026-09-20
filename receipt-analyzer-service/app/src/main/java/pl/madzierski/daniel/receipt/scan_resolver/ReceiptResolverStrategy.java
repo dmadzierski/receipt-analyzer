@@ -9,5 +9,5 @@ public interface ReceiptResolverStrategy {
 
     ReceiptResolverStrategyType strategy();
 
-    ReceiptRevisionResolveData execute(List<String> filePath);
+    ReceiptRevisionResolveData execute(List<byte[]> files);
 }

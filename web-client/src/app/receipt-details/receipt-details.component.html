@@ -29,18 +29,18 @@
 
 
     @if (this.receiptDetails.preferredRevision) {
-    <h2>Revision details
-      @if (this.editMode) {
-      <mat-icon (click)="saveRevision()" class="icon" fontIcon="save"></mat-icon>
-      <mat-icon (click)="declineEdit()" class="icon" fontIcon="cancel"></mat-icon>
-      } @else {
-      <mat-icon (click)="doEdit()" class="icon" fontIcon="edit"></mat-icon>
-      <mat-icon (click)="refreshAliases()" class="icon" fontIcon="sync"
-                matTooltip="Update aliases"></mat-icon>
-      <mat-icon (click)="refreshProductDict()" class="icon" fontIcon="refresh"
-                matTooltip="Update product dict"></mat-icon>
-      }
-    </h2>
+      <h2>Revision details
+        @if (this.editMode) {
+          <mat-icon (click)="saveRevision()" class="icon" fontIcon="save"></mat-icon>
+          <mat-icon (click)="declineEdit()" class="icon" fontIcon="cancel"></mat-icon>
+        } @else {
+          <mat-icon (click)="doEdit()" class="icon" fontIcon="edit"></mat-icon>
+          <mat-icon (click)="refreshAliases()" class="icon" fontIcon="sync"
+                    matTooltip="Update aliases"></mat-icon>
+          <mat-icon (click)="refreshProductDict()" class="icon" fontIcon="refresh"
+                    matTooltip="Update product dict"></mat-icon>
+        }
+      </h2>
     }
 
 
@@ -54,6 +54,23 @@
       <mat-icon>attach_file</mat-icon>
       Add files
     </button>
+
+    <mat-form-field>
+      <mat-label>Select strategy</mat-label>
+      <mat-select [(ngModel)]="createRevisionData.strategy">
+        @for (strategy of strategies; track strategy) {
+          <mat-option [value]="strategy">
+            {{ strategy }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <button (click)="createRevision()" mat-stroked-button style="margin-bottom: 12px;" type="button">
+      <mat-icon>add</mat-icon>
+      Create revision
+    </button>
+
 
     @if (fileGroups.length > 0) {
       <app-file-group-selector

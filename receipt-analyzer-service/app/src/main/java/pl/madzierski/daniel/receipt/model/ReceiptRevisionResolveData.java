@@ -12,7 +12,6 @@ public record ReceiptRevisionResolveData(
     String revisionVersion,
     String brand,
     List<ReceiptRevisionResolveDataItem> items,
-    List<ReceiptRevisionResolveDataFile> files,
     LocalDateTime paymentDate,
     String address,
     ReceiptResolverStrategyType strategy,
@@ -25,13 +24,6 @@ public record ReceiptRevisionResolveData(
         BigDecimal discount,
         BigDecimal totalPrice,
         Integer position
-    ) {
-    }
-
-    public record ReceiptRevisionResolveDataFile(
-        String name,
-        int page,
-        String rawData
     ) {
     }
 }

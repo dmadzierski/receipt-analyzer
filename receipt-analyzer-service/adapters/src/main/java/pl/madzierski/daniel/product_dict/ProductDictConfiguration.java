@@ -26,7 +26,6 @@ class ProductDictConfiguration {
             productDictQueryRepository,
             productDictFactory(productCategoryFactory, productAliasFactory),
             productAliasRepository,
-            productAliasQueryRepository,
             productCategoryRepository,
             receiptFacade,
             minRequiredStringSimilarity,

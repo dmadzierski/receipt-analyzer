@@ -6,10 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import pl.madzierski.daniel.receipt.model.GetRevisionResponse;
-import pl.madzierski.daniel.receipt.model.RevisionCopyResponse;
-import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;
-import pl.madzierski.daniel.receipt.model.UpdateRevisionResponse;
+import pl.madzierski.daniel.receipt.model.*;
 
 @RestController
 @RequestMapping("/revisions")
