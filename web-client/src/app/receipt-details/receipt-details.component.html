@@ -50,6 +50,11 @@
 
   </div>
   <div class="right-panel">
+    <button (click)="openAddFilesDialog()" mat-stroked-button style="margin-bottom: 12px;" type="button">
+      <mat-icon>attach_file</mat-icon>
+      Add files
+    </button>
+
     @if (fileGroups.length > 0) {
       <app-file-group-selector
         [fileGroups]="fileGroups"

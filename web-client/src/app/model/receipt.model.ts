@@ -61,6 +61,11 @@ export interface FileGroup {
   files: ReceiptFile[]
 }
 
+export enum FileType {
+  PDF = 'PDF',
+  JSON = 'JSON'
+}
+
 export interface RevisionDetails {
   id: string
   resolver: any

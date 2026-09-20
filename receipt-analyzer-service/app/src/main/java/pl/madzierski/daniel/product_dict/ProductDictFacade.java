@@ -21,7 +21,6 @@ public class ProductDictFacade {
     private final ProductDictQueryRepository productDictQueryRepository;
     private final ProductDictFactory productDictFactory;
     private final ProductAliasRepository productAliasRepository;
-    private final ProductAliasQueryRepository productAliasQueryRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ReceiptFacade receiptFacade;
     private final Double minRequiredStringSimilarity;

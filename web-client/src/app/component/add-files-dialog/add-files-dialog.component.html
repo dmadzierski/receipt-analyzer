@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Add files</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>File type</mat-label>
+    <mat-select [(ngModel)]="fileType">
+      @for (type of fileTypes; track type) {
+        <mat-option [value]="type">{{ type }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <div style="margin-top: 12px;">
+    <file-upload [files]="files"></file-upload>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button (click)="cancel()" mat-button>Cancel</button>
+  <button (click)="save()" [disabled]="files.length === 0 || submitting" color="primary" mat-flat-button>Upload</button>
+</mat-dialog-actions>

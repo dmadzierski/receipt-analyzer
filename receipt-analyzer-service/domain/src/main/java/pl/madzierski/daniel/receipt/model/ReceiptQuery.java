@@ -12,5 +12,4 @@ import pl.madzierski.daniel.wallet.model.WalletQuery;
 @AllArgsConstructor
 public class ReceiptQuery {
     private String id;
-    private WalletQuery wallet;
 }

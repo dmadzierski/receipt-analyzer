@@ -5,10 +5,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import pl.madzierski.daniel.file_group.model.CreateFileGroupRequest;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/receipt-files")
@@ -26,5 +29,13 @@ class FileController {
             .body(fileReceipt);
     }
 
+    @PostMapping(path = "/{receiptId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<Void> uploadFileGroup(@PathVariable String receiptId,
+                                         @RequestPart("file") List<MultipartFile> files,
+                                         @RequestPart("body") CreateFileGroupRequest createFileGroupRequest,
+                                         @AuthenticationPrincipal Jwt jwt) {
+        fileFacade.uploadFile(jwt.getSubject(), receiptId, files, createFileGroupRequest);
+        return ResponseEntity.ok().build();
+    }
 
 }

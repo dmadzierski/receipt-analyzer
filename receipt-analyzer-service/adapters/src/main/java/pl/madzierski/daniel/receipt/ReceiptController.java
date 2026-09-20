@@ -20,6 +20,8 @@ import pl.madzierski.daniel.receipt.model.GetReceiptRevisionsResponse;
 import java.io.IOException;
 import java.util.List;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping(path = "/receipts", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -28,13 +30,14 @@ class ReceiptController {
 
     private final ReceiptFacade receiptFacade;
 
-    @PostMapping(consumes = {"multipart/form-data"})
+    @PostMapping(consumes = {MULTIPART_FORM_DATA_VALUE})
     ResponseEntity<CreateReceiptResponse> addReceipt(@AuthenticationPrincipal Jwt jwt,
-                                                      @RequestPart(value = "file") MultipartFile file,
+                                                     @RequestPart(value = "file") MultipartFile file,
                                                      @RequestPart(value = "body") @NotNull @Valid CreateReceiptRequest body) throws IOException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.receiptFacade.addReceipt(jwt.getSubject(),
-            file.getInputStream(), file.getContentType(),
-            body));
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(this.receiptFacade.addReceipt(jwt.getSubject(),
+                file.getInputStream(), file.getContentType(),
+                body));
     }
 
     @GetMapping(path = {"/{receiptId}"})

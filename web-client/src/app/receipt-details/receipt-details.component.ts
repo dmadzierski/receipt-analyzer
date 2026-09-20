@@ -8,6 +8,7 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
+import {MatDialog} from '@angular/material/dialog';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import {RevisionDetailsComponent} from '../component/revision-details/revision-details.component';
 import {PdfViewerComponent} from '../component/pdf-viewer/pdf-viewer.component';
@@ -17,6 +18,8 @@ import {RevisionService} from '../service/revision.service';
 import {Observable} from 'rxjs';
 import {MatTooltip} from '@angular/material/tooltip';
 import {FileGroupSelectorComponent} from '../component/file-group-selector/file-group-selector.component';
+import {AddFilesDialogComponent} from '../component/add-files-dialog/add-files-dialog.component';
+
 
 @Component({
   selector: 'app-receipt-details',
@@ -50,7 +53,8 @@ export class ReceiptDetailsComponent implements OnInit {
     private readonly receiptService: ReceiptService,
     private readonly revisionService: RevisionService,
     private readonly router: Router,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly dialog: MatDialog,
   ) {
   }
 
@@ -147,5 +151,32 @@ export class ReceiptDetailsComponent implements OnInit {
       // @ts-ignore
       this.receiptDetails.preferredRevision = null;
     }
+  }
+
+  openAddFilesDialog(): void {
+    const dialogRef = this.dialog.open(AddFilesDialogComponent, {
+      width: '500px',
+      disableClose: true,
+      data: {receiptId: this.receiptDetails.id},
+    });
+
+    dialogRef.afterClosed().subscribe((uploaded?: boolean) => {
+      if (uploaded) {
+        this.refreshFileGroups();
+      }
+    });
+  }
+
+  private refreshFileGroups(): void {
+    if (!this.receiptId) {
+      return;
+    }
+
+    this.receiptService.getReceiptDetails(this.receiptId).subscribe({
+      next: (res) => {
+        this.fileGroups = res.fileGroups ?? [];
+        this.selectPdfFile(this.selectedFileGroupId);
+      }
+    });
   }
 }

@@ -39,7 +39,6 @@ public class ReceiptFacade {
     private final ReceiptResolverLocatorService receiptResolverLocatorService;
     private final ReceiptQueryRepository receiptQueryRepository;
     private final ReceiptRevisionQueryRepository receiptRevisionQueryRepository;
-    private final FileQueryRepository fileQueryRepository;
     private final StoreQueryRepository storeQueryRepository;
     private final ProductDictFacade productDictFacade;
     private final FileGroupQueryRepository fileGroupQueryRepository;
@@ -66,7 +65,6 @@ public class ReceiptFacade {
     GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
         ReceiptDto receiptDto = receiptQueryRepository.findById(receiptId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
         List<ReceiptRevisionDto> receiptRevisionList = receiptRevisionQueryRepository.getRevisionsByReceiptId(receiptId);
-//        String fileId = fileQueryRepository.findOriginalPdf(receiptId).map(FileDto::getId).orElse(null);
         List<FileGroupDto> fileGroups = fileGroupQueryRepository.findAllByReceiptId(receiptId);
         Collection<ReceiptItemDto> itemListDto = Collections.emptyList();
         String preferredRevisionId = receiptRevisionList.stream().filter(ReceiptRevisionDto::getIsPreferredRevision).map(ReceiptRevisionDto::getId).findFirst().orElse(null);
