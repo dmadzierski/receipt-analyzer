@@ -101,7 +101,7 @@ services:
       LOGGING_LEVEL_ROOT: INFO
       JPA_DDL_AUTO: update
       KEYCLOAK_JWK_SET_URI: http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs
-      KEYCLOAK_ISSUER_URI: http://host.docker.internal/auth/realms/activiti
+      KEYCLOAK_ISSUER_URI: http://localhost/auth/realms/activiti
       MYSQL_DB_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/receipt-analyzer-service?useSSL=false&serverTimezone=UTC
     depends_on:
       keycloak:
@@ -115,16 +115,5 @@ services:
     volumes:
       - ./uploads:/app/uploads
 
-  web-client:
-    image: docker-registry.oziaka.eu/receipt-analyzer-web-client:latest
-    container_name: web-client
-    build:
-      context: ./web-client
-      dockerfile: Dockerfile
-    ports:
-      - "4200:80"
-    restart: always
-    networks:
-      - app-network
 volumes:
   receipt_analyzer_mysql_data:

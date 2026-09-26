@@ -9,6 +9,7 @@ import {
   includeBearerTokenInterceptor,
   provideKeycloak,
 } from 'keycloak-angular';
+import {environment} from '../environments/environment';
 
 
 const urlCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
@@ -22,7 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideKeycloak({
       config: {
-        url: 'http://localhost/auth',
+        url: environment.keycloakUrl,
         realm: 'activiti',
         clientId: 'web-client',
       },
@@ -30,7 +31,8 @@ export const appConfig: ApplicationConfig = {
         onLoad: 'login-required',
         silentCheckSsoRedirectUri:
           window.location.origin + '/silent-check-sso.html',
-        pkceMethod: 'S256'
+        pkceMethod: 'S256',
+        checkLoginIframe: false
       },
     }),
     provideHttpClient(
