@@ -10,7 +10,9 @@ import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,15 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
         WHERE r.product.id IN (:productDictIdList)
         """)
     void reassignProductDict(SqlProductDictQuery dict, List<String> productDictIdList);
+
+    @Query("""
+        SELECT item FROM SqlReceiptItem item LEFT JOIN FETCH item.parentItem parentItem 
+        WHERE item.receiptRevision.id = :revisionId AND 
+                item.receiptRevision.resolver = pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND 
+                parentItem.receiptRevision.resolver <> pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND 
+                item.product IS NULL AND 
+                parentItem.product IS NULL""")
+    Set<SqlReceiptItem> findByIdWithItemsAndItemsParentWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(String revisionId);
 
 }
 
@@ -47,8 +58,15 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     public List<ReceiptItem> saveAll(List<ReceiptItem> entities, String receiptRevisionId) {
         SqlReceiptRevision sqlReceiptRevision =
             this.receiptRevisionRepository.findById(receiptRevisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_REVISION_NOT_FOUND));
-        this.receiptItemRepository.flush();
         return receiptItemRepository.saveAll(entities.stream().map(item -> SqlReceiptItem.fromReceiptItem(item,
             sqlReceiptRevision)).collect(Collectors.toSet())).stream().map(SqlReceiptItem::toReceiptItem).toList();
+    }
+
+    @Override
+    public List<ReceiptItem> findByRevisionIdWithParentItemWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(String revisionId) {
+        return receiptItemRepository.findByIdWithItemsAndItemsParentWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(revisionId)
+            .stream()
+            .map(SqlReceiptItem::toReceiptItem)
+            .toList();
     }
 }

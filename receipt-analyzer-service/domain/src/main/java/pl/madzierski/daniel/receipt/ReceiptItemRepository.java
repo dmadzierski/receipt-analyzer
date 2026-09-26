@@ -11,4 +11,6 @@ interface ReceiptItemRepository {
     void deleteAllByIdIn(List<String> ids);
 
     List<ReceiptItem> saveAll(List<ReceiptItem> entities, String receiptRevisionId);
+
+    List<ReceiptItem> findByRevisionIdWithParentItemWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(String revisionId);
 }

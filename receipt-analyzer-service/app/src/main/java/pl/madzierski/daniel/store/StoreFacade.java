@@ -19,14 +19,14 @@ public class StoreFacade {
         return storeQueryRepository.findStoreById(storeId).stream().map(StoreDetailsResponse::storeMapper).findFirst().orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND));
     }
 
-    public StoreListResponse getStores(String query) {
+    StoreListResponse getStores(String query) {
         return new StoreListResponse(
             storeQueryRepository.findStoresByQuery(query).stream().map(
                 StoreListResponse::storeMapper).collect(Collectors.toSet())
         );
     }
 
-    public CreateStoreResponse addStore(CreateStoreRequest request) {
+    CreateStoreResponse addStore(CreateStoreRequest request) {
         StoreBrand storeBrand;
         if (request.storeBrandId() != null)
             storeBrand = storeBrandRepository.findById(request.storeBrandId()).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_BRAND_NOT_FOUND));

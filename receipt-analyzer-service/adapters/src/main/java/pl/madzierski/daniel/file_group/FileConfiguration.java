@@ -8,6 +8,6 @@ class FileConfiguration {
     @Bean
     FileFacade fileFacade(final FileRepository fileRepository,
                           final FileGroupQueryRepository fileGroupQueryRepository, final FileGroupRepository fileGroupRepository) {
-        return new FileFacade(fileRepository, fileGroupQueryRepository, fileGroupRepository);
+        return new FileFacade(fileRepository, fileGroupQueryRepository, fileGroupRepository, new FileGroupFactory(new FileFactory()));
     }
 }

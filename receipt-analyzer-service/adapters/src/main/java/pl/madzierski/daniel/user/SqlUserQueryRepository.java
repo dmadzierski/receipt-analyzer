@@ -2,16 +2,15 @@ package pl.madzierski.daniel.user;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-import pl.madzierski.daniel.user.model.UserQuery;
+import pl.madzierski.daniel.user.model.UserDto;
 
 import java.util.Optional;
 
 public interface SqlUserQueryRepository extends UserQueryRepository, Repository<SqlUser, String> {
 
-
     @Query(value = """
-        SELECT new pl.madzierski.daniel.user.model.UserQuery(u.id)
+        SELECT new pl.madzierski.daniel.user.model.UserDto(u.id, u.userSub)
         FROM SqlUser u WHERE u.userSub = :userSub
         """)
-    Optional<UserQuery> findUserByUserSub(String userSub);
+    Optional<UserDto> findUser(String userSub);
 }

@@ -9,13 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision, String> {
-    SqlReceiptRevision save(SqlReceiptRevision revision);
-
-    @Query("""
-        SELECT r FROM SqlReceiptRevision r LEFT JOIN FETCH r.items item LEFT JOIN FETCH item.parentItem \
-        parentItem\
-         WHERE r.id = \
-        :revisionId""")
+    @Query("SELECT r FROM SqlReceiptRevision r LEFT JOIN FETCH r.items item LEFT JOIN FETCH item.parentItem parentItem WHERE r.id = :revisionId")
     Optional<SqlReceiptRevision> findByIdWithItems(String revisionId);
 }
 

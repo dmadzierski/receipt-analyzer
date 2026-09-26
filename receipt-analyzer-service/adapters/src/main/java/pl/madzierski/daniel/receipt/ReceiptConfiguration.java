@@ -39,7 +39,6 @@ class ReceiptConfiguration {
         return new ReceiptFacade(
             receiptItemRepository,
             receiptItemQueryRepository,
-            receiptItemFactory,
             revisionRepository,
             new ReceiptRevisionFactory(receiptItemFactory),
             receiptRepository,

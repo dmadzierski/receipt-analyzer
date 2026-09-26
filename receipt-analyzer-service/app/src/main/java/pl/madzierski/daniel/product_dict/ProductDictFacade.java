@@ -9,6 +9,7 @@ import pl.madzierski.daniel.product_dict.model.*;
 import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
 import pl.madzierski.daniel.receipt.ReceiptFacade;
 import pl.madzierski.daniel.user.UserQueryRepository;
+import pl.madzierski.daniel.user.model.UserDto;
 import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.*;
@@ -59,7 +60,7 @@ public class ProductDictFacade {
         });
     }
 
-    private static boolean compareProductCategories(UpdateProductDictListRequest.UpdateProductDict updateProductDict, ProductDict productDict) {
+    private boolean compareProductCategories(UpdateProductDictListRequest.UpdateProductDict updateProductDict, ProductDict productDict) {
         return Objects.equals(productDict.getProductCategories() != null ? productDict.getProductCategories().stream().map(ProductCategory::getId).collect(Collectors.toSet()) : Collections.emptySet(), updateProductDict.productCategoryIds() != null ? new HashSet<>(updateProductDict.productCategoryIds()) : Collections.emptySet());
     }
 
@@ -85,18 +86,13 @@ public class ProductDictFacade {
         })).filter(entry -> entry.getValue() >= minRequiredStringSimilarity).max(Map.Entry.comparingByValue()).map(Map.Entry::getKey);
     }
 
-    public void mergeProductAliasesOfProductDictList(String productDictId, List<String> productDictIdsListToMerge) {
+    private void mergeProductAliasesOfProductDictList(String productDictId, List<String> productDictIdsListToMerge) {
         productAliasRepository.reassignAliasesToProductDict(productDictId, productDictIdsListToMerge);
     }
 
     public List<ProductDto> saveAll(Set<ProductDto> productDictEntities) {
         return productDictRepository.saveAll(productDictEntities.stream().map(productDictFactory::from).toList())
-            .stream().map(product -> ProductDto.builder().id(product.getId()).name(product.getName()).build()).toList();
-    }
-
-
-    public long countByProductCategoryId(String id) {
-        return productDictQueryRepository.countProductDictEntitiesByCategoriesIdIn(Set.of(id));
+                .stream().map(product -> ProductDto.builder().id(product.getId()).name(product.getName()).build()).toList();
     }
 
     GetProductCategoryListResponse getProductCategoryList() {
@@ -109,8 +105,8 @@ public class ProductDictFacade {
         String name = request.name().trim();
         if (productCategoryRepository.existsByNameAndUser(name, userSub))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_ALREADY_EXISTS);
-        UserQuery user = userQueryRepository.findUserByUserSub(userSub).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.USER_NOT_FOUND));
-        ProductCategory savedProductCategory = productCategoryRepository.save(new ProductCategory(name, user));
+        UserDto user = userQueryRepository.findUser(userSub).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.USER_NOT_FOUND));
+        ProductCategory savedProductCategory = productCategoryRepository.save(new ProductCategory(name, new UserQuery(user.id())));
         return new CreateProductCategoryResponse(savedProductCategory.getId(), savedProductCategory.getName());
     }
 
@@ -131,7 +127,7 @@ public class ProductDictFacade {
     @Transactional
     void deleteProductCategory(String productCategoryId) {
         ProductCategory productCategory = productCategoryRepository.findById(productCategoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
-        if (this.countByProductCategoryId(productCategory.getId()) > 0) {
+        if (productDictQueryRepository.countProductDictEntitiesByCategoriesIdIn(Set.of(productCategory.getId())) > 0) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_IN_USE);
         }
         productCategoryRepository.delete(productCategory);
