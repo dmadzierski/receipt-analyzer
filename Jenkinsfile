@@ -7,7 +7,7 @@ pipeline {
 	}
 
 	environment {
-		REGISTRY = 'docker-registry.oziaka.eu'
+		REGISTRY = credentials('registry-url')
 		REGISTRY_CREDS = credentials('registry-cred')
 		DOCKHAND_ADDRESS = 'docker.local'
 		DOCKHAND_CRED = credentials('DOCKHUND_RECEIPT_ANALYZER_API_KEY')
