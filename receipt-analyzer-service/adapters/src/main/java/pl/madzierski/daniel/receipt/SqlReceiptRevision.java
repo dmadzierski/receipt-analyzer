@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "receipt_revision")
@@ -102,9 +103,9 @@ class SqlReceiptRevision {
             .isCorrect(isCorrect)
             .receipt(receipt != null ? receipt.toReceipt() : null)
             .resolver(resolver)
-            .items(Collections.unmodifiableSet(items.stream()
+            .items(items.stream()
                 .map(SqlReceiptItem::toReceiptItem)
-                .collect(java.util.stream.Collectors.toSet())))
+                .collect(Collectors.toSet()))
             .build();
     }
 }

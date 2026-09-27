@@ -176,9 +176,7 @@ public class ReceiptFacade {
                 .filter(id -> !incomingIds.contains(id))
                 .toList());
             for (UpdateRevisionRequest.ItemRequest incomingItem : updatedRevisionRequest.items()) {
-                if (incomingItem.id() != null && !incomingItem.id()
-                    .trim()
-                    .isEmpty()) {
+                if (incomingItem.id() != null && !incomingItem.id().trim().isEmpty()) {
                     revision.getItems()
                         .stream()
                         .filter(entity -> incomingItem.id()
