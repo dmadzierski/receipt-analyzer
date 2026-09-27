@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.regex.Pattern.CANON_EQ;
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.*;
 import static pl.madzierski.daniel.exception.AppRuntimeExceptionMessages.OCR_PROCESSING_ERROR;
 
 @AllArgsConstructor
@@ -34,11 +33,11 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
     private static final Pattern DISCOUNT_PATTERN_REGEX = Pattern.compile("^Rabat [-—]{1,2}(?<discount>\\d+[.,\\s]\\d+)$");
     private static final Pattern DISCOUNTED_PRICE_REGEX = Pattern.compile("^(?<totalPrice>\\d+[.,\\s]\\d+)$");
     private static final Pattern PRICE_SUFFIX_REGEX = Pattern.compile("\\d+[.,\\s]?\\d{2}$");
-    private static final Pattern START_ITEM_INDEX_REGEX = Pattern.compile("Nazwa PTU Ilosc Cena Wartość", CASE_INSENSITIVE + CANON_EQ);
-    private static final Pattern LAST_ITEM_INDEX_REGEX = Pattern.compile("Sprzeda[zż] opodatkowana C.*", CASE_INSENSITIVE + CANON_EQ);
-    private static final Pattern PAGE_INFO_REGEX = Pattern.compile(".*Strona\\s+\\d+\\s+z\\s+\\d+.*", CASE_INSENSITIVE + CANON_EQ);
-    private static final String maybeWeightUnitPatter = "(?<=\\d)9(?=\\s|$)";
-    private static final String patternToCleanLine = "^.*?(?=\\d[.,]\\d{3}|[ABC]\\s)";
+    private static final Pattern START_ITEM_INDEX_REGEX = Pattern.compile("Nazwa PTU Ilość Cena Wartość", CASE_INSENSITIVE );
+    private static final Pattern LAST_ITEM_INDEX_REGEX = Pattern.compile("Sprzeda[zż] opodatkowana C.*", CASE_INSENSITIVE);
+    private static final Pattern PAGE_INFO_REGEX = Pattern.compile(".*Strona\\s+\\d+\\s+z\\s+\\d+.*", CASE_INSENSITIVE);
+    private static final String WEIGHT_UNIT_PATTER = "(?<=\\d)9(?=\\s|$)";
+    private static final String PATTERN_TO_CLEAN_LINE = "^.*?(?=\\d[.,]\\d{3}|[ABC]\\s)";
     private static final String TOTAL_PRICE = "totalPrice";
     private static final String DISCOUNT = "discount";
     private static final String BIEDRONKA_BRAND_NAME = "Biedronka";
@@ -129,7 +128,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
             if (PRICE_SUFFIX_REGEX.matcher(trimmedLine)
                 .find()) {
                 if (!nameBuffer.isEmpty()) {
-                    String cleanLine = trimmedLine.replaceAll(patternToCleanLine, "");
+                    String cleanLine = trimmedLine.replaceAll(PATTERN_TO_CLEAN_LINE, "");
                     mergedItemList.add(nameBuffer + " " + cleanLine);
                     nameBuffer = "";
                 } else {
@@ -185,7 +184,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
     private ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem extractItem(int index, Matcher matcher) {
         String name = getValueFromGroup(matcher, "name");
         if (name != null) {
-            name = name.replaceAll(maybeWeightUnitPatter, "g");
+            name = name.replaceAll(WEIGHT_UNIT_PATTER, "g");
         }
 
         BigDecimal amount = parseBigDecimal(getValueFromGroup(matcher, "amount"));

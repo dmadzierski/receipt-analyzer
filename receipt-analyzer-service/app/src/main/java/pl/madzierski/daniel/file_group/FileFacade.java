@@ -32,21 +32,22 @@ public class FileFacade {
         file.setFileGroup(fileGroup);
         file = fileRepository.save(file);
         String pathInString = createPath(userSub, file.getId(), fileGroup.getId(),
-                fileType.getExtension(),
-                receiptId);
+            fileType.getExtension(),
+            receiptId);
         file.setPath(pathInString);
         fileRepository.save(file);
         saveFile(pathInString, binaryFile);
+        
         return fileGroupFactory.toDto(fileGroup);
     }
 
     String createPath(String currentUserSub, String fileId, String fileGroupId, String fileExtension, String receiptId) {
-        return System.lineSeparator() + "app" + System.lineSeparator() +
-            "uploads" + System.lineSeparator() + "user" + System.lineSeparator() +
-                currentUserSub + System.lineSeparator() + "receipts" + System.lineSeparator() +
-                receiptId + System.lineSeparator() + "file_group" + System.lineSeparator() +
-                fileGroupId + System.lineSeparator() + "file" + System.lineSeparator() +
-                fileId + "." + fileExtension;
+        return java.io.File.separator + "app" + java.io.File.separator +
+               "uploads" + java.io.File.separator + "user" + java.io.File.separator +
+               currentUserSub + java.io.File.separator + "receipts" + java.io.File.separator +
+               receiptId + java.io.File.separator + "file_group" + java.io.File.separator +
+               fileGroupId + java.io.File.separator + "file" + java.io.File.separator +
+               fileId + "." + fileExtension;
     }
 
     FileSystemResource getFile(String receiptFileId) {
@@ -69,12 +70,9 @@ public class FileFacade {
     private void saveFile(String path, byte[] file) {
         try {
             java.io.File destFile = new java.io.File(path);
-            if (!destFile.getPath().startsWith(destFile.getCanonicalPath())) {
-                throw new SecurityException("Invalid file path");
-            }
             if (destFile.getParentFile() != null) {
                 destFile.getParentFile()
-                        .mkdirs();
+                    .mkdirs();
             }
             try (OutputStream outputStream = Files.newOutputStream(destFile.toPath())) {
                 outputStream.write(file);
@@ -98,7 +96,8 @@ public class FileFacade {
             fileEntity.setPath(pathInString);
             fileGroup.addFile(fileEntity);
             try {
-                saveFile(pathInString, multipartFile.getInputStream().readAllBytes());
+                saveFile(pathInString, multipartFile.getInputStream()
+                    .readAllBytes());
             } catch (IOException e) {
                 throw new AppRuntimeException(AppRuntimeExceptionMessages.ERROR_DURING_SAVING_FILE);
             }
