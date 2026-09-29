@@ -37,7 +37,7 @@ pipeline {
 		stage('Trigger Dockhand Webhook') {
 			steps {
 				httpRequest httpMode: 'GET',
-				url: 'http://' + env.DOCKHAND_ADDRESS + '/api/git/stacks/1/webhook?secret=' + env.DOCKHAND_CRED,
+				url: 'http://' + env.DOCKHAND_ADDRESS + '/api/git/stacks/2/webhook?secret=' + env.DOCKHAND_CRED,
 				validResponseCodes: '200'
 			}
 		}
