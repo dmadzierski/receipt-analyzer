@@ -130,3 +130,4 @@ services:
       - app-network
 volumes:
   receipt_analyzer_mysql_data:
+    name: receipt_analyzer_mysql_data
