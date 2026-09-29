@@ -1,6 +1,7 @@
 import {Component, ElementRef, inject, Input, ViewChild,} from "@angular/core";
 import * as pdfjsLib from "pdfjs-dist";
 import Keycloak from 'keycloak-js';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: "app-pdf-viewer",
@@ -34,7 +35,7 @@ export class PdfViewerComponent {
       const pdfjs = pdfjsLib as any;
       pdfjs.GlobalWorkerOptions.workerSrc = "assets/pdf.worker.min.mjs";
       const loadingTask = pdfjsLib.getDocument({
-        url: `http://localhost:4200/api/receipt-files/${this._receiptFileId}`,
+        url: `${environment.apiUrl}/receipt-files/${this._receiptFileId}`,
         httpHeaders: {
           'Authorization': `Bearer ${this.keycloak.token}`
         },
