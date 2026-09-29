@@ -84,6 +84,7 @@ services:
 
   receipt-analyzer-service:
     image: docker-registry.oziaka.eu/receipt-analyzer-service:latest
+    pull_policy: always
     build:
       context: ./receipt-analyzer-service
       dockerfile: Dockerfile
@@ -117,6 +118,7 @@ services:
 
   web-client:
     image: docker-registry.oziaka.eu/receipt-analyzer-web-client:latest
+    pull_policy: always
     container_name: web-client
     build:
       context: ./web-client
