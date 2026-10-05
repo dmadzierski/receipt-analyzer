@@ -12,6 +12,7 @@ pipeline {
 		DOCKHAND_ADDRESS = 'docker.local'
 		DOCKHAND_CRED = credentials('DOCKHUND_RECEIPT_ANALYZER_API_KEY')
 		IMAGE_VERSION = "0.0.${env.BUILD_NUMBER}"
+		WEBHOOK_ID = 3
 	}
 
 	stages {
@@ -37,7 +38,7 @@ pipeline {
 		stage('Trigger Dockhand Webhook') {
 			steps {
 				httpRequest httpMode: 'GET',
-				url: 'http://' + env.DOCKHAND_ADDRESS + '/api/git/stacks/1/webhook?secret=' + env.DOCKHAND_CRED,
+				url: 'http://' + env.DOCKHAND_ADDRESS + '/api/git/stacks/' + env.WEBHOOK_ID + '/webhook?secret=' + env.DOCKHAND_CRED,
 				validResponseCodes: '200'
 			}
 		}

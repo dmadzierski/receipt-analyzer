@@ -1,4 +1,4 @@
-# Receipt Analyzer - Receipt Digitization and Expense Tracking
+# Receipt Analyzer - Receipt Digitization and Expense Tracking 
 
 A modular web application for receipt digitization and expense tracking with advanced OCR processing. Created to collect training data for an ML model.
 
