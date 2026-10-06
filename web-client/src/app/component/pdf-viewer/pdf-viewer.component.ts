@@ -22,6 +22,7 @@ export class PdfViewerComponent {
 
   private _receiptFileId: string = '';
 
+
   @Input()
   set receiptFileId(value: string) {
     this._receiptFileId = value;
@@ -30,10 +31,13 @@ export class PdfViewerComponent {
     }
   }
 
+  constructor() {
+    const pdfjs = pdfjsLib as any;
+    pdfjs.GlobalWorkerOptions.workerSrc = "./assets/pdf.worker.min.mjs";
+  }
+
   async loadPdf() {
     try {
-      const pdfjs = pdfjsLib as any;
-      pdfjs.GlobalWorkerOptions.workerSrc = "assets/pdf.worker.min.mjs";
       const loadingTask = pdfjsLib.getDocument({
         url: `${environment.apiUrl}/receipt-files/${this._receiptFileId}`,
         httpHeaders: {
