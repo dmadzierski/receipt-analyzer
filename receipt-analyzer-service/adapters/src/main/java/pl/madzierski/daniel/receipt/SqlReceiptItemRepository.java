@@ -10,10 +10,7 @@ import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String> {
@@ -34,6 +31,14 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
                 item.product IS NULL AND 
                 parentItem.product IS NULL""")
     Set<SqlReceiptItem> findByIdWithItemsAndItemsParentWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(String revisionId);
+
+    @Modifying
+    @Query("""
+        UPDATE SqlReceiptItem i
+        SET i.product = :product
+        WHERE i.id IN :ids
+        """)
+    void updateProduct(SqlProductDictQuery product, Collection<String> ids);
 
 }
 
@@ -68,5 +73,10 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
             .stream()
             .map(SqlReceiptItem::toReceiptItem)
             .toList();
+    }
+
+    @Override
+    public void updateProduct(ProductDictQuery product, Collection<String> itemIds) {
+        receiptItemRepository.updateProduct(SqlProductDictQuery.fromProductDict(product), itemIds);
     }
 }

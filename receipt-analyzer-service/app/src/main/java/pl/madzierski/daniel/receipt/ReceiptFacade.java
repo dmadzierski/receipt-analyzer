@@ -294,7 +294,7 @@ public class ReceiptFacade {
                     (a, b) -> {
                         List<ReceiptItem> receiptItems = new ArrayList<>(a); receiptItems.addAll(b); return receiptItems; }
                 ));
-            this.updateItemsProductDict(persistedProductDictMap, revisionId);
+            this.updateItemsProductDict(persistedProductDictMap);
         }
     }
 
@@ -303,13 +303,13 @@ public class ReceiptFacade {
         receiptItemRepository.reassignProductDict(primaryDict, productDictIdList);
     }
 
-    private void updateItemsProductDict(Map<ProductDto, Collection<ReceiptItem>> receiptItemToProductDictNameMap, String revisionId) {
-        receiptItemRepository.saveAll(receiptItemToProductDictNameMap.entrySet()
-            .stream()
-            .flatMap(entry -> entry.getValue()
-                .stream()
-                .peek(item -> item.setNameDict(new ProductDictQuery(entry.getKey().getId()))))
-            .toList(), revisionId);
+    private void updateItemsProductDict(Map<ProductDto, Collection<ReceiptItem>> map) {
+        map.forEach((product, items) ->
+            receiptItemRepository.updateProduct(
+                new ProductDictQuery(product.getId()),
+                items.stream()
+                    .map(ReceiptItem::getId)
+                    .toList()));
     }
 
     void updateProductDictInRevisionItems(String revisionId) {
