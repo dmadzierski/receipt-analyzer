@@ -29,7 +29,7 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
 
     @Override
     public List<ProductDict> saveAll(List<ProductDict> entities) {
-        return repository.saveAll(entities.stream().map(SqlProductDict::fromProductDict).toList()).stream().map(SqlProductDict::toProductDict).toList();
+        return repository.saveAllAndFlush(entities.stream().map(SqlProductDict::fromProductDict).toList()).stream().map(SqlProductDict::toProductDict).toList();
     }
 
     @Override

@@ -285,9 +285,15 @@ public class ReceiptFacade {
             List<ProductDto> productDtoList = productDictFacade.saveAll(receiptItemToProductDictNameMap.keySet());
             Map<ProductDto, Collection<ReceiptItem>> persistedProductDictMap = receiptItemToProductDictNameMap.entrySet()
                 .stream()
-                .collect(Collectors.toMap(entry -> productDtoList.stream()
-                    .filter(productDto -> Objects.equals(productDto.getName(), entry.getKey().getName())).findFirst()
-                    .orElse(entry.getKey()), Map.Entry::getValue));
+                .collect(Collectors.toMap(
+                    entry -> productDtoList.stream()
+                        .filter(productDto -> Objects.equals(productDto.getName(), entry.getKey().getName()))
+                        .findFirst()
+                        .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND)),
+                    Map.Entry::getValue,
+                    (a, b) -> {
+                        List<ReceiptItem> receiptItems = new ArrayList<>(a); receiptItems.addAll(b); return receiptItems; }
+                ));
             this.updateItemsProductDict(persistedProductDictMap, revisionId);
         }
     }
