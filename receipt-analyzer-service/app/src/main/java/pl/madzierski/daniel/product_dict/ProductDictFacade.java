@@ -64,9 +64,9 @@ public class ProductDictFacade {
         return Objects.equals(productDict.getProductCategories() != null ? productDict.getProductCategories().stream().map(ProductCategory::getId).collect(Collectors.toSet()) : Collections.emptySet(), updateProductDict.productCategoryIds() != null ? new HashSet<>(updateProductDict.productCategoryIds()) : Collections.emptySet());
     }
 
-    public Optional<ProductDto> findCanonicalName(String alias) {
-        List<ProductDto> productDtoList = productDictQueryRepository.findAllProduct(alias);
-        Optional<ProductDto> exactMatch = productDtoList.stream().filter(productDto -> productDto.getAliases().stream().anyMatch(productAliasDto -> productAliasDto.getName().equalsIgnoreCase(alias))).findAny();
+    public Optional<ProductDto> findCanonicalName(String alias, String userTranslation) {
+        List<ProductDto> productDtoList = productDictQueryRepository.findAllProducts();
+        Optional<ProductDto> exactMatch = productDtoList.stream().filter(productDto -> productDto.getAliases().stream().anyMatch(productAliasDto -> productAliasDto.getName().equalsIgnoreCase(alias) || productAliasDto.getName().equalsIgnoreCase(userTranslation))).findAny();
         if (exactMatch.isPresent()) return exactMatch;
 
         String normalizedSearchAlias = alias.trim().toUpperCase();

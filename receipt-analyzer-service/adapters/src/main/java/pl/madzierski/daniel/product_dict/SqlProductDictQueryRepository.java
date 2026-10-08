@@ -32,9 +32,8 @@ public interface SqlProductDictQueryRepository extends JpaRepository<SqlProductD
         FROM SqlProductDict d
         LEFT JOIN d.aliases a
         LEFT JOIN d.categories c
-        WHERE a.name = :alias
         """)
-    List<SimpleProductProjection> findAllProduct(String alias);
+    List<SimpleProductProjection> findAllProduct();
 }
 
 @RequiredArgsConstructor
@@ -54,9 +53,9 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
     }
 
     @Override
-    public List<ProductDto> findAllProduct(String alias) {
+    public List<ProductDto> findAllProducts() {
         Map<String, ProductDto> productDtoById = new HashMap<>();
-        for (SimpleProductProjection projection : sqlProductDictQueryRepository.findAllProduct(alias)) {
+        for (SimpleProductProjection projection : sqlProductDictQueryRepository.findAllProduct()) {
             ProductDto productDto = productDtoById.computeIfAbsent(projection.getId(), id -> ProductDto.builder()
                 .id(projection.getId())
                 .name(projection.getName())

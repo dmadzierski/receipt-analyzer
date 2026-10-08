@@ -193,7 +193,7 @@ public class ReceiptFacade {
                                 .getId()));
                         });
                 } else {
-                    ProductDictQuery productDict = productDictFacade.findCanonicalName(incomingItem.name())
+                    ProductDictQuery productDict = productDictFacade.findCanonicalName(incomingItem.name(), null)
                         .map(item -> new ProductDictQuery(item.getId()))
                         .orElse(null);
                     ReceiptItem newItem = new ReceiptItem(revision, incomingItem.name(), productDict, incomingItem.amount(), incomingItem.unitPrice(), incomingItem.discount(), incomingItem.totalPrice(), incomingItem.position(), null);
@@ -233,14 +233,14 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    synchronized void updateAliasesByUserRevision(String revisionId) {
+    void updateAliasesByUserRevision(String revisionId) {
         Map<ProductDto, Collection<ReceiptItem>> receiptItemToProductDictNameMap = new HashMap<>();
         receiptItemRepository.findByRevisionIdWithParentItemWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(revisionId)
             .forEach(receiptItem -> {
                 String alias = receiptItem.getParentItem().getName();
                 String userText = receiptItem.getName();
                 ProductDto resolvedDict;
-                Optional<ProductDto> productDictEntityOptional = productDictFacade.findCanonicalName(alias);
+                Optional<ProductDto> productDictEntityOptional = productDictFacade.findCanonicalName(alias, receiptItem.getName());
                 if (productDictEntityOptional.isPresent()) {
                     resolvedDict = productDictEntityOptional.get();
                     if (resolvedDict.getAliases()
@@ -317,7 +317,7 @@ public class ReceiptFacade {
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND))
             .getItems()
             .stream()
-            .peek(item -> productDictFacade.findCanonicalName(item.getName())
+            .peek(item -> productDictFacade.findCanonicalName(item.getName(), null)
                 .ifPresent(productDict -> item.setNameDict(new ProductDictQuery(productDict.getId()))))
             .toList(), revisionId);
     }

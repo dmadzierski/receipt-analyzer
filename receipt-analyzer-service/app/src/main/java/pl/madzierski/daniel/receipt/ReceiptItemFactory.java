@@ -39,7 +39,7 @@ class ReceiptItemFactory {
         receiptItem.setDiscount(resolveDataItem.discount());
         receiptItem.setTotalPrice(resolveDataItem.totalPrice());
         receiptItem.setPosition(resolveDataItem.position());
-        Optional<ProductDto> canonicalName = productDictFacade.findCanonicalName(resolveDataItem.name());
+        Optional<ProductDto> canonicalName = productDictFacade.findCanonicalName(resolveDataItem.name(), null);
         receiptItem.setNameDict(canonicalName.map(productDictDto -> new ProductDictQuery(productDictDto.getId())).orElse(null));
         return receiptItem;
     }

@@ -11,5 +11,5 @@ public interface ProductDictQueryRepository {
 
     long countProductDictEntitiesByCategoriesIdIn(Set<String> productCategoryIds);
 
-    List<ProductDto> findAllProduct(String alias);
+    List<ProductDto> findAllProducts();
 }
