@@ -10,10 +10,7 @@ import pl.madzierski.daniel.product_dict.model.ProductCategoryDto;
 import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
 import pl.madzierski.daniel.product_dict.projection.SimpleProductProjection;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public interface SqlProductDictQueryRepository extends JpaRepository<SqlProductDict, String> {
     @Query("SELECT d FROM SqlProductDict d LEFT JOIN FETCH d.aliases LEFT JOIN FETCH d.categories")
@@ -60,14 +57,18 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
                 .id(projection.getId())
                 .name(projection.getName())
                 .build());
-            if (projection.getAliasId() != null) {
+            if (projection.getAliasId() != null && productDto.getAliases()
+                .stream()
+                .anyMatch(alias -> Objects.equals(alias.getId(), projection.getAliasId()))) {
                 productDto.addAlias(ProductAliasDto.builder()
                     .id(projection.getAliasId())
                     .name(projection.getAliasName())
                     .productDictId(projection.getId())
                     .build());
             }
-            if (projection.getCategoryId() != null) {
+            if (projection.getCategoryId() != null && productDto.getProductCategories()
+                .stream()
+                .anyMatch(category -> Objects.equals(category.getId(), projection.getCategoryId()))) {
                 productDto.getProductCategories().add(ProductCategoryDto.builder()
                     .id(projection.getCategoryId())
                     .name(projection.getCategoryName())
