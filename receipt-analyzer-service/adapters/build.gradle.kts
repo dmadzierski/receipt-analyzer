@@ -6,6 +6,7 @@ dependencies {
     implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.boot.starter.oauth2.resource.server)
     implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.actuator)
     runtimeOnly(libs.mysql.connector.j)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
