@@ -5,7 +5,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.multipart.MultipartFile;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
-import pl.madzierski.daniel.file_group.model.CreateFileGroupRequest;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 
@@ -22,9 +21,10 @@ public class FileFacade {
     private final FileGroupQueryRepository fileGroupQueryRepository;
     private final FileGroupRepository fileGroupRepository;
     private final FileGroupFactory fileGroupFactory;
+    private final FileTypeDetector fileTypeDetector;
 
-    public FileGroupDto save(String receiptId, byte[] binaryFile, String contentType, String userSub) {
-        FileType fileType = FileType.invoke(contentType);
+    public FileGroupDto save(String receiptId, byte[] binaryFile, String userSub) {
+        FileType fileType = fileTypeDetector.detectFileType(binaryFile);
         ReceiptQuery receiptQueryEntity = new ReceiptQuery(receiptId);
         FileGroup fileGroup = new FileGroup(fileType, receiptQueryEntity, true);
         fileGroup = fileGroupRepository.save(fileGroup);
@@ -37,7 +37,6 @@ public class FileFacade {
         file.setPath(pathInString);
         fileRepository.save(file);
         saveFile(pathInString, binaryFile);
-        
         return fileGroupFactory.toDto(fileGroup);
     }
 
@@ -82,13 +81,19 @@ public class FileFacade {
         }
     }
 
-    void uploadFile(String userSub, String receiptId, List<MultipartFile> files, CreateFileGroupRequest createFileGroupRequest) {
+    void uploadFile(String userSub, String receiptId, List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
         }
-        FileType fileType = createFileGroupRequest.fileType();
+        byte[] firstFile;
+        try {
+            firstFile = files.get(0).getBytes();
+        } catch (IOException e) {
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.ERROR_DURING_SAVING_FILE);
+        }
+        FileType fileType = fileTypeDetector.detectFileType(firstFile);
         ReceiptQuery receiptQueryEntity = new ReceiptQuery(receiptId);
-        FileGroup fileGroup = new FileGroup(fileType, receiptQueryEntity, createFileGroupRequest.isOriginal());
+        FileGroup fileGroup = new FileGroup(fileType, receiptQueryEntity, true);
         for (int partNumber = 0; partNumber < files.size(); partNumber++) {
             MultipartFile multipartFile = files.get(partNumber);
             File fileEntity = new File(fileGroup, partNumber);

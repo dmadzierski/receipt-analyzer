@@ -19,8 +19,8 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 20MB
+      max-request-size: 80MB
 
 server:
   port: 8090
@@ -49,3 +49,4 @@ pdf-service:
 
 product-dict:
   min-required-similarity: 0.8
+

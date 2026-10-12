@@ -9,7 +9,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pl.madzierski.daniel.file_group.model.CreateFileGroupRequest;
 
 import java.util.List;
 
@@ -32,9 +31,8 @@ class FileController {
     @PostMapping(path = "/{receiptId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<Void> uploadFileGroup(@PathVariable String receiptId,
                                          @RequestPart("file") List<MultipartFile> files,
-                                         @RequestPart("body") CreateFileGroupRequest createFileGroupRequest,
                                          @AuthenticationPrincipal Jwt jwt) {
-        fileFacade.uploadFile(jwt.getSubject(), receiptId, files, createFileGroupRequest);
+        fileFacade.uploadFile(jwt.getSubject(), receiptId, files);
         return ResponseEntity.ok().build();
     }
 

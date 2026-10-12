@@ -43,11 +43,11 @@ public class ReceiptFacade {
     private final FileGroupQueryRepository fileGroupQueryRepository;
 
     @Transactional
-    CreateReceiptResponse addReceipt(String userSub, InputStream fileInputStream, String fileContentType, CreateReceiptRequest body) {
+    CreateReceiptResponse addReceipt(String userSub, InputStream fileInputStream, CreateReceiptRequest body) {
         Receipt receipt = receiptRepository.save(createReceipt(body));
         try {
             byte[] file = fileInputStream.readAllBytes();
-            FileGroupDto fileGroupDto = fileFacade.save(receipt.getId(), file, fileContentType, userSub);
+            FileGroupDto fileGroupDto = fileFacade.save(receipt.getId(), file, userSub);
             ReceiptRevisionResolveData revisionData = receiptResolverLocatorService.resolve(List.of(file), body.strategy());
             ReceiptRevision revision = receiptRevisionFactory.from(revisionData);
             revision.setSourceFileGroup(new FileGroupQuery(fileGroupDto.id()));

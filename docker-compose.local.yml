@@ -94,7 +94,6 @@ services:
       - "5005:5005"
     environment:
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n"
-      RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID: ${RECEIPT_ANALYZER_KEYCLOAK_CLIENT_ID}
       DOCKER_IP: $(DOCKER_IP)
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}

@@ -33,7 +33,7 @@ class ReceiptController {
                                                      @RequestPart(value = "body") @NotNull @Valid CreateReceiptRequest body) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(this.receiptFacade.addReceipt(jwt.getSubject(),
-                file.getInputStream(), file.getContentType(),
+                file.getInputStream(),
                 body));
     }
 
