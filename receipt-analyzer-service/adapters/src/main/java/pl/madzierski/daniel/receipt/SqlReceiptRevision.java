@@ -50,9 +50,11 @@ class SqlReceiptRevision {
     private SqlReceiptRevision parentReceiptRevision;
     @Getter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "receiptRevision")
+    @Builder.Default
     private Set<SqlReceiptItem> items = new HashSet<>();
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "parentReceiptRevision")
+    @Builder.Default
     private Set<SqlReceiptRevision> childReceiptRevisions = new HashSet<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_file_group_id")
@@ -61,6 +63,7 @@ class SqlReceiptRevision {
     public static SqlReceiptRevision fromReceiptRevision(ReceiptRevision revision) {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();
         sqlReceiptRevision.setId(revision.getId());
+        sqlReceiptRevision.setRevision(revision.getRevision());
         sqlReceiptRevision.setName(revision.getName());
         sqlReceiptRevision.setTotalPrice(revision.getTotalPrice());
         sqlReceiptRevision.setPaymentDate(revision.getPaymentDate());
@@ -72,6 +75,11 @@ class SqlReceiptRevision {
             .stream()
             .map(SqlReceiptItem::fromReceiptItem)
             .toList()) : Collections.emptySet());
+        if (revision.getParentReceiptRevision() != null) {
+            SqlReceiptRevision parent = new SqlReceiptRevision();
+            parent.setId(revision.getParentReceiptRevision().getId());
+            sqlReceiptRevision.setParentReceiptRevision(parent);
+        }
         sqlReceiptRevision.items.forEach(item -> item.setReceiptRevision(sqlReceiptRevision));
         if (revision.getSourceFileGroup() != null) {
             sqlReceiptRevision.setSourceFileGroup(SqlFileGroupQuery.fromFileGroupQuery(revision.getSourceFileGroup()));
@@ -85,6 +93,7 @@ class SqlReceiptRevision {
         return ReceiptRevision.builder()
             .id(id)
             .name(name)
+            .revision(revision)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
             .totalPrice(totalPrice)
@@ -93,6 +102,8 @@ class SqlReceiptRevision {
             .isCorrect(isCorrect)
             .receipt(receipt != null ? receipt.toReceipt() : null)
             .resolver(resolver)
+            .parentReceiptRevision(parentReceiptRevision != null ? ReceiptRevision.builder().id(parentReceiptRevision.getId()).build() : null)
+            .sourceFileGroup(sourceFileGroup != null ? sourceFileGroup.toFileGroupQuery() : null)
             .items(items.stream()
                 .map(SqlReceiptItem::toReceiptItem)
                 .collect(Collectors.toSet()))

@@ -22,4 +22,8 @@ public class SqlFileGroupQuery {
     public static SqlFileGroupQuery fromFileGroupQuery(FileGroupQuery sourceFileGroup) {
         return new SqlFileGroupQuery(sourceFileGroup.getId());
     }
+
+    public FileGroupQuery toFileGroupQuery() {
+        return new FileGroupQuery(id);
+    }
 }

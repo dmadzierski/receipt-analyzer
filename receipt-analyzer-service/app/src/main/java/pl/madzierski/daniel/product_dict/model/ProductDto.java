@@ -19,11 +19,10 @@ public class ProductDto {
     private final Set<ProductAliasDto> aliases = new HashSet<>();
     private final Set<ProductCategoryDto> productCategories = new HashSet<>();
 
-    public ProductDto(String id) {
-        this.id = id;
-    }
-
     public void addAlias(ProductAliasDto productAliasDto) {
         aliases.add(productAliasDto);
+    }
+    public void addCategory(ProductCategoryDto productCategoryDto) {
+        productCategories.add(productCategoryDto);
     }
 }

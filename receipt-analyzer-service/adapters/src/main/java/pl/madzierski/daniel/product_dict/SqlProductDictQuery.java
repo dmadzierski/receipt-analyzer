@@ -21,4 +21,8 @@ public class SqlProductDictQuery {
     public static SqlProductDictQuery fromProductDict(ProductDictQuery nameDict) {
         return new SqlProductDictQuery(nameDict.getId());
     }
+
+    public ProductDictQuery toProductDictQuery() {
+        return new ProductDictQuery(id);
+    }
 }

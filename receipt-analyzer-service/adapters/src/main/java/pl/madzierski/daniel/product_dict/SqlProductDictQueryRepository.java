@@ -12,25 +12,11 @@ import pl.madzierski.daniel.product_dict.projection.SimpleProductProjection;
 
 import java.util.*;
 
-public interface SqlProductDictQueryRepository extends JpaRepository<SqlProductDict, String> {
+interface SqlProductDictQueryRepository extends JpaRepository<SqlProductDict, String> {
     @Query("SELECT d FROM SqlProductDict d LEFT JOIN FETCH d.aliases LEFT JOIN FETCH d.categories")
     Set<ProductDictWithAliasesAndCategoryProjection> findAllWithCategoryAndAliases();
 
     long countProductDictEntitiesByCategoriesIdIn(Set<String> productCategoryIds);
-
-    @Query("""
-        SELECT
-            d.id AS id,
-            d.name AS name,
-            a.id AS aliasId,
-            a.name AS aliasName,
-            c.id AS categoryId,
-            c.name AS categoryName
-        FROM SqlProductDict d
-        LEFT JOIN d.aliases a
-        LEFT JOIN d.categories c
-        """)
-    List<SimpleProductProjection> findAllProduct();
 }
 
 @RequiredArgsConstructor
@@ -51,30 +37,16 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
 
     @Override
     public List<ProductDto> findAllProducts() {
-        Map<String, ProductDto> productDtoById = new HashMap<>();
-        for (SimpleProductProjection projection : sqlProductDictQueryRepository.findAllProduct()) {
-            ProductDto productDto = productDtoById.computeIfAbsent(projection.getId(), id -> ProductDto.builder()
-                .id(projection.getId())
-                .name(projection.getName())
-                .build());
-            if (projection.getAliasId() != null && productDto.getAliases()
-                .stream()
-                .anyMatch(alias -> Objects.equals(alias.getId(), projection.getAliasId()))) {
-                productDto.addAlias(ProductAliasDto.builder()
-                    .id(projection.getAliasId())
-                    .name(projection.getAliasName())
-                    .productDictId(projection.getId())
-                    .build());
-            }
-            if (projection.getCategoryId() != null && productDto.getProductCategories()
-                .stream()
-                .anyMatch(category -> Objects.equals(category.getId(), projection.getCategoryId()))) {
-                productDto.getProductCategories().add(ProductCategoryDto.builder()
-                    .id(projection.getCategoryId())
-                    .name(projection.getCategoryName())
-                    .build());
-            }
-        }
-        return productDtoById.values().stream().toList();
+        return this.sqlProductDictQueryRepository.findAll().stream().map(
+                product -> {
+                    ProductDto productDto = new ProductDto(
+                        product.getId(),
+                        product.getName()
+                    );
+                    product.getAliases().forEach(alias -> productDto.addAlias(new ProductAliasDto(alias.getId(), alias.getName())));
+                    product.getCategories().forEach(category -> productDto.addCategory(new ProductCategoryDto(category.getId(), category.getName())));
+                    return productDto;
+                }
+        ).toList();
     }
 }

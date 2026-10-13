@@ -68,7 +68,6 @@ public class ProductDictFacade {
         List<ProductDto> productDtoList = productDictQueryRepository.findAllProducts();
         Optional<ProductDto> exactMatch = productDtoList.stream().filter(productDto -> productDto.getAliases().stream().anyMatch(productAliasDto -> productAliasDto.getName().equalsIgnoreCase(alias) || productAliasDto.getName().equalsIgnoreCase(userTranslation))).findAny();
         if (exactMatch.isPresent()) return exactMatch;
-
         String normalizedSearchAlias = alias.trim().toUpperCase();
         int searchLength = normalizedSearchAlias.length();
         return productDtoList.parallelStream().flatMap(productDto -> productDto.getAliases().stream().map(aliasDto -> {

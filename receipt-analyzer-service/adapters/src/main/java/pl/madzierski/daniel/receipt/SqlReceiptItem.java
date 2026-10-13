@@ -64,6 +64,9 @@ class SqlReceiptItem {
         sqlReceiptItem.setTotalPrice(item.getTotalPrice());
         sqlReceiptItem.setPosition(item.getPosition());
         sqlReceiptItem.setParentItem(item.getParentItem() != null ? SqlReceiptItem.fromReceiptItem(item.getParentItem()) : null);
+        if (item.getNameDict() != null) {
+            sqlReceiptItem.setProduct(SqlProductDictQuery.fromProductDict(item.getNameDict()));
+        }
         return sqlReceiptItem;
     }
 
@@ -93,6 +96,7 @@ class SqlReceiptItem {
         receiptItem.setDiscount(this.discount);
         receiptItem.setTotalPrice(this.totalPrice);
         receiptItem.setPosition(this.position);
+        receiptItem.setNameDict(this.product != null ? this.product.toProductDictQuery() : null);
         receiptItem.setParentItem(this.parentItem != null ? this.parentItem.toReceiptItem() : null);
         return receiptItem;
     }
