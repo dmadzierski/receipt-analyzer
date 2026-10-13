@@ -17,7 +17,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "product")
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"categories", "aliases"})
 @EntityListeners({AuditingEntityListener.class})
 class SqlProductDict {
     @Id

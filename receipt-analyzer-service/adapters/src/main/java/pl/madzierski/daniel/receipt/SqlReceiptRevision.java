@@ -12,10 +12,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode(exclude = {"items", "childReceiptRevisions", "receipt", "parentReceiptRevision", "sourceFileGroup"})
 @Entity
 @Table(name = "receipt_revision")
 @Getter
@@ -79,17 +79,7 @@ class SqlReceiptRevision {
         return sqlReceiptRevision;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        SqlReceiptRevision that = (SqlReceiptRevision) o;
-        return Objects.equals(name, that.name) && Objects.equals(revision, that.revision) && resolver == that.resolver && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(paymentDate, that.paymentDate) && Objects.equals(isPreferredRevision, that.isPreferredRevision) && Objects.equals(isCorrect, that.isCorrect);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, revision, resolver, totalPrice, paymentDate, isPreferredRevision, isCorrect);
-    }
 
     public ReceiptRevision toReceiptRevision() {
         return ReceiptRevision.builder()

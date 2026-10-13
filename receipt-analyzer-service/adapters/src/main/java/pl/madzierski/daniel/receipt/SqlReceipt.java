@@ -11,11 +11,11 @@ import pl.madzierski.daniel.wallet.SqlWalletQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"receiptRevisions", "wallet", "store"})
 @Entity
 @Getter
 @Setter
@@ -56,22 +56,7 @@ class SqlReceipt {
         return sqlReceipt;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
 
-        SqlReceipt that = (SqlReceipt) o;
-        return Objects.equals(name, that.name) && Objects.equals(description, that.description);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(name);
-        result = 31 * result + Objects.hashCode(description);
-        return result;
-    }
 
     public Receipt toReceipt() {
         Receipt receipt = new Receipt();

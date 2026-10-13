@@ -4,9 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
+@EqualsAndHashCode
 @Entity
 @Table(name = "product")
 @AllArgsConstructor

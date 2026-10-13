@@ -9,11 +9,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pl.madzierski.daniel.user.SqlUserQuery;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@EqualsAndHashCode(exclude = "user")
 @Entity
 @Setter
 @Table(name = "wallet")
@@ -43,23 +43,6 @@ class SqlWallet {
             .name(wallet.getName())
             .user(SqlUserQuery.fromUserQuery(wallet.getUser()))
             .build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        SqlWallet wallet = (SqlWallet) o;
-        return Objects.equals(name, wallet.name) && Objects.equals(user, wallet.user);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(name);
-        result = 31 * result + Objects.hashCode(user);
-        return result;
     }
 
     public Wallet toWallet() {

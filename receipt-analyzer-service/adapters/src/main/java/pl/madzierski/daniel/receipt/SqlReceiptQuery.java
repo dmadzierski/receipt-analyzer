@@ -3,13 +3,11 @@ package pl.madzierski.daniel.receipt;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 
+@EqualsAndHashCode
 @Entity
 @Table(name = "receipt")
 @Getter

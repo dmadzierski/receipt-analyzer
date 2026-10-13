@@ -2,10 +2,7 @@ package pl.madzierski.daniel.file_group;
 
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -24,6 +21,7 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 @EntityListeners({AuditingEntityListener.class})
+@EqualsAndHashCode(exclude = {"receipt", "files"})
 class SqlFileGroup {
     @Id
     @UuidGenerator

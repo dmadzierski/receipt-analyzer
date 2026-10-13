@@ -1,10 +1,7 @@
 package pl.madzierski.daniel.product_dict;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,10 +9,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pl.madzierski.daniel.user.SqlUserQuery;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.Set;
 
 
+@EqualsAndHashCode(exclude = {"productDictList", "user"})
 @Entity
 @Table(name = "product_category")
 @NoArgsConstructor
@@ -57,21 +54,7 @@ class SqlProductCategory {
         return sqlProductCategory;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
 
-        SqlProductCategory that = (SqlProductCategory) o;
-        return Objects.equals(name, that.name);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(name);
-        return result;
-    }
 
     public ProductCategory toProductCategory() {
         ProductCategory productCategory = new ProductCategory();

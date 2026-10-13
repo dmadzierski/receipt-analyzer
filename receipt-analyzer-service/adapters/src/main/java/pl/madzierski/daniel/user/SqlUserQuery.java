@@ -4,12 +4,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 import pl.madzierski.daniel.user.model.UserQuery;
 
-import java.util.Objects;
 
+@EqualsAndHashCode
 @Entity
 @Table(name = "user")
 @NoArgsConstructor
@@ -21,22 +22,6 @@ public class SqlUserQuery {
 
     public static SqlUserQuery fromUserQuery(UserQuery user) {
         return new SqlUserQuery(user.getId());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        SqlUserQuery that = (SqlUserQuery) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(id);
-        return result;
     }
 
     public UserQuery toUserQuery() {

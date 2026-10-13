@@ -10,7 +10,8 @@ import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "receipt_item")
@@ -19,6 +20,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners({AuditingEntityListener.class})
+@EqualsAndHashCode(exclude = {"receiptRevision", "parentItem", "childItems", "product"})
 class SqlReceiptItem {
 
     @Id
@@ -80,18 +82,6 @@ class SqlReceiptItem {
             sqlReceiptItem.setProduct(SqlProductDictQuery.fromProductDict(item.getNameDict()));
         sqlReceiptItem.setReceiptRevision(receiptRevision);
         return sqlReceiptItem;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        SqlReceiptItem that = (SqlReceiptItem) o;
-        return Objects.equals(name, that.name) && Objects.equals(amount, that.amount) && Objects.equals(unitPrice, that.unitPrice) && Objects.equals(discount, that.discount) && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(position, that.position);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, amount, unitPrice, discount, totalPrice, position);
     }
 
     public ReceiptItem toReceiptItem() {
