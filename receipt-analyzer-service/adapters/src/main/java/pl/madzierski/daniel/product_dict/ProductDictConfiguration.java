@@ -14,7 +14,6 @@ class ProductDictConfiguration {
         ProductDictRepository productDictRepository,
         ProductDictQueryRepository productDictQueryRepository,
         ProductAliasRepository productAliasRepository,
-        ProductAliasQueryRepository productAliasQueryRepository,
         ProductCategoryRepository productCategoryRepository,
         ProductCategoryFactory productCategoryFactory,
         ProductAliasFactory productAliasFactory,

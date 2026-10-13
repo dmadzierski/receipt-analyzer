@@ -10,5 +10,4 @@ import lombok.*;
 public class ProductAliasDto {
     private String id;
     private String name;
-    private String productDictId;
 }
