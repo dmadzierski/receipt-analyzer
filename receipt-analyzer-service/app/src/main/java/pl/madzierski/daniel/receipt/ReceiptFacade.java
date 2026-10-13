@@ -19,8 +19,6 @@ import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -43,22 +41,16 @@ public class ReceiptFacade {
     private final FileGroupQueryRepository fileGroupQueryRepository;
 
     @Transactional
-    CreateReceiptResponse addReceipt(String userSub, InputStream fileInputStream, CreateReceiptRequest body) {
+    CreateReceiptResponse addReceipt(String userSub, List<byte[]> files, CreateReceiptRequest body) {
         Receipt receipt = receiptRepository.save(createReceipt(body));
-        try {
-            byte[] file = fileInputStream.readAllBytes();
-            FileGroupDto fileGroupDto = fileFacade.save(receipt.getId(), file, userSub);
-            ReceiptRevisionResolveData revisionData = receiptResolverLocatorService.resolve(List.of(file), body.strategy());
-            ReceiptRevision revision = receiptRevisionFactory.from(revisionData);
-            revision.setSourceFileGroup(new FileGroupQuery(fileGroupDto.id()));
-            revision.setReceipt(receipt);
-            revisionRepository.save(revision);
-            return new CreateReceiptResponse(receipt.getId(), receipt.getName(), receipt.getDescription());
-        } catch (IOException e) {
-            throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
-        }
+        FileGroupDto fileGroupDto = fileFacade.save(receipt.getId(), files, userSub);
+        ReceiptRevisionResolveData revisionData = receiptResolverLocatorService.resolve(files, body.strategy());
+        ReceiptRevision revision = receiptRevisionFactory.from(revisionData);
+        revision.setSourceFileGroup(new FileGroupQuery(fileGroupDto.id()));
+        revision.setReceipt(receipt);
+        revisionRepository.save(revision);
+        return new CreateReceiptResponse(receipt.getId(), receipt.getName(), receipt.getDescription());
     }
-
     private Receipt createReceipt(CreateReceiptRequest body) {
         String name = body.name() != null && !body.name()
             .trim()

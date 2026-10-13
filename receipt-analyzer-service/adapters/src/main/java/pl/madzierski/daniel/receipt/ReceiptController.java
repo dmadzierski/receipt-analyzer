@@ -12,9 +12,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import pl.madzierski.daniel.file_group.MultipartFileMapper;
 import pl.madzierski.daniel.receipt.model.*;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -29,12 +29,11 @@ class ReceiptController {
 
     @PostMapping(consumes = {MULTIPART_FORM_DATA_VALUE})
     ResponseEntity<CreateReceiptResponse> addReceipt(@AuthenticationPrincipal Jwt jwt,
-                                                     @RequestPart(value = "file") MultipartFile file,
-                                                     @RequestPart(value = "body") @NotNull @Valid CreateReceiptRequest body) throws IOException {
+                                                     @RequestPart(value = "file", required = false) List<MultipartFile> files,
+                                                     @RequestPart(value = "body") @NotNull @Valid CreateReceiptRequest body) {
+        List<byte[]> binaryFiles = MultipartFileMapper.toBytes(files);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(this.receiptFacade.addReceipt(jwt.getSubject(),
-                file.getInputStream(),
-                body));
+            .body(this.receiptFacade.addReceipt(jwt.getSubject(), binaryFiles, body));
     }
 
     @GetMapping(path = {"/{receiptId}"})

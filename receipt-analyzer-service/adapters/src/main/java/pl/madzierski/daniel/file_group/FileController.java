@@ -32,7 +32,7 @@ class FileController {
     ResponseEntity<Void> uploadFileGroup(@PathVariable String receiptId,
                                          @RequestPart("file") List<MultipartFile> files,
                                          @AuthenticationPrincipal Jwt jwt) {
-        fileFacade.uploadFile(jwt.getSubject(), receiptId, files);
+        fileFacade.save(receiptId, MultipartFileMapper.toBytes(files), jwt.getSubject());
         return ResponseEntity.ok().build();
     }
 

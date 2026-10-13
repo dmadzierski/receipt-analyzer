@@ -2,7 +2,6 @@ package pl.madzierski.daniel.file_group;
 
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.web.multipart.MultipartFile;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
@@ -23,20 +22,28 @@ public class FileFacade {
     private final FileGroupFactory fileGroupFactory;
     private final FileTypeDetector fileTypeDetector;
 
-    public FileGroupDto save(String receiptId, byte[] binaryFile, String userSub) {
-        FileType fileType = fileTypeDetector.detectFileType(binaryFile);
-        ReceiptQuery receiptQueryEntity = new ReceiptQuery(receiptId);
-        FileGroup fileGroup = new FileGroup(fileType, receiptQueryEntity, true);
-        fileGroup = fileGroupRepository.save(fileGroup);
-        File file = new File(fileGroup);
-        file.setFileGroup(fileGroup);
-        file = fileRepository.save(file);
-        String pathInString = createPath(userSub, file.getId(), fileGroup.getId(),
-            fileType.getExtension(),
-            receiptId);
-        file.setPath(pathInString);
-        fileRepository.save(file);
-        saveFile(pathInString, binaryFile);
+    public FileGroupDto save(String receiptId, List<byte[]> files, String userSub) {
+        if (files == null || files.isEmpty()) {
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
+        }
+        FileType fileType = null;
+        for (byte[] content : files) {
+            if (fileType == null)
+                fileType = fileTypeDetector.detectFileType(content);
+            else if (fileTypeDetector.detectFileType(content) != fileType) {
+                throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_TYPE_MISMATCH);
+            }
+        }
+        if (fileType == null) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_TYPE_NOT_DETECTED);
+        FileGroup fileGroup = fileGroupRepository.save(new FileGroup(fileType, new ReceiptQuery(receiptId), true));
+        for (int partNumber = 0; partNumber < files.size(); partNumber++) {
+            File file = new File(fileGroup, partNumber);
+            file = fileRepository.save(file);
+            String path = createPath(userSub, file.getId(), fileGroup.getId(), fileType.getExtension(), receiptId);
+            file.setPath(path);
+            fileRepository.save(file);
+            saveFile(path, files.get(partNumber));
+        }
         return fileGroupFactory.toDto(fileGroup);
     }
 
@@ -79,35 +86,6 @@ public class FileFacade {
         } catch (IOException e) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.ERROR_DURING_SAVING_FILE);
         }
-    }
-
-    void uploadFile(String userSub, String receiptId, List<MultipartFile> files) {
-        if (files == null || files.isEmpty()) {
-            throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
-        }
-        byte[] firstFile;
-        try {
-            firstFile = files.get(0).getBytes();
-        } catch (IOException e) {
-            throw new AppRuntimeException(AppRuntimeExceptionMessages.ERROR_DURING_SAVING_FILE);
-        }
-        FileType fileType = fileTypeDetector.detectFileType(firstFile);
-        ReceiptQuery receiptQueryEntity = new ReceiptQuery(receiptId);
-        FileGroup fileGroup = new FileGroup(fileType, receiptQueryEntity, true);
-        for (int partNumber = 0; partNumber < files.size(); partNumber++) {
-            MultipartFile multipartFile = files.get(partNumber);
-            File fileEntity = new File(fileGroup, partNumber);
-            String pathInString = createPath(userSub, fileEntity.getId(), fileGroup.getId(), fileType.getExtension(), receiptId);
-            fileEntity.setPath(pathInString);
-            fileGroup.addFile(fileEntity);
-            try {
-                saveFile(pathInString, multipartFile.getInputStream()
-                    .readAllBytes());
-            } catch (IOException e) {
-                throw new AppRuntimeException(AppRuntimeExceptionMessages.ERROR_DURING_SAVING_FILE);
-            }
-        }
-        fileGroupRepository.save(fileGroup);
     }
 
     public List<byte[]> getFiles(String fileGroupId) {
