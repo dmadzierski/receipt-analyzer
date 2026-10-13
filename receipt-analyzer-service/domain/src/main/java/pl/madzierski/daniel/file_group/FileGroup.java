@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.file_group;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,12 +9,12 @@ import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode(exclude = {"receipt", "files"})
 class FileGroup {
 
     private String id;
@@ -30,32 +31,11 @@ class FileGroup {
         this.isOriginal = isOriginal;
     }
 
-    void addFile(File file) {
-        this.files.add(file);
-    }
-
     public void addFiles(Set<File> collect) {
         this.files.addAll(collect);
     }
 
     Set<File> getFiles() {
         return Collections.unmodifiableSet(this.files);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        FileGroup that = (FileGroup) o;
-        return fileType == that.fileType && Objects.equals(isOriginal, that.isOriginal);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(fileType);
-        result = 31 * result + Objects.hashCode(isOriginal);
-        return result;
     }
 }

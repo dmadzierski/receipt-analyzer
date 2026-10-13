@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -15,6 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"items", "receipt", "parentReceiptRevision", "childReceiptRevisions", "sourceFileGroup"})
 class ReceiptRevision {
     private String id;
     private LocalDateTime createdDate;
@@ -36,18 +36,6 @@ class ReceiptRevision {
 
     public Set<ReceiptItem> getItems() {
         return Collections.unmodifiableSet(items);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        ReceiptRevision that = (ReceiptRevision) o;
-        return Objects.equals(name, that.name) && Objects.equals(revision, that.revision) && resolver == that.resolver && Objects.equals(brand, that.brand) && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(paymentDate, that.paymentDate) && Objects.equals(address, that.address) && Objects.equals(isPreferredRevision, that.isPreferredRevision) && Objects.equals(isCorrect, that.isCorrect);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, revision, resolver, brand, totalPrice, paymentDate, address, isPreferredRevision, isCorrect);
     }
 
     public void addItems(Set<ReceiptItem> items) {

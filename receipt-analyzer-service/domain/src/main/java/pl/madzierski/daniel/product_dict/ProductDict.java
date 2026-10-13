@@ -10,7 +10,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"aliases", "productCategories"})
 class ProductDict {
     private Set<ProductAlias> aliases = new HashSet<>();
     private String id;
@@ -21,9 +21,5 @@ class ProductDict {
 
     public void addAlias(ProductAlias productAlias) {
         this.aliases.add(productAlias);
-    }
-
-    public void addProductCategory(ProductCategory productCategory) {
-        this.productCategories.add(productCategory);
     }
 }

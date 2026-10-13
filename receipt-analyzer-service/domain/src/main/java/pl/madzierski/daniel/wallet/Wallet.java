@@ -6,7 +6,6 @@ import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -14,6 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode(exclude = "receipts")
 class Wallet {
 
     private final Set<ReceiptQuery> receipts = new HashSet<>();
@@ -22,21 +22,4 @@ class Wallet {
     private LocalDateTime modifiedDate;
     private String name;
     private UserQuery user;
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        Wallet wallet = (Wallet) o;
-        return Objects.equals(name, wallet.name) && Objects.equals(user, wallet.user);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(name);
-        result = 31 * result + Objects.hashCode(user);
-        return result;
-    }
 }

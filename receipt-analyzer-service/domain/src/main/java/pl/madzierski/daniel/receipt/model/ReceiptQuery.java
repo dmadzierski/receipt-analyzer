@@ -1,15 +1,12 @@
 package pl.madzierski.daniel.receipt.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import pl.madzierski.daniel.wallet.model.WalletQuery;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class ReceiptQuery {
     private String id;
 }

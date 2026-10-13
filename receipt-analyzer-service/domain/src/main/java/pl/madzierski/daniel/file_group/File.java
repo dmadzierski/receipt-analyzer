@@ -1,15 +1,16 @@
 package pl.madzierski.daniel.file_group;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode(exclude = "fileGroup")
 class File {
 
     private String id;
@@ -20,39 +21,8 @@ class File {
     private String rawData;
     private Integer partNumber;
 
-    public File(String id, String path, FileGroup fileGroup, String rawData, Integer partNumber) {
-        this.id = id;
-        this.path = path;
-        this.fileGroup = fileGroup;
-        this.rawData = rawData;
-        this.partNumber = partNumber;
-    }
-
     public File(FileGroup fileGroup, Integer partNumber) {
         this.fileGroup = fileGroup;
         this.partNumber = partNumber;
     }
-
-    public File(FileGroup fileGroup) {
-        this(fileGroup, 0);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        File that = (File) o;
-        return Objects.equals(path, that.path) && Objects.equals(rawData, that.rawData) && Objects.equals(partNumber, that.partNumber);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(path);
-        result = 31 * result + Objects.hashCode(rawData);
-        result = 31 * result + Objects.hashCode(partNumber);
-        return result;
-    }
-
 }

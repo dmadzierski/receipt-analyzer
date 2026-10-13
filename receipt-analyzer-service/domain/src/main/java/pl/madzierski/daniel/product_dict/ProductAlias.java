@@ -3,7 +3,6 @@ package pl.madzierski.daniel.product_dict;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 
 @NoArgsConstructor
@@ -11,6 +10,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode(exclude = "productDict")
 class ProductAlias {
 
     private String id;
@@ -19,19 +19,4 @@ class ProductAlias {
     private String name;
     private ProductDict productDict;
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        ProductAlias that = (ProductAlias) o;
-        return Objects.equals(name, that.name);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Objects.hashCode(name);
-        return result;
-    }
 }
