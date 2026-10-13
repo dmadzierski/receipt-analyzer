@@ -181,8 +181,9 @@ public class ReceiptFacade {
                             entity.setDiscount(incomingItem.discount());
                             entity.setTotalPrice(incomingItem.totalPrice());
                             entity.setPosition(incomingItem.position());
-                            entity.setParentItem(new ReceiptItem(entity.getParentItem()
-                                .getId()));
+                            if (entity.getParentItem() != null) {
+                                entity.setParentItem(new ReceiptItem(entity.getParentItem().getId()));
+                            }
                         });
                 } else {
                     ProductDictQuery productDict = productDictFacade.findCanonicalName(incomingItem.name(), null)

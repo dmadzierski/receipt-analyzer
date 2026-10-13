@@ -34,6 +34,13 @@
 
     <h3>Items</h3>
 
+    @if (contentEditable) {
+      <button (click)="pasteItems()" mat-stroked-button matTooltip="Paste CSV from clipboard: name, amount, unit price, total price, discount">
+        <mat-icon>content_paste</mat-icon>
+        Paste items
+      </button>
+    }
+
     <table (cdkDropListDropped)="drop($event)"
            [cdkDropListData]="data.data"
            [dataSource]="data"

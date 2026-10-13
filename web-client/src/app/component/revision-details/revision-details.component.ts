@@ -128,6 +128,69 @@ export class RevisionDetailsComponent implements OnChanges {
     this.updatePositions();
   }
 
+  async pasteItems() {
+    let text: string;
+    try {
+      text = await navigator.clipboard.readText();
+    } catch {
+      return;
+    }
+
+    const items = this.parseItems(text);
+    if (items.length === 0) {
+      return;
+    }
+
+    this.data.data = [...this.data.data, ...items];
+    this.updatePositions();
+  }
+
+  private parseItems(text: string): Item[] {
+    const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+    if (lines.length === 0) {
+      return [];
+    }
+
+    const delimiter = ['\t', ';', ','].find(d => lines[0].includes(d)) ?? ',';
+    const items: Item[] = [];
+
+    for (const line of lines) {
+      const [name, amount, unitPrice, totalPrice, discount] = line
+        .split(delimiter)
+        .map(cell => cell.trim().replace(/^"(.*)"$/, '$1'));
+
+      const parsedAmount = this.parseNumber(amount);
+      const parsedUnitPrice = this.parseNumber(unitPrice);
+      if (parsedAmount === null || parsedUnitPrice === null) {
+        continue;
+      }
+
+      const parsedDiscount = this.parseNumber(discount);
+      const parsedTotal = this.parseNumber(totalPrice)
+        ?? new Decimal(parsedAmount).times(parsedUnitPrice).minus(parsedDiscount ?? 0).toNumber();
+
+      items.push({
+        id: '',
+        position: 0,
+        name: name ?? '',
+        amount: parsedAmount,
+        unitPrice: parsedUnitPrice,
+        totalPrice: parsedTotal,
+        ...(parsedDiscount !== null && {discount: parsedDiscount})
+      });
+    }
+
+    return items;
+  }
+
+  private parseNumber(value?: string): number | null {
+    if (!value) {
+      return null;
+    }
+    const parsed = Number(value.replace(/\s/g, '').replace(',', '.'));
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
   protected onKeyDown($event: KeyboardEvent) {
     if ($event.key !== 'ArrowUp' && $event.key !== 'ArrowDown') {
       return;
