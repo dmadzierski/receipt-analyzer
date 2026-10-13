@@ -1,23 +1,19 @@
-<h2 mat-dialog-title>Add files</h2>
+﻿<h2 mat-dialog-title>Add files</h2>
 
-<mat-dialog-content>
-  <div style="margin-top: 12px;">
-    <file-upload [files]="files"></file-upload>
-  </div>
+<mat-dialog-content class="dialog-content">
+  <file-upload [files]="files"></file-upload>
 
   @if (imageFiles.length > 0) {
-    <div style="margin-top: 16px;">
-      <strong>Images order &amp; preview:</strong>
+    <div class="images">
+      <div class="images-title">Images order &amp; preview</div>
       @for (file of imageFiles; track file; let i = $index; let first = $first; let last = $last) {
-        <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
-          <img [src]="previewUrl(file)" [alt]="file.name"
-               style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; border-radius: 4px;"
-               (click)="openPreview(file)">
-          <span style="flex: 1; word-break: break-all;">{{ i + 1 }}. {{ file.name }}</span>
-          <button (click)="moveUp(file)" [disabled]="first" mat-icon-button type="button">
+        <div class="image-row">
+          <img (click)="openPreview(file)" [alt]="file.name" [src]="previewUrl(file)" class="thumb">
+          <span class="image-name">{{ i + 1 }}. {{ file.name }}</span>
+          <button (click)="moveUp(file)" [disabled]="first" aria-label="Move up" mat-icon-button type="button">
             <mat-icon>arrow_upward</mat-icon>
           </button>
-          <button (click)="moveDown(file)" [disabled]="last" mat-icon-button type="button">
+          <button (click)="moveDown(file)" [disabled]="last" aria-label="Move down" mat-icon-button type="button">
             <mat-icon>arrow_downward</mat-icon>
           </button>
         </div>
@@ -27,6 +23,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button (click)="cancel()" mat-button>Cancel</button>
-  <button (click)="save()" [disabled]="files.length === 0 || submitting" color="primary" mat-flat-button>Upload</button>
+  <button (click)="cancel()" mat-button type="button">Cancel</button>
+  <button (click)="save()" [disabled]="files.length === 0 || submitting" color="primary" mat-flat-button type="button">
+    {{ submitting ? 'Uploading...' : 'Upload' }}
+  </button>
 </mat-dialog-actions>

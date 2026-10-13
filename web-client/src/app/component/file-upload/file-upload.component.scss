@@ -1,49 +1,71 @@
-.progress-bar {
-  padding: 0;
+﻿.hidden-input {
+  display: none;
 }
 
-.progress {
-  width: 50px;
-}
-
-#fileInput {
-  position: absolute;
+.drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 20px 16px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
   cursor: pointer;
-  z-index: 10;
-  opacity: 0;
-  height: 100%;
-  left: 0px;
-  top: 0px;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+  }
+
+  &:hover,
+  &:focus-visible,
+  &.dragging {
+    border-color: var(--mat-sys-primary, #a8c7fa);
+    background: rgba(168, 199, 250, 0.08);
+    outline: none;
+  }
 }
 
-.mat-toolbar-single-row {
-  height: auto !important;
-  background: transparent;
-  padding: 0;
+.file-list {
+  margin-top: 16px;
 }
 
-.mat-toolbar-single-row button {
-  width: 100px;
+.file-list-title {
+  font-weight: 500;
+  margin-bottom: 4px;
 }
 
-.mat-form-field {
-  width: 100%;
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
-.mat-mdc-form-field {
-  display: block;
+.file-icon {
+  flex: none;
+  opacity: 0.8;
 }
 
-.message {
-  background-color: #ddd;
-  padding: 15px;
-  color: #333;
-  border: #aaa solid 1px;
-  border-radius: 4px;
-  margin-bottom: 10px;
+.file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.add-attachment {
-  margin-top: 20px;
-  margin-bottom: 20px;
+.file-size {
+  flex: none;
+  opacity: 0.7;
+  font-size: 13px;
 }

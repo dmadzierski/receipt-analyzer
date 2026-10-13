@@ -3,6 +3,7 @@ import {ReceiptService} from '../service/receipt.service';
 import {
   CreateRevisionRequest,
   FileGroup,
+  FileType,
   GetReceiptDetailsResponse,
   ResolverStrategy,
   Revision,
@@ -25,6 +26,7 @@ import {RevisionService} from '../service/revision.service';
 import {Observable} from 'rxjs';
 import {MatTooltip} from '@angular/material/tooltip';
 import {FileGroupSelectorComponent} from '../component/file-group-selector/file-group-selector.component';
+import {FilePreviewComponent} from '../component/file-preview/file-preview.component';
 import {AddFilesDialogComponent} from '../component/add-files-dialog/add-files-dialog.component';
 
 
@@ -42,7 +44,8 @@ import {AddFilesDialogComponent} from '../component/add-files-dialog/add-files-d
     RevisionListComponent,
     MatIcon,
     MatTooltip,
-    FileGroupSelectorComponent
+    FileGroupSelectorComponent,
+    FilePreviewComponent
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-details.component.html',
@@ -52,6 +55,9 @@ export class ReceiptDetailsComponent implements OnInit {
   strategies = Object.keys(ResolverStrategy).filter(key => Number.isNaN(Number(key)));
   receiptDetails = {} as GetReceiptDetailsResponse;
   receiptFileId: string = '';
+  previewFileIds: string[] = [];
+  protected readonly FileType = FileType;
+  previewType: FileType | null = null;
   fileGroups: FileGroup[] = [];
   selectedFileGroupId: string = '';
   editMode: boolean = false;
@@ -83,22 +89,35 @@ export class ReceiptDetailsComponent implements OnInit {
   }
 
   selectPdfFile(fileGroupId?: string): void {
-    const preferredGroup = fileGroupId
-      ? this.fileGroups.find(group => group.id === fileGroupId)
-      : this.fileGroups.find(group => group.fileType === 'PDF' && group.isOriginal);
+    const group = (fileGroupId ? this.fileGroups.find(g => g.id === fileGroupId) : undefined)
+      ?? this.fileGroups.find(g => g.fileType === FileType.PDF && g.isOriginal)
+      ?? this.fileGroups.find(g => g.isOriginal)
+      ?? this.fileGroups.find(g => g.fileType === FileType.PDF)
+      ?? this.fileGroups[0];
 
-    const group = preferredGroup ?? this.fileGroups.find(group => group.fileType === 'PDF');
+    this.receiptFileId = '';
+    this.previewFileIds = [];
+    this.previewType = null;
+    this.selectedFileGroupId = '';
+
     if (!group || !group.files?.length) {
-      this.receiptFileId = '';
-      this.selectedFileGroupId = '';
       return;
     }
-
-    const pdfFile = group.files.find(file => file.path?.toLowerCase().endsWith('.pdf')) ?? group.files[0];
-    this.receiptFileId = pdfFile?.id ?? '';
     this.selectedFileGroupId = group.id;
-  }
 
+    const files = [...group.files];
+    if (group.fileType === FileType.PDF) {
+      const pdfFile = files.find(file => file.path?.toLowerCase().endsWith('.pdf')) ?? files[0];
+      this.receiptFileId = pdfFile?.id ?? '';
+      this.previewType = FileType.PDF;
+    } else if (group.fileType === FileType.JSON) {
+      this.previewFileIds = files.map(file => file.id);
+      this.previewType = FileType.JSON;
+    } else {
+      this.previewFileIds = files.map(file => file.id);
+      this.previewType = group.fileType as FileType;
+    }
+  }
   doEdit() {
     this.editMode = !this.editMode;
   }
@@ -111,13 +130,14 @@ export class ReceiptDetailsComponent implements OnInit {
     return this.revisionService.getRevisionDetails(revisionId);
   }
 
-  // TODO dodać usuwanie ostatniej preferowanej rewizji przy ustawieniu nowej
+  // TODO dodaÄ‡ usuwanie ostatniej preferowanej rewizji przy ustawieniu nowej
   protected saveRevision() {
     this.revisionService.updateRevision(this.receiptDetails.preferredRevision!!).subscribe(
       {
         next: (revision: RevisionDetails) => {
           this.editMode = false;
           this.refreshRevisionDetails(revision.id);
+          this.refreshRevisions();
         }
       }
     )
@@ -196,8 +216,9 @@ export class ReceiptDetailsComponent implements OnInit {
     }
 
     this.receiptService.createRevision(this.receiptId, this.createRevisionData).subscribe({
-      next: (_) => {
-      }
+      next: () => this.refreshRevisions()
     })
   }
+
 }
+

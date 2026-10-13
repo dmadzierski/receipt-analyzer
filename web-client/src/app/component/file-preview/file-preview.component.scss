@@ -1,0 +1,27 @@
+:host {
+  display: block;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+}
+
+.state {
+  text-align: center;
+  padding: 16px;
+}
+
+.preview-image {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto 12px;
+  border-radius: 4px;
+}
+
+.preview-json {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

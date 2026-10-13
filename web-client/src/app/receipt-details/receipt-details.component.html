@@ -50,40 +50,51 @@
 
   </div>
   <div class="right-panel">
-    <button (click)="openAddFilesDialog()" mat-stroked-button style="margin-bottom: 12px;" type="button">
-      <mat-icon>attach_file</mat-icon>
-      Add files
-    </button>
+    <p class="hint">
+      <mat-icon>info</mat-icon>
+      To create a revision, select a file group below and choose a strategy.
+    </p>
 
-    <mat-form-field>
-      <mat-label>Select strategy</mat-label>
-      <mat-select [(ngModel)]="createRevisionData.strategy">
-        @for (strategy of strategies; track strategy) {
-          <mat-option [value]="strategy">
-            {{ strategy }}
-          </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <div class="toolbar">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Select strategy</mat-label>
+        <mat-select [(ngModel)]="createRevisionData.strategy">
+          @for (strategy of strategies; track strategy) {
+            <mat-option [value]="strategy">
+              {{ strategy }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-    <button (click)="createRevision()" mat-stroked-button style="margin-bottom: 12px;" type="button">
-      <mat-icon>add</mat-icon>
-      Create revision
-    </button>
+      <button (click)="createRevision()" [disabled]="!selectedFileGroupId || !createRevisionData.strategy"
+              mat-stroked-button type="button">
+        <mat-icon>add</mat-icon>
+        Create revision
+      </button>
+    </div>
 
-
-    @if (fileGroups.length > 0) {
-      <app-file-group-selector
-        [fileGroups]="fileGroups"
-        [selectedFileGroupId]="selectedFileGroupId"
-        (fileGroupChange)="selectPdfFile($event)"
-      ></app-file-group-selector>
-    }
-
-    @if (receiptFileId) {
+    <div class="toolbar">
+      @if (fileGroups.length > 0) {
+        <app-file-group-selector
+          [fileGroups]="fileGroups"
+          [selectedFileGroupId]="selectedFileGroupId"
+          (fileGroupChange)="selectPdfFile($event)"
+        ></app-file-group-selector>
+      }
+      <button (click)="openAddFilesDialog()" mat-stroked-button type="button">
+        <mat-icon>attach_file</mat-icon>
+        Add files
+      </button>
+    </div>
+    @if (previewType === FileType.PDF && receiptFileId) {
       <app-pdf-viewer [receiptFileId]="receiptFileId"></app-pdf-viewer>
+    } @else if (previewType) {
+      <app-file-preview [fileIds]="previewFileIds" [type]="previewType"></app-file-preview>
     } @else {
-      <div>No PDF file available</div>
+      <div class="empty">No file available</div>
     }
   </div>
 </div>
+
+

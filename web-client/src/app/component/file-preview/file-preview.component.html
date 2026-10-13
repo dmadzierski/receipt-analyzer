@@ -1,0 +1,15 @@
+@if (loading) {
+  <div class="state">Loading...</div>
+}
+@if (error) {
+  <div class="state">Failed to load file</div>
+}
+@if (type !== FileType.JSON) {
+  @for (url of imageUrls; track $index) {
+    <img [src]="url" alt="Receipt image" class="preview-image"/>
+  }
+} @else {
+  @for (content of jsonContents; track $index) {
+    <pre class="preview-json">{{ content }}</pre>
+  }
+}

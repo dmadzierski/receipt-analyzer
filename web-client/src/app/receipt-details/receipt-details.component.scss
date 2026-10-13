@@ -1,19 +1,59 @@
 .content {
   flex-direction: row;
+  gap: 24px;
 }
 
 .left-panel {
   flex: 1;
+  min-width: 0;
 }
 
 .right-panel {
   flex: 1;
+  min-width: 0;
   position: sticky;
   top: 0;
   align-self: start;
   height: fit-content;
+  padding: 16px;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  mat-form-field,
+  app-file-group-selector {
+    display: block;
+    width: 100%;
+  }
+
+  button[mat-stroked-button] {
+    height: 56px;
+    width: 100%;
+    border-radius: 4px;
+  }
+}
+.empty {
+  padding: 24px;
+  text-align: center;
+  opacity: 0.7;
 }
 
 .icon {
   margin-left: 10px;
+  cursor: pointer;
 }
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  opacity: 0.8;
+  font-size: 14px;
+}
+

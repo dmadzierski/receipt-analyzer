@@ -63,7 +63,10 @@ export interface FileGroup {
 
 export enum FileType {
   PDF = 'PDF',
-  JSON = 'JSON'
+  JSON = 'JSON',
+  JPEG = 'JPEG',
+  PNG = 'PNG',
+  WEBP = 'WEBP',
 }
 
 export interface RevisionDetails {
@@ -108,11 +111,11 @@ export interface Revision {
   isCorrect: boolean
 }
 
-export interface CreateRevisionRequest{
+export interface CreateRevisionRequest {
   fileGroupId: string
   strategy: ResolverStrategy,
 }
 
-export interface CreateRevisionResponse{
+export interface CreateRevisionResponse {
 
 }

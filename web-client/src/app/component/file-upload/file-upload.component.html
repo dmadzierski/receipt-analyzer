@@ -1,22 +1,30 @@
-<input #fileInput (change)="onFileSelected($event)" style="display: none" type="file">
+﻿<input #fileInput (change)="onFileSelected($event)" class="hidden-input" multiple type="file">
 
-<button (click)="fileInput.click()" class="add-attachment" color="primary" mat-raised-button>
-  <mat-icon>attach_file</mat-icon>
-  <span>Add attachment</span>
-</button>
-
-<div *ngIf="files.length > 0" style="margin-top: 10px;">
-  <strong>Select file:</strong>
-  <mat-list>
-    @for (file of files; track $index) {
-      <mat-list-item>
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <span>{{ file.name }}</span>
-          <button (click)="removeFile($index)" color="warn" mat-icon-button type="button">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-      </mat-list-item>
-    }
-  </mat-list>
+<div (click)="fileInput.click()"
+     (dragleave)="dragging = false"
+     (dragover)="onDragOver($event)"
+     (drop)="onDrop($event)"
+     [class.dragging]="dragging"
+     class="drop-zone"
+     role="button"
+     tabindex="0"
+     (keydown.enter)="fileInput.click()">
+  <mat-icon>cloud_upload</mat-icon>
+  <span>Drop files here or <strong>browse</strong></span>
 </div>
+
+@if (files.length > 0) {
+  <div class="file-list">
+    <div class="file-list-title">Selected files ({{ files.length }})</div>
+    @for (file of files; track $index) {
+      <div class="file-row">
+        <mat-icon class="file-icon">{{ iconFor(file) }}</mat-icon>
+        <span class="file-name" [title]="file.name">{{ file.name }}</span>
+        <span class="file-size">{{ formatSize(file.size) }}</span>
+        <button (click)="removeFile($index)" aria-label="Remove file" mat-icon-button type="button">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+}

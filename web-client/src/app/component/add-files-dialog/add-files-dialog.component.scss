@@ -1,0 +1,33 @@
+﻿.dialog-content {
+  min-width: 420px;
+  padding-top: 8px !important;
+}
+
+.images {
+  margin-top: 20px;
+}
+
+.images-title {
+  font-weight: 500;
+}
+
+.image-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.image-name {
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
