@@ -1,5 +1,5 @@
 <div class="form-container">
-  @if (creationSucceeded) {
+  @if (creationSucceeded()) {
     <h1>Receipt created</h1>
     <p>Your receipt was created successfully.</p>
     <button (click)="goToReceipt()" matButton="outlined">Open receipt</button>

@@ -132,6 +132,13 @@
         <div *cdkDragPlaceholder class="custom-placeholder"></div>
       </tr>
     </table>
+
+    @if (contentEditable && data.data.length === 0) {
+      <button (click)="addRowAfter(-1)" color="primary" mat-stroked-button>
+        <mat-icon>add_circle</mat-icon>
+        Add item
+      </button>
+    }
   }
 
 </div>

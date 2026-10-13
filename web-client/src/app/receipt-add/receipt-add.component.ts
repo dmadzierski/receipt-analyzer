@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal, ViewChild} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -39,7 +39,7 @@ export class ReceiptAddComponent {
   data: CreateReceiptData = new CreateReceiptData('', '', '', ResolverStrategy.BIEDRONKA, []);
   storeSearchText = '';
   createdReceiptId = '';
-  creationSucceeded = false;
+  creationSucceeded = signal(false);
   private readonly storeSearchSubject = new Subject<string>();
   private walletId: string = '';
 
@@ -121,7 +121,7 @@ export class ReceiptAddComponent {
     this.data.walletId = this.walletId;
     this.receiptService.addReceipt(this.data).subscribe((res) => {
       this.createdReceiptId = res.id ?? '';
-      this.creationSucceeded = true;
+      this.creationSucceeded.set(true);
     });
   }
 
