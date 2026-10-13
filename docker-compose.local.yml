@@ -102,7 +102,7 @@ services:
       JPA_DDL_AUTO: update
       KEYCLOAK_JWK_SET_URI: http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs
       KEYCLOAK_ISSUER_URI: http://host.docker.internal/auth/realms/activiti
-      MYSQL_DB_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/receipt-analyzer-service?useSSL=false&serverTimezone=UTC
+      MYSQL_DB_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/receipt-analyzer-service?useSSL=false&serverTimezone=UTC&rewriteBatchedStatements=true
     depends_on:
       keycloak:
         condition: service_healthy

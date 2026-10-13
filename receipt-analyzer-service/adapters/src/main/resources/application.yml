@@ -9,7 +9,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:update}
-    show-sql: true
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
   security:
     oauth2:
       resourceserver:
