@@ -71,6 +71,20 @@ export class RevisionListComponent implements OnChanges {
     });
   }
 
+  deleteRevision(id: string) {
+    if (!id || !confirm('Delete this revision?')) return;
+    this.revisionService.deleteRevision(id).subscribe({
+      next: () => {
+        if (this.selectedId === id) {
+          this.selectedId = undefined;
+          this.selectedRevisionChange.emit(undefined);
+        }
+        this.refreshData(this.receiptId);
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
   refreshData(receiptId: string) {
     this.receiptService.getReceiptRevisions(receiptId).subscribe(
       {

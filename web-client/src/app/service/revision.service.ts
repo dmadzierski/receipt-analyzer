@@ -23,6 +23,10 @@ export class RevisionService {
     return this.httpClient.put<RevisionDetails>(`/api/revisions/${revision.id}`, revision)
   }
 
+  deleteRevision(id: string) {
+    return this.httpClient.delete<void>(`/api/revisions/${id}`);
+  }
+
   updateAliases(id: string) {
     return this.httpClient.post<null>(`/api/revisions/${id}/aliases`, {})
   }

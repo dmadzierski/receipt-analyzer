@@ -40,4 +40,10 @@ class ReceiptRevisionController {
     void updateProductDictInRevisionItems(@PathVariable String revisionId) {
         receiptFacade.updateProductDictInRevisionItems(revisionId);
     }
+
+    @DeleteMapping(path = "/{revisionId}")
+    ResponseEntity<Void> deleteRevision(@PathVariable String revisionId) {
+        receiptFacade.deleteRevision(revisionId);
+        return ResponseEntity.noContent().build();
+    }
 }

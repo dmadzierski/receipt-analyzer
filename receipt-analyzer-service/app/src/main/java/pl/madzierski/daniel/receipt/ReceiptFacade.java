@@ -327,4 +327,15 @@ public class ReceiptFacade {
         revision = revisionRepository.save(revision);
         return new CreateRevisionResponse(revision.getId());
     }
+
+    public void deleteRevision(String revisionId) {
+        if (revisionRepository.findById(revisionId)
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND))
+            .getChildReceiptRevisions()
+            .isEmpty()) {
+            revisionRepository.deleteById(revisionId);
+        } else {
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS);
+        }
+    }
 }

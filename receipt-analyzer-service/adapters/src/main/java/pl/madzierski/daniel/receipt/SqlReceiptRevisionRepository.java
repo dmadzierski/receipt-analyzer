@@ -35,4 +35,9 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
         return repository.findById(revisionId)
             .map(SqlReceiptRevision::toReceiptRevision);
     }
+
+    @Override
+    public void deleteById(String revisionId) {
+        repository.deleteById(revisionId);
+    }
 }

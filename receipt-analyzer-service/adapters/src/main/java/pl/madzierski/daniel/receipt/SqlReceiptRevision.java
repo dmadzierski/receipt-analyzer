@@ -86,9 +86,7 @@ class SqlReceiptRevision {
         }
         return sqlReceiptRevision;
     }
-
-
-
+    
     public ReceiptRevision toReceiptRevision() {
         return ReceiptRevision.builder()
             .id(id)
@@ -104,6 +102,9 @@ class SqlReceiptRevision {
             .resolver(resolver)
             .parentReceiptRevision(parentReceiptRevision != null ? ReceiptRevision.builder().id(parentReceiptRevision.getId()).build() : null)
             .sourceFileGroup(sourceFileGroup != null ? sourceFileGroup.toFileGroupQuery() : null)
+            .childReceiptRevisions(childReceiptRevisions.stream()
+                .map(SqlReceiptRevision::toReceiptRevision)
+                .collect(Collectors.toSet()))
             .items(items.stream()
                 .map(SqlReceiptItem::toReceiptItem)
                 .collect(Collectors.toSet()))

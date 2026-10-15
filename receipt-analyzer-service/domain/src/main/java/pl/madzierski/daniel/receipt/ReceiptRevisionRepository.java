@@ -9,4 +9,6 @@ interface ReceiptRevisionRepository {
     Optional<ReceiptRevision> findByIdWithItems(String revisionId);
 
     Optional<ReceiptRevision> findById(String revisionId);
+
+    void deleteById(String revisionId);
 }
