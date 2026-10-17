@@ -346,6 +346,7 @@ public class ReceiptFacade {
     void rewriteProductNameToItems(String revisionId) {
         ReceiptRevision revision = revisionRepository.findById(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+        if(revision.getResolver() != ReceiptResolverStrategyType.USER) throw new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
         revision.getItems().stream()
             .filter(item -> item.getNameDict() != null)
             .forEach(item -> productDictQueryRepository

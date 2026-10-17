@@ -24,10 +24,13 @@ import {RevisionListComponent} from '../component/revision-list/revision-list.co
 import {MatIcon} from '@angular/material/icon';
 import {RevisionService} from '../service/revision.service';
 import {Observable} from 'rxjs';
-import {MatTooltip} from '@angular/material/tooltip';
 import {FileGroupSelectorComponent} from '../component/file-group-selector/file-group-selector.component';
 import {FilePreviewComponent} from '../component/file-preview/file-preview.component';
 import {AddFilesDialogComponent} from '../component/add-files-dialog/add-files-dialog.component';
+import {
+  ConfirmDialogComponent,
+  ConfirmDialogData
+} from '../component/confirm-dialog/confirm-dialog.component';
 
 
 @Component({
@@ -43,7 +46,6 @@ import {AddFilesDialogComponent} from '../component/add-files-dialog/add-files-d
     PdfViewerComponent,
     RevisionListComponent,
     MatIcon,
-    MatTooltip,
     FileGroupSelectorComponent,
     FilePreviewComponent
   ],
@@ -168,8 +170,19 @@ export class ReceiptDetailsComponent implements OnInit {
   }
 
   protected rewriteProductNames() {
-    this.revisionService.rewriteProductNames(this.receiptDetails.preferredRevision?.id!!)
-      .subscribe({})
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Rewrite product names',
+        message: 'Rewrite product names for this revision?',
+        confirmLabel: 'Rewrite',
+      } as ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed?: boolean) => {
+      if (confirmed) {
+        this.revisionService.rewriteProductNames(this.receiptDetails.preferredRevision?.id!!)
+          .subscribe({})
+      }
+    });
   }
 
   private refreshRevisionDetails(revisionId: string) {

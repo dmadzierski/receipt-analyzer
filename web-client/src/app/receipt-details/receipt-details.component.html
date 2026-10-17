@@ -48,9 +48,11 @@
           <button (click)="refreshProductDict()" mat-stroked-button type="button">
             Update product dict
           </button>
-          <button (click)="rewriteProductNames()" mat-stroked-button type="button">
-            Rewrite product names
-          </button>
+          @if (receiptDetails.preferredRevision.resolver === 'USER') {
+            <button (click)="rewriteProductNames()" mat-stroked-button type="button">
+              Rewrite product names
+            </button>
+          }
         }
       </div>
     }
