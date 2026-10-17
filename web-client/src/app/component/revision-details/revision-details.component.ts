@@ -145,6 +145,24 @@ export class RevisionDetailsComponent implements OnChanges {
     this.updatePositions();
   }
 
+  async overwriteItems() {
+    let text: string;
+    try {
+      text = await navigator.clipboard.readText();
+    } catch {
+      return;
+    }
+
+    const parsed = this.parseItems(text);
+    if (parsed.length === 0) {
+      return;
+    }
+
+    const existing = [...this.data.data].sort((a, b) => a.position - b.position);
+    this.data.data = parsed.map((item, index) => ({...item, id: existing[index]?.id ?? ''}));
+    this.updatePositions();
+  }
+
   private parseItems(text: string): Item[] {
     const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
     if (lines.length === 0) {

@@ -39,6 +39,10 @@
         <mat-icon>content_paste</mat-icon>
         Paste items
       </button>
+      <button (click)="overwriteItems()" mat-stroked-button matTooltip="Replace all items with CSV from clipboard (same columns). Rows are matched by order and keep the existing item ids">
+        <mat-icon>edit_note</mat-icon>
+        Overwrite items
+      </button>
     }
 
     <table (cdkDropListDropped)="drop($event)"
