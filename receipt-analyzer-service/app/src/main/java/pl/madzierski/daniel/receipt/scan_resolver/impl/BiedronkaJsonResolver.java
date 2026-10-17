@@ -10,12 +10,9 @@ import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData.ReceiptRevi
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
 import pl.madzierski.daniel.receipt.scan_resolver.model.BiedronkaJsonReceipt;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

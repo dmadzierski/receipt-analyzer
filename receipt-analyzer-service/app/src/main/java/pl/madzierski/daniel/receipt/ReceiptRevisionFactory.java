@@ -1,7 +1,6 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.RequiredArgsConstructor;
-import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
 

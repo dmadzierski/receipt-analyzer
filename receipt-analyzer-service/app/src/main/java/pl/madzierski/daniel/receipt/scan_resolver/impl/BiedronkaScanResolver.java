@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.regex.Pattern.*;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static pl.madzierski.daniel.exception.AppRuntimeExceptionMessages.OCR_PROCESSING_ERROR;
 
 @AllArgsConstructor

@@ -14,8 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 public class PDFService {
 
-    private final String tmpFilePath;
-
     public List<byte[]> dividePdfFileToImages(byte[] file) {
         try {
             List<byte[]> outputImages = new ArrayList<>();

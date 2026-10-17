@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
-import pl.madzierski.daniel.file_group.FileQueryRepository;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
 import pl.madzierski.daniel.store.StoreQueryRepository;
@@ -68,7 +67,7 @@ class ReceiptConfiguration {
     }
 
     @Bean
-    PDFService pdfService(@Value("${pdf-service.tmp-dir}") String tmpFilePath) {
-        return new PDFService(tmpFilePath);
+    PDFService pdfService() {
+        return new PDFService();
     }
 }

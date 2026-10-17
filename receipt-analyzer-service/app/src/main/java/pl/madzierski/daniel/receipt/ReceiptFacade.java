@@ -229,7 +229,7 @@ public class ReceiptFacade {
     @Transactional
     void updateAliasesByUserRevision(String revisionId) {
         Map<ProductDto, Collection<ReceiptItem>> receiptItemToProductDictNameMap = new HashMap<>();
-        receiptItemRepository.findByRevisionIdWithParentItemWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(revisionId)
+        receiptItemRepository.findUnmatchedItemsByReceiptId(revisionId)
             .forEach(receiptItem -> {
                 String alias = receiptItem.getParentItem().getName();
                 String userText = receiptItem.getName();
@@ -268,7 +268,7 @@ public class ReceiptFacade {
                         resolvedDict.addAlias(ProductAliasDto.builder()
                             .name(userText)
                             .build());
-                        if (!userText.equals(alias)) resolvedDict.addAlias(ProductAliasDto.builder()
+                        if (!userText.equalsIgnoreCase(alias)) resolvedDict.addAlias(ProductAliasDto.builder()
                             .name(alias)
                             .build());
                         receiptItemToProductDictNameMap.put(resolvedDict, new HashSet<>(Set.of(receiptItem.getParentItem())));
@@ -329,7 +329,7 @@ public class ReceiptFacade {
         return new CreateRevisionResponse(revision.getId());
     }
 
-    public void deleteRevision(String revisionId) {
+    void deleteRevision(String revisionId) {
         if (revisionRepository.findById(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND))
             .getChildReceiptRevisions()

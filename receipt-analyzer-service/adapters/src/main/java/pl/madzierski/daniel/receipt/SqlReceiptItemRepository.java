@@ -24,13 +24,12 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
     void reassignProductDict(SqlProductDictQuery dict, List<String> productDictIdList);
 
     @Query("""
-        SELECT item FROM SqlReceiptItem item LEFT JOIN FETCH item.parentItem parentItem 
+        SELECT item FROM SqlReceiptItem item INNER JOIN FETCH item.parentItem parentItem 
         WHERE item.receiptRevision.id = :revisionId AND 
                 item.receiptRevision.resolver = pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND 
-                parentItem.receiptRevision.resolver <> pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND 
                 item.product IS NULL AND 
                 parentItem.product IS NULL""")
-    Set<SqlReceiptItem> findByIdWithItemsAndItemsParentWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(String revisionId);
+    Set<SqlReceiptItem> findUnmatchedItemsByReceiptId(String revisionId);
 
     @Modifying
     @Query("""
@@ -68,8 +67,8 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     }
 
     @Override
-    public List<ReceiptItem> findByRevisionIdWithParentItemWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(String revisionId) {
-        return receiptItemRepository.findByIdWithItemsAndItemsParentWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(revisionId)
+    public List<ReceiptItem> findUnmatchedItemsByReceiptId(String revisionId) {
+        return receiptItemRepository.findUnmatchedItemsByReceiptId(revisionId)
             .stream()
             .map(SqlReceiptItem::toReceiptItem)
             .toList();

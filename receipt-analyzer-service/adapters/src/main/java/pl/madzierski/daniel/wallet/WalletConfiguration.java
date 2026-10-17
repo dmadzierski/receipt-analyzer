@@ -3,7 +3,6 @@ package pl.madzierski.daniel.wallet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
-import pl.madzierski.daniel.user.UserFacade;
 import pl.madzierski.daniel.user.UserQueryRepository;
 
 @Configuration

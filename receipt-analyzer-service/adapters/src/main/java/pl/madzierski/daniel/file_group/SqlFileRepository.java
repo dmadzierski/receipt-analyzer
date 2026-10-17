@@ -2,8 +2,6 @@ package pl.madzierski.daniel.file_group;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.Repository;
-import pl.madzierski.daniel.file_group.model.FileGroupDto;
 
 import java.util.Optional;
 

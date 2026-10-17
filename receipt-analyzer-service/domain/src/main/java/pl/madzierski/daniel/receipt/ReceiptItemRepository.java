@@ -13,7 +13,7 @@ interface ReceiptItemRepository {
 
     List<ReceiptItem> saveAll(List<ReceiptItem> entities, String receiptRevisionId);
 
-    List<ReceiptItem> findByRevisionIdWithParentItemWhenRevisionResolverIsUserAndParentRevisionResolverIsNotAndProductIsEmpty(String revisionId);
+    List<ReceiptItem> findUnmatchedItemsByReceiptId(String revisionId);
 
     void updateProduct(ProductDictQuery productDictQuery, Collection<String> list);
 }

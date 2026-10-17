@@ -1,7 +1,6 @@
 package pl.madzierski.daniel.user;
 
 import pl.madzierski.daniel.user.model.UserDto;
-import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.Optional;
 

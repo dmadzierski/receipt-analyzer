@@ -53,9 +53,6 @@ receipt-resolver-strategy:
   biedronka-json:
       version: 1.0
 
-pdf-service:
-  tmp-dir: /app/pdf-service-tmp
-
 product-dict:
   min-required-similarity: 0.8
 

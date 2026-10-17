@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import pl.madzierski.daniel.receipt.model.ReceiptItemDto;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface SqlReceiptItemQueryRepository extends ReceiptItemQueryRepository, JpaRepository<SqlReceiptItem, String> {
