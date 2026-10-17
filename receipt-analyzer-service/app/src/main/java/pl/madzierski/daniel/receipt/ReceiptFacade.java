@@ -162,17 +162,18 @@ public class ReceiptFacade {
                 .map(UpdateRevisionRequest.ItemRequest::id)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-            receiptItemRepository.deleteAllByIdIn(revision.getItems()
+            List<String> itemsToRemove = revision.getItems()
                 .stream()
                 .map(ReceiptItem::getId)
                 .filter(id -> !incomingIds.contains(id))
-                .toList());
+                .toList();
+            receiptItemRepository.deleteAllByIdIn(itemsToRemove);
+            itemsToRemove.forEach(revision::removeItem);
             for (UpdateRevisionRequest.ItemRequest incomingItem : updatedRevisionRequest.items()) {
                 if (incomingItem.id() != null && !incomingItem.id().trim().isEmpty()) {
                     revision.getItems()
                         .stream()
-                        .filter(entity -> incomingItem.id()
-                            .equals(entity.getId()))
+                        .filter(entity -> incomingItem.id().equals(entity.getId()))
                         .findFirst()
                         .ifPresent(entity -> {
                             entity.setName(incomingItem.name());
@@ -193,8 +194,8 @@ public class ReceiptFacade {
                     revision.addItem(newItem);
                 }
             }
+            revisionRepository.save(revision);
         }
-        revisionRepository.save(revision);
         return UpdateRevisionResponse.map(toDto(revision), revision.getItems()
             .stream()
             .map(this::toDto)

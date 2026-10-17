@@ -45,4 +45,8 @@ class ReceiptRevision {
     public void addItem(ReceiptItem newItem) {
         this.items.add(newItem);
     }
+
+    public void removeItem(String id) {
+        this.items.removeIf(item -> item.getId().equals(id));
+    }
 }
