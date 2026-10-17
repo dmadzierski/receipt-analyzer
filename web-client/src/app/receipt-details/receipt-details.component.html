@@ -29,18 +29,30 @@
 
 
     @if (this.receiptDetails.preferredRevision) {
-      <h2>Revision details
+      <h2>Revision details</h2>
+      <div class="actions">
         @if (this.editMode) {
-          <mat-icon (click)="saveRevision()" class="icon" fontIcon="save"></mat-icon>
-          <mat-icon (click)="declineEdit()" class="icon" fontIcon="cancel"></mat-icon>
+          <button (click)="saveRevision()" mat-stroked-button type="button">
+            Save
+          </button>
+          <button (click)="declineEdit()" mat-stroked-button type="button">
+            Cancel
+          </button>
         } @else {
-          <mat-icon (click)="doEdit()" class="icon" fontIcon="edit"></mat-icon>
-          <mat-icon (click)="refreshAliases()" class="icon" fontIcon="sync"
-                    matTooltip="Update aliases"></mat-icon>
-          <mat-icon (click)="refreshProductDict()" class="icon" fontIcon="refresh"
-                    matTooltip="Update product dict"></mat-icon>
+          <button (click)="doEdit()" mat-stroked-button type="button">
+            Edit
+          </button>
+          <button (click)="refreshAliases()" mat-stroked-button type="button">
+            Update aliases
+          </button>
+          <button (click)="refreshProductDict()" mat-stroked-button type="button">
+            Update product dict
+          </button>
+          <button (click)="rewriteProductNames()" mat-stroked-button type="button">
+            Rewrite product names
+          </button>
         }
-      </h2>
+      </div>
     }
 
 

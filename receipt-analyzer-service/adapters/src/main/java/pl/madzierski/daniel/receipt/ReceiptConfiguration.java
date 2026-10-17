@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Lazy;
 import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
+import pl.madzierski.daniel.product_dict.ProductDictQueryRepository;
 import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
 import pl.madzierski.daniel.store.StoreQueryRepository;
 import pl.madzierski.daniel.receipt.scan_resolver.impl.BiedronkaJsonResolver;
@@ -32,7 +33,8 @@ class ReceiptConfiguration {
         ReceiptRevisionQueryRepository receiptRevisionQueryRepository,
         StoreQueryRepository storeQueryRepository,
         @Lazy ProductDictFacade productDictFacade,
-        FileGroupQueryRepository fileGroupQueryRepository
+        FileGroupQueryRepository fileGroupQueryRepository,
+        ProductDictQueryRepository productDictQueryRepository
     ) {
         ReceiptItemFactory receiptItemFactory = new ReceiptItemFactory(productDictFacade);
         return new ReceiptFacade(
@@ -47,6 +49,7 @@ class ReceiptConfiguration {
             receiptRevisionQueryRepository,
             storeQueryRepository,
             productDictFacade,
+            productDictQueryRepository,
             fileGroupQueryRepository
         );
     }

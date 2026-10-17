@@ -9,6 +9,7 @@ import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
+import pl.madzierski.daniel.product_dict.ProductDictQueryRepository;
 import pl.madzierski.daniel.product_dict.model.ProductAliasDto;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDto;
@@ -38,6 +39,7 @@ public class ReceiptFacade {
     private final ReceiptRevisionQueryRepository receiptRevisionQueryRepository;
     private final StoreQueryRepository storeQueryRepository;
     private final ProductDictFacade productDictFacade;
+    private final ProductDictQueryRepository productDictQueryRepository;
     private final FileGroupQueryRepository fileGroupQueryRepository;
 
     @Transactional
@@ -338,5 +340,17 @@ public class ReceiptFacade {
         } else {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS);
         }
+    }
+
+    @Transactional
+    void rewriteProductNameToItems(String revisionId) {
+        ReceiptRevision revision = revisionRepository.findById(revisionId)
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+        revision.getItems().stream()
+            .filter(item -> item.getNameDict() != null)
+            .forEach(item -> productDictQueryRepository
+                .findNameById(item.getNameDict().getId())
+                .ifPresent(productDict -> item.setName(productDict.getName())));
+        revisionRepository.save(revision);
     }
 }

@@ -31,6 +31,10 @@ export class RevisionService {
     return this.httpClient.post<null>(`/api/revisions/${id}/aliases`, {})
   }
 
+  rewriteProductNames(id: string) {
+    return this.httpClient.post<null>(`/api/revisions/${id}/rewrite-product-names`, {})
+  }
+
   updateProductDict(id: string) {
     return this.httpClient.post<null>(`/api/revisions/${id}/update-product-dict`, {})
   }

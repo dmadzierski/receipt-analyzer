@@ -4,6 +4,7 @@ import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ProductDictQueryRepository {
@@ -12,4 +13,6 @@ public interface ProductDictQueryRepository {
     long countProductDictEntitiesByCategoriesIdIn(Set<String> productCategoryIds);
 
     List<ProductDto> findAllProducts();
+
+    Optional<ProductDto> findNameById(String id);
 }

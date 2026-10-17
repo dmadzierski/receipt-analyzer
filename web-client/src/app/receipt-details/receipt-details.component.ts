@@ -167,6 +167,11 @@ export class ReceiptDetailsComponent implements OnInit {
       .subscribe({})
   }
 
+  protected rewriteProductNames() {
+    this.revisionService.rewriteProductNames(this.receiptDetails.preferredRevision?.id!!)
+      .subscribe({})
+  }
+
   private refreshRevisionDetails(revisionId: string) {
     if (revisionId) {
       this.getRevisionDate(revisionId).subscribe(

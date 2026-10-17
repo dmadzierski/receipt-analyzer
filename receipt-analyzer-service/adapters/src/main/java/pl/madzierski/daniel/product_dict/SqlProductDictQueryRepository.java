@@ -49,4 +49,9 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
                 }
         ).toList();
     }
+
+    @Override
+    public Optional<ProductDto> findNameById(String id) {
+        return this.sqlProductDictQueryRepository.findById(id).map(product-> ProductDto.builder().id(product.getId()).name(product.getName()).build());
+    }
 }

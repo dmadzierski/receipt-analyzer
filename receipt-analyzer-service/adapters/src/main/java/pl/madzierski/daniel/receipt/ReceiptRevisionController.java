@@ -46,4 +46,9 @@ class ReceiptRevisionController {
         receiptFacade.deleteRevision(revisionId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping(path = "/{revisionId}/rewrite-product-names")
+    void rewriteProductNames(@PathVariable String revisionId) {
+        receiptFacade.rewriteProductNameToItems(revisionId);
+    }
 }
