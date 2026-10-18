@@ -17,6 +17,8 @@ import {MatCheckbox} from '@angular/material/checkbox';
 import {DatePipe} from '@angular/common';
 import {RevisionService} from '../../service/revision.service';
 import {ReceiptService} from '../../service/receipt.service';
+import {MatDialog} from '@angular/material/dialog';
+import {ConfirmDialogComponent, ConfirmDialogData} from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-revision-list',
@@ -42,6 +44,7 @@ export class RevisionListComponent implements OnChanges {
   data = new MatTableDataSource({} as Revision[]);
   private readonly revisionService = inject(RevisionService);
   private readonly receiptService = inject(ReceiptService);
+  private readonly dialog = inject(MatDialog);
 
   constructor() {
   }
@@ -72,16 +75,26 @@ export class RevisionListComponent implements OnChanges {
   }
 
   deleteRevision(id: string) {
-    if (!id || !confirm('Delete this revision?')) return;
-    this.revisionService.deleteRevision(id).subscribe({
-      next: () => {
-        if (this.selectedId === id) {
-          this.selectedId = undefined;
-          this.selectedRevisionChange.emit(undefined);
-        }
-        this.refreshData(this.receiptId);
-      },
-      error: (err) => console.error(err)
+    if (!id) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete revision',
+        message: 'Delete this revision?',
+        confirmLabel: 'Delete',
+      } as ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed?: boolean) => {
+      if (!confirmed) return;
+      this.revisionService.deleteRevision(id).subscribe({
+        next: () => {
+          if (this.selectedId === id) {
+            this.selectedId = undefined;
+            this.selectedRevisionChange.emit(undefined);
+          }
+          this.refreshData(this.receiptId);
+        },
+        error: (err) => console.error(err)
+      });
     });
   }
 
