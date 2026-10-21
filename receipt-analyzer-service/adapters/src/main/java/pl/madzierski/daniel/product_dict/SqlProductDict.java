@@ -6,7 +6,6 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import pl.madzierski.daniel.product_dict.model.ProductDto;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -42,7 +41,7 @@ class SqlProductDict {
     )
     private final Set<SqlProductCategory> categories = new HashSet<>();
     @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private final Set<SqlProductAlias> aliases = new HashSet<>();
 
     public Set<SqlProductAlias> getAliases() {
@@ -76,14 +75,8 @@ class SqlProductDict {
         productDict.setName(this.name);
         productDict.setCreatedDate(this.createdDate);
         productDict.setModifiedDate(this.modifiedDate);
-        productDict.getAliases()
-            .addAll(this.aliases.stream()
-                .map(SqlProductAlias::toProductAlias)
-                .toList());
-        productDict.getProductCategories()
-            .addAll(this.categories.stream()
-                .map(SqlProductCategory::toProductCategory)
-                .toList());
+        productDict.addAllAlias(this.aliases.stream().map(alias -> alias.toProductAlias(productDict)).toList());
+        productDict.addAllCategories(this.categories.stream().map(SqlProductCategory::toProductCategory).toList());
         return productDict;
     }
 

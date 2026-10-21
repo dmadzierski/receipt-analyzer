@@ -206,8 +206,21 @@ export class ProductDictListComponent implements OnInit {
     return {
       canonicalName: group.canonicalName,
       productCategoryIds: [...group.categoryIds],
-      productDictList: [group.primaryId, ...group.mergedDicts.map((dict) => dict.id)]
+      productDictList: [group.primaryId, ...group.mergedDicts.map((dict) => dict.id)],
+      aliasIds: this.collectAliases(group).map((alias) => alias.id)
     };
+  }
+
+  protected removeAlias(group: EditableProductDictGroup, alias: Alias) {
+    if (!this.contentEditable) {
+      return;
+    }
+
+    group.aliases = group.aliases.filter((item) => item.id !== alias.id);
+    group.mergedDicts = group.mergedDicts.map((dict) => ({
+      ...dict,
+      aliases: dict.aliases.filter((item) => item.id !== alias.id)
+    }));
   }
 
   private collectAliases(group: EditableProductDictGroup): Alias[] {
@@ -267,7 +280,16 @@ export class ProductDictListComponent implements OnInit {
       return true;
     }
 
-    return current.productDictList.some((id, index) => id !== original.productDictList[index]);
+    if (current.aliasIds.length !== original.aliasIds.length) {
+      return true;
+    }
+
+    if (current.productDictList.some((id, index) => id !== original.productDictList[index])) {
+      return true;
+    }
+
+    const originalAliasIds = new Set(original.aliasIds);
+    return current.aliasIds.some((id) => !originalAliasIds.has(id));
   }
 
   private cloneGroups(groups: EditableProductDictGroup[]): EditableProductDictGroup[] {

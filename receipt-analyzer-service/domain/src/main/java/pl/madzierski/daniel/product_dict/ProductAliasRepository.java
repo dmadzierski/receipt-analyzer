@@ -1,8 +1,9 @@
 package pl.madzierski.daniel.product_dict;
 
 import java.util.List;
+import java.util.Set;
 
 interface ProductAliasRepository {
 
-    void reassignAliasesToProductDict(String targetProductDictId, List<String> productDictIdsToMerge);
+    Set<ProductAlias> findAllByIds(Set<String> aliasIdList);
 }

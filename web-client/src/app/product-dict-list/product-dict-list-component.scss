@@ -166,3 +166,16 @@
 .cdk-drag-animating {
   transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+.alias-remove {
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #6b7280;
+
+  &:hover {
+    color: #dc2626;
+  }
+}

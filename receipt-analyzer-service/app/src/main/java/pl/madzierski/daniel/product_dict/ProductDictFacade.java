@@ -13,7 +13,6 @@ import pl.madzierski.daniel.user.model.UserDto;
 import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class ProductDictFacade {
@@ -33,35 +32,53 @@ public class ProductDictFacade {
     }
 
     @Transactional
-    void updateProductDict(UpdateProductDictListRequest updateProductDictListRequest) {
-        updateProductDictListRequest.items().forEach(updateProductDict -> {
-            List<String> dictIds = updateProductDict.productDictList();
-            String primaryDictId = dictIds.getFirst();
-            ProductDict productDict = productDictRepository.findById(primaryDictId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
-            String trimmedName = updateProductDict.canonicalName().trim();
-            if (!productDict.getName().equals(trimmedName)) {
-                productDict.setName(trimmedName);
-                productDict.addAlias(ProductAlias.builder().name(trimmedName).build());
-            }
-            if (!compareProductCategories(updateProductDict, productDict)) {
-                if (updateProductDict.productCategoryIds() != null) {
-                    productDict.setProductCategories(updateProductDict.productCategoryIds().stream().map(categoryId -> productCategoryRepository.findById(categoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND))).collect(Collectors.toSet()));
-                } else {
-                    productDict.setProductCategories(Collections.emptySet());
-                }
-            }
-            if (dictIds.size() > 1) {
-                List<String> productDictIdsListToMerge = dictIds.subList(1, dictIds.size());
-                this.mergeProductAliasesOfProductDictList(productDict.getId(), productDictIdsListToMerge);
-                receiptFacade.reassignProductDict(new ProductDictQuery(productDict.getId()), productDictIdsListToMerge);
-                productDictRepository.deleteAllByIdIn(productDictIdsListToMerge);
-            }
-            productDictRepository.save(productDict);
+    void updateProductDict(UpdateProductDictListRequest body) {
+        body.items().forEach(item -> {
+            List<String> dictIds = item.productDictList();
+            String primaryId = dictIds.getFirst();
+            List<String> sourceIds = dictIds.subList(1, dictIds.size());
+
+            ProductDict product = productDictRepository.findById(primaryId)
+                .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
+
+            String canonicalName = item.canonicalName().trim();
+            updateAliases(product, canonicalName, item.aliasIds());
+            product.setProductCategories(loadCategories(item.productCategoryIds()));
+            productDictRepository.save(product);
+
+            mergeProducts(primaryId, sourceIds);
         });
     }
 
-    private boolean compareProductCategories(UpdateProductDictListRequest.UpdateProductDict updateProductDict, ProductDict productDict) {
-        return Objects.equals(productDict.getProductCategories() != null ? productDict.getProductCategories().stream().map(ProductCategory::getId).collect(Collectors.toSet()) : Collections.emptySet(), updateProductDict.productCategoryIds() != null ? new HashSet<>(updateProductDict.productCategoryIds()) : Collections.emptySet());
+    private void updateAliases(ProductDict product, String name, Set<String> aliasIds) {
+        Set<ProductAlias> previous = new HashSet<>(product.getAliases());
+        Set<ProductAlias> chosen = new HashSet<>(productAliasRepository.findAllByIds(aliasIds));
+
+        boolean hasCanonical = chosen.stream().anyMatch(a -> a.getName().equalsIgnoreCase(name));
+        if (!hasCanonical) {
+            chosen.add(previous.stream()
+                .filter(a -> a.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseGet(() -> ProductAlias.builder().name(name).build()));
+        }
+
+        product.setAliases(chosen);
+        product.setName(name);
+    }
+
+    private void mergeProducts(String primaryId, List<String> sourceIds) {
+        if (sourceIds.isEmpty()) return;
+        receiptFacade.reassignProductDict(new ProductDictQuery(primaryId), sourceIds);
+        productDictRepository.deleteAllByIdIn(sourceIds);
+    }
+
+    private Set<ProductCategory> loadCategories(Collection<String> ids) {
+        Set<String> requested = ids == null ? Set.of() : new HashSet<>(ids);
+        Set<ProductCategory> found = productCategoryRepository.findAllById(requested);
+        if (found.size() != requested.size()) {
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND);
+        }
+        return found;
     }
 
     public Optional<ProductDto> findCanonicalName(String alias, String userTranslation) {
@@ -83,10 +100,6 @@ public class ProductDictFacade {
             double similarityScore = (maxLength - distance) / maxLength;
             return Map.entry(productDto, similarityScore);
         })).filter(entry -> entry.getValue() >= minRequiredStringSimilarity).max(Map.Entry.comparingByValue()).map(Map.Entry::getKey);
-    }
-
-    private void mergeProductAliasesOfProductDictList(String productDictId, List<String> productDictIdsListToMerge) {
-        productAliasRepository.reassignAliasesToProductDict(productDictId, productDictIdsListToMerge);
     }
 
     public List<ProductDto> saveAll(Set<ProductDto> productDictEntities) {

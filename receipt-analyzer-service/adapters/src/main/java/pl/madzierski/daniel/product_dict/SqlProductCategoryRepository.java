@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 interface SqlProductCategoryRepository extends JpaRepository<SqlProductCategory, String> {
     List<SqlProductCategory> findAllByOrderByNameAsc();
@@ -51,5 +53,12 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     @Override
     public void delete(ProductCategory productCategory) {
         this.repository.delete(SqlProductCategory.formProductCategory(productCategory));
+    }
+
+    @Override
+    public Set<ProductCategory> findAllById(Set<String> categoryIdList) {
+        return this.repository.findAllById(categoryIdList).stream()
+            .map(SqlProductCategory::toProductCategory)
+            .collect(Collectors.toSet());
     }
 }

@@ -1,21 +1,16 @@
 package pl.madzierski.daniel.product_dict;
 
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 interface SqlProductAliasRepository extends Repository<SqlProductAlias, String> {
 
-    @Modifying
-    @Query(value = """
-        UPDATE product_alias
-        SET product_id = :targetProductDictId
-        WHERE product_id IN (:productDictIdsToMerge)
-        """, nativeQuery = true)
-    void reassignAliasesToProductDict(String targetProductDictId, List<String> productDictIdsToMerge);
+    Set<SqlProductAlias> findAllByIdIn(Collection<String> aliasIdList);
 }
 
 @org.springframework.stereotype.Repository
@@ -25,7 +20,8 @@ class ProductAliasRepositoryImpl implements ProductAliasRepository {
     private final SqlProductAliasRepository sqlProductAliasRepository;
 
     @Override
-    public void reassignAliasesToProductDict(String targetProductDictId, List<String> productDictIdsToMerge) {
-        sqlProductAliasRepository.reassignAliasesToProductDict(targetProductDictId, productDictIdsToMerge);
+    public Set<ProductAlias> findAllByIds(Set<String> aliasIdList) {
+        return sqlProductAliasRepository.findAllByIdIn(aliasIdList).stream()
+            .map(alias -> alias.toProductAlias(alias.getProductDict().toProductDict())).collect(Collectors.toSet());
     }
 }

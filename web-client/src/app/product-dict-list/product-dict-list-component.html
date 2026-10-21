@@ -71,7 +71,12 @@
         <div class="aliases">
           @if (group.aliases.length) {
             @for (alias of group.aliases; track alias.id) {
-              <span class="alias-pill">{{ alias.alias }}</span>
+              <span class="alias-pill">
+                {{ alias.alias }}
+                @if (contentEditable) {
+                  <mat-icon (click)="removeAlias(group, alias)" class="alias-remove" title="Remove alias">close</mat-icon>
+                }
+              </span>
             }
           } @else {
             <span class="aliases-empty">No aliases</span>

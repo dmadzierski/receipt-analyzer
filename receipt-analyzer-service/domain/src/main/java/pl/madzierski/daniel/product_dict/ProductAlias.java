@@ -19,4 +19,9 @@ class ProductAlias {
     private String name;
     private ProductDict productDict;
 
+    public ProductAlias(String id, String name, ProductDict productDict) {
+        this.id = id;
+        this.name = name;
+        this.productDict = productDict;
+    }
 }

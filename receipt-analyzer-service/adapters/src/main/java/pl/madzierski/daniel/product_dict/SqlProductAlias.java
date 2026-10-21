@@ -51,14 +51,13 @@ class SqlProductAlias {
         );
     }
 
-    public ProductAlias toProductAlias() {
+    public ProductAlias toProductAlias(ProductDict productDict) {
         return new ProductAlias(
             this.id,
             this.createdDate,
             this.modifiedDate,
             this.name,
-            null
-//            this.productDict != null ? this.productDict.toProductDict() : null
+            productDict
         );
     }
 }

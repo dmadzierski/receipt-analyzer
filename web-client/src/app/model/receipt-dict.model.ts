@@ -30,6 +30,7 @@ export interface UpdateProductDictListRequestItem {
   canonicalName: string;
   productCategoryIds: string[];
   productDictList: string[];
+  aliasIds: string[];
 }
 
 export interface UpdateProductDictListResponse {
