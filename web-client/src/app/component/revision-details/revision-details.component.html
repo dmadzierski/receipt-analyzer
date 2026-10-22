@@ -3,7 +3,7 @@
 
     <mat-form-field>
       <mat-label>Total price</mat-label>
-      <input [(ngModel)]="revision().totalPrice" [readonly]="!contentEditable" matInput maxlength="30"/>
+      <input [(ngModel)]="revision().totalPrice" [readonly]="!contentEditable" matInput step="0.01" type="number"/>
     @if (contentEditable && isTotalReceiptPriceInValid()) {
       <mat-icon class="error-icon" matTooltip="Calcaulation error">error</mat-icon>
     }
