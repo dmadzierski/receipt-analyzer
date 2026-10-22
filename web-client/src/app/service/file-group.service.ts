@@ -17,4 +17,8 @@ export class FileGroupService {
 
     return this.httpClient.post<void>(`/api/receipt-group-files/${receiptId}`, body);
   }
+
+  deleteFileGroup(fileGroupId: string): Observable<void> {
+    return this.httpClient.delete<void>(`/api/receipt-group-files/${fileGroupId}`);
+  }
 }

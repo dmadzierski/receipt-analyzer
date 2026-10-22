@@ -21,4 +21,9 @@ class FileGroupRepositoryImpl implements FileGroupRepository {
     public void flush() {
         this.fileGroupRepository.flush();
     }
+
+    @Override
+    public void deleteById(String fileGroupId) {
+        this.fileGroupRepository.deleteById(fileGroupId);
+    }
 }

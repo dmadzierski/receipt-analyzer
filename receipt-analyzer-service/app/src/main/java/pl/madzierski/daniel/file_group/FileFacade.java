@@ -102,4 +102,8 @@ public class FileFacade {
             })
             .toList();
     }
+
+    public void deleteFileGroupId(String fileGroupId, String userSub) {
+        fileGroupRepository.deleteById(fileGroupId);
+    }
 }

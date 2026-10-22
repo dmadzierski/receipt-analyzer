@@ -24,4 +24,10 @@ public class FileGroupController {
         fileFacade.save(receiptId, MultipartFileMapper.toBytes(files), jwt.getSubject());
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping(value = "/{fileGroupId}")
+    ResponseEntity<Void> deleteFileGroup(@PathVariable String fileGroupId, @AuthenticationPrincipal Jwt jwt) {
+        fileFacade.deleteFileGroupId(fileGroupId, jwt.getSubject());
+        return ResponseEntity.noContent().build();
+    }
 }

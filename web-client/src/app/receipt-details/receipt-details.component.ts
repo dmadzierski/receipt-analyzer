@@ -23,6 +23,7 @@ import {PdfViewerComponent} from '../component/pdf-viewer/pdf-viewer.component';
 import {RevisionListComponent} from '../component/revision-list/revision-list.component';
 import {MatIcon} from '@angular/material/icon';
 import {RevisionService} from '../service/revision.service';
+import {FileGroupService} from '../service/file-group.service';
 import {Observable} from 'rxjs';
 import {FileGroupSelectorComponent} from '../component/file-group-selector/file-group-selector.component';
 import {FilePreviewComponent} from '../component/file-preview/file-preview.component';
@@ -69,6 +70,7 @@ export class ReceiptDetailsComponent implements OnInit {
   constructor(
     private readonly receiptService: ReceiptService,
     private readonly revisionService: RevisionService,
+    private readonly fileGroupService: FileGroupService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly dialog: MatDialog,
@@ -211,6 +213,24 @@ export class ReceiptDetailsComponent implements OnInit {
       if (uploaded) {
         this.refreshFileGroups();
       }
+    });
+  }
+
+  deleteFileGroup(fileGroupId: string): void {
+    if (!fileGroupId) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete file group',
+        message: 'Delete this file group?',
+        confirmLabel: 'Delete',
+      } as ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed?: boolean) => {
+      if (!confirmed) return;
+      this.fileGroupService.deleteFileGroup(fileGroupId).subscribe({
+        next: () => this.refreshFileGroups(),
+        error: (err) => console.error(err)
+      });
     });
   }
 

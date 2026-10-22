@@ -94,6 +94,7 @@
           [fileGroups]="fileGroups"
           [selectedFileGroupId]="selectedFileGroupId"
           (fileGroupChange)="selectPdfFile($event)"
+          (fileGroupDelete)="deleteFileGroup($event)"
         ></app-file-group-selector>
       }
       <button (click)="openAddFilesDialog()" mat-stroked-button type="button">

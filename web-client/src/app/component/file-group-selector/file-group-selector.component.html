@@ -1,9 +1,17 @@
 ﻿<mat-form-field class="file-group-selector" subscriptSizing="dynamic">
   <mat-label>File group</mat-label>
-  <mat-select [value]="selectedFileGroupId" (selectionChange)="onSelectionChange($event.value)">
+  <mat-select [value]="selectedFileGroupId" (selectionChange)="onSelectionChange($event.value)"
+              panelClass="file-group-panel">
+    <mat-select-trigger>{{ selectedLabel }}</mat-select-trigger>
     @for (group of fileGroups; track group.id) {
       <mat-option [value]="group.id">
-        {{ group.fileType }} @if (group.isOriginal) { (original) } @else { (copy) }
+        <div class="file-group-option">
+          <span>{{ label(group) }}</span>
+          <button (click)="onDelete($event, group.id)" aria-label="Delete file group" mat-icon-button
+                  type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </mat-option>
     }
   </mat-select>

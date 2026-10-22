@@ -31,3 +31,11 @@ h1, h2, h3 {
 .mat-icon:hover {
   border-color: black;
 }
+
+.file-group-panel .mdc-list-item__primary-text {
+  flex: 1;
+}
+
+.file-group-panel .mat-pseudo-checkbox-minimal {
+  display: none;
+}
