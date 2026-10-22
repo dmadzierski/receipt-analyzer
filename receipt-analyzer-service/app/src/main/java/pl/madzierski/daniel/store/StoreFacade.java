@@ -32,14 +32,13 @@ public class StoreFacade {
             storeBrand = storeBrandRepository.findById(request.storeBrandId()).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_BRAND_NOT_FOUND));
        else
             storeBrand = storeBrandRepository.save(StoreBrand.builder().name(request.brandName()).build());
-        Store store = Store.builder()
+        Store store = storeRepository.save(Store.builder()
             .brand(storeBrand)
             .address(request.address())
             .city(request.city())
             .postalCode(request.postalCode())
             .country(request.country())
-            .build();
-        storeRepository.save(store);
+            .build());
         return new CreateStoreResponse(
             store.getId(),
             store.getBrand().getName(),

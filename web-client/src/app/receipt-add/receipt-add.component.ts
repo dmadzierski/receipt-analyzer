@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, signal, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, signal, ViewChild} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -48,6 +48,7 @@ export class ReceiptAddComponent {
               private readonly activatedRoute: ActivatedRoute,
               private readonly router: Router,
               private readonly dialog: MatDialog,
+              private readonly cdr: ChangeDetectorRef,
   ) {
     this.activatedRoute.params.subscribe(params => {
       this.walletId = params['walletId'];
@@ -69,9 +70,8 @@ export class ReceiptAddComponent {
         })
       )
       .subscribe((items) => {
-        const storeList = items as GetStoreListResponseItem[];
-        this.stores = storeList;
-        if (this.stores.length > 0) {
+        this.stores = items as GetStoreListResponseItem[];
+        if (this.storeSearchText.trim().length >= 3) {
           this.storeAutocomplete?.openPanel();
         } else {
           this.storeAutocomplete?.closePanel();
@@ -111,8 +111,9 @@ export class ReceiptAddComponent {
       if (createdStore) {
         this.data.storeId = createdStore.id;
         this.storeSearchText = `${createdStore.brand} - ${createdStore.city} ${createdStore.address}`;
-        this.stores = [];
-        this.searchStores();
+        this.stores = [createdStore];
+        this.storeAutocomplete?.closePanel();
+        this.cdr.markForCheck();
       }
     });
   }

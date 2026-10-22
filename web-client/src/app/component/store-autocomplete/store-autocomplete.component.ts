@@ -38,6 +38,12 @@ export class StoreAutocompleteComponent {
   onInputChange(value: string): void {
     const trimmed = value.trim();
     this.value = trimmed;
+
+    if (this.options.some(store => this.displayValue(store) === trimmed)) {
+      this.autocompleteTrigger?.closePanel();
+      return;
+    }
+
     this.valueChange.emit(trimmed);
 
     if (trimmed.length >= this.minLength) {
@@ -49,7 +55,6 @@ export class StoreAutocompleteComponent {
 
   selectOption(store: GetStoreListResponseItem): void {
     this.value = `${store.brand} - ${store.city} ${store.address}`;
-    this.valueChange.emit(this.value);
     this.optionSelected.emit(store);
   }
 

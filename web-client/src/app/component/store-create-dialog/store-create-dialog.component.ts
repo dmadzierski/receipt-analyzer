@@ -69,6 +69,11 @@ export class StoreCreateDialogComponent {
       return;
     }
 
+    const selected = this.brandOptions.find(brand => brand.name === query);
+    if (selected && selected.id === this.model.storeBrandId) {
+      return;
+    }
+
     this.model.brandName = query;
     this.model.storeBrandId = null;
     this.brandSearchSubject.next(query);
