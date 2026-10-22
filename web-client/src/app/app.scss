@@ -25,6 +25,15 @@
   text-decoration: none;
 }
 
+.app-navbar__wallet {
+  opacity: 0.85;
+}
+
+.app-navbar__link.app-navbar__wallet.active {
+  font-weight: 400;
+  opacity: 1;
+}
+
 .app-navbar__profile {
   margin-left: auto;
 }

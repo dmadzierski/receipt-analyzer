@@ -1,6 +1,9 @@
 <nav class="app-navbar">
   <div class="app-navbar__links">
     <a [routerLink]="['/wallets']" class="app-navbar__link" routerLinkActive="active">Wallets</a>
+    @for (wallet of wallets(); track wallet.id) {
+      <a [routerLink]="['/wallets', wallet.id]" class="app-navbar__link app-navbar__wallet" routerLinkActive="active">{{ wallet.name }}</a>
+    }
     <a [routerLink]="['/product-dicts']" class="app-navbar__link" routerLinkActive="active">Product dict</a>
     <a [routerLink]="['/product-categories']" class="app-navbar__link" routerLinkActive="active">Categories</a>
     <a [routerLink]="['/stores']" class="app-navbar__link" routerLinkActive="active">Stores</a>
