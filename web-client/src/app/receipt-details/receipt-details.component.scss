@@ -64,3 +64,20 @@
   font-size: 14px;
 }
 
+@media (max-width: 1400px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .left-panel,
+  .right-panel {
+    flex: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .right-panel {
+    position: static;
+  }
+}
+
