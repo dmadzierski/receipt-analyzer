@@ -196,8 +196,8 @@ public class ReceiptFacade {
                     revision.addItem(newItem);
                 }
             }
-            revisionRepository.save(revision);
         }
+        revisionRepository.save(revision);
         return UpdateRevisionResponse.map(toDto(revision), revision.getItems()
             .stream()
             .map(this::toDto)
