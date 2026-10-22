@@ -34,7 +34,7 @@
 
     <h3>Items</h3>
 
-    @if (contentEditable) {
+    @if (contentEditable && isUserResolver) {
       <button (click)="pasteItems()" mat-stroked-button matTooltip="Paste CSV from clipboard: name, amount, unit price, total price, discount">
         <mat-icon>content_paste</mat-icon>
         Paste items
@@ -120,12 +120,14 @@
         <th *matHeaderCellDef mat-header-cell></th>
         <td *matCellDef="let element; let i = index" mat-cell>
             <div style="display: flex; gap: 5px; align-items: center;">
-              <button (click)="addRowAfter(i)" color="primary" mat-icon-button>
-                <mat-icon>add_circle</mat-icon>
-              </button>
-              <button (click)="removeRow(i)" color="warn" mat-icon-button>
-                <mat-icon>delete</mat-icon>
-              </button>
+              @if (contentEditable && isUserResolver) {
+                <button (click)="addRowAfter(i)" color="primary" mat-icon-button>
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+                <button (click)="removeRow(i)" color="warn" mat-icon-button>
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
               @if (isItemInvalid(element)) {
                 <mat-icon class="error-icon" matTooltip="Calcaulation error">error</mat-icon>
               }
@@ -144,7 +146,7 @@
       </tr>
     </table>
 
-    @if (contentEditable && data.data.length === 0) {
+    @if (contentEditable && isUserResolver && data.data.length === 0) {
       <button (click)="addRowAfter(-1)" color="primary" mat-stroked-button>
         <mat-icon>add_circle</mat-icon>
         Add item

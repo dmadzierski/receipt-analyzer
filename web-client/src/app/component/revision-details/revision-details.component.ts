@@ -54,6 +54,10 @@ export class RevisionDetailsComponent implements OnChanges {
   contentEditable: boolean = false;
   data = new MatTableDataSource<Item>([]);
 
+  get isUserResolver(): boolean {
+    return this.revision()?.resolver === 'USER';
+  }
+
   constructor(private cdr: ChangeDetectorRef) {
   }
 
