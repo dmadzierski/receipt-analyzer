@@ -9,4 +9,6 @@ public interface FileGroupQueryRepository {
     List<FileGroupDto> findAllByReceiptId(String receiptId);
 
     Optional<FileGroupDto> findFileGroupWithFiles(String fileGroupId);
+
+    boolean isUsedByRevision(String fileGroupId);
 }

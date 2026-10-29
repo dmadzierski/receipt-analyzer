@@ -21,6 +21,9 @@ interface SqlFileGroupQueryRepository extends JpaRepository<SqlFileGroup, String
                 WHERE rfg.receipt.id = :receiptId
         """)
     List<SqlFileGroup> findAllByReceiptId(@Param(value = "receiptId") String receiptId);
+
+    @Query("SELECT COUNT(rev) > 0 FROM SqlReceiptRevision rev WHERE rev.sourceFileGroup.id = :fileGroupId")
+    boolean isUsedByRevision(String fileGroupId);
 }
 
 @AllArgsConstructor
@@ -65,5 +68,10 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
                     .collect(Collectors.toSet()))
                 .isOriginal(it.getIsOriginal())
                 .build());
+    }
+
+    @Override
+    public boolean isUsedByRevision(String fileGroupId) {
+        return sqlFileGroupQueryRepository.isUsedByRevision(fileGroupId);
     }
 }

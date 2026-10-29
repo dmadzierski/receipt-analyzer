@@ -104,6 +104,8 @@ public class FileFacade {
     }
 
     public void deleteFileGroupId(String fileGroupId, String userSub) {
+        if (fileGroupQueryRepository.isUsedByRevision(fileGroupId))
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_USED_BY_REVISION);
         fileGroupRepository.deleteById(fileGroupId);
     }
 
