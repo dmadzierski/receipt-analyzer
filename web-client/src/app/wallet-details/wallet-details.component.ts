@@ -7,10 +7,9 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {provideNativeDateAdapter} from '@angular/material/core';
-import {WalletDetails} from '../model/wallet.model';
+import {WalletDetails, WalletReceipt} from '../model/wallet.model';
 import {WalletService} from '../service/wallet-service';
 import {ReceiptListComponent} from '../component/receipt-list/receipt-list.component';
-import {GetReceiptResponseItem} from '../model/receipt.model';
 
 
 @Component({
@@ -52,7 +51,7 @@ export class WalletDetailsComponent implements OnInit {
     })
   }
 
-  getReceipts(): GetReceiptResponseItem[] {
+  getReceipts(): WalletReceipt[] {
     return this.wallet?.receipts || [];
   }
 }

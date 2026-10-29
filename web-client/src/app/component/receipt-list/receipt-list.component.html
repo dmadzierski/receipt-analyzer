@@ -16,9 +16,26 @@
     <td *matCellDef="let element" mat-cell> {{ element.name }}</td>
   </ng-container>
 
-  <ng-container matColumnDef="description">
-    <th *matHeaderCellDef mat-header-cell> Description</th>
-    <td *matCellDef="let element" mat-cell> {{ element.description }}</td>
+  <ng-container matColumnDef="store">
+    <th *matHeaderCellDef mat-header-cell mat-sort-header> Store</th>
+    <td *matCellDef="let element" mat-cell> {{ formatStore(element.store) || '-' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="paymentDate">
+    <th *matHeaderCellDef mat-header-cell mat-sort-header> Payment date</th>
+    <td *matCellDef="let element" mat-cell> {{ (element.paymentDate | date:'dd-MM-yyyy') || '-' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="totalPrice">
+    <th *matHeaderCellDef mat-header-cell mat-sort-header> Total price</th>
+    <td *matCellDef="let element" mat-cell> {{ (element.totalPrice | number:'1.2-2') || '-' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="isCorrect">
+    <th *matHeaderCellDef mat-header-cell> Correct</th>
+    <td *matCellDef="let element" mat-cell>
+      <mat-icon>{{ element.isCorrect ? 'check_circle' : 'help_outline' }}</mat-icon>
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="createdDate">

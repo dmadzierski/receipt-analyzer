@@ -4,18 +4,19 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSortModule, MatSort} from '@angular/material/sort';
 import {Router, RouterModule} from '@angular/router';
-import {GetReceiptResponseItem} from '../../model/receipt.model';
-import {DatePipe} from '@angular/common';
+import {WalletReceipt} from '../../model/wallet.model';
+import {StoreDetails} from '../../model/receipt.model';
+import {DatePipe, DecimalPipe} from '@angular/common';
 
 @Component({
   selector: 'receipt-list',
   templateUrl: './receipt-list.component.html',
   styleUrl: './receipt-list.component.scss',
-  imports: [MatTableModule, MatIconModule, MatButtonModule, RouterModule, DatePipe, MatSortModule],
+  imports: [MatTableModule, MatIconModule, MatButtonModule, RouterModule, DatePipe, DecimalPipe, MatSortModule],
 })
 export class ReceiptListComponent implements AfterViewInit {
-  displayedColumns: string[] = ['name', 'description', 'createdDate'];
-  matDataSource = new MatTableDataSource<GetReceiptResponseItem>();
+  displayedColumns: string[] = ['name', 'store', 'paymentDate', 'totalPrice', 'isCorrect', 'createdDate'];
+  matDataSource = new MatTableDataSource<WalletReceipt>();
 
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -23,13 +24,15 @@ export class ReceiptListComponent implements AfterViewInit {
   public walletId: string = '';
 
   @Input()
-  set dataSource(value: GetReceiptResponseItem[]) {
+  set dataSource(value: WalletReceipt[]) {
    this.matDataSource.data = value;
   }
 
   constructor(
    private readonly router: Router
   ) {
+   this.matDataSource.sortingDataAccessor = (receipt, column) =>
+     column === 'store' ? this.formatStore(receipt.store) : (receipt as any)[column] ?? '';
   }
 
   ngAfterViewInit() {
@@ -38,8 +41,15 @@ export class ReceiptListComponent implements AfterViewInit {
    this.matDataSource.sort = this.sort;
   }
 
-  goToDetails(row: GetReceiptResponseItem) {
+  goToDetails(row: WalletReceipt) {
    this.router.navigate(['/receipts/', row.id]);
+  }
+
+  formatStore(store?: StoreDetails): string {
+   if (!store) {
+     return '';
+   }
+   return [store.brand, store.address, store.city].filter(Boolean).join(', ');
   }
 
 }

@@ -1,4 +1,4 @@
-import {GetReceiptResponseItem} from './receipt.model';
+import {StoreDetails} from './receipt.model';
 
 export interface GetWalletListResponse {
   items: GetWalletListResponseItem[];
@@ -24,5 +24,15 @@ export interface AddWalletResponse {
 export interface WalletDetails {
   id: string;
   name: string;
-  receipts: GetReceiptResponseItem[];
+  receipts: WalletReceipt[];
+}
+
+export interface WalletReceipt {
+  id: string;
+  name: string;
+  paymentDate?: string;
+  isCorrect?: boolean;
+  totalPrice?: number;
+  createdDate: string;
+  store?: StoreDetails;
 }
