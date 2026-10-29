@@ -39,6 +39,10 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
         """)
     void updateProduct(SqlProductDictQuery product, Collection<String> ids);
 
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM SqlReceiptItem i WHERE i.id IN :ids")
+    void deleteByIds(Collection<String> ids);
+
 }
 
 @AllArgsConstructor
@@ -55,7 +59,8 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
 
     @Override
     public void deleteAllByIdIn(List<String> ids) {
-        this.receiptItemRepository.deleteAllById(ids);
+        if (ids.isEmpty()) return;
+        this.receiptItemRepository.deleteByIds(ids);
     }
 
     @Override
