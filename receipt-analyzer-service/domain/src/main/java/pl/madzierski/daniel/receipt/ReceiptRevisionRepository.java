@@ -13,4 +13,6 @@ interface ReceiptRevisionRepository {
     void deleteById(String revisionId);
 
     void deleteAllByReceiptId(String receiptId);
+
+    void unsetPreferredInOtherRevisions(String receiptId, String preferredRevisionId);
 }

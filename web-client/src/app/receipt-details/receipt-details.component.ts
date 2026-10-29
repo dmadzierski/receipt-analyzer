@@ -134,7 +134,6 @@ export class ReceiptDetailsComponent implements OnInit {
     return this.revisionService.getRevisionDetails(revisionId);
   }
 
-  // TODO dodaÄ‡ usuwanie ostatniej preferowanej rewizji przy ustawieniu nowej
   protected saveRevision() {
     this.revisionService.updateRevision(this.receiptDetails.preferredRevision!!).subscribe(
       {

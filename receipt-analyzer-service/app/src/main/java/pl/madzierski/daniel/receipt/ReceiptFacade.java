@@ -202,6 +202,8 @@ public class ReceiptFacade {
         }
         if (arePricesConsistent(revision)) revision.setIsCorrect(true);
         revisionRepository.save(revision);
+        if (Boolean.TRUE.equals(revision.getIsPreferredRevision()) && revision.getReceipt() != null)
+            revisionRepository.unsetPreferredInOtherRevisions(revision.getReceipt().getId(), revision.getId());
         return UpdateRevisionResponse.map(toDto(revision), revision.getItems()
             .stream()
             .map(this::toDto)

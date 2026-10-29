@@ -24,6 +24,14 @@ interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision,
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId")
     void deleteByReceiptId(String receiptId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+        UPDATE SqlReceiptRevision r
+        SET r.isPreferredRevision = false
+        WHERE r.receipt.id = :receiptId AND r.id <> :preferredRevisionId AND r.isPreferredRevision = true
+        """)
+    void unsetPreferredInOtherRevisions(String receiptId, String preferredRevisionId);
 }
 
 @AllArgsConstructor
@@ -58,5 +66,10 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     public void deleteAllByReceiptId(String receiptId) {
         repository.detachReferencesByReceiptId(receiptId);
         repository.deleteByReceiptId(receiptId);
+    }
+
+    @Override
+    public void unsetPreferredInOtherRevisions(String receiptId, String preferredRevisionId) {
+        repository.unsetPreferredInOtherRevisions(receiptId, preferredRevisionId);
     }
 }
