@@ -73,10 +73,9 @@ export class RevisionDetailsComponent implements OnChanges {
       const unitPrice = toDecimal(item.unitPrice);
       const totalPrice = toDecimal(item.totalPrice);
 
-      const expected = amount.times(unitPrice).minus(discount);
-      const diff = expected.minus(totalPrice).abs();
+      const expected = amount.times(unitPrice).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).minus(discount);
 
-      return diff.greaterThan(new Decimal('0.05'));
+      return !expected.equals(totalPrice);
     } catch {
       return false;
     }
@@ -255,22 +254,12 @@ export class RevisionDetailsComponent implements OnChanges {
 
   protected isTotalReceiptPriceInValid() {
     try {
-      const totalPrice = this.data.data.reduce((sum, item) => {
-        const discount = this.toDecimal(item.discount || 0);
-        const amount = this.toDecimal(item.amount);
-        const unitPrice = this.toDecimal(item.unitPrice);
+      const itemsSum = this.data.data.reduce(
+        (sum, item) => sum.plus(this.toDecimal(item.totalPrice)),
+        this.toDecimal(0)
+      );
 
-        const itemTotal = amount.times(unitPrice).minus(discount);
-
-        return sum.plus(itemTotal);
-      }, this.toDecimal(0));
-
-      const expected = this.toDecimal(this.revision().totalPrice);
-      const diff = expected.minus(totalPrice).abs();
-
-      console.log(totalPrice.toString());
-
-      return diff.greaterThan(new Decimal('0.05'));
+      return !itemsSum.equals(this.toDecimal(this.revision().totalPrice));
     } catch {
       return false;
     }

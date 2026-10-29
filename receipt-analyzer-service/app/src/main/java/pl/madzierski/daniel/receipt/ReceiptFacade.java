@@ -20,6 +20,8 @@ import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -48,6 +50,7 @@ public class ReceiptFacade {
         FileGroupDto fileGroupDto = fileFacade.save(receipt.getId(), files, userSub);
         ReceiptRevisionResolveData revisionData = receiptResolverLocatorService.resolve(files, body.strategy());
         ReceiptRevision revision = receiptRevisionFactory.from(revisionData);
+        revision.setIsCorrect(arePricesConsistent(revision));
         revision.setSourceFileGroup(new FileGroupQuery(fileGroupDto.id()));
         revision.setReceipt(receipt);
         revisionRepository.save(revision);
@@ -197,11 +200,27 @@ public class ReceiptFacade {
                 }
             }
         }
+        if (arePricesConsistent(revision)) revision.setIsCorrect(true);
         revisionRepository.save(revision);
         return UpdateRevisionResponse.map(toDto(revision), revision.getItems()
             .stream()
             .map(this::toDto)
             .collect(Collectors.toSet()));
+    }
+
+    private boolean arePricesConsistent(ReceiptRevision revision) {
+        if (revision.getTotalPrice() == null || revision.getItems().isEmpty()) return false;
+        BigDecimal itemsSum = BigDecimal.ZERO;
+        for (ReceiptItem item : revision.getItems()) {
+            if (item.getAmount() == null || item.getUnitPrice() == null || item.getTotalPrice() == null) return false;
+            BigDecimal discount = item.getDiscount() != null ? item.getDiscount() : BigDecimal.ZERO;
+            BigDecimal expectedItemTotal = item.getAmount().multiply(item.getUnitPrice())
+                .setScale(2, RoundingMode.HALF_UP)
+                .subtract(discount);
+            if (expectedItemTotal.compareTo(item.getTotalPrice()) != 0) return false;
+            itemsSum = itemsSum.add(item.getTotalPrice());
+        }
+        return itemsSum.compareTo(revision.getTotalPrice()) == 0;
     }
 
     private ReceiptItemDto toDto(ReceiptItem item) {
@@ -325,6 +344,7 @@ public class ReceiptFacade {
         if (files.isEmpty()) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
         ReceiptRevisionResolveData revisionData = receiptResolverLocatorService.resolve(files, body.strategy());
         ReceiptRevision revision = receiptRevisionFactory.from(revisionData);
+        revision.setIsCorrect(arePricesConsistent(revision));
         revision.setSourceFileGroup(new FileGroupQuery(body.fileGroupId()));
         revision.setReceipt(receipt);
         revision = revisionRepository.save(revision);
