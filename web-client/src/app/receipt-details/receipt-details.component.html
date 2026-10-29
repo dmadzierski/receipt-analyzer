@@ -1,33 +1,66 @@
 <div class="content">
   <div class="form-container left-panel">
     <h1>Receipt data</h1>
-    <mat-form-field>
-      <mat-label>Receipt name</mat-label>
-      <input [(ngModel)]="receiptDetails.name" [readonly]="true" matInput maxlength="30"/>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Description</mat-label>
-      <input [(ngModel)]="receiptDetails.description" [readonly]="true" matInput maxlength="30"/>
-    </mat-form-field>
-
-    @if (receiptDetails.store) {
+    @if (receiptEditMode) {
       <mat-form-field>
-        <mat-label>Store</mat-label>
-        <input
-          [ngModel]="receiptDetails.store.brand + ' - ' + receiptDetails.store.address + ', ' + receiptDetails.store.city + ' ' + receiptDetails.store.postalCode + ', ' + receiptDetails.store.country"
-          [readonly]="true"
-          matInput
-        />
+        <mat-label>Receipt name</mat-label>
+        <input [(ngModel)]="receiptEdit.name" matInput maxlength="30" required/>
       </mat-form-field>
-    }
 
-    <div class="actions">
-      <button (click)="deleteReceipt()" mat-stroked-button type="button">
-        <mat-icon>delete</mat-icon>
-        Delete receipt
-      </button>
-    </div>
+      <mat-form-field>
+        <mat-label>Description</mat-label>
+        <input [(ngModel)]="receiptEdit.description" matInput maxlength="30"/>
+      </mat-form-field>
+
+      <app-store-autocomplete
+        [value]="storeSearchText"
+        [options]="stores"
+        (valueChange)="searchStores($event)"
+        (optionSelected)="selectStore($event)"
+        (createNew)="openCreateStoreDialog()"
+      ></app-store-autocomplete>
+
+      <div class="actions">
+        <button (click)="saveReceipt()" [disabled]="!canSaveReceipt()" mat-stroked-button type="button">
+          Save
+        </button>
+        <button (click)="cancelReceiptEdit()" mat-stroked-button type="button">
+          Cancel
+        </button>
+      </div>
+    } @else {
+      <mat-form-field>
+        <mat-label>Receipt name</mat-label>
+        <input [ngModel]="receiptDetails.name" [readonly]="true" matInput/>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Description</mat-label>
+        <input [ngModel]="receiptDetails.description" [readonly]="true" matInput/>
+      </mat-form-field>
+
+      @if (receiptDetails.store) {
+        <mat-form-field>
+          <mat-label>Store</mat-label>
+          <input
+            [ngModel]="receiptDetails.store.brand + ' - ' + receiptDetails.store.address + ', ' + receiptDetails.store.city + ' ' + receiptDetails.store.postalCode + ', ' + receiptDetails.store.country"
+            [readonly]="true"
+            matInput
+          />
+        </mat-form-field>
+      }
+
+      <div class="actions">
+        <button (click)="startReceiptEdit()" mat-stroked-button type="button">
+          <mat-icon>edit</mat-icon>
+          Edit receipt
+        </button>
+        <button (click)="deleteReceipt()" mat-stroked-button type="button">
+          <mat-icon>delete</mat-icon>
+          Delete receipt
+        </button>
+      </div>
+    }
 
     <h2>Revisions</h2>
 

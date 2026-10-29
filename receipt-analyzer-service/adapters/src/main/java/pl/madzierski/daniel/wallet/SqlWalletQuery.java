@@ -24,4 +24,8 @@ public class SqlWalletQuery {
         return new SqlWalletQuery(wallet.getId());
     }
 
+    public WalletQuery toWalletQuery() {
+        return new WalletQuery(id);
+    }
+
 }

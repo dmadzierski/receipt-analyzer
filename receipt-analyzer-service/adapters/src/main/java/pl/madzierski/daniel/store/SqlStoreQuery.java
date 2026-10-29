@@ -24,5 +24,9 @@ public class SqlStoreQuery {
         return new SqlStoreQuery(store.getId());
     }
 
+    public StoreQuery toStoreQuery() {
+        return new StoreQuery(id);
+    }
+
 
 }

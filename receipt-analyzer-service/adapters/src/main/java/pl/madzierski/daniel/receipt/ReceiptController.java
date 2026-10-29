@@ -53,6 +53,12 @@ class ReceiptController {
         return ResponseEntity.ok(receiptFacade.createRevision(receiptId, createRevisionRequest));
     }
 
+    @PutMapping(path = "/{receiptId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UpdateReceiptResponse> updateReceipt(@PathVariable @UUID String receiptId,
+                                                        @RequestBody @Valid UpdateReceiptRequest request) {
+        return ResponseEntity.ok(receiptFacade.updateReceipt(receiptId, request));
+    }
+
     @DeleteMapping(path = "/{receiptId}")
     ResponseEntity<Void> deleteReceipt(@PathVariable @UUID String receiptId) {
         receiptFacade.deleteReceipt(receiptId);

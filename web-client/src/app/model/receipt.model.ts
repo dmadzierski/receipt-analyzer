@@ -27,6 +27,19 @@ export enum ResolverStrategy {
   BIEDRONKA_JSON
 }
 
+export interface UpdateReceiptRequest {
+  name: string
+  description: string
+  storeId: string
+}
+
+export interface UpdateReceiptResponse {
+  id: string
+  name: string
+  description: string
+  storeId: string
+}
+
 export interface CreateReceiptResponse {
   id: string
   name: string

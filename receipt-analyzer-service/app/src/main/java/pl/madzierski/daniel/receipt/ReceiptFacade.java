@@ -354,6 +354,20 @@ public class ReceiptFacade {
     }
 
     @Transactional
+    UpdateReceiptResponse updateReceipt(String receiptId, UpdateReceiptRequest request) {
+        Receipt receipt = receiptRepository.findById(receiptId)
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
+        storeQueryRepository.findStoreById(request.storeId())
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND));
+        receipt.setName(request.name().trim());
+        receipt.setDescription(request.description());
+        receipt.setStore(new StoreQuery(request.storeId()));
+        Receipt savedReceipt = receiptRepository.save(receipt);
+        return new UpdateReceiptResponse(savedReceipt.getId(), savedReceipt.getName(), savedReceipt.getDescription(),
+            savedReceipt.getStore() != null ? savedReceipt.getStore().getId() : null);
+    }
+
+    @Transactional
     void deleteReceipt(String receiptId) {
         receiptRepository.findById(receiptId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));

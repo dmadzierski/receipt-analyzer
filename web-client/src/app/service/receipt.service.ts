@@ -7,6 +7,8 @@ import {
   CreateRevisionRequest, CreateRevisionResponse,
   GetReceiptDetailsResponse,
   Revision,
+  UpdateReceiptRequest,
+  UpdateReceiptResponse,
 } from '../model/receipt.model';
 
 @Injectable({
@@ -57,6 +59,10 @@ export class ReceiptService {
 
   createRevision(receiptId: string, body :CreateRevisionRequest) {
     return this.httpClient.post<CreateRevisionResponse>(`/api/receipts/${receiptId}`, body);
+  }
+
+  updateReceipt(receiptId: string, body: UpdateReceiptRequest): Observable<UpdateReceiptResponse> {
+    return this.httpClient.put<UpdateReceiptResponse>(`/api/receipts/${receiptId}`, body);
   }
 
   deleteReceipt(receiptId: string): Observable<void> {

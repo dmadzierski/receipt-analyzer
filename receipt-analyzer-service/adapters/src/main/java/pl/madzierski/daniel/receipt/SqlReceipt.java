@@ -65,6 +65,8 @@ class SqlReceipt {
         receipt.setModifiedDate(modifiedDate);
         receipt.setName(name);
         receipt.setDescription(description);
+        receipt.setWallet(wallet != null ? wallet.toWalletQuery() : null);
+        receipt.setStore(store != null ? store.toStoreQuery() : null);
         return receipt;
     }
 }

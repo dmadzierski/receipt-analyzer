@@ -1,5 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ReceiptService} from '../service/receipt.service';
+import {StoreService} from '../service/store.service';
 import {
   CreateRevisionRequest,
   FileGroup,
@@ -7,8 +9,13 @@ import {
   GetReceiptDetailsResponse,
   ResolverStrategy,
   Revision,
-  RevisionDetails
+  RevisionDetails,
+  StoreDetails,
+  UpdateReceiptRequest
 } from '../model/receipt.model';
+import {CreateStoreResponse, GetStoreListResponseItem} from '../model/store.model';
+import {StoreAutocompleteComponent} from '../component/store-autocomplete/store-autocomplete.component';
+import {StoreCreateDialogComponent} from '../component/store-create-dialog/store-create-dialog.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -24,7 +31,7 @@ import {RevisionListComponent} from '../component/revision-list/revision-list.co
 import {MatIcon} from '@angular/material/icon';
 import {RevisionService} from '../service/revision.service';
 import {FileGroupService} from '../service/file-group.service';
-import {Observable} from 'rxjs';
+import {debounceTime, distinctUntilChanged, map, Observable, of, Subject, switchMap} from 'rxjs';
 import {FileGroupSelectorComponent} from '../component/file-group-selector/file-group-selector.component';
 import {FilePreviewComponent} from '../component/file-preview/file-preview.component';
 import {AddFilesDialogComponent} from '../component/add-files-dialog/add-files-dialog.component';
@@ -48,7 +55,8 @@ import {
     RevisionListComponent,
     MatIcon,
     FileGroupSelectorComponent,
-    FilePreviewComponent
+    FilePreviewComponent,
+    StoreAutocompleteComponent
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './receipt-details.component.html',
@@ -66,6 +74,12 @@ export class ReceiptDetailsComponent implements OnInit {
   editMode: boolean = false;
   receiptId: string = '';
   createRevisionData: CreateRevisionRequest = {} as CreateRevisionRequest;
+  receiptEditMode: boolean = false;
+  receiptEdit: UpdateReceiptRequest = {name: '', description: '', storeId: ''};
+  storeSearchText: string = '';
+  stores: GetStoreListResponseItem[] = [];
+  private readonly storeService = inject(StoreService);
+  private readonly storeSearchSubject = new Subject<string>();
 
   constructor(
     private readonly receiptService: ReceiptService,
@@ -75,6 +89,77 @@ export class ReceiptDetailsComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly dialog: MatDialog,
   ) {
+    this.storeSearchSubject
+      .pipe(
+        debounceTime(250),
+        distinctUntilChanged(),
+        switchMap(query => query.length < 3
+          ? of([] as GetStoreListResponseItem[])
+          : this.storeService.getStoreList(query).pipe(map(result => result.items ?? []))),
+        takeUntilDestroyed(inject(DestroyRef))
+      )
+      .subscribe(items => this.stores = items);
+  }
+
+  startReceiptEdit(): void {
+    this.receiptEdit = {
+      name: this.receiptDetails.name ?? '',
+      description: this.receiptDetails.description ?? '',
+      storeId: this.receiptDetails.store?.id ?? '',
+    };
+    this.storeSearchText = this.storeLabel(this.receiptDetails.store);
+    this.stores = [];
+    this.receiptEditMode = true;
+  }
+
+  cancelReceiptEdit(): void {
+    this.receiptEditMode = false;
+  }
+
+  canSaveReceipt(): boolean {
+    return this.receiptEdit.name.trim().length > 0 && !!this.receiptEdit.storeId;
+  }
+
+  saveReceipt(): void {
+    if (!this.canSaveReceipt()) return;
+    this.receiptService.updateReceipt(this.receiptId, {...this.receiptEdit, name: this.receiptEdit.name.trim()}).subscribe({
+      next: () => {
+        this.receiptEditMode = false;
+        // reload to get the full store details for the read-only view
+        this.receiptService.getReceiptDetails(this.receiptId).subscribe(res => {
+          this.receiptDetails.name = res.name;
+          this.receiptDetails.description = res.description;
+          this.receiptDetails.store = res.store;
+        });
+      }
+    });
+  }
+
+  searchStores(text: string): void {
+    this.storeSearchText = text;
+    // typing invalidates the previously selected store until a new one is chosen
+    this.receiptEdit.storeId = '';
+    this.storeSearchSubject.next(text.trim());
+  }
+
+  selectStore(store: GetStoreListResponseItem): void {
+    this.receiptEdit.storeId = store.id;
+    this.storeSearchText = this.storeLabel(store);
+  }
+
+  openCreateStoreDialog(): void {
+    this.dialog.open(StoreCreateDialogComponent, {width: '500px', disableClose: true})
+      .afterClosed()
+      .subscribe((createdStore?: CreateStoreResponse) => {
+        if (createdStore) {
+          this.stores = [createdStore];
+          this.selectStore(createdStore);
+        }
+      });
+  }
+
+  private storeLabel(store?: StoreDetails | GetStoreListResponseItem): string {
+    return store ? `${store.brand} - ${store.city} ${store.address}` : '';
   }
 
   ngOnInit(): void {
