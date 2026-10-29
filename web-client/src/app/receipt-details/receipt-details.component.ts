@@ -216,6 +216,27 @@ export class ReceiptDetailsComponent implements OnInit {
     });
   }
 
+  deleteReceipt(): void {
+    if (!this.receiptId) return;
+    const revisionCount = this.receiptDetails.revisions?.length ?? 0;
+    const fileGroupCount = this.fileGroups.length;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete receipt',
+        message: `Delete receipt "${this.receiptDetails.name}" together with ${revisionCount} revision(s) with their items `
+          + `and ${fileGroupCount} file group(s)? This cannot be undone.`,
+        confirmLabel: 'Delete',
+      } as ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed?: boolean) => {
+      if (!confirmed) return;
+      this.receiptService.deleteReceipt(this.receiptId).subscribe({
+        next: () => this.router.navigate(this.receiptDetails.walletId ? ['/wallets', this.receiptDetails.walletId] : ['/']),
+        error: (err) => console.error(err)
+      });
+    });
+  }
+
   deleteFileGroup(fileGroupId: string): void {
     if (!fileGroupId) return;
     this.dialog.open(ConfirmDialogComponent, {

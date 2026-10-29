@@ -53,4 +53,10 @@ class ReceiptController {
         return ResponseEntity.ok(receiptFacade.createRevision(receiptId, createRevisionRequest));
     }
 
+    @DeleteMapping(path = "/{receiptId}")
+    ResponseEntity<Void> deleteReceipt(@PathVariable @UUID String receiptId) {
+        receiptFacade.deleteReceipt(receiptId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

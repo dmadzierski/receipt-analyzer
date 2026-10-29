@@ -6,4 +6,6 @@ interface ReceiptRepository {
     Receipt save(Receipt receipt);
 
     Optional<Receipt> findById(String receiptId);
+
+    void deleteById(String receiptId);
 }

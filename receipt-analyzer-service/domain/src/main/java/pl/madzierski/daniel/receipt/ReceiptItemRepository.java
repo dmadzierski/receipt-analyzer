@@ -11,6 +11,8 @@ interface ReceiptItemRepository {
 
     void deleteAllByIdIn(List<String> ids);
 
+    void deleteAllByReceiptId(String receiptId);
+
     List<ReceiptItem> saveAll(List<ReceiptItem> entities, String receiptRevisionId);
 
     List<ReceiptItem> findUnmatchedItemsByReceiptId(String revisionId);

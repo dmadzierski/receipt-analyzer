@@ -46,6 +46,7 @@ export interface GetReceiptDetailsResponse {
   id: string
   name: string
   description: string
+  walletId?: string
   preferredRevision?: RevisionDetails
   revisions: Revision[]
   createdDate: string

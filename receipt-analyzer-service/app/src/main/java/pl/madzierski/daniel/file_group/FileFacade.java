@@ -106,4 +106,8 @@ public class FileFacade {
     public void deleteFileGroupId(String fileGroupId, String userSub) {
         fileGroupRepository.deleteById(fileGroupId);
     }
+
+    public void deleteFileGroupsByReceiptId(String receiptId) {
+        fileGroupRepository.deleteAllByReceiptId(receiptId);
+    }
 }

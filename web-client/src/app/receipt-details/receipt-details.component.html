@@ -22,6 +22,13 @@
       </mat-form-field>
     }
 
+    <div class="actions">
+      <button (click)="deleteReceipt()" mat-stroked-button type="button">
+        <mat-icon>delete</mat-icon>
+        Delete receipt
+      </button>
+    </div>
+
     <h2>Revisions</h2>
 
     <app-revision-list (selectedRevisionChange)="handleSelectedRevisionChange($event)" [receiptId]="receiptDetails.id"

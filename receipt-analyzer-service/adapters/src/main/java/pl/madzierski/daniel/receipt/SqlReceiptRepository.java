@@ -24,4 +24,9 @@ class ReceiptRepositoryImpl implements ReceiptRepository {
     public Optional<Receipt> findById(String receiptId) {
         return this.repository.findById(receiptId).map(SqlReceipt::toReceipt);
     }
+
+    @Override
+    public void deleteById(String receiptId) {
+        this.repository.deleteById(receiptId);
+    }
 }

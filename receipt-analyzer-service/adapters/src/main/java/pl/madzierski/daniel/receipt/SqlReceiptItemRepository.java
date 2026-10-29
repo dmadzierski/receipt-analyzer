@@ -43,6 +43,21 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
     @Query("DELETE FROM SqlReceiptItem i WHERE i.id IN :ids")
     void deleteByIds(Collection<String> ids);
 
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+        UPDATE SqlReceiptItem i
+        SET i.parentItem = null
+        WHERE i.receiptRevision.id IN (SELECT r.id FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId)
+        """)
+    void detachParentItemsByReceiptId(String receiptId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+        DELETE FROM SqlReceiptItem i
+        WHERE i.receiptRevision.id IN (SELECT r.id FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId)
+        """)
+    void deleteByReceiptId(String receiptId);
+
 }
 
 @AllArgsConstructor
@@ -63,6 +78,11 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
         this.receiptItemRepository.deleteByIds(ids);
     }
 
+    @Override
+    public void deleteAllByReceiptId(String receiptId) {
+        this.receiptItemRepository.detachParentItemsByReceiptId(receiptId);
+        this.receiptItemRepository.deleteByReceiptId(receiptId);
+    }
     @Override
     public List<ReceiptItem> saveAll(List<ReceiptItem> entities, String receiptRevisionId) {
         SqlReceiptRevision sqlReceiptRevision =

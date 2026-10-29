@@ -11,4 +11,6 @@ interface ReceiptRevisionRepository {
     Optional<ReceiptRevision> findById(String revisionId);
 
     void deleteById(String revisionId);
+
+    void deleteAllByReceiptId(String receiptId);
 }

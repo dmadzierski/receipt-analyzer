@@ -58,4 +58,8 @@ export class ReceiptService {
   createRevision(receiptId: string, body :CreateRevisionRequest) {
     return this.httpClient.post<CreateRevisionResponse>(`/api/receipts/${receiptId}`, body);
   }
+
+  deleteReceipt(receiptId: string): Observable<void> {
+    return this.httpClient.delete<void>(`/api/receipts/${receiptId}`);
+  }
 }

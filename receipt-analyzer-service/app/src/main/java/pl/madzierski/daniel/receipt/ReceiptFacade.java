@@ -351,6 +351,16 @@ public class ReceiptFacade {
         return new CreateRevisionResponse(revision.getId());
     }
 
+    @Transactional
+    void deleteReceipt(String receiptId) {
+        receiptRepository.findById(receiptId)
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
+        receiptItemRepository.deleteAllByReceiptId(receiptId);
+        revisionRepository.deleteAllByReceiptId(receiptId);
+        fileFacade.deleteFileGroupsByReceiptId(receiptId);
+        receiptRepository.deleteById(receiptId);
+    }
+
     void deleteRevision(String revisionId) {
         if (revisionRepository.findById(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND))
