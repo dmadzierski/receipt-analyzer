@@ -1,3 +1,4 @@
+import {formatDate} from '@angular/common';
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
@@ -20,7 +21,11 @@ export class RevisionService {
   }
 
   updateRevision(revision: RevisionDetails) {
-    return this.httpClient.put<RevisionDetails>(`/api/revisions/${revision.id}`, revision)
+    const paymentDate: unknown = revision.paymentDate;
+    const body = paymentDate instanceof Date
+      ? {...revision, paymentDate: formatDate(paymentDate, "yyyy-MM-dd'T'HH:mm:ss", 'en-US')}
+      : revision;
+    return this.httpClient.put<RevisionDetails>(`/api/revisions/${revision.id}`, body)
   }
 
   deleteRevision(id: string) {
