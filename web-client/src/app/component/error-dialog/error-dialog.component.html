@@ -1,0 +1,35 @@
+<h2 class="error-title" mat-dialog-title>
+  <mat-icon class="error-icon">error_outline</mat-icon>
+  {{ data.title }}
+</h2>
+<mat-dialog-content>
+  <p class="error-message">{{ data.message }}</p>
+
+  <button (click)="toggleDetails()" class="details-toggle" mat-button type="button">
+    <mat-icon>{{ showDetails() ? 'expand_less' : 'expand_more' }}</mat-icon>
+    {{ (showDetails() ? 'ERROR.HIDE_DETAILS' : 'ERROR.SHOW_DETAILS') | translate }}
+  </button>
+
+  @if (showDetails()) {
+    <dl class="error-details">
+      <dt>{{ 'ERROR.TIME' | translate }}</dt>
+      <dd>{{ data.details.timestamp | date:'dd-MM-yyyy HH:mm:ss' }}</dd>
+
+      @if (data.details.status !== undefined) {
+        <dt>{{ 'ERROR.STATUS' | translate }}</dt>
+        <dd>{{ data.details.status }} {{ data.details.statusText }}</dd>
+      }
+      @if (data.details.code) {
+        <dt>{{ 'ERROR.CODE' | translate }}</dt>
+        <dd><code>{{ data.details.code }}</code></dd>
+      }
+      @if (data.details.path) {
+        <dt>{{ 'ERROR.REQUEST' | translate }}</dt>
+        <dd><code>{{ data.details.method }} {{ data.details.path }}</code></dd>
+      }
+    </dl>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close type="button">{{ 'ERROR.CLOSE' | translate }}</button>
+</mat-dialog-actions>

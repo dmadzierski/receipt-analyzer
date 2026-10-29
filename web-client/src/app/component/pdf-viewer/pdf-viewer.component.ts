@@ -2,7 +2,7 @@ import {Component, ElementRef, inject, Input, ViewChild,} from "@angular/core";
 import * as pdfjsLib from "pdfjs-dist";
 import Keycloak from 'keycloak-js';
 import { environment } from '../../../environments/environment';
-
+import {ErrorDialogService} from '../../error/error-dialog.service';
 @Component({
   selector: "app-pdf-viewer",
   templateUrl: "./pdf-viewer.component.html",
@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment';
 export class PdfViewerComponent {
 
   keycloak = inject(Keycloak);
+  private readonly errorDialog = inject(ErrorDialogService);
 
   @ViewChild("pdfContainer", {static: true})
   pdfContainer!: ElementRef<HTMLDivElement>;
@@ -50,6 +51,7 @@ export class PdfViewerComponent {
       this.renderPage(this.currentPageNumber);
     } catch (error) {
       console.error(error);
+      this.errorDialog.show('ERROR.PDF_LOAD');
     }
   }
 

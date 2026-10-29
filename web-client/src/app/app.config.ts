@@ -10,6 +10,9 @@ import {
   provideKeycloak,
 } from 'keycloak-angular';
 import {environment} from '../environments/environment';
+import {errorInterceptor} from './error/error.interceptor';
+import {provideTranslateService} from '@ngx-translate/core';
+import {provideTranslateHttpLoader} from '@ngx-translate/http-loader';
 
 
 const urlCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
@@ -37,8 +40,14 @@ export const appConfig: ApplicationConfig = {
     }),
     provideHttpClient(
       withFetch(),
-      withInterceptors([includeBearerTokenInterceptor])
+      withInterceptors([includeBearerTokenInterceptor, errorInterceptor])
     ),
+    provideTranslateService({
+      // useHttpBackend skips the interceptors: the translation file needs no token and must not trigger the error dialog
+      loader: provideTranslateHttpLoader({prefix: './i18n/', suffix: '.json', useHttpBackend: true}),
+      fallbackLang: 'en',
+      lang: 'en',
+    }),
     {
       provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
       useValue: [urlCondition],
