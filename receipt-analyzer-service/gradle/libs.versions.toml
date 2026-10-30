@@ -5,6 +5,7 @@ pdfbox = "2.0.30"
 tess4j = "5.4.0"
 commons-text = "1.15.0"
 postgresql = "42.7.7"
+flyway = "11.7.2"
 tika = "3.2.3"
 jakarta-validation = "4.0.0-M1"
 
@@ -21,5 +22,7 @@ pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 tess4j = { module = "net.sourceforge.tess4j:tess4j", version.ref = "tess4j" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 tika-core = { module = "org.apache.tika:tika-core", version.ref = "tika" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }

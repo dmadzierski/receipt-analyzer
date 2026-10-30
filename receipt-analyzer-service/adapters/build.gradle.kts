@@ -8,6 +8,8 @@ dependencies {
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.tika.core)
+    implementation(libs.flyway.core)
+    runtimeOnly(libs.flyway.database.postgresql)
     runtimeOnly(libs.postgresql)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
