@@ -125,3 +125,4 @@ services:
 
 volumes:
   receipt_analyzer_postgres_data:
+    name: postgres_data
