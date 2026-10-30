@@ -17,6 +17,26 @@ pipeline {
 
 	stages {
 
+		stage('Test') {
+			agent {
+				docker {
+					image 'gradle:9.3.0-jdk21'
+					args '-v /var/run/docker.sock:/var/run/docker.sock -v receipt-analyzer-gradle-cache:/home/gradle/.gradle -u root'
+					reuseNode true
+				}
+			}
+			steps {
+				dir('receipt-analyzer-service') {
+					sh 'gradle :monolith:test --no-daemon'
+				}
+			}
+			post {
+				always {
+					junit allowEmptyResults: true, testResults: 'receipt-analyzer-service/monolith/build/test-results/test/*.xml'
+				}
+			}
+		}
+
 		stage('Login to Registry') {
 			steps {
 				sh 'echo $REGISTRY_CREDS_PSW | docker login $REGISTRY -u $REGISTRY_CREDS_USR --password-stdin'
