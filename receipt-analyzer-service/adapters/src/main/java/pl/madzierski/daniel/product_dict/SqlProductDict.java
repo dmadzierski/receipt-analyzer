@@ -2,12 +2,8 @@ package pl.madzierski.daniel.product_dict;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,18 +14,9 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "product")
-@EqualsAndHashCode(exclude = {"categories", "aliases"})
-@EntityListeners({AuditingEntityListener.class})
-class SqlProductDict {
-    @Id
-    @UuidGenerator
-    private String id;
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
+@EqualsAndHashCode(callSuper = true, exclude = {"categories", "aliases"})
+class SqlProductDict extends BaseEntity {
+
     @Column(nullable = false, unique = true)
     private String name;
     @Getter(AccessLevel.NONE)

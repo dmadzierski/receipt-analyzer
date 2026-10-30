@@ -2,35 +2,16 @@ package pl.madzierski.daniel.product_dict;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 
-import java.time.LocalDateTime;
-
-
-@EqualsAndHashCode(exclude = "productDict")
+@EqualsAndHashCode(callSuper = true, exclude = "productDict")
 @Entity
 @Table(name = "product_alias")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@EntityListeners({AuditingEntityListener.class})
-class SqlProductAlias {
-
-    @Id
-    @UuidGenerator
-    private String id;
-
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
+class SqlProductAlias extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -42,13 +23,11 @@ class SqlProductAlias {
 
 
     public static SqlProductAlias fromProductAlias(ProductAlias productAlias, SqlProductDict sqlProductDict) {
-        return new SqlProductAlias(
-            productAlias.getId(),
-            productAlias.getCreatedDate(),
-            productAlias.getModifiedDate(),
-            productAlias.getName(),
-            sqlProductDict
-        );
+        SqlProductAlias sqlProductAlias = new SqlProductAlias(productAlias.getName(), sqlProductDict);
+        sqlProductAlias.setId(productAlias.getId());
+        sqlProductAlias.setCreatedDate(productAlias.getCreatedDate());
+        sqlProductAlias.setModifiedDate(productAlias.getModifiedDate());
+        return sqlProductAlias;
     }
 
     public ProductAlias toProductAlias(ProductDict productDict) {

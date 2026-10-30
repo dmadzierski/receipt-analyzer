@@ -1,22 +1,22 @@
 package pl.madzierski.daniel.product_dict;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product")
-@AllArgsConstructor
 @NoArgsConstructor
-public class SqlProductDictQuery {
+public class SqlProductDictQuery extends BaseEntity {
 
-    @Id
-    private String id;
+    public SqlProductDictQuery(String id) {
+        this.id = id;
+    }
+
 
     public static SqlProductDictQuery fromProductDict(ProductDictQuery nameDict) {
         return new SqlProductDictQuery(nameDict.getId());

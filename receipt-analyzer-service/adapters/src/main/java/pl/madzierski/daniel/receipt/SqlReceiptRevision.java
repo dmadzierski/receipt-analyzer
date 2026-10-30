@@ -2,10 +2,7 @@ package pl.madzierski.daniel.receipt;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.file_group.SqlFileGroupQuery;
 
 import java.math.BigDecimal;
@@ -15,26 +12,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@EqualsAndHashCode(exclude = {"items", "childReceiptRevisions", "receipt", "parentReceiptRevision", "sourceFileGroup"})
+@EqualsAndHashCode(callSuper = true, exclude = {"items", "childReceiptRevisions", "receipt", "parentReceiptRevision", "sourceFileGroup"})
 @Entity
 @Table(name = "receipt_revision")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EntityListeners({AuditingEntityListener.class})
 @Builder
-class SqlReceiptRevision {
+class SqlReceiptRevision extends BaseEntity {
 
-    @Id
-    @UuidGenerator
-    private String id;
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
     private String name;
     private String revision;
     @Enumerated(EnumType.STRING)

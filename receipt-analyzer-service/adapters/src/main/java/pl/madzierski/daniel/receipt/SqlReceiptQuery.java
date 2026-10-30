@@ -1,23 +1,22 @@
 package pl.madzierski.daniel.receipt;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "receipt")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class SqlReceiptQuery {
-    @Id
-    @UuidGenerator
-    private String id;
+public class SqlReceiptQuery extends BaseEntity {
+
+    public SqlReceiptQuery(String id) {
+        this.id = id;
+    }
 
     public ReceiptQuery toReceipt() {
         ReceiptQuery receiptQuery = new ReceiptQuery();

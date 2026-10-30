@@ -2,13 +2,9 @@ package pl.madzierski.daniel.store;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.store.model.Store;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "store")
@@ -16,21 +12,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@EntityListeners({AuditingEntityListener.class})
-@EqualsAndHashCode(exclude = {"brand"})
-class SqlStore {
-
-    @Id
-    @UuidGenerator
-    private String id;
-
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
+@EqualsAndHashCode(callSuper = true, exclude = {"brand"})
+class SqlStore extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private SqlStoreBrand brand;
@@ -41,16 +24,17 @@ class SqlStore {
     private String country;
 
     public static SqlStore fromStore(Store store) {
-        return new SqlStore(
-                store.getId(),
-                store.getCreatedDate(),
-                store.getModifiedDate(),
+        SqlStore sqlStore = new SqlStore(
                 SqlStoreBrand.fromStoreBrand(store.getBrand()),
                 store.getAddress(),
                 store.getCity(),
                 store.getPostalCode(),
                 store.getCountry()
         );
+        sqlStore.setId(store.getId());
+        sqlStore.setCreatedDate(store.getCreatedDate());
+        sqlStore.setModifiedDate(store.getModifiedDate());
+        return sqlStore;
     }
 
     public Store toStore() {

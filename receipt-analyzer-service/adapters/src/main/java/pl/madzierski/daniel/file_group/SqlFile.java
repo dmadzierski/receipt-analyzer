@@ -5,31 +5,17 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 
-import java.time.LocalDateTime;
 
-@EqualsAndHashCode(exclude = "fileGroup")
+@EqualsAndHashCode(callSuper = true, exclude = "fileGroup")
 @Entity
 @Table(name = "receipt_file")
-@EntityListeners({AuditingEntityListener.class})
 @Setter
 @Getter
 @NoArgsConstructor
-class SqlFile {
+class SqlFile extends BaseEntity {
 
-    @Id
-    @UuidGenerator
-    private String id;
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file_group_id")
     private SqlFileGroup fileGroup;

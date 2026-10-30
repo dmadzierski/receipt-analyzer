@@ -3,13 +3,9 @@ package pl.madzierski.daniel.file_group;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.receipt.SqlReceiptQuery;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,18 +16,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Setter
 @Getter
-@EntityListeners({AuditingEntityListener.class})
-@EqualsAndHashCode(exclude = {"receipt", "files"})
-class SqlFileGroup {
-    @Id
-    @UuidGenerator
-    private String id;
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
+@EqualsAndHashCode(callSuper = true, exclude = {"receipt", "files"})
+class SqlFileGroup extends BaseEntity {
+
     @Enumerated(EnumType.STRING)
     private FileType fileType;
     @ManyToOne

@@ -2,37 +2,23 @@ package pl.madzierski.daniel.receipt;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.store.SqlStoreQuery;
 import pl.madzierski.daniel.wallet.SqlWalletQuery;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"receiptRevisions", "wallet", "store"})
+@EqualsAndHashCode(callSuper = true, exclude = {"receiptRevisions", "wallet", "store"})
 @Entity
 @Getter
 @Setter
 @Table(name = "receipt")
 @Builder
-@EntityListeners({AuditingEntityListener.class})
-class SqlReceipt {
+class SqlReceipt extends BaseEntity {
 
-    @Id
-    @UuidGenerator
-    private String id;
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
     private String name;
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)

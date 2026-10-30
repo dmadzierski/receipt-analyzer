@@ -2,37 +2,20 @@ package pl.madzierski.daniel.product_dict;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.user.SqlUserQuery;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 
-@EqualsAndHashCode(exclude = {"productDictList", "user"})
+@EqualsAndHashCode(callSuper = true, exclude = {"productDictList", "user"})
 @Entity
 @Table(name = "product_category")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@EntityListeners({AuditingEntityListener.class})
-class SqlProductCategory {
-
-    @Id
-    @UuidGenerator
-    private String id;
-
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
+class SqlProductCategory extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -66,13 +49,10 @@ class SqlProductCategory {
     }
 
     public static SqlProductCategory fromProductCategory(ProductCategory productCategory) {
-        return new SqlProductCategory(
-            productCategory.getId(),
-            productCategory.getCreatedDate(),
-            productCategory.getModifiedDate(),
-            productCategory.getName(),
-            null,
-            null
-        );
+        SqlProductCategory sqlProductCategory = new SqlProductCategory(productCategory.getName(), null, null);
+        sqlProductCategory.setId(productCategory.getId());
+        sqlProductCategory.setCreatedDate(productCategory.getCreatedDate());
+        sqlProductCategory.setModifiedDate(productCategory.getModifiedDate());
+        return sqlProductCategory;
     }
 }

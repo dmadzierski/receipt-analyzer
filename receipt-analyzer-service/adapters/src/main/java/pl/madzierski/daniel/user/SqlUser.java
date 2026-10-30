@@ -2,45 +2,27 @@ package pl.madzierski.daniel.user;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 
-import java.time.LocalDateTime;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "app_user")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@EntityListeners({AuditingEntityListener.class})
-public class SqlUser {
-
-    @Id
-    @UuidGenerator
-    private String id;
-
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
+public class SqlUser extends BaseEntity {
 
     @Column(name = "user_sub", nullable = false, unique = true)
     private String userSub;
 
     public static SqlUser fromUser(User user) {
-        return new SqlUser(
-            user.getId(),
-            user.getCreatedDate(),
-            user.getModifiedDate(),
-            user.getUserSub()
-        );
+        SqlUser sqlUser = new SqlUser(user.getUserSub());
+        sqlUser.setId(user.getId());
+        sqlUser.setCreatedDate(user.getCreatedDate());
+        sqlUser.setModifiedDate(user.getModifiedDate());
+        return sqlUser;
     }
 
     public User toUser() {

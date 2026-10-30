@@ -5,13 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.store.model.StoreBrand;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "store_brand")
@@ -19,30 +15,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@EntityListeners({AuditingEntityListener.class})
-public class SqlStoreBrand {
-
-    @Id
-    @UuidGenerator
-    private String id;
-
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
+public class SqlStoreBrand extends BaseEntity {
 
     private String name;
 
     public static SqlStoreBrand fromStoreBrand(StoreBrand brand) {
-        return new SqlStoreBrand(
-                brand.getId(),
-                brand.getCreatedDate(),
-                brand.getModifiedDate(),
-                brand.getName()
-        );
+        SqlStoreBrand sqlStoreBrand = new SqlStoreBrand(brand.getName());
+        sqlStoreBrand.setId(brand.getId());
+        sqlStoreBrand.setCreatedDate(brand.getCreatedDate());
+        sqlStoreBrand.setModifiedDate(brand.getModifiedDate());
+        return sqlStoreBrand;
     }
 
     public StoreBrand toStoreBrand() {

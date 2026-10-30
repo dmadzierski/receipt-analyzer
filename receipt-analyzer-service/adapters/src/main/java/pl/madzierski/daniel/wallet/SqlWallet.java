@@ -2,47 +2,34 @@ package pl.madzierski.daniel.wallet;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.user.SqlUserQuery;
 
-import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@EqualsAndHashCode(exclude = "user")
+@EqualsAndHashCode(callSuper = true, exclude = "user")
 @Entity
 @Setter
 @Table(name = "wallet")
 @Builder
-@EntityListeners({AuditingEntityListener.class})
-class SqlWallet {
+class SqlWallet extends BaseEntity {
 
-    @Id
-    @UuidGenerator
-    private String id;
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-    @LastModifiedDate
-    @Column(name = "modified_date")
-    private LocalDateTime modifiedDate;
     private String name;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private SqlUserQuery user;
 
     public static SqlWallet fromWallet(Wallet wallet) {
-        return SqlWallet.builder()
-            .id(wallet.getId())
-            .createdDate(wallet.getCreatedDate())
-            .modifiedDate(wallet.getModifiedDate())
+        SqlWallet sqlWallet = SqlWallet.builder()
             .name(wallet.getName())
             .user(SqlUserQuery.fromUserQuery(wallet.getUser()))
             .build();
+        sqlWallet.setId(wallet.getId());
+        sqlWallet.setCreatedDate(wallet.getCreatedDate());
+        sqlWallet.setModifiedDate(wallet.getModifiedDate());
+        return sqlWallet;
     }
 
     public Wallet toWallet() {
