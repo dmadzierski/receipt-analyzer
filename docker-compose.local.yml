@@ -50,7 +50,6 @@ services:
       KC_SPI_COOKIE_SAMESITE_LEGACY_SAMESITE_VALUE: none
       #      LOGGING_LEVEL_ROOT: INFO
       KC_HEALTH_ENABLED: true
-    # imports the activiti realm on first start; an existing realm is left as it is
     command: start-dev --import-realm
     volumes:
       - ./dev/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro

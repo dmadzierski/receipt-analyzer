@@ -21,6 +21,7 @@ public class FileFacade {
     private final FileGroupRepository fileGroupRepository;
     private final FileGroupFactory fileGroupFactory;
     private final FileTypeDetector fileTypeDetector;
+    private final String uploadDir;
 
     public FileGroupDto save(String receiptId, List<byte[]> files, String userSub) {
         if (files == null || files.isEmpty()) {
@@ -48,8 +49,7 @@ public class FileFacade {
     }
 
     String createPath(String currentUserSub, String fileId, String fileGroupId, String fileExtension, String receiptId) {
-        return java.io.File.separator + "app" + java.io.File.separator +
-               "uploads" + java.io.File.separator + "user" + java.io.File.separator +
+        return uploadDir + java.io.File.separator + "user" + java.io.File.separator +
                currentUserSub + java.io.File.separator + "receipts" + java.io.File.separator +
                receiptId + java.io.File.separator + "file_group" + java.io.File.separator +
                fileGroupId + java.io.File.separator + "file" + java.io.File.separator +

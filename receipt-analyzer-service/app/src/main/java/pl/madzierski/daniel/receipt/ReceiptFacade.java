@@ -108,8 +108,8 @@ public class ReceiptFacade {
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         ReceiptRevision revisionCopy = copyRevisionWithItems(revision);
         revisionCopy.setSourceFileGroup(revision.getSourceFileGroup());
-        revisionRepository.save(revisionCopy);
-        return new RevisionCopyResponse(revisionCopy.getId());
+        ReceiptRevision savedCopy = revisionRepository.save(revisionCopy);
+        return new RevisionCopyResponse(savedCopy.getId());
     }
 
     private ReceiptRevision copyRevisionWithItems(ReceiptRevision revision) {

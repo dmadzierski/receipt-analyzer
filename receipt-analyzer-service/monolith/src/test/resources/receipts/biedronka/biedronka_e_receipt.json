@@ -1,0 +1,555 @@
+{
+  "protoVersion": "000",
+  "IDZ": "c=00000000000000000000000000000000|g={00000000-0000-0000-0000-000000000000}|s=0000|p=1|t=0001",
+  "deviceType": 2,
+  "printed": false,
+  "header": [
+    {
+      "image": {
+        "id": "TEST0000000-1-00001",
+        "hash": "",
+        "data": ""
+      }
+    },
+    {
+      "headerText": {
+        "headerTextLines": "<div class=\"align-center \">BIEDRONKA&nbsp;TEST</div><div class=\"align-center \">00-000&nbsp;TESTOWO&nbsp;UL.&nbsp;TESTOWA&nbsp;1</div>"
+      }
+    },
+    {
+      "headerData": {
+        "tin": "7791011327",
+        "docNumber": 1,
+        "date": "2026-01-01T10:00:00.000Z",
+        "CPS": 56
+      }
+    }
+  ],
+  "body": [
+    {
+      "sellLine": {
+        "name": "Cebula Żółta Luz         C",
+        "vatId": "C",
+        "price": 349,
+        "total": 189,
+        "quantity": "0,542",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "RzodkiewkaPęczekSzt      C",
+        "vatId": "C",
+        "price": 299,
+        "total": 598,
+        "quantity": "2",
+        "isStorno": false
+      }
+    },
+    {
+      "discountLine": {
+        "base": 598,
+        "value": 300,
+        "isDiscount": true,
+        "isPercent": false,
+        "isStorno": false,
+        "vatId": "C"
+      }
+    },
+    {
+      "sellLine": {
+        "name": "PralinLindCornet225g     A",
+        "vatId": "A",
+        "price": 3699,
+        "total": 3699,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "HummusSpicyGV160gN       C",
+        "vatId": "C",
+        "price": 429,
+        "total": 429,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Szczypiorek Natka        C",
+        "vatId": "C",
+        "price": 299,
+        "total": 299,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "OgórekSzkLuz             C",
+        "vatId": "C",
+        "price": 799,
+        "total": 158,
+        "quantity": "0,198",
+        "isStorno": false
+      }
+    },
+    {
+      "discountLine": {
+        "base": 158,
+        "value": 99,
+        "isDiscount": true,
+        "isPercent": false,
+        "isStorno": false,
+        "vatId": "C"
+      }
+    },
+    {
+      "sellLine": {
+        "name": "PłatkiOwsGórskie500g     C",
+        "vatId": "C",
+        "price": 275,
+        "total": 275,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "CzekoMilkaAlpin90g       A",
+        "vatId": "A",
+        "price": 699,
+        "total": 2097,
+        "quantity": "3",
+        "isStorno": false
+      }
+    },
+    {
+      "discountLine": {
+        "base": 2097,
+        "value": 1049,
+        "isDiscount": true,
+        "isPercent": false,
+        "isStorno": false,
+        "vatId": "A"
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Torba T-SHIRT            A",
+        "vatId": "A",
+        "price": 79,
+        "total": 158,
+        "quantity": "2",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Marchew Luz              C",
+        "vatId": "C",
+        "price": 399,
+        "total": 214,
+        "quantity": "0,536",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "RęczQuMegSweep120m       A",
+        "vatId": "A",
+        "price": 1199,
+        "total": 1199,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "BoczWędzKraWęd kg        C",
+        "vatId": "C",
+        "price": 2820,
+        "total": 1571,
+        "quantity": "0,557",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Mleko świeże 2  1l       C",
+        "vatId": "C",
+        "price": 299,
+        "total": 299,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Papryka Słodka Czerw     C",
+        "vatId": "C",
+        "price": 1799,
+        "total": 792,
+        "quantity": "0,440",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Gruszka Packh Luz        C",
+        "vatId": "C",
+        "price": 999,
+        "total": 474,
+        "quantity": "0,474",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Ziemniaki Jad Luz        C",
+        "vatId": "C",
+        "price": 199,
+        "total": 261,
+        "quantity": "1,310",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "JogurtSkyrNatur 400g     C",
+        "vatId": "C",
+        "price": 569,
+        "total": 569,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "PudProtWanilia200g       C",
+        "vatId": "C",
+        "price": 435,
+        "total": 435,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "PudProtCzekolada200g     C",
+        "vatId": "C",
+        "price": 435,
+        "total": 435,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "PudProtCaffLatte200g     C",
+        "vatId": "C",
+        "price": 435,
+        "total": 435,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Jog.Skyr.Tru.150g        C",
+        "vatId": "C",
+        "price": 369,
+        "total": 738,
+        "quantity": "2",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "KetchupPikKotlin450g     B",
+        "vatId": "B",
+        "price": 645,
+        "total": 645,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "SoczySkrzydełkaZMiod     B",
+        "vatId": "B",
+        "price": 355,
+        "total": 355,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "SoczKurczakZCzosnkZi     B",
+        "vatId": "B",
+        "price": 355,
+        "total": 355,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "SosSojJasTao 150 ml      B",
+        "vatId": "B",
+        "price": 649,
+        "total": 649,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "MydłoRumianLinda900      A",
+        "vatId": "A",
+        "price": 649,
+        "total": 649,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "WarzNaPatPolskie450g     C",
+        "vatId": "C",
+        "price": 699,
+        "total": 699,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Fil  Z Piersi K kg       C",
+        "vatId": "C",
+        "price": 2480,
+        "total": 1438,
+        "quantity": "0,580",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Fil  Z Piersi K kg       C",
+        "vatId": "C",
+        "price": 2480,
+        "total": 1825,
+        "quantity": "0,736",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Skrzydełka Kg            C",
+        "vatId": "C",
+        "price": 999,
+        "total": 471,
+        "quantity": "0,471",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Jaja Ściółk L 10szt      C",
+        "vatId": "C",
+        "price": 1149,
+        "total": 2298,
+        "quantity": "2",
+        "isStorno": false
+      }
+    },
+    {
+      "discountLine": {
+        "base": 2298,
+        "value": 577,
+        "isDiscount": true,
+        "isPercent": false,
+        "isStorno": false,
+        "vatId": "C"
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Arbuz Drobnopes  Luz     C",
+        "vatId": "C",
+        "price": 999,
+        "total": 5045,
+        "quantity": "5,050",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "BorNaszaSp300g           C",
+        "vatId": "C",
+        "price": 899,
+        "total": 899,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "SerCamembertNat120g      C",
+        "vatId": "C",
+        "price": 399,
+        "total": 399,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "Bukiet Mix               B",
+        "vatId": "B",
+        "price": 3699,
+        "total": 3699,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "sellLine": {
+        "name": "CzekoladaHazelnut85g     A",
+        "vatId": "A",
+        "price": 699,
+        "total": 699,
+        "quantity": "1",
+        "isStorno": false
+      }
+    },
+    {
+      "discountLine": {
+        "base": 699,
+        "value": 349,
+        "isDiscount": true,
+        "isPercent": false,
+        "isStorno": false,
+        "vatId": "A"
+      }
+    },
+    {
+      "discountSummary": {
+        "discounts": 2374
+      }
+    },
+    {
+      "vatSummary": {
+        "currency": "PLN",
+        "vatRatesSummary": [
+          {
+            "vatId": "A",
+            "vatRate": 2300,
+            "vatSale": 7103,
+            "vatAmount": 1328
+          },
+          {
+            "vatId": "B",
+            "vatRate": 800,
+            "vatSale": 5703,
+            "vatAmount": 422
+          },
+          {
+            "vatId": "C",
+            "vatRate": 500,
+            "vatSale": 20269,
+            "vatAmount": 965
+          }
+        ]
+      }
+    },
+    {
+      "sumInCurrency": {
+        "fiscalTotal": 33075,
+        "totalWithPacks": 33075,
+        "currency": "PLN",
+        "printBig": true,
+        "printable": true
+      }
+    },
+    {
+      "section": {
+        "type": 3
+      }
+    },
+    {
+      "payment": {
+        "type": "2",
+        "amount": 33075,
+        "name": "KARTA PLATNICZA",
+        "currency": "PLN"
+      }
+    },
+    {
+      "fiscalFooter": {
+        "billNumber": 1,
+        "uniqueNumber": "TEST0000000",
+        "cashNumber": "Kasa 1",
+        "cashier": "Kasjer nr 1",
+        "CPS": 56,
+        "date": "2026-01-01T10:00:00.000Z"
+      }
+    },
+    {
+      "addLine": {
+        "id": 0,
+        "data": "<div class=\"align-left \">Nr&nbsp;transakcji:&nbsp;0001</div>",
+        "width": 80,
+        "CPS": 56
+      }
+    },
+    {
+      "addLine": {
+        "id": 30,
+        "data": "<div class=\"align-left \">Numer:&nbsp;0000000000000001</div>",
+        "width": 80,
+        "CPS": 56
+      }
+    },
+    {
+      "addLine": {
+        "id": 41,
+        "data": "<div class=\"align-left \">Udzielono&nbsp;łącznie&nbsp;opustów&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"font-wide \">23,74</span></div>",
+        "width": 80,
+        "CPS": 56
+      }
+    },
+    {
+      "addLine": {
+        "id": 41,
+        "data": "<div class=\"align-left \">w&nbsp;tym:</div>",
+        "width": 80,
+        "CPS": 56
+      }
+    },
+    {
+      "addLine": {
+        "id": 41,
+        "data": "<div class=\"align-left \">&nbsp;&nbsp;Promocje&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"font-wide \">23,74</span></div>",
+        "width": 80,
+        "CPS": 56
+      }
+    },
+    {
+      "barcode": {
+        "id": 5,
+        "data": "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMQ=="
+      }
+    },
+    {
+      "sysNumber": {
+        "data": "0001",
+        "width": 80,
+        "CPS": 56
+      }
+    }
+  ]
+}

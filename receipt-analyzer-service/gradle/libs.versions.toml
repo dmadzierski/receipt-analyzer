@@ -6,6 +6,8 @@ tess4j = "5.4.0"
 commons-text = "1.15.0"
 postgresql = "42.7.7"
 flyway = "11.7.2"
+junit-platform = "1.12.2"
+testcontainers = "1.21.4"
 tika = "3.2.3"
 jakarta-validation = "4.0.0-M1"
 
@@ -18,6 +20,11 @@ spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-
 spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server", version.ref = "spring-boot" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+spring-boot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers", version.ref = "spring-boot" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 tess4j = { module = "net.sourceforge.tess4j:tess4j", version.ref = "tess4j" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }

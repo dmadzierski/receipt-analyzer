@@ -43,7 +43,6 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([includeBearerTokenInterceptor, errorInterceptor])
     ),
     provideTranslateService({
-      // useHttpBackend skips the interceptors: the translation file needs no token and must not trigger the error dialog
       loader: provideTranslateHttpLoader({prefix: './i18n/', suffix: '.json', useHttpBackend: true}),
       fallbackLang: 'en',
       lang: 'en',

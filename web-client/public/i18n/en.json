@@ -14,21 +14,17 @@
   },
   "EXCEPTION": {
     "UNKNOWN_ERROR": "Something went wrong. Please try again.",
-    "UNHANDLED_MEDIA_TYPE": "This file format is not supported.",
     "FILE_RECEIPT_NOT_FOUND": "The receipt file could not be found.",
     "FILE_RECEIPT_PATH_NOT_FOUND": "The location of the receipt file could not be found.",
     "FILE_RECEIPT_FILE_NOT_FOUND": "The receipt file is missing on the server.",
     "CAN_NOT_RESOLVE_RECEIPT": "The receipt could not be read. Check the file and the selected strategy.",
     "RECEIPT_NOT_FOUND": "The receipt does not exist or has been deleted.",
     "REVISION_NOT_FOUND": "The revision does not exist or has been deleted.",
-    "UNHANDLED_FILE_TYPE": "This file type is not supported.",
-    "FILE_PATH_NOT_FOUND": "The file path could not be found.",
     "STRATEGY_NOT_FOUND": "The selected reading strategy is not available.",
     "OCR_PROCESSING_ERROR": "Text recognition (OCR) failed for this file.",
     "ERROR_DURING_SAVING_FILE": "The file could not be saved. Please try again.",
     "INVALID_INPUT_AMOUNT_OF_INPUT_FILES": "The number of files is not valid for the selected strategy.",
     "FILE_NOT_FOUND": "The file does not exist or has been deleted.",
-    "REVISION_STRATEGY_READ_ONLY": "This revision is read-only and cannot be edited.",
     "WALLET_NOT_FOUND": "The wallet does not exist or has been deleted.",
     "PRODUCT_NOT_FOUND": "The product does not exist or has been deleted.",
     "PRODUCT_CATEGORY_NOT_FOUND": "The product category does not exist or has been deleted.",
@@ -45,7 +41,6 @@
     "FILE_TYPE_NOT_DETECTED": "The file type could not be detected.",
     "FILE_EMPTY": "The file is empty.",
     "CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS": "This revision has copies. Delete the copies first.",
-    "REVISION_NOT_USER_RESOLVER": "Only user revisions can be changed this way.",
-    "ALIAS_NOT_FOUND": "The product alias does not exist or has been deleted."
+    "REVISION_NOT_USER_RESOLVER": "Only user revisions can be changed this way."
   }
 }

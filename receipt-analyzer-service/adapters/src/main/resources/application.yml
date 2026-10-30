@@ -8,7 +8,6 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      # the schema is owned by Flyway (db/migration); Hibernate only checks that the entities match it
       ddl-auto: ${JPA_DDL_AUTO:validate}
     show-sql: ${JPA_SHOW_SQL:true}
     properties:
@@ -40,6 +39,9 @@ server:
 ocr:
   tesseract:
     dataPath: /app/tesseract-data
+
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:/app/uploads}
 
 security:
   web-client-host: ${WEB_CLIENT_HOST}

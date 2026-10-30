@@ -125,7 +125,6 @@ export class ReceiptDetailsComponent implements OnInit {
     this.receiptService.updateReceipt(this.receiptId, {...this.receiptEdit, name: this.receiptEdit.name.trim()}).subscribe({
       next: () => {
         this.receiptEditMode = false;
-        // reload to get the full store details for the read-only view
         this.receiptService.getReceiptDetails(this.receiptId).subscribe(res => {
           this.receiptDetails.name = res.name;
           this.receiptDetails.description = res.description;
@@ -137,7 +136,6 @@ export class ReceiptDetailsComponent implements OnInit {
 
   searchStores(text: string): void {
     this.storeSearchText = text;
-    // typing invalidates the previously selected store until a new one is chosen
     this.receiptEdit.storeId = '';
     this.storeSearchSubject.next(text.trim());
   }
