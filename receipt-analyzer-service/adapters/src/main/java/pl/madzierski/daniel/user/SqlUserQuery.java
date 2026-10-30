@@ -12,7 +12,7 @@ import pl.madzierski.daniel.user.model.UserQuery;
 
 @EqualsAndHashCode
 @Entity
-@Table(name = "user")
+@Table(name = "app_user")
 @NoArgsConstructor
 @AllArgsConstructor
 public class SqlUserQuery {

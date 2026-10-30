@@ -60,7 +60,7 @@ flowchart TB
         K["Keycloak"]
   end
  subgraph Database["Database"]
-        L["MySQL"]
+        L["PostgreSQL"]
   end
     Gateway --> Service
     Service --> OAuth & Database
@@ -78,7 +78,7 @@ flowchart TB
 Language:           Java 21
 Framework:          Spring Boot 3.x
 Build Tool:         Gradle
-Database:           MySQL 8.0
+Database:           PostgreSQL 17
 Authentication:     Keycloak 26.3
 OCR:                Tesseract
 Persistence:        Hibernate JPA

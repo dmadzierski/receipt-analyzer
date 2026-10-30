@@ -4,7 +4,7 @@ lombok = "1.18.46"
 pdfbox = "2.0.30"
 tess4j = "5.4.0"
 commons-text = "1.15.0"
-mysql-connector-j = "8.4.0"
+postgresql = "42.7.7"
 tika = "3.2.3"
 jakarta-validation = "4.0.0-M1"
 
@@ -20,6 +20,6 @@ spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 tess4j = { module = "net.sourceforge.tess4j:tess4j", version.ref = "tess4j" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
-mysql-connector-j = { module = "com.mysql:mysql-connector-j", version.ref = "mysql-connector-j" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 tika-core = { module = "org.apache.tika:tika-core", version.ref = "tika" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }

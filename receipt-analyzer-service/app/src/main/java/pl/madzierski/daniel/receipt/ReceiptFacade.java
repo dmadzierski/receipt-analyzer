@@ -56,6 +56,7 @@ public class ReceiptFacade {
         revisionRepository.save(revision);
         return new CreateReceiptResponse(receipt.getId(), receipt.getName(), receipt.getDescription());
     }
+
     private Receipt createReceipt(CreateReceiptRequest body) {
         String name = body.name() != null && !body.name()
             .trim()

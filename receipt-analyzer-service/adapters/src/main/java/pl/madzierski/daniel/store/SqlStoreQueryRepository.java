@@ -25,8 +25,9 @@ public interface SqlStoreQueryRepository extends StoreQueryRepository, Repositor
 
     @Query(value = """
         SELECT new pl.madzierski.daniel.store.model.StoreDto(s.id, b.name, s.address, s.city, s.postalCode, s.country)
-        FROM SqlStore s LEFT JOIN s.brand b WHERE b.name LIKE %:query% OR s.address LIKE %:query% OR s.city
-        LIKE %:query% OR s.postalCode LIKE %:query%
+        FROM SqlStore s LEFT JOIN s.brand b
+        WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(s.address) LIKE LOWER(CONCAT('%', :query, '%'))
+            OR LOWER(s.city) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(s.postalCode) LIKE LOWER(CONCAT('%', :query, '%'))
         """)
     Set<StoreDto> findStoresByQuery(String query);
 }

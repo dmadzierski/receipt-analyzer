@@ -9,7 +9,7 @@ import java.util.List;
 public interface SqlReceiptItemQueryRepository extends ReceiptItemQueryRepository, JpaRepository<SqlReceiptItem, String> {
 
     @Query(nativeQuery = true, value = """
-            SELECT ri.id AS id, ri.product_id as productDictId, IF(rr.resolver = 'USER', ri.name, COALESCE(pd.name, ri.name)) AS name, ri.amount AS amount, ri.unit_price AS unitPrice, ri.discount as discount, ri.total_price AS totalPrice, ri.position AS position
+            SELECT ri.id AS id, ri.product_id AS "productDictId", CASE WHEN rr.resolver = 'USER' THEN ri.name ELSE COALESCE(pd.name, ri.name) END AS name, ri.amount AS amount, ri.unit_price AS "unitPrice", ri.discount AS discount, ri.total_price AS "totalPrice", ri.position AS position
             FROM receipt_item ri
             LEFT JOIN receipt_revision rr ON ri.receipt_revision_id = rr.id
             LEFT JOIN product pd ON pd.id = ri.product_id

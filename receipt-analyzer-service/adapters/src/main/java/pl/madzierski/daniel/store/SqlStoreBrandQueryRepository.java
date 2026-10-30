@@ -10,7 +10,7 @@ public interface SqlStoreBrandQueryRepository extends StoreBrandQueryRepository,
 
     @Query(value = """
         SELECT new pl.madzierski.daniel.store.model.StoreBrandDto(b.id, b.name) 
-        FROM SqlStoreBrand b WHERE b.name LIKE %:query%
+        FROM SqlStoreBrand b WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :query, '%'))
         """)
     Set<StoreBrandDto> findStoreBrandsByQuery(String query);
 }

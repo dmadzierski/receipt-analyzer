@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 interface SqlProductCategoryRepository extends JpaRepository<SqlProductCategory, String> {
     List<SqlProductCategory> findAllByOrderByNameAsc();
 
-    boolean existsByName(String name);
+    boolean existsByNameIgnoreCase(String name);
 
-    boolean existsByNameAndIdNot(String name, String id);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, String id);
 }
 
 @org.springframework.stereotype.Repository
@@ -31,12 +31,12 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
 
     @Override
     public boolean existsByNameAndUser(String name, String userSub) {
-        return this.repository.existsByName(name);
+        return this.repository.existsByNameIgnoreCase(name);
     }
 
     @Override
     public boolean existsByNameAndIdNot(String name, String id) {
-        return this.repository.existsByNameAndIdNot(name, id);
+        return this.repository.existsByNameIgnoreCaseAndIdNot(name, id);
     }
 
     @Override
