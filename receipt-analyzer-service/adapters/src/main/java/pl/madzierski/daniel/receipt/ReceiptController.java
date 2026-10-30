@@ -3,7 +3,6 @@ package pl.madzierski.daniel.receipt;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import org.hibernate.validator.constraints.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import pl.madzierski.daniel.file_group.MultipartFileMapper;
 import pl.madzierski.daniel.receipt.model.*;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -37,30 +37,30 @@ class ReceiptController {
     }
 
     @GetMapping(path = {"/{receiptId}"})
-    ResponseEntity<GetReceiptDetailsResponse> getReceiptDetails(@PathVariable @UUID String receiptId) {
+    ResponseEntity<GetReceiptDetailsResponse> getReceiptDetails(@PathVariable UUID receiptId) {
         return ResponseEntity.ok(this.receiptFacade.getReceiptDetails(receiptId));
     }
 
     @GetMapping(path = {"/{receiptId}/revisions"}, produces = {"application/json"})
-    ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(@PathVariable @UUID String receiptId) {
+    ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(@PathVariable UUID receiptId) {
         return ResponseEntity.ok(this.receiptFacade.getReceiptRevisions(receiptId));
     }
 
     @PostMapping(path = "/{receiptId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces =
         MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<CreateRevisionResponse> createRevision(@PathVariable String receiptId,
+    ResponseEntity<CreateRevisionResponse> createRevision(@PathVariable UUID receiptId,
                                                           @RequestBody CreateRevisionRequest createRevisionRequest) {
         return ResponseEntity.ok(receiptFacade.createRevision(receiptId, createRevisionRequest));
     }
 
     @PutMapping(path = "/{receiptId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<UpdateReceiptResponse> updateReceipt(@PathVariable @UUID String receiptId,
+    ResponseEntity<UpdateReceiptResponse> updateReceipt(@PathVariable UUID receiptId,
                                                         @RequestBody @Valid UpdateReceiptRequest request) {
         return ResponseEntity.ok(receiptFacade.updateReceipt(receiptId, request));
     }
 
     @DeleteMapping(path = "/{receiptId}")
-    ResponseEntity<Void> deleteReceipt(@PathVariable @UUID String receiptId) {
+    ResponseEntity<Void> deleteReceipt(@PathVariable UUID receiptId) {
         receiptFacade.deleteReceipt(receiptId);
         return ResponseEntity.noContent().build();
     }

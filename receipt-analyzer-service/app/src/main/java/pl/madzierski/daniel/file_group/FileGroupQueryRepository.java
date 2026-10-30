@@ -4,11 +4,12 @@ import pl.madzierski.daniel.file_group.model.FileGroupDto;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface FileGroupQueryRepository {
-    List<FileGroupDto> findAllByReceiptId(String receiptId);
+    List<FileGroupDto> findAllByReceiptId(UUID receiptId);
 
-    Optional<FileGroupDto> findFileGroupWithFiles(String fileGroupId);
+    Optional<FileGroupDto> findFileGroupWithFiles(UUID fileGroupId);
 
-    boolean isUsedByRevision(String fileGroupId);
+    boolean isUsedByRevision(UUID fileGroupId);
 }

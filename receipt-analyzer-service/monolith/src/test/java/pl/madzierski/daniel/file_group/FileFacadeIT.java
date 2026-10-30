@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +28,7 @@ class FileFacadeIT extends IntegrationTest {
     @Autowired
     private FileFacade fileFacade;
 
-    private String receiptId;
+    private UUID receiptId;
 
     @BeforeEach
     void createReceipt() {
@@ -67,7 +68,7 @@ class FileFacadeIT extends IntegrationTest {
 
     @Test
     void deletesFileGroupWithItsFiles() {
-        String groupId = fileFacade.save(receiptId, List.of(PNG), USER_SUB).id();
+        UUID groupId = fileFacade.save(receiptId, List.of(PNG), USER_SUB).id();
         flush();
 
         fileFacade.deleteFileGroupId(groupId, USER_SUB);
@@ -79,9 +80,9 @@ class FileFacadeIT extends IntegrationTest {
 
     @Test
     void fileGroupUsedAsRevisionSourceCannotBeDeleted() {
-        String groupId = fileFacade.save(receiptId, List.of(JSON), USER_SUB).id();
+        UUID groupId = fileFacade.save(receiptId, List.of(JSON), USER_SUB).id();
         flush();
-        String revisionId = insertRevision(receiptId, "BIEDRONKA_JSON", "0", false, null);
+        UUID revisionId = insertRevision(receiptId, "BIEDRONKA_JSON", "0", false, null);
         jdbcTemplate.update("UPDATE receipt_revision SET source_file_group_id = ? WHERE id = ?", groupId, revisionId);
 
         assertError(() -> fileFacade.deleteFileGroupId(groupId, USER_SUB), AppRuntimeExceptionMessages.FILE_GROUP_USED_BY_REVISION);
@@ -89,7 +90,7 @@ class FileFacadeIT extends IntegrationTest {
 
     @Test
     void readsSingleFileFromDisk() throws IOException {
-        String fileId = fileIdOf(fileFacade.save(receiptId, List.of(PNG), USER_SUB).id());
+        UUID fileId = fileIdOf(fileFacade.save(receiptId, List.of(PNG), USER_SUB).id());
 
         assertThat(fileFacade.getFile(fileId).getContentAsByteArray()).isEqualTo(PNG);
     }
@@ -102,7 +103,7 @@ class FileFacadeIT extends IntegrationTest {
 
     @Test
     void fileWithoutPathIsReported() {
-        String fileId = fileIdOf(fileFacade.save(receiptId, List.of(PNG), USER_SUB).id());
+        UUID fileId = fileIdOf(fileFacade.save(receiptId, List.of(PNG), USER_SUB).id());
         jdbcTemplate.update("UPDATE receipt_file SET path = NULL WHERE id = ?", fileId);
 
         assertError(() -> fileFacade.getFile(fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_PATH_NOT_FOUND);
@@ -110,17 +111,17 @@ class FileFacadeIT extends IntegrationTest {
 
     @Test
     void fileMissingOnDiskIsReported() throws IOException {
-        String groupId = fileFacade.save(receiptId, List.of(PNG), USER_SUB).id();
-        String fileId = fileIdOf(groupId);
+        UUID groupId = fileFacade.save(receiptId, List.of(PNG), USER_SUB).id();
+        UUID fileId = fileIdOf(groupId);
         Files.delete(Path.of(jdbcTemplate.queryForObject("SELECT path FROM receipt_file WHERE id = ?", String.class, fileId)));
 
         assertError(() -> fileFacade.getFile(fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);
         assertError(() -> fileFacade.getFiles(groupId), AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);
     }
 
-    private String fileIdOf(String groupId) {
+    private UUID fileIdOf(UUID groupId) {
         flush();
-        return jdbcTemplate.queryForObject("SELECT id FROM receipt_file WHERE file_group_id = ?", String.class, groupId);
+        return jdbcTemplate.queryForObject("SELECT id FROM receipt_file WHERE file_group_id = ?", UUID.class, groupId);
     }
 
     private void assertFileError(List<byte[]> files, AppRuntimeExceptionMessages expected) {

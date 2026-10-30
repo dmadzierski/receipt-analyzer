@@ -3,6 +3,7 @@ package pl.madzierski.daniel.receipt.model;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -10,8 +11,8 @@ import java.math.BigDecimal;
 @Setter
 @Builder(toBuilder = true)
 public class ReceiptItemDto {
-    private String id;
-    private String productDictId;
+    private UUID id;
+    private UUID productDictId;
     private String name;
     private BigDecimal amount;
     private BigDecimal unitPrice;
@@ -20,7 +21,7 @@ public class ReceiptItemDto {
     private Integer position;
     private ReceiptItemDto parentItem;
 
-    public ReceiptItemDto(String id, String productDictId, String name, BigDecimal amount, BigDecimal unitPrice, BigDecimal discount, BigDecimal totalPrice, Integer position) {
+    public ReceiptItemDto(UUID id, UUID productDictId, String name, BigDecimal amount, BigDecimal unitPrice, BigDecimal discount, BigDecimal totalPrice, Integer position) {
         this.id = id;
         this.productDictId = productDictId;
         this.name = name;

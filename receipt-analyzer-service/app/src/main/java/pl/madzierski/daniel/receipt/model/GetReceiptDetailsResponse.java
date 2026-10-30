@@ -11,13 +11,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public record GetReceiptDetailsResponse(
-    String id,
+    UUID id,
     String name,
     String description,
-    String walletId,
+    UUID walletId,
     PreferredRevisionResponse preferredRevision,
     Set<RevisionResponse> revisions,
     LocalDateTime createdDate,
@@ -27,13 +28,13 @@ public record GetReceiptDetailsResponse(
 ) {
 
     public record FileGroupResponse(
-        String id,
+        UUID id,
         String fileType,
         boolean isOriginal,
         Set<FileResponse> files
     ) {
         public record FileResponse(
-            String id,
+            UUID id,
             String path,
             Integer partNumber
         ) {
@@ -139,7 +140,7 @@ public record GetReceiptDetailsResponse(
     }
 
     public record ItemResponse(
-        String id,
+        UUID id,
         String name,
         BigDecimal amount,
         BigDecimal unitPrice,
@@ -150,7 +151,7 @@ public record GetReceiptDetailsResponse(
     }
 
     public record PreferredRevisionResponse(
-        String id,
+        UUID id,
         ReceiptResolverStrategyType resolver,
         LocalDateTime createdDate,
         BigDecimal totalPrice,
@@ -162,7 +163,7 @@ public record GetReceiptDetailsResponse(
     }
 
     public record RevisionResponse(
-        String id,
+        UUID id,
         ReceiptResolverStrategyType resolver,
         LocalDateTime createdDate,
         BigDecimal totalPrice,

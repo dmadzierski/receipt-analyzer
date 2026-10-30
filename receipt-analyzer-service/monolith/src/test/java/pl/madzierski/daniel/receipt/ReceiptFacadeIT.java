@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,31 +41,31 @@ class ReceiptFacadeIT extends IntegrationTest {
     @Autowired
     private ReceiptFacade receiptFacade;
 
-    private String walletId;
-    private String storeId;
+    private UUID walletId;
+    private UUID storeId;
 
     @BeforeEach
     void createOwnerWalletAndStore() {
-        String userId = createUser(USER_SUB);
+        UUID userId = createUser(USER_SUB);
         walletId = createWallet(userId, "Test wallet");
         storeId = createStore("Biedronka", "ul. Testowa 1", "Poznań");
     }
 
     @Test
     void createsReceiptWithRevisionFromBiedronkaJson() {
-        String receiptId = createReceiptFromJson();
+        UUID receiptId = createReceiptFromJson();
 
         Map<String, Object> revision = jdbcTemplate.queryForMap(
             "SELECT id, resolver, total_price, is_correct FROM receipt_revision WHERE receipt_id = ?", receiptId);
         assertThat(revision.get("resolver")).isEqualTo("BIEDRONKA_JSON");
         assertThat((BigDecimal) revision.get("total_price")).isEqualByComparingTo("330.75");
         assertThat(revision.get("is_correct")).isEqualTo(true);
-        assertThat(itemsOf(revision.get("id").toString())).hasSize(36);
+        assertThat(itemsOf((UUID) revision.get("id"))).hasSize(36);
     }
 
     @Test
     void storesUploadedFileInUploadDirectory() throws IOException {
-        String receiptId = createReceiptFromJson();
+        UUID receiptId = createReceiptFromJson();
 
         List<String> paths = jdbcTemplate.queryForList(
             "SELECT f.path FROM receipt_file f JOIN receipt_file_group g ON g.id = f.file_group_id WHERE g.receipt_id = ?",
@@ -77,8 +78,8 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void removingItemAndAddingNewOneInSameSaveDeletesRemovedItem() {
-        String receiptId = createReceiptFromJson();
-        String userRevisionId = copyRevision(revisionIdOf(receiptId));
+        UUID receiptId = createReceiptFromJson();
+        UUID userRevisionId = copyRevision(revisionIdOf(receiptId));
 
         List<ItemRequest> items = itemsOf(userRevisionId);
         ItemRequest removed = items.getFirst();
@@ -89,15 +90,15 @@ class ReceiptFacadeIT extends IntegrationTest {
         receiptFacade.updateRevision(userRevisionId, revisionUpdate(request));
         flush();
 
-        Set<String> itemIds = itemsOf(userRevisionId).stream().map(ItemRequest::id).collect(Collectors.toSet());
+        Set<UUID> itemIds = itemsOf(userRevisionId).stream().map(ItemRequest::id).collect(Collectors.toSet());
         assertThat(itemIds).hasSize(36).doesNotContain(removed.id());
         assertThat(itemsOf(userRevisionId)).extracting(ItemRequest::name).contains(removed.name());
     }
 
     @Test
     void updatingReceiptKeepsItsWallet() {
-        String receiptId = createReceiptFromJson();
-        String otherStoreId = createStore("Lidl", "ul. Inna 2", "Kraków");
+        UUID receiptId = createReceiptFromJson();
+        UUID otherStoreId = createStore("Lidl", "ul. Inna 2", "Kraków");
 
         receiptFacade.updateReceipt(receiptId, new UpdateReceiptRequest("  Weekly shopping ", "groceries", otherStoreId));
         flush();
@@ -112,7 +113,7 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void updatingReceiptWithUnknownStoreFails() {
-        String receiptId = createReceiptFromJson();
+        UUID receiptId = createReceiptFromJson();
 
         assertError(() -> receiptFacade.updateReceipt(receiptId, new UpdateReceiptRequest("name", null, UNKNOWN_ID)),
             AppRuntimeExceptionMessages.STORE_NOT_FOUND);
@@ -134,10 +135,10 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void deletingReceiptRemovesRevisionsItemsAndFileGroupsUsedByThem() {
-        String receiptId = createReceiptFromJson();
-        String originalId = revisionIdOf(receiptId);
-        String copyId = copyRevision(originalId);
-        String fileGroupId = jdbcTemplate.queryForObject("SELECT source_file_group_id FROM receipt_revision WHERE id = ?", String.class, copyId);
+        UUID receiptId = createReceiptFromJson();
+        UUID originalId = revisionIdOf(receiptId);
+        UUID copyId = copyRevision(originalId);
+        UUID fileGroupId = jdbcTemplate.queryForObject("SELECT source_file_group_id FROM receipt_revision WHERE id = ?", UUID.class, copyId);
         assertThat(fileGroupId).isNotNull();
 
         receiptFacade.deleteReceipt(receiptId);
@@ -152,9 +153,9 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void copyIsEditableUserRevisionLinkedToOriginal() {
-        String originalId = revisionIdOf(createReceiptFromJson());
+        UUID originalId = revisionIdOf(createReceiptFromJson());
 
-        String copyId = copyRevision(originalId);
+        UUID copyId = copyRevision(originalId);
 
         Map<String, Object> copy = jdbcTemplate.queryForMap(
             "SELECT c.resolver, c.is_preferred_revision, c.is_correct, c.total_price, c.parent_receipt_revision_id, "
@@ -175,9 +176,9 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void revisionWithCopiesCannotBeDeletedUntilCopiesAreGone() {
-        String receiptId = createReceiptFromJson();
-        String originalId = revisionIdOf(receiptId);
-        String copyId = copyRevision(originalId);
+        UUID receiptId = createReceiptFromJson();
+        UUID originalId = revisionIdOf(receiptId);
+        UUID copyId = copyRevision(originalId);
 
         assertError(() -> receiptFacade.deleteRevision(originalId), AppRuntimeExceptionMessages.CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS);
 
@@ -192,8 +193,8 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void userCorrectionBecomesProductWithOriginalNameAsAlias() {
-        String originalId = revisionIdOf(createReceiptFromJson());
-        String copyId = copyRevision(originalId);
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
         renameItem(copyId, ONION, "Cebula");
 
         receiptFacade.updateAliasesByUserRevision(copyId);
@@ -206,9 +207,9 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void userCorrectionToExistingProductAddsAliasInsteadOfNewProduct() {
-        String onionId = createProduct("Cebula", "Cebula");
-        String originalId = revisionIdOf(createReceiptFromJson());
-        String copyId = copyRevision(originalId);
+        UUID onionId = createProduct("Cebula", "Cebula");
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
         renameItem(copyId, ONION, "Cebula");
 
         receiptFacade.updateAliasesByUserRevision(copyId);
@@ -216,19 +217,19 @@ class ReceiptFacadeIT extends IntegrationTest {
 
         assertThat(count("SELECT count(*) FROM product WHERE name = 'Cebula'")).isEqualTo(1);
         assertThat(aliasesOf("Cebula")).containsExactlyInAnyOrder("Cebula", ONION);
-        assertThat(jdbcTemplate.queryForObject("SELECT product_id FROM receipt_item WHERE id = ?", String.class,
+        assertThat(jdbcTemplate.queryForObject("SELECT product_id FROM receipt_item WHERE id = ?", UUID.class,
             itemNamed(originalId, ONION).id())).isEqualTo(onionId);
     }
 
     @Test
     void dictionaryLearnedFromOneReceiptIsUsedForNextOne() {
-        String firstCopyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+        UUID firstCopyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         renameItem(firstCopyId, ONION, "Cebula");
         receiptFacade.updateAliasesByUserRevision(firstCopyId);
         flush();
 
-        String secondRevisionId = revisionIdOf(createReceiptFromJson());
-        String secondCopyId = copyRevision(secondRevisionId);
+        UUID secondRevisionId = revisionIdOf(createReceiptFromJson());
+        UUID secondCopyId = copyRevision(secondRevisionId);
         receiptFacade.updateAliasesByUserRevision(secondCopyId);
         flush();
 
@@ -239,8 +240,8 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void itemsWithSameNameShareOneProductAndRepeatedUpdateDoesNotDuplicateIt() {
-        String originalId = revisionIdOf(createReceiptFromJson());
-        String copyId = copyRevision(originalId);
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
         receiptFacade.updateAliasesByUserRevision(copyId);
         flush();
 
@@ -259,8 +260,8 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void markingRevisionAsPreferredUnmarksOtherRevisionsOfReceipt() {
-        String originalId = revisionIdOf(createReceiptFromJson());
-        String copyId = copyRevision(originalId);
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
         receiptFacade.updateRevision(originalId, preferredUpdate());
         flush();
 
@@ -273,7 +274,7 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void editWithConsistentPricesMarksRevisionAsCorrect() {
-        String copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         jdbcTemplate.update("UPDATE receipt_revision SET is_correct = false WHERE id = ?", copyId);
 
         receiptFacade.updateRevision(copyId, revisionUpdate(Set.copyOf(itemsOf(copyId))));
@@ -284,7 +285,7 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void editWithInconsistentPricesDoesNotMarkRevisionAsCorrect() {
-        String copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         jdbcTemplate.update("UPDATE receipt_revision SET is_correct = false WHERE id = ?", copyId);
         Set<ItemRequest> items = itemsOf(copyId).stream()
             .map(item -> item.name().equals(ONION)
@@ -300,7 +301,7 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void updatingProductDictMatchesItemsToSimilarAlias() {
-        String revisionId = revisionIdOf(createReceiptFromJson());
+        UUID revisionId = revisionIdOf(createReceiptFromJson());
         createProduct("Cebula", "Cebula Zolta Luz");
 
         receiptFacade.updateProductDictInRevisionItems(revisionId);
@@ -314,7 +315,7 @@ class ReceiptFacadeIT extends IntegrationTest {
     void newReceiptItemsAreMatchedToExistingDictionary() {
         createProduct("Cebula", ONION);
 
-        String revisionId = revisionIdOf(createReceiptFromJson());
+        UUID revisionId = revisionIdOf(createReceiptFromJson());
 
         assertThat(productNameOfItem(itemNamed(revisionId, ONION).id())).contains("Cebula");
         assertThat(nameShownInRevision(revisionId, ONION)).isEqualTo("Cebula");
@@ -322,8 +323,8 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void rewritingProductNamesRenamesOnlyUserRevisionItems() {
-        String originalId = revisionIdOf(createReceiptFromJson());
-        String copyId = copyRevision(originalId);
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
         createProduct("Cebula", ONION);
         receiptFacade.updateProductDictInRevisionItems(copyId);
         flush();
@@ -337,7 +338,7 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void rewritingProductNamesIsRejectedForResolverRevision() {
-        String originalId = revisionIdOf(createReceiptFromJson());
+        UUID originalId = revisionIdOf(createReceiptFromJson());
 
         assertError(() -> receiptFacade.rewriteProductNameToItems(originalId), AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
     }
@@ -360,8 +361,8 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void revisionWithoutStrategyIsRejected() {
-        String receiptId = createReceiptFromJson();
-        String fileGroupId = jdbcTemplate.queryForObject("SELECT id FROM receipt_file_group WHERE receipt_id = ?", String.class, receiptId);
+        UUID receiptId = createReceiptFromJson();
+        UUID fileGroupId = jdbcTemplate.queryForObject("SELECT id FROM receipt_file_group WHERE receipt_id = ?", UUID.class, receiptId);
 
         assertError(() -> receiptFacade.createRevision(receiptId, new CreateRevisionRequest(fileGroupId, null)),
             AppRuntimeExceptionMessages.STRATEGY_NOT_FOUND);
@@ -369,13 +370,13 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Test
     void revisionFromUnknownFileGroupIsRejected() {
-        String receiptId = createReceiptFromJson();
+        UUID receiptId = createReceiptFromJson();
 
         assertError(() -> receiptFacade.createRevision(receiptId, new CreateRevisionRequest(UNKNOWN_ID, ReceiptResolverStrategyType.BIEDRONKA_JSON)),
             AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
     }
 
-    private void renameItem(String revisionId, String from, String to) {
+    private void renameItem(UUID revisionId, String from, String to) {
         Set<ItemRequest> items = itemsOf(revisionId).stream()
             .map(item -> item.name().equals(from)
                 ? new ItemRequest(item.id(), to, item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position())
@@ -389,11 +390,11 @@ class ReceiptFacadeIT extends IntegrationTest {
         return new UpdateRevisionRequest(null, null, null, null, null, null, null, true, null, null);
     }
 
-    private boolean isPreferred(String revisionId) {
+    private boolean isPreferred(UUID revisionId) {
         return jdbcTemplate.queryForObject("SELECT is_preferred_revision FROM receipt_revision WHERE id = ?", Boolean.class, revisionId);
     }
 
-    private boolean isCorrect(String revisionId) {
+    private boolean isCorrect(UUID revisionId) {
         return jdbcTemplate.queryForObject("SELECT is_correct FROM receipt_revision WHERE id = ?", Boolean.class, revisionId);
     }
 
@@ -402,8 +403,8 @@ class ReceiptFacadeIT extends IntegrationTest {
             "SELECT a.name FROM product_alias a JOIN product p ON p.id = a.product_id WHERE p.name = ?", String.class, productName));
     }
 
-    private String nameShownInRevision(String revisionId, String itemName) {
-        String itemId = itemNamed(revisionId, itemName).id();
+    private String nameShownInRevision(UUID revisionId, String itemName) {
+        UUID itemId = itemNamed(revisionId, itemName).id();
         return receiptFacade.getRevision(revisionId).items().stream()
             .filter(item -> item.id().equals(itemId))
             .map(GetRevisionResponse.ItemResponse::name)
@@ -411,49 +412,49 @@ class ReceiptFacadeIT extends IntegrationTest {
             .orElseThrow();
     }
 
-    private String createReceiptFromJson() {
-        String receiptId = receiptFacade.addReceipt(USER_SUB, List.of(readResource(RECEIPT_JSON)),
+    private UUID createReceiptFromJson() {
+        UUID receiptId = receiptFacade.addReceipt(USER_SUB, List.of(readResource(RECEIPT_JSON)),
             new CreateReceiptRequest("Biedronka 22.05", "test receipt", ReceiptResolverStrategyType.BIEDRONKA_JSON, walletId, storeId)).id();
         flush();
         return receiptId;
     }
 
-    private String revisionIdOf(String receiptId) {
+    private UUID revisionIdOf(UUID receiptId) {
         return jdbcTemplate.queryForObject(
             "SELECT id FROM receipt_revision WHERE receipt_id = ? ORDER BY created_date LIMIT 1",
-            String.class, receiptId);
+            UUID.class, receiptId);
     }
 
-    private String copyRevision(String revisionId) {
-        String copyId = receiptFacade.createRevisionCopy(revisionId).revisionId();
+    private UUID copyRevision(UUID revisionId) {
+        UUID copyId = receiptFacade.createRevisionCopy(revisionId).revisionId();
         flush();
         return copyId;
     }
 
-    private List<ItemRequest> itemsOf(String revisionId) {
+    private List<ItemRequest> itemsOf(UUID revisionId) {
         return jdbcTemplate.query(
             "SELECT id, name, amount, unit_price, discount, total_price, position "
                 + "FROM receipt_item WHERE receipt_revision_id = ? ORDER BY position, id",
-            (rs, rowNum) -> new ItemRequest(rs.getString("id"), rs.getString("name"), rs.getBigDecimal("amount"),
+            (rs, rowNum) -> new ItemRequest(rs.getObject("id", UUID.class), rs.getString("name"), rs.getBigDecimal("amount"),
                 rs.getBigDecimal("unit_price"), rs.getBigDecimal("discount"), rs.getBigDecimal("total_price"), rs.getInt("position")),
             revisionId);
     }
 
-    private ItemRequest itemNamed(String revisionId, String name) {
+    private ItemRequest itemNamed(UUID revisionId, String name) {
         return itemsOf(revisionId).stream()
             .filter(item -> item.name().equals(name))
             .findFirst()
             .orElseThrow(() -> new AssertionError("No item named '" + name + "' in revision " + revisionId));
     }
 
-    private Optional<String> productNameOfItem(String itemId) {
+    private Optional<String> productNameOfItem(UUID itemId) {
         return jdbcTemplate.queryForList(
             "SELECT p.name FROM receipt_item i JOIN product p ON p.id = i.product_id WHERE i.id = ?", String.class, itemId)
             .stream().findFirst();
     }
 
-    private String createProduct(String name, String... aliases) {
-        String productId = insertProduct(name);
+    private UUID createProduct(String name, String... aliases) {
+        UUID productId = insertProduct(name);
         for (String alias : aliases) {
             insertAlias(productId, alias);
         }

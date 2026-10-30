@@ -7,6 +7,7 @@ import pl.madzierski.daniel.user.model.UserQuery;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +18,7 @@ import java.util.Set;
 class Wallet {
 
     private final Set<ReceiptQuery> receipts = new HashSet<>();
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;

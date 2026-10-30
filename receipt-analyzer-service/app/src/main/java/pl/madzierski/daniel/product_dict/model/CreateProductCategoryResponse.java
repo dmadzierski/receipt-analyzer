@@ -1,7 +1,9 @@
 package pl.madzierski.daniel.product_dict.model;
 
+import java.util.UUID;
+
 public record CreateProductCategoryResponse(
-    String id,
+    UUID id,
     String name
 ) {
 }

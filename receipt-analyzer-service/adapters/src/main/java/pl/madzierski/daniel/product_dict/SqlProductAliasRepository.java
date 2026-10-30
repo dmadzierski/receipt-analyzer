@@ -6,11 +6,12 @@ import org.springframework.data.repository.Repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-interface SqlProductAliasRepository extends Repository<SqlProductAlias, String> {
+interface SqlProductAliasRepository extends Repository<SqlProductAlias, UUID> {
 
-    Set<SqlProductAlias> findAllByIdIn(Collection<String> aliasIdList);
+    Set<SqlProductAlias> findAllByIdIn(Collection<UUID> aliasIdList);
 }
 
 @org.springframework.stereotype.Repository
@@ -20,7 +21,7 @@ class ProductAliasRepositoryImpl implements ProductAliasRepository {
     private final SqlProductAliasRepository sqlProductAliasRepository;
 
     @Override
-    public Set<ProductAlias> findAllByIds(Set<String> aliasIdList) {
+    public Set<ProductAlias> findAllByIds(Set<UUID> aliasIdList) {
         return sqlProductAliasRepository.findAllByIdIn(aliasIdList).stream()
             .map(alias -> alias.toProductAlias(alias.getProductDict().toProductDict())).collect(Collectors.toSet());
     }

@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.store.model;
 
 import java.util.Set;
+import java.util.UUID;
 
 public record StoreBrandListResponse (
     Set<StoreBrandItem> storeBrands
@@ -10,6 +11,6 @@ public record StoreBrandListResponse (
         return new StoreBrandItem(storeBrandDto.id(), storeBrandDto.name());
     }
 
-    public record StoreBrandItem(String id, String name) {
+    public record StoreBrandItem(UUID id, String name) {
     }
 }

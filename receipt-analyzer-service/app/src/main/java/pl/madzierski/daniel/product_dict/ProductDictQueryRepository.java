@@ -6,13 +6,14 @@ import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCat
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public interface ProductDictQueryRepository {
     Set<ProductDictWithAliasesAndCategoryProjection> findAllWithCategoryAndAliases();
 
-    long countProductDictEntitiesByCategoriesIdIn(Set<String> productCategoryIds);
+    long countProductDictEntitiesByCategoriesIdIn(Set<UUID> productCategoryIds);
 
     List<ProductDto> findAllProducts();
 
-    Optional<ProductDto> findNameById(String id);
+    Optional<ProductDto> findNameById(UUID id);
 }

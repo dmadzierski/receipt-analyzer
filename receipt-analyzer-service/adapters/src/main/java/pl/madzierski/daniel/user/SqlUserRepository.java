@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
-interface SqlUserRepository extends JpaRepository<SqlUser, String> {
+interface SqlUserRepository extends JpaRepository<SqlUser, UUID> {
     Optional<SqlUser> findByUserSub(String userSub);
 }
 

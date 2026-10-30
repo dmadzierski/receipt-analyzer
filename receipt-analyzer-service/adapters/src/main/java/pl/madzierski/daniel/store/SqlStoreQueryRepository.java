@@ -8,20 +8,21 @@ import pl.madzierski.daniel.store.model.StoreDto;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
-public interface SqlStoreQueryRepository extends StoreQueryRepository, Repository<SqlStore, String> {
+public interface SqlStoreQueryRepository extends StoreQueryRepository, Repository<SqlStore, UUID> {
 
     @Query(value = """
         SELECT new pl.madzierski.daniel.store.model.StoreDto(s.id, b.name, s.address, s.city, s.postalCode, s.country)
         FROM SqlStore s LEFT JOIN s.brand b WHERE s.id = :storeId
         """)
-    Optional<StoreDto> findStoreById(String storeId);
+    Optional<StoreDto> findStoreById(UUID storeId);
 
     @Query(value = """
         SELECT new pl.madzierski.daniel.store.model.StoreDto(s.id, b.name, s.address, s.city, s.postalCode, s.country)
         FROM SqlStore s LEFT JOIN s.brand b WHERE s.id IN :storeIds
         """)
-    Set<StoreDto> findStoresByIds(Collection<String> storeIds);
+    Set<StoreDto> findStoresByIds(Collection<UUID> storeIds);
 
     @Query(value = """
         SELECT new pl.madzierski.daniel.store.model.StoreDto(s.id, b.name, s.address, s.city, s.postalCode, s.country)

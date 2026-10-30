@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.store.model.StoreQuery;
 
+import java.util.UUID;
+
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -14,7 +16,7 @@ import pl.madzierski.daniel.store.model.StoreQuery;
 @NoArgsConstructor
 public class SqlStoreQuery extends BaseEntity {
 
-    public SqlStoreQuery(String id) {
+    public SqlStoreQuery(UUID id) {
         this.id = id;
     }
 

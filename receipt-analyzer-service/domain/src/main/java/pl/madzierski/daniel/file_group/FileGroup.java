@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
@@ -17,7 +18,7 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {"receipt", "files"})
 class FileGroup {
 
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private FileType fileType;

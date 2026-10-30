@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ import java.util.Set;
 @Builder
 @EqualsAndHashCode(exclude = {"items", "receipt", "parentReceiptRevision", "childReceiptRevisions", "sourceFileGroup"})
 class ReceiptRevision {
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
@@ -46,7 +47,7 @@ class ReceiptRevision {
         this.items.add(newItem);
     }
 
-    public void removeItem(String id) {
+    public void removeItem(UUID id) {
         this.items.removeIf(item -> item.getId().equals(id));
     }
 }

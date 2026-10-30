@@ -12,11 +12,11 @@ import pl.madzierski.daniel.product_dict.projection.SimpleProductProjection;
 
 import java.util.*;
 
-interface SqlProductDictQueryRepository extends JpaRepository<SqlProductDict, String> {
+interface SqlProductDictQueryRepository extends JpaRepository<SqlProductDict, UUID> {
     @Query("SELECT d FROM SqlProductDict d LEFT JOIN FETCH d.aliases LEFT JOIN FETCH d.categories")
     Set<ProductDictWithAliasesAndCategoryProjection> findAllWithCategoryAndAliases();
 
-    long countProductDictEntitiesByCategoriesIdIn(Set<String> productCategoryIds);
+    long countProductDictEntitiesByCategoriesIdIn(Set<UUID> productCategoryIds);
 }
 
 @RequiredArgsConstructor
@@ -31,7 +31,7 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
     }
 
     @Override
-    public long countProductDictEntitiesByCategoriesIdIn(Set<String> productCategoryIds) {
+    public long countProductDictEntitiesByCategoriesIdIn(Set<UUID> productCategoryIds) {
         return sqlProductDictQueryRepository.countProductDictEntitiesByCategoriesIdIn(productCategoryIds);
     }
 
@@ -51,7 +51,7 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
     }
 
     @Override
-    public Optional<ProductDto> findNameById(String id) {
+    public Optional<ProductDto> findNameById(UUID id) {
         return this.sqlProductDictQueryRepository.findById(id).map(product-> ProductDto.builder().id(product.getId()).name(product.getName()).build());
     }
 }

@@ -5,9 +5,10 @@ import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 public record UpdateRevisionRequest(
-    String id,
+    UUID id,
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
     String brand,
@@ -20,7 +21,7 @@ public record UpdateRevisionRequest(
 ) {
 
     public record ItemRequest(
-        String id,
+        UUID id,
         String name,
         BigDecimal amount,
         BigDecimal unitPrice,

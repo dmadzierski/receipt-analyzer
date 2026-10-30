@@ -6,8 +6,9 @@ import org.springframework.data.repository.Repository;
 import pl.madzierski.daniel.file_group.model.FileDto;
 
 import java.util.Optional;
+import java.util.UUID;
 
-interface SqlFileQueryRepository extends Repository<SqlFile, String> {
+interface SqlFileQueryRepository extends Repository<SqlFile, UUID> {
 
     @Query(nativeQuery = true, value = """
                 SELECT rf.id, rf.path, rf.part_number
@@ -16,7 +17,7 @@ interface SqlFileQueryRepository extends Repository<SqlFile, String> {
                 WHERE rfg.receipt_id = :receiptId AND rfg.file_type = 'PDF' AND rfg.is_original = true
                 LIMIT 1
         """)
-    Optional<FileDto> findOriginalPdf(String receiptId);
+    Optional<FileDto> findOriginalPdf(UUID receiptId);
 }
 
 @AllArgsConstructor
@@ -26,7 +27,7 @@ class FileQueryRepositoryImpl implements FileQueryRepository {
     private final SqlFileQueryRepository sqlFileQueryRepository;
 
     @Override
-    public Optional<FileDto> findOriginalPdf(String receiptId) {
+    public Optional<FileDto> findOriginalPdf(UUID receiptId) {
         return sqlFileQueryRepository.findOriginalPdf(receiptId);
     }
 }

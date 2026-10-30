@@ -34,9 +34,9 @@ public class ProductDictFacade {
     @Transactional
     void updateProductDict(UpdateProductDictListRequest body) {
         body.items().forEach(item -> {
-            List<String> dictIds = item.productDictList();
-            String primaryId = dictIds.getFirst();
-            List<String> sourceIds = dictIds.subList(1, dictIds.size());
+            List<UUID> dictIds = item.productDictList();
+            UUID primaryId = dictIds.getFirst();
+            List<UUID> sourceIds = dictIds.subList(1, dictIds.size());
 
             ProductDict product = productDictRepository.findById(primaryId)
                 .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
@@ -50,7 +50,7 @@ public class ProductDictFacade {
         });
     }
 
-    private void updateAliases(ProductDict product, String name, Set<String> aliasIds) {
+    private void updateAliases(ProductDict product, String name, Set<UUID> aliasIds) {
         Set<ProductAlias> previous = new HashSet<>(product.getAliases());
         Set<ProductAlias> chosen = new HashSet<>(productAliasRepository.findAllByIds(aliasIds));
 
@@ -66,14 +66,14 @@ public class ProductDictFacade {
         product.setName(name);
     }
 
-    private void mergeProducts(String primaryId, List<String> sourceIds) {
+    private void mergeProducts(UUID primaryId, List<UUID> sourceIds) {
         if (sourceIds.isEmpty()) return;
         receiptFacade.reassignProductDict(new ProductDictQuery(primaryId), sourceIds);
         productDictRepository.deleteAllByIdIn(sourceIds);
     }
 
-    private Set<ProductCategory> loadCategories(Collection<String> ids) {
-        Set<String> requested = ids == null ? Set.of() : new HashSet<>(ids);
+    private Set<ProductCategory> loadCategories(Collection<UUID> ids) {
+        Set<UUID> requested = ids == null ? Set.of() : new HashSet<>(ids);
         Set<ProductCategory> found = productCategoryRepository.findAllById(requested);
         if (found.size() != requested.size()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND);
@@ -123,7 +123,7 @@ public class ProductDictFacade {
     }
 
     @Transactional
-    UpdateProductCategoryResponse updateProductCategory(String productCategoryId, UpdateProductCategoryRequest request) {
+    UpdateProductCategoryResponse updateProductCategory(UUID productCategoryId, UpdateProductCategoryRequest request) {
         ProductCategory productCategory = productCategoryRepository.findById(productCategoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
         String name = request.name().trim();
 
@@ -137,7 +137,7 @@ public class ProductDictFacade {
     }
 
     @Transactional
-    void deleteProductCategory(String productCategoryId) {
+    void deleteProductCategory(UUID productCategoryId) {
         ProductCategory productCategory = productCategoryRepository.findById(productCategoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
         if (productDictQueryRepository.countProductDictEntitiesByCategoriesIdIn(Set.of(productCategory.getId())) > 0) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_IN_USE);

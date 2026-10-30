@@ -4,6 +4,7 @@ import lombok.*;
 import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @NoArgsConstructor
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 class ProductCategory {
 
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;

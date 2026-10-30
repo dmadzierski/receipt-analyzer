@@ -8,13 +8,14 @@ import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 public class ReceiptDto {
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
@@ -22,7 +23,7 @@ public class ReceiptDto {
     private WalletQuery wallet;
     private StoreQuery store;
 
-    public ReceiptDto(String id, LocalDateTime createdDate, LocalDateTime modifiedDate, String name, String description, WalletQuery wallet) {
+    public ReceiptDto(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String name, String description, WalletQuery wallet) {
         this(id, createdDate, modifiedDate, name, description, wallet, null);
     }
 }

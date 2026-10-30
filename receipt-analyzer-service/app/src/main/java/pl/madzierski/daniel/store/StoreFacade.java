@@ -5,6 +5,7 @@ import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.store.model.*;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -15,7 +16,7 @@ public class StoreFacade {
     private final StoreBrandRepository storeBrandRepository;
     private final StoreBrandQueryRepository storeBrandQueryRepository;
 
-    StoreDetailsResponse getStoreDetails(String storeId) {
+    StoreDetailsResponse getStoreDetails(UUID storeId) {
         return storeQueryRepository.findStoreById(storeId).stream().map(StoreDetailsResponse::storeMapper).findFirst().orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND));
     }
 

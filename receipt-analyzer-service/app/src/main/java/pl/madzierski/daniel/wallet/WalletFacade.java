@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,15 +45,15 @@ public class WalletFacade {
         return new GetWalletListResponse(wallets);
     }
 
-    GetWalletDetailsResponse getWalletDetails(String walletId) {
+    GetWalletDetailsResponse getWalletDetails(UUID walletId) {
         WalletDto walletDetails = walletQueryRepository.getWalletDetails(walletId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.WALLET_NOT_FOUND));
         Collection<WalletReceiptProjection> walletReceipts = receiptQueryRepository.getWalletReceipts(walletId);
-        Set<String> storeIds = walletReceipts.stream()
+        Set<UUID> storeIds = walletReceipts.stream()
             .map(WalletReceiptProjection::storeId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
-        Map<String, StoreDto> stores = storeIds.isEmpty() ? Map.of() : storeQueryRepository.findStoresByIds(storeIds).stream()
+        Map<UUID, StoreDto> stores = storeIds.isEmpty() ? Map.of() : storeQueryRepository.findStoresByIds(storeIds).stream()
             .collect(Collectors.toMap(StoreDto::getId, Function.identity()));
         return new GetWalletDetailsResponse(walletDetails.getId(), walletDetails.getName(), walletReceipts.stream()
             .map(receipt -> new GetWalletDetailsResponse.Receipt(

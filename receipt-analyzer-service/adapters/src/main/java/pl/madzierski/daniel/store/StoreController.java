@@ -12,6 +12,8 @@ import pl.madzierski.daniel.store.model.CreateStoreResponse;
 import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 import pl.madzierski.daniel.store.model.StoreListResponse;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping(path = "/stores", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -21,7 +23,7 @@ class StoreController {
     private final StoreFacade storeFacade;
 
     @GetMapping(path = {"/{storeId}"})
-    ResponseEntity<StoreDetailsResponse> getStoreDetails(@PathVariable String storeId) {
+    ResponseEntity<StoreDetailsResponse> getStoreDetails(@PathVariable UUID storeId) {
         return ResponseEntity.ok(this.storeFacade.getStoreDetails(storeId));
     }
 

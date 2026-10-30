@@ -1,10 +1,11 @@
 package pl.madzierski.daniel.product_dict.projection;
 
 import java.util.Set;
+import java.util.UUID;
 
 public interface ProductDictWithAliasesAndCategoryProjection {
 
-    String getId();
+    UUID getId();
 
     String getName();
 
@@ -13,13 +14,13 @@ public interface ProductDictWithAliasesAndCategoryProjection {
     Set<Alias> getAliases();
 
     interface ProductCategory {
-        String getId();
+        UUID getId();
 
         String getName();
     }
 
     interface Alias {
-        String getId();
+        UUID getId();
 
         String getName();
     }

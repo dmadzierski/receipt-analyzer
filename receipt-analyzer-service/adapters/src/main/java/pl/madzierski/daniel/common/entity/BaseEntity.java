@@ -13,6 +13,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @MappedSuperclass
 @EntityListeners({AuditingEntityListener.class})
@@ -23,7 +24,7 @@ public abstract class BaseEntity {
 
     @Id
     @UuidGenerator
-    protected String id;
+    protected UUID id;
 
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)

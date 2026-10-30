@@ -10,9 +10,10 @@ import pl.madzierski.daniel.file_group.model.FileGroupDto;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-interface SqlFileGroupQueryRepository extends JpaRepository<SqlFileGroup, String> {
+interface SqlFileGroupQueryRepository extends JpaRepository<SqlFileGroup, UUID> {
 
     @Query(value = """
                 SELECT rfg
@@ -20,10 +21,10 @@ interface SqlFileGroupQueryRepository extends JpaRepository<SqlFileGroup, String
                 LEFT JOIN FETCH rfg.files rf
                 WHERE rfg.receipt.id = :receiptId
         """)
-    List<SqlFileGroup> findAllByReceiptId(@Param(value = "receiptId") String receiptId);
+    List<SqlFileGroup> findAllByReceiptId(@Param(value = "receiptId") UUID receiptId);
 
     @Query("SELECT COUNT(rev) > 0 FROM SqlReceiptRevision rev WHERE rev.sourceFileGroup.id = :fileGroupId")
-    boolean isUsedByRevision(String fileGroupId);
+    boolean isUsedByRevision(UUID fileGroupId);
 }
 
 @AllArgsConstructor
@@ -33,7 +34,7 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
     private final SqlFileGroupQueryRepository sqlFileGroupQueryRepository;
 
     @Override
-    public List<FileGroupDto> findAllByReceiptId(String receiptId) {
+    public List<FileGroupDto> findAllByReceiptId(UUID receiptId) {
         return sqlFileGroupQueryRepository.findAllByReceiptId(receiptId)
             .stream()
             .map(it -> FileGroupDto.builder()
@@ -53,7 +54,7 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
     }
 
     @Override
-    public Optional<FileGroupDto> findFileGroupWithFiles(String fileGroupId) {
+    public Optional<FileGroupDto> findFileGroupWithFiles(UUID fileGroupId) {
         return sqlFileGroupQueryRepository.findById(fileGroupId)
             .map(it -> FileGroupDto.builder()
                 .id(it.getId())
@@ -71,7 +72,7 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
     }
 
     @Override
-    public boolean isUsedByRevision(String fileGroupId) {
+    public boolean isUsedByRevision(UUID fileGroupId) {
         return sqlFileGroupQueryRepository.isUsedByRevision(fileGroupId);
     }
 }

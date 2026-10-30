@@ -41,6 +41,7 @@
     "FILE_TYPE_NOT_DETECTED": "The file type could not be detected.",
     "FILE_EMPTY": "The file is empty.",
     "CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS": "This revision has copies. Delete the copies first.",
-    "REVISION_NOT_USER_RESOLVER": "Only user revisions can be changed this way."
+    "REVISION_NOT_USER_RESOLVER": "Only user revisions can be changed this way.",
+    "INVALID_REQUEST": "The request contains invalid data."
   }
 }

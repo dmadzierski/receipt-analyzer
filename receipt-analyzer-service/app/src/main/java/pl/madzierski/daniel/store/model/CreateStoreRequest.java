@@ -1,8 +1,10 @@
 package pl.madzierski.daniel.store.model;
 
+import java.util.UUID;
+
 
 public record CreateStoreRequest(
-        String storeBrandId,
+        UUID storeBrandId,
         String brandName,
         String address,
         String city,

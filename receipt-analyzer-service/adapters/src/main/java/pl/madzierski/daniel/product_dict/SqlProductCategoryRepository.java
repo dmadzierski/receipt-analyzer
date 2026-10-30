@@ -6,14 +6,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-interface SqlProductCategoryRepository extends JpaRepository<SqlProductCategory, String> {
+interface SqlProductCategoryRepository extends JpaRepository<SqlProductCategory, UUID> {
     List<SqlProductCategory> findAllByOrderByNameAsc();
 
     boolean existsByNameIgnoreCase(String name);
 
-    boolean existsByNameIgnoreCaseAndIdNot(String name, String id);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
 }
 
 @org.springframework.stereotype.Repository
@@ -35,7 +36,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     }
 
     @Override
-    public boolean existsByNameAndIdNot(String name, String id) {
+    public boolean existsByNameAndIdNot(String name, UUID id) {
         return this.repository.existsByNameIgnoreCaseAndIdNot(name, id);
     }
 
@@ -45,7 +46,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     }
 
     @Override
-    public Optional<ProductCategory> findById(String productCategoryId) {
+    public Optional<ProductCategory> findById(UUID productCategoryId) {
         return this.repository.findById(productCategoryId)
             .map(SqlProductCategory::toProductCategory);
     }
@@ -56,7 +57,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     }
 
     @Override
-    public Set<ProductCategory> findAllById(Set<String> categoryIdList) {
+    public Set<ProductCategory> findAllById(Set<UUID> categoryIdList) {
         return this.repository.findAllById(categoryIdList).stream()
             .map(SqlProductCategory::toProductCategory)
             .collect(Collectors.toSet());

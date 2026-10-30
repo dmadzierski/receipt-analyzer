@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.store.model.Store;
 import pl.madzierski.daniel.store.model.StoreRepository;
 
-interface SqlStoreRepository extends JpaRepository<SqlStore, String> {
+import java.util.UUID;
+
+interface SqlStoreRepository extends JpaRepository<SqlStore, UUID> {
 }
 
 @AllArgsConstructor

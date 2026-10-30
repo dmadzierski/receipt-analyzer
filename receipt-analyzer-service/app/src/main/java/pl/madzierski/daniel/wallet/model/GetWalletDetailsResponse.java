@@ -6,15 +6,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public record GetWalletDetailsResponse(
-    String id,
+    UUID id,
     String name,
     List<Receipt> receipts
 ) {
 
     public record Receipt(
-        String id,
+        UUID id,
         String name,
         LocalDate paymentDate,
         Boolean isCorrect,

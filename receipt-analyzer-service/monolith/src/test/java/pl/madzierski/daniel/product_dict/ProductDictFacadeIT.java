@@ -14,6 +14,7 @@ import pl.madzierski.daniel.product_dict.model.UpdateProductDictListRequest.Upda
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,7 +51,7 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void renamesCategoryButNotToNameOfAnotherCategory() {
-        String vegetablesId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
+        UUID vegetablesId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
         productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Owoce"));
         flush();
 
@@ -66,8 +67,8 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void categoryUsedByProductCannotBeDeleted() {
-        String usedId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
-        String unusedId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Owoce")).id();
+        UUID usedId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
+        UUID unusedId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Owoce")).id();
         flush();
         assignCategory(insertProduct("Cebula"), usedId);
 
@@ -82,17 +83,17 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void mergingProductsKeepsChosenAliasesAndMovesItemsAndCategoriesToPrimaryProduct() {
-        String categoryId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Nabiał")).id();
-        String primaryId = insertProduct("Mleko");
-        String primaryAliasId = insertAlias(primaryId, "Mleko 3,2% 1l");
-        String secondId = insertProduct("Mleko łaciate");
-        String keptAliasId = insertAlias(secondId, "MlekoŁaciate1l");
-        String droppedAliasId = insertAlias(secondId, "Mleko typo");
-        String thirdId = insertProduct("Mleko UHT");
-        String thirdAliasId = insertAlias(thirdId, "MlekoUHT2%");
-        String revisionId = insertRevision(insertReceipt(null, null, "Receipt"), "USER", "10.00", true, null);
-        String secondItemId = insertItem(revisionId, "MlekoŁaciate1l", secondId);
-        String thirdItemId = insertItem(revisionId, "MlekoUHT2%", thirdId);
+        UUID categoryId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Nabiał")).id();
+        UUID primaryId = insertProduct("Mleko");
+        UUID primaryAliasId = insertAlias(primaryId, "Mleko 3,2% 1l");
+        UUID secondId = insertProduct("Mleko łaciate");
+        UUID keptAliasId = insertAlias(secondId, "MlekoŁaciate1l");
+        UUID droppedAliasId = insertAlias(secondId, "Mleko typo");
+        UUID thirdId = insertProduct("Mleko UHT");
+        UUID thirdAliasId = insertAlias(thirdId, "MlekoUHT2%");
+        UUID revisionId = insertRevision(insertReceipt(null, null, "Receipt"), "USER", "10.00", true, null);
+        UUID secondItemId = insertItem(revisionId, "MlekoŁaciate1l", secondId);
+        UUID thirdItemId = insertItem(revisionId, "MlekoUHT2%", thirdId);
         flush();
 
         productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(new UpdateProductDict(
@@ -101,7 +102,7 @@ class ProductDictFacadeIT extends IntegrationTest {
 
         assertThat(count("SELECT count(*) FROM product WHERE id IN (?, ?)", secondId, thirdId)).isZero();
         assertThat(count("SELECT count(*) FROM product_alias WHERE id = ?", droppedAliasId)).isZero();
-        assertThat(jdbcTemplate.queryForList("SELECT product_id FROM receipt_item WHERE id IN (?, ?)", String.class, secondItemId, thirdItemId))
+        assertThat(jdbcTemplate.queryForList("SELECT product_id FROM receipt_item WHERE id IN (?, ?)", UUID.class, secondItemId, thirdItemId))
             .containsOnly(primaryId);
         GetProductDictListResponse.ProductDict merged = productDictFacade.getProductDictList().items().stream()
             .filter(product -> product.id().equals(primaryId))
@@ -124,7 +125,7 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void unknownCategoryIsReported() {
-        String productId = insertProduct("Cebula");
+        UUID productId = insertProduct("Cebula");
 
         assertError(() -> productDictFacade.updateProductCategory(UNKNOWN_ID, new UpdateProductCategoryRequest("Warzywa")),
             AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND);
@@ -137,8 +138,8 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void canonicalNameMatchingExistingAliasDoesNotDuplicateIt() {
-        String productId = insertProduct("Cebula biała");
-        String aliasId = insertAlias(productId, "cebula BIAŁA");
+        UUID productId = insertProduct("Cebula biała");
+        UUID aliasId = insertAlias(productId, "cebula BIAŁA");
         flush();
 
         productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(new UpdateProductDict(
@@ -151,11 +152,11 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void updatingProductReplacesItsCategories() {
-        String vegetablesId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
-        String organicId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Eko")).id();
+        UUID vegetablesId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
+        UUID organicId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Eko")).id();
         flush();
-        String productId = insertProduct("Cebula");
-        String aliasId = insertAlias(productId, "Cebula");
+        UUID productId = insertProduct("Cebula");
+        UUID aliasId = insertAlias(productId, "Cebula");
         assignCategory(productId, vegetablesId);
         flush();
 
@@ -168,11 +169,11 @@ class ProductDictFacadeIT extends IntegrationTest {
             String.class, productId)).containsExactly("Eko");
     }
 
-    private Set<String> aliasesOf(String productId) {
+    private Set<String> aliasesOf(UUID productId) {
         return Set.copyOf(jdbcTemplate.queryForList("SELECT name FROM product_alias WHERE product_id = ?", String.class, productId));
     }
 
-    private void assignCategory(String productId, String categoryId) {
+    private void assignCategory(UUID productId, UUID categoryId) {
         jdbcTemplate.update("INSERT INTO product_category_mapping (product_id, category_id) VALUES (?, ?)", productId, categoryId);
     }
 

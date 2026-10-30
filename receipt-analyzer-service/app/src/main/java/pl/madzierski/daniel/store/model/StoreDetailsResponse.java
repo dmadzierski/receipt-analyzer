@@ -1,8 +1,10 @@
 package pl.madzierski.daniel.store.model;
 
+import java.util.UUID;
+
 
 public record StoreDetailsResponse (
-    String id,
+    UUID id,
     String brand,
     String address,
     String city,

@@ -6,8 +6,9 @@ import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.store.model.StoreBrand;
 
 import java.util.Optional;
+import java.util.UUID;
 
-interface SqlStoreBrandRepository extends JpaRepository<SqlStoreBrand, String> {
+interface SqlStoreBrandRepository extends JpaRepository<SqlStoreBrand, UUID> {
 }
 
 @AllArgsConstructor
@@ -22,7 +23,7 @@ class StoreBrandRepositoryImpl implements StoreBrandRepository {
     }
 
     @Override
-    public Optional<StoreBrand> findById(String id) {
+    public Optional<StoreBrand> findById(UUID id) {
         return this.repository.findById(id).map(SqlStoreBrand::toStoreBrand);
     }
 }

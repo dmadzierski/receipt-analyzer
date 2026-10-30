@@ -10,6 +10,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pl.madzierski.daniel.product_dict.model.*;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping(path = "/product-categories", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -30,12 +32,12 @@ class ProductCategoryController {
     }
 
     @PutMapping(path = "/{productCategoryId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<UpdateProductCategoryResponse> updateProductCategory(@PathVariable String productCategoryId, @RequestBody @Valid UpdateProductCategoryRequest request) {
+    ResponseEntity<UpdateProductCategoryResponse> updateProductCategory(@PathVariable UUID productCategoryId, @RequestBody @Valid UpdateProductCategoryRequest request) {
         return ResponseEntity.ok(productDictFacade.updateProductCategory(productCategoryId, request));
     }
 
     @DeleteMapping(path = "/{productCategoryId}")
-    ResponseEntity<Void> deleteProductCategory(@PathVariable String productCategoryId) {
+    ResponseEntity<Void> deleteProductCategory(@PathVariable UUID productCategoryId) {
         productDictFacade.deleteProductCategory(productCategoryId);
         return ResponseEntity.noContent().build();
     }

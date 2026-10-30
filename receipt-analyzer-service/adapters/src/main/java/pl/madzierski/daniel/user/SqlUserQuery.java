@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.user.model.UserQuery;
 
+import java.util.UUID;
+
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -14,7 +16,7 @@ import pl.madzierski.daniel.user.model.UserQuery;
 @NoArgsConstructor
 public class SqlUserQuery extends BaseEntity {
 
-    public SqlUserQuery(String id) {
+    public SqlUserQuery(UUID id) {
         this.id = id;
     }
 

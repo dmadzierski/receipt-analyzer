@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 public class FileFacade {
@@ -23,7 +24,7 @@ public class FileFacade {
     private final FileTypeDetector fileTypeDetector;
     private final String uploadDir;
 
-    public FileGroupDto save(String receiptId, List<byte[]> files, String userSub) {
+    public FileGroupDto save(UUID receiptId, List<byte[]> files, String userSub) {
         if (files == null || files.isEmpty()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
         }
@@ -48,7 +49,7 @@ public class FileFacade {
         return fileGroupFactory.toDto(fileGroup);
     }
 
-    String createPath(String currentUserSub, String fileId, String fileGroupId, String fileExtension, String receiptId) {
+    String createPath(String currentUserSub, UUID fileId, UUID fileGroupId, String fileExtension, UUID receiptId) {
         return uploadDir + java.io.File.separator + "user" + java.io.File.separator +
                currentUserSub + java.io.File.separator + "receipts" + java.io.File.separator +
                receiptId + java.io.File.separator + "file_group" + java.io.File.separator +
@@ -56,7 +57,7 @@ public class FileFacade {
                fileId + "." + fileExtension;
     }
 
-    FileSystemResource getFile(String receiptFileId) {
+    FileSystemResource getFile(UUID receiptFileId) {
         File fileEntity = fileRepository.findById(receiptFileId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_RECEIPT_NOT_FOUND));
         String path = fileEntity.getPath();
@@ -88,7 +89,7 @@ public class FileFacade {
         }
     }
 
-    public List<byte[]> getFiles(String fileGroupId) {
+    public List<byte[]> getFiles(UUID fileGroupId) {
         return fileGroupQueryRepository.findFileGroupWithFiles(fileGroupId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND))
             .files()
@@ -103,13 +104,13 @@ public class FileFacade {
             .toList();
     }
 
-    public void deleteFileGroupId(String fileGroupId, String userSub) {
+    public void deleteFileGroupId(UUID fileGroupId, String userSub) {
         if (fileGroupQueryRepository.isUsedByRevision(fileGroupId))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_USED_BY_REVISION);
         fileGroupRepository.deleteById(fileGroupId);
     }
 
-    public void deleteFileGroupsByReceiptId(String receiptId) {
+    public void deleteFileGroupsByReceiptId(UUID receiptId) {
         fileGroupRepository.deleteAllByReceiptId(receiptId);
     }
 }

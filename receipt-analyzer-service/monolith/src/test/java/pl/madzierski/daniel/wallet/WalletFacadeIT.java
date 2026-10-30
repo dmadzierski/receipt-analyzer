@@ -10,6 +10,7 @@ import pl.madzierski.daniel.wallet.model.GetWalletListResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -22,10 +23,10 @@ class WalletFacadeIT extends IntegrationTest {
     @Test
     void listsOnlyWalletsOfCurrentUser() {
         createUser("anna");
-        String otherUserId = createUser("bartek");
+        UUID otherUserId = createUser("bartek");
         createWallet(otherUserId, "Bartek's wallet");
 
-        String walletId = walletFacade.addWallet(new CreateWalletRequest("Home"), "anna").id();
+        UUID walletId = walletFacade.addWallet(new CreateWalletRequest("Home"), "anna").id();
         flush();
 
         assertThat(walletFacade.getWallets("anna").items())
@@ -40,9 +41,9 @@ class WalletFacadeIT extends IntegrationTest {
 
     @Test
     void walletDetailsShowCorrectRevisionAndStoreOfEachReceipt() {
-        String walletId = createWallet(createUser("anna"), "Home");
-        String storeId = createStore("Biedronka", "ul. Testowa 1", "Poznań");
-        String receiptId = insertReceipt(walletId, storeId, "Weekly shopping");
+        UUID walletId = createWallet(createUser("anna"), "Home");
+        UUID storeId = createStore("Biedronka", "ul. Testowa 1", "Poznań");
+        UUID receiptId = insertReceipt(walletId, storeId, "Weekly shopping");
         insertRevision(receiptId, "BIEDRONKA_JSON", "999.99", false, null);
         insertRevision(receiptId, "USER", "330.75", true, LocalDateTime.of(2026, 5, 22, 10, 4));
         flush();
@@ -62,8 +63,8 @@ class WalletFacadeIT extends IntegrationTest {
 
     @Test
     void walletDetailsListReceiptWithoutCorrectRevision() {
-        String walletId = createWallet(createUser("anna"), "Home");
-        String receiptId = insertReceipt(walletId, null, "Not checked yet");
+        UUID walletId = createWallet(createUser("anna"), "Home");
+        UUID receiptId = insertReceipt(walletId, null, "Not checked yet");
         insertRevision(receiptId, "BIEDRONKA_JSON", "12.50", false, null);
         flush();
 

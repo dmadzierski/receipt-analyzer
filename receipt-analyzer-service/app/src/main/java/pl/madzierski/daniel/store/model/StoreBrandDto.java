@@ -1,7 +1,9 @@
 package pl.madzierski.daniel.store.model;
 
+import java.util.UUID;
+
 public record StoreBrandDto(
-    String id,
+    UUID id,
     String name
 ) {
 }

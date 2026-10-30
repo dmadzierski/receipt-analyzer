@@ -3,6 +3,7 @@ package pl.madzierski.daniel.store.model;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(exclude = "brand")
 public class Store {
 
-    private String id;
+    private UUID id;
     private StoreBrand brand;
     private String address;
     private String city;

@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
-interface SqlReceiptRepository extends JpaRepository<SqlReceipt, String> {
+interface SqlReceiptRepository extends JpaRepository<SqlReceipt, UUID> {
 }
 
 @AllArgsConstructor
@@ -21,12 +22,12 @@ class ReceiptRepositoryImpl implements ReceiptRepository {
     }
 
     @Override
-    public Optional<Receipt> findById(String receiptId) {
+    public Optional<Receipt> findById(UUID receiptId) {
         return this.repository.findById(receiptId).map(SqlReceipt::toReceipt);
     }
 
     @Override
-    public void deleteById(String receiptId) {
+    public void deleteById(UUID receiptId) {
         this.repository.deleteById(receiptId);
     }
 }

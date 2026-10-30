@@ -7,13 +7,15 @@ import lombok.NoArgsConstructor;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 
+import java.util.UUID;
+
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product")
 @NoArgsConstructor
 public class SqlProductDictQuery extends BaseEntity {
 
-    public SqlProductDictQuery(String id) {
+    public SqlProductDictQuery(UUID id) {
         this.id = id;
     }
 

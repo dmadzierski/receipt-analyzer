@@ -4,9 +4,10 @@ import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record GetReceiptRevisionsResponse(
-    String id,
+    UUID id,
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
     BigDecimal totalPrice,

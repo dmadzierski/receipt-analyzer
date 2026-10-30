@@ -6,9 +6,10 @@ import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryRepository,
-    Repository<SqlReceiptRevision, String> {
+    Repository<SqlReceiptRevision, UUID> {
 
     @Query("""
         SELECT new pl.madzierski.daniel.receipt.model.ReceiptRevisionDto(
@@ -28,7 +29,7 @@ public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryR
         WHERE rev.receipt.id = :receiptId
         """
     )
-    List<ReceiptRevisionDto> getRevisionsByReceiptId(String receiptId);
+    List<ReceiptRevisionDto> getRevisionsByReceiptId(UUID receiptId);
 
     @Query("""
         SELECT new pl.madzierski.daniel.receipt.model.ReceiptRevisionDto(
@@ -48,6 +49,6 @@ public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryR
         WHERE rev.id = :revisionId
         """
     )
-    Optional<ReceiptRevisionDto> getRevisionById(String revisionId);
+    Optional<ReceiptRevisionDto> getRevisionById(UUID revisionId);
 
 }

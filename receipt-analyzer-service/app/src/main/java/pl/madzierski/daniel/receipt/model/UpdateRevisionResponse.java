@@ -6,10 +6,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public record UpdateRevisionResponse(
-    String id,
+    UUID id,
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
     BigDecimal totalPrice,
@@ -49,7 +50,7 @@ public record UpdateRevisionResponse(
     }
 
     public record ItemResponse(
-        String id,
+        UUID id,
         String name,
         BigDecimal amount,
         BigDecimal unitPrice,

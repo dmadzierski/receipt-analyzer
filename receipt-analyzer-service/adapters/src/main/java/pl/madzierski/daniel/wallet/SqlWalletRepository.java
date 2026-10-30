@@ -4,7 +4,9 @@ package pl.madzierski.daniel.wallet;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-interface SqlWalletRepository extends JpaRepository<SqlWallet, String> {
+import java.util.UUID;
+
+interface SqlWalletRepository extends JpaRepository<SqlWallet, UUID> {
 }
 
 @org.springframework.stereotype.Repository

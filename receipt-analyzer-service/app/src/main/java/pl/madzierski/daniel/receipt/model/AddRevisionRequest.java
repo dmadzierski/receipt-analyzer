@@ -3,9 +3,10 @@ package pl.madzierski.daniel.receipt.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 public record AddRevisionRequest(
-    String receiptId,
+    UUID receiptId,
     LocalDateTime createdDate,
     String brand,
     BigDecimal totalPrice,
@@ -14,14 +15,14 @@ public record AddRevisionRequest(
     Set<AddRevisionItemRequest> items
 ) {
     public record AddRevisionItemRequest(
-        String id,
+        UUID id,
         String name,
         BigDecimal amount,
         BigDecimal unitPrice,
         BigDecimal discount,
         BigDecimal totalPrice,
         Integer position,
-        String originalItemId
+        UUID originalItemId
     ) {
     }
 }

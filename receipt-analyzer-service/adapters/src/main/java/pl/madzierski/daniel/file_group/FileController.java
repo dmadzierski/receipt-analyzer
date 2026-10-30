@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/receipt-files")
 @AllArgsConstructor
@@ -19,7 +21,7 @@ class FileController {
     private final FileFacade fileFacade;
 
     @GetMapping(path = "/{receiptFileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    ResponseEntity<Resource> getFileReceipt(@PathVariable String receiptFileId) {
+    ResponseEntity<Resource> getFileReceipt(@PathVariable UUID receiptFileId) {
         Resource fileReceipt = fileFacade.getFile(receiptFileId);
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME_TEMPLATE.formatted(fileReceipt.getFilename()))

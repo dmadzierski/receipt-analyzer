@@ -7,13 +7,15 @@ import lombok.NoArgsConstructor;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 
+import java.util.UUID;
+
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "receipt_file_group")
 @NoArgsConstructor
 public class SqlFileGroupQuery extends BaseEntity {
 
-    public SqlFileGroupQuery(String id) {
+    public SqlFileGroupQuery(UUID id) {
         this.id = id;
     }
 

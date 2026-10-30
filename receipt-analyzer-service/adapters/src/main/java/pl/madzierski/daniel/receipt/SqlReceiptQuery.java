@@ -6,6 +6,8 @@ import lombok.*;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 
+import java.util.UUID;
+
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "receipt")
@@ -14,7 +16,7 @@ import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 @NoArgsConstructor
 public class SqlReceiptQuery extends BaseEntity {
 
-    public SqlReceiptQuery(String id) {
+    public SqlReceiptQuery(UUID id) {
         this.id = id;
     }
 

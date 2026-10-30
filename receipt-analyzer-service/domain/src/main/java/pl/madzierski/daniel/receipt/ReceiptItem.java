@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -16,7 +17,7 @@ import java.util.Set;
 class ReceiptItem {
 
     private final Set<ReceiptItem> childItems = new HashSet<>();
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private ReceiptRevision receiptRevision;
@@ -29,7 +30,7 @@ class ReceiptItem {
     private Integer position;
     private ReceiptItem parentItem;
 
-    public ReceiptItem(String id) {
+    public ReceiptItem(UUID id) {
         this.id = id;
     }
 

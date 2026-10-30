@@ -13,7 +13,7 @@ import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
-interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String> {
+interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, UUID> {
 
     @Modifying
     @Query("""
@@ -21,7 +21,7 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
         SET r.product = :dict
         WHERE r.product.id IN (:productDictIdList)
         """)
-    void reassignProductDict(SqlProductDictQuery dict, List<String> productDictIdList);
+    void reassignProductDict(SqlProductDictQuery dict, List<UUID> productDictIdList);
 
     @Query("""
         SELECT item FROM SqlReceiptItem item INNER JOIN FETCH item.parentItem parentItem 
@@ -29,7 +29,7 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
                 item.receiptRevision.resolver = pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND 
                 item.product IS NULL AND 
                 parentItem.product IS NULL""")
-    Set<SqlReceiptItem> findUnmatchedItemsByReceiptId(String revisionId);
+    Set<SqlReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId);
 
     @Modifying
     @Query("""
@@ -37,11 +37,11 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
         SET i.product = :product
         WHERE i.id IN :ids
         """)
-    void updateProduct(SqlProductDictQuery product, Collection<String> ids);
+    void updateProduct(SqlProductDictQuery product, Collection<UUID> ids);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM SqlReceiptItem i WHERE i.id IN :ids")
-    void deleteByIds(Collection<String> ids);
+    void deleteByIds(Collection<UUID> ids);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
@@ -49,14 +49,14 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, String>
         SET i.parentItem = null
         WHERE i.receiptRevision.id IN (SELECT r.id FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId)
         """)
-    void detachParentItemsByReceiptId(String receiptId);
+    void detachParentItemsByReceiptId(UUID receiptId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
         DELETE FROM SqlReceiptItem i
         WHERE i.receiptRevision.id IN (SELECT r.id FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId)
         """)
-    void deleteByReceiptId(String receiptId);
+    void deleteByReceiptId(UUID receiptId);
 
 }
 
@@ -68,23 +68,23 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     private final SqlReceiptRevisionRepository receiptRevisionRepository;
 
     @Override
-    public void reassignProductDict(ProductDictQuery dict, List<String> productDictIdList) {
+    public void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList) {
         this.receiptItemRepository.reassignProductDict(SqlProductDictQuery.fromProductDict(dict), productDictIdList);
     }
 
     @Override
-    public void deleteAllByIdIn(List<String> ids) {
+    public void deleteAllByIdIn(List<UUID> ids) {
         if (ids.isEmpty()) return;
         this.receiptItemRepository.deleteByIds(ids);
     }
 
     @Override
-    public void deleteAllByReceiptId(String receiptId) {
+    public void deleteAllByReceiptId(UUID receiptId) {
         this.receiptItemRepository.detachParentItemsByReceiptId(receiptId);
         this.receiptItemRepository.deleteByReceiptId(receiptId);
     }
     @Override
-    public List<ReceiptItem> saveAll(List<ReceiptItem> entities, String receiptRevisionId) {
+    public List<ReceiptItem> saveAll(List<ReceiptItem> entities, UUID receiptRevisionId) {
         SqlReceiptRevision sqlReceiptRevision =
             this.receiptRevisionRepository.findById(receiptRevisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_REVISION_NOT_FOUND));
         return receiptItemRepository.saveAll(entities.stream().map(item -> SqlReceiptItem.fromReceiptItem(item,
@@ -92,7 +92,7 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     }
 
     @Override
-    public List<ReceiptItem> findUnmatchedItemsByReceiptId(String revisionId) {
+    public List<ReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId) {
         return receiptItemRepository.findUnmatchedItemsByReceiptId(revisionId)
             .stream()
             .map(SqlReceiptItem::toReceiptItem)
@@ -100,7 +100,7 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     }
 
     @Override
-    public void updateProduct(ProductDictQuery product, Collection<String> itemIds) {
+    public void updateProduct(ProductDictQuery product, Collection<UUID> itemIds) {
         receiptItemRepository.updateProduct(SqlProductDictQuery.fromProductDict(product), itemIds);
     }
 }

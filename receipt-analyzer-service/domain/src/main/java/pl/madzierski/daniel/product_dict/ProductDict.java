@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 @NoArgsConstructor
@@ -15,7 +16,7 @@ import java.util.function.Predicate;
 @Setter
 @EqualsAndHashCode(exclude = {"aliases", "productCategories"})
 class ProductDict {
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;

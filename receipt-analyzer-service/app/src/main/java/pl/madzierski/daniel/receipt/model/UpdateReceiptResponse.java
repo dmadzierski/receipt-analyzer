@@ -1,9 +1,11 @@
 package pl.madzierski.daniel.receipt.model;
 
+import java.util.UUID;
+
 public record UpdateReceiptResponse(
-    String id,
+    UUID id,
     String name,
     String description,
-    String storeId
+    UUID storeId
 ) {
 }

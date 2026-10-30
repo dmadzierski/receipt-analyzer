@@ -1,15 +1,17 @@
 package pl.madzierski.daniel.product_dict.projection;
 
+import java.util.UUID;
+
 public interface SimpleProductProjection {
-    String getId();
+    UUID getId();
 
     String getName();
 
-    String getAliasId();
+    UUID getAliasId();
 
     String getAliasName();
 
-    String getCategoryId();
+    UUID getCategoryId();
 
     String getCategoryName();
 }

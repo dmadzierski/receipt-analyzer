@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(exclude = "fileGroup")
 class File {
 
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private FileGroup fileGroup;

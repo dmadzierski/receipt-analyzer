@@ -12,6 +12,8 @@ import pl.madzierski.daniel.wallet.model.CreateWalletResponse;
 import pl.madzierski.daniel.wallet.model.GetWalletDetailsResponse;
 import pl.madzierski.daniel.wallet.model.GetWalletListResponse;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping(path = "/wallets", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -31,7 +33,7 @@ class WalletController {
     }
 
     @GetMapping(path = "/{walletId}")
-    ResponseEntity<GetWalletDetailsResponse> getWalletDetails(@PathVariable String walletId) {
+    ResponseEntity<GetWalletDetailsResponse> getWalletDetails(@PathVariable UUID walletId) {
         return ResponseEntity.ok(this.walletFacade.getWalletDetails(walletId));
     }
 }

@@ -12,6 +12,7 @@ import pl.madzierski.daniel.store.model.StoreDto;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +29,7 @@ class StoreFacadeIT extends IntegrationTest {
         CreateStoreResponse first = storeFacade.addStore(
             new CreateStoreRequest(null, "Biedronka", "ul. Testowa 1", "Poznań", "60-001", "Polska"));
         flush();
-        String brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM store WHERE id = ?", String.class, first.id());
+        UUID brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM store WHERE id = ?", UUID.class, first.id());
 
         CreateStoreResponse second = storeFacade.addStore(
             new CreateStoreRequest(brandId, null, "ul. Inna 2", "Gniezno", "62-200", "Polska"));
@@ -36,7 +37,7 @@ class StoreFacadeIT extends IntegrationTest {
 
         assertThat(second.brand()).isEqualTo("Biedronka");
         assertThat(count("SELECT count(*) FROM store_brand")).isEqualTo(1);
-        assertThat(jdbcTemplate.queryForObject("SELECT brand_id FROM store WHERE id = ?", String.class, second.id())).isEqualTo(brandId);
+        assertThat(jdbcTemplate.queryForObject("SELECT brand_id FROM store WHERE id = ?", UUID.class, second.id())).isEqualTo(brandId);
     }
 
     @Test
@@ -48,7 +49,7 @@ class StoreFacadeIT extends IntegrationTest {
 
     @Test
     void returnsStoreDetails() {
-        String storeId = createStore("Lidl", "ul. Testowa 3", "Kraków");
+        UUID storeId = createStore("Lidl", "ul. Testowa 3", "Kraków");
 
         StoreDetailsResponse details = storeFacade.getStoreDetails(storeId);
 
@@ -74,7 +75,7 @@ class StoreFacadeIT extends IntegrationTest {
 
     @Test
     void searchesStoresByBrandCityAndAddressRegardlessOfLetterCase() {
-        String storeId = createStore("Biedronka", "ul. Półwiejska 2", "Poznań");
+        UUID storeId = createStore("Biedronka", "ul. Półwiejska 2", "Poznań");
 
         assertThat(idsOf(storeQueryRepository.findStoresByQuery("biedronka"))).contains(storeId);
         assertThat(idsOf(storeQueryRepository.findStoresByQuery("POZNAŃ"))).contains(storeId);
@@ -83,14 +84,14 @@ class StoreFacadeIT extends IntegrationTest {
 
     @Test
     void findsOnlyRequestedStoresByIds() {
-        String first = createStore("Biedronka", "ul. Testowa 1", "Poznań");
-        String second = createStore("Lidl", "ul. Testowa 2", "Gniezno");
+        UUID first = createStore("Biedronka", "ul. Testowa 1", "Poznań");
+        UUID second = createStore("Lidl", "ul. Testowa 2", "Gniezno");
         createStore("Żabka", "ul. Testowa 3", "Września");
 
         assertThat(idsOf(storeQueryRepository.findStoresByIds(List.of(first, second)))).containsExactlyInAnyOrder(first, second);
     }
 
-    private static List<String> idsOf(Set<StoreDto> stores) {
+    private static List<UUID> idsOf(Set<StoreDto> stores) {
         return stores.stream().map(StoreDto::getId).toList();
     }
 }

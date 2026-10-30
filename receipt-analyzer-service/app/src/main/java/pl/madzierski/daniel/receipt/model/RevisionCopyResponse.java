@@ -1,4 +1,6 @@
 package pl.madzierski.daniel.receipt.model;
 
-public record RevisionCopyResponse(String revisionId) {
+import java.util.UUID;
+
+public record RevisionCopyResponse(UUID revisionId) {
 }

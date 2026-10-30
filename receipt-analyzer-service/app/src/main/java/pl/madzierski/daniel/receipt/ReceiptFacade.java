@@ -71,13 +71,13 @@ public class ReceiptFacade {
     }
 
     @Transactional(readOnly = true)
-    GetReceiptDetailsResponse getReceiptDetails(String receiptId) {
+    GetReceiptDetailsResponse getReceiptDetails(UUID receiptId) {
         ReceiptDto receiptDto = receiptQueryRepository.findById(receiptId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
         List<ReceiptRevisionDto> receiptRevisionList = receiptRevisionQueryRepository.getRevisionsByReceiptId(receiptId);
         List<FileGroupDto> fileGroups = fileGroupQueryRepository.findAllByReceiptId(receiptId);
         Collection<ReceiptItemDto> itemListDto = Collections.emptyList();
-        String preferredRevisionId = receiptRevisionList.stream()
+        UUID preferredRevisionId = receiptRevisionList.stream()
             .filter(ReceiptRevisionDto::getIsPreferredRevision)
             .map(ReceiptRevisionDto::getId)
             .findFirst()
@@ -95,7 +95,7 @@ public class ReceiptFacade {
     }
 
     @Transactional(readOnly = true)
-    List<GetReceiptRevisionsResponse> getReceiptRevisions(String receiptId) {
+    List<GetReceiptRevisionsResponse> getReceiptRevisions(UUID receiptId) {
         List<ReceiptRevisionDto> receiptRevisionEntitiesByReceiptId = receiptRevisionQueryRepository.getRevisionsByReceiptId(receiptId);
         return receiptRevisionEntitiesByReceiptId.stream()
             .map(GetReceiptRevisionsResponse::receiptRevisionMapper)
@@ -103,7 +103,7 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    RevisionCopyResponse createRevisionCopy(String revisionId) {
+    RevisionCopyResponse createRevisionCopy(UUID revisionId) {
         ReceiptRevision revision = revisionRepository.findByIdWithItems(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         ReceiptRevision revisionCopy = copyRevisionWithItems(revision);
@@ -144,7 +144,7 @@ public class ReceiptFacade {
     }
 
     @Transactional(readOnly = true)
-    GetRevisionResponse getRevision(String revisionId) {
+    GetRevisionResponse getRevision(UUID revisionId) {
         ReceiptRevisionDto revision = receiptRevisionQueryRepository.getRevisionById(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         Collection<ReceiptItemDto> items = receiptItemQueryRepository.findReceiptItemsByRevisionId(revisionId);
@@ -152,7 +152,7 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    UpdateRevisionResponse updateRevision(String revisionId, UpdateRevisionRequest updatedRevisionRequest) {
+    UpdateRevisionResponse updateRevision(UUID revisionId, UpdateRevisionRequest updatedRevisionRequest) {
         ReceiptRevision revision = revisionRepository.findByIdWithItems(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         if (updatedRevisionRequest.brand() != null) revision.setBrand(updatedRevisionRequest.brand());
@@ -163,12 +163,12 @@ public class ReceiptFacade {
             revision.setIsPreferredRevision(updatedRevisionRequest.isPreferredRevision());
         if (updatedRevisionRequest.isCorrect() != null) revision.setIsCorrect(updatedRevisionRequest.isCorrect());
         if (updatedRevisionRequest.items() != null && revision.getResolver() == ReceiptResolverStrategyType.USER) {
-            Set<String> incomingIds = updatedRevisionRequest.items()
+            Set<UUID> incomingIds = updatedRevisionRequest.items()
                 .stream()
                 .map(UpdateRevisionRequest.ItemRequest::id)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-            List<String> itemsToRemove = revision.getItems()
+            List<UUID> itemsToRemove = revision.getItems()
                 .stream()
                 .map(ReceiptItem::getId)
                 .filter(id -> !incomingIds.contains(id))
@@ -176,7 +176,7 @@ public class ReceiptFacade {
             receiptItemRepository.deleteAllByIdIn(itemsToRemove);
             itemsToRemove.forEach(revision::removeItem);
             for (UpdateRevisionRequest.ItemRequest incomingItem : updatedRevisionRequest.items()) {
-                if (incomingItem.id() != null && !incomingItem.id().trim().isEmpty()) {
+                if (incomingItem.id() != null) {
                     revision.getItems()
                         .stream()
                         .filter(entity -> incomingItem.id().equals(entity.getId()))
@@ -251,7 +251,7 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    void updateAliasesByUserRevision(String revisionId) {
+    void updateAliasesByUserRevision(UUID revisionId) {
         Map<ProductDto, Collection<ReceiptItem>> receiptItemToProductDictNameMap = new HashMap<>();
         receiptItemRepository.findUnmatchedItemsByReceiptId(revisionId)
             .forEach(receiptItem -> {
@@ -317,7 +317,7 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    public void reassignProductDict(ProductDictQuery primaryDict, List<String> productDictIdList) {
+    public void reassignProductDict(ProductDictQuery primaryDict, List<UUID> productDictIdList) {
         receiptItemRepository.reassignProductDict(primaryDict, productDictIdList);
     }
 
@@ -330,7 +330,7 @@ public class ReceiptFacade {
                     .toList()));
     }
 
-    void updateProductDictInRevisionItems(String revisionId) {
+    void updateProductDictInRevisionItems(UUID revisionId) {
         receiptItemRepository.saveAll(revisionRepository.findById(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND))
             .getItems()
@@ -340,7 +340,7 @@ public class ReceiptFacade {
             .toList(), revisionId);
     }
 
-    CreateRevisionResponse createRevision(String receiptId, CreateRevisionRequest body) {
+    CreateRevisionResponse createRevision(UUID receiptId, CreateRevisionRequest body) {
         Receipt receipt = receiptRepository.findById(receiptId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
         List<byte[]> files = fileFacade.getFiles(body.fileGroupId());
@@ -355,7 +355,7 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    UpdateReceiptResponse updateReceipt(String receiptId, UpdateReceiptRequest request) {
+    UpdateReceiptResponse updateReceipt(UUID receiptId, UpdateReceiptRequest request) {
         Receipt receipt = receiptRepository.findById(receiptId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
         storeQueryRepository.findStoreById(request.storeId())
@@ -369,7 +369,7 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    void deleteReceipt(String receiptId) {
+    void deleteReceipt(UUID receiptId) {
         receiptRepository.findById(receiptId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
         receiptItemRepository.deleteAllByReceiptId(receiptId);
@@ -378,7 +378,7 @@ public class ReceiptFacade {
         receiptRepository.deleteById(receiptId);
     }
 
-    void deleteRevision(String revisionId) {
+    void deleteRevision(UUID revisionId) {
         if (revisionRepository.findById(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND))
             .getChildReceiptRevisions()
@@ -390,7 +390,7 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    void rewriteProductNameToItems(String revisionId) {
+    void rewriteProductNameToItems(UUID revisionId) {
         ReceiptRevision revision = revisionRepository.findById(revisionId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         if(revision.getResolver() != ReceiptResolverStrategyType.USER) throw new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);

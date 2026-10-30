@@ -2,17 +2,18 @@ package pl.madzierski.daniel.receipt;
 
 
 import java.util.Optional;
+import java.util.UUID;
 
 interface ReceiptRevisionRepository {
     ReceiptRevision save(ReceiptRevision revision);
 
-    Optional<ReceiptRevision> findByIdWithItems(String revisionId);
+    Optional<ReceiptRevision> findByIdWithItems(UUID revisionId);
 
-    Optional<ReceiptRevision> findById(String revisionId);
+    Optional<ReceiptRevision> findById(UUID revisionId);
 
-    void deleteById(String revisionId);
+    void deleteById(UUID revisionId);
 
-    void deleteAllByReceiptId(String receiptId);
+    void deleteAllByReceiptId(UUID receiptId);
 
-    void unsetPreferredInOtherRevisions(String receiptId, String preferredRevisionId);
+    void unsetPreferredInOtherRevisions(UUID receiptId, UUID preferredRevisionId);
 }

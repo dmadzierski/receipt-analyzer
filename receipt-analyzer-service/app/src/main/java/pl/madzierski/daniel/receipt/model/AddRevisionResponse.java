@@ -5,11 +5,12 @@ import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 public record AddRevisionResponse(
     String revision,
     ReceiptResolverStrategyType resolver,
-    String receiptId,
+    UUID receiptId,
     LocalDateTime createdDate,
     BigDecimal totalPrice,
     LocalDateTime paymentDate,
@@ -31,14 +32,14 @@ public record AddRevisionResponse(
     }
 
     public record AddRevisionItemResponse(
-        String id,
+        UUID id,
         String name,
         BigDecimal amount,
         BigDecimal unitPrice,
         BigDecimal discount,
         BigDecimal totalPrice,
         Integer position,
-        String originalItemId
+        UUID originalItemId
     ) {
     }
 }

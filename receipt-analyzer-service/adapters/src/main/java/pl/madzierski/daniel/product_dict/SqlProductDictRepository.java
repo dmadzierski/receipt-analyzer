@@ -7,8 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-interface SqlProductDictRepository extends JpaRepository<SqlProductDict, String> {
+interface SqlProductDictRepository extends JpaRepository<SqlProductDict, UUID> {
 }
 
 @Repository
@@ -18,12 +19,12 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
     private final SqlProductDictRepository repository;
 
     @Override
-    public Optional<ProductDict> findById(String productDictId) {
+    public Optional<ProductDict> findById(UUID productDictId) {
         return repository.findById(productDictId).map(SqlProductDict::toProductDict);
     }
 
     @Override
-    public void deleteAllByIdIn(List<String> productDictIdList) {
+    public void deleteAllByIdIn(List<UUID> productDictIdList) {
         repository.deleteAllById(productDictIdList);
     }
 

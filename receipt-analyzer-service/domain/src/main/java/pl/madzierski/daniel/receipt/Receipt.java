@@ -8,6 +8,7 @@ import pl.madzierski.daniel.wallet.model.WalletQuery;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +20,7 @@ class Receipt {
 
     private final Set<FileGroupQuery> fileGroups = new HashSet<>();
     private final Set<ReceiptRevision> receiptRevisions = new HashSet<>();
-    private String id;
+    private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;

@@ -1,4 +1,6 @@
 package pl.madzierski.daniel.wallet.model;
 
-public record CreateWalletResponse(String id, String name) {
+import java.util.UUID;
+
+public record CreateWalletResponse(UUID id, String name) {
 }

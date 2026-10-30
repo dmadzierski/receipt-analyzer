@@ -1,12 +1,14 @@
 package pl.madzierski.daniel.file_group;
 
+import java.util.UUID;
+
 public interface FileGroupRepository {
 
     FileGroup save(FileGroup fileGroup);
 
     void flush();
 
-    void deleteById(String fileGroupId);
+    void deleteById(UUID fileGroupId);
 
-    void deleteAllByReceiptId(String receiptId);
+    void deleteAllByReceiptId(UUID receiptId);
 }
