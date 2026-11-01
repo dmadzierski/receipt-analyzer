@@ -14,6 +14,7 @@ import pl.madzierski.daniel.receipt.model.GetRevisionResponse;
 import pl.madzierski.daniel.receipt.model.UpdateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest.ItemRequest;
+import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,7 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,16 +37,19 @@ class ReceiptFacadeIT extends IntegrationTest {
     private static final String RECEIPT_JSON = "receipts/biedronka/biedronka_e_receipt.json";
     private static final String ONION = "Cebula Żółta Luz";
     private static final String CHICKEN = "Fil  Z Piersi K kg";
+    private static final String STRANGER_SUB = "stranger";
 
     @Autowired
     private ReceiptFacade receiptFacade;
 
     private UUID walletId;
     private UUID storeId;
+    private AuthenticatedUser user;
 
     @BeforeEach
     void createOwnerWalletAndStore() {
         UUID userId = createUser(USER_SUB);
+        user = new AuthenticatedUser(userId);
         walletId = createWallet(userId, "Test wallet");
         storeId = createStore("Biedronka", "ul. Testowa 1", "Poznań");
     }
@@ -87,7 +90,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         request.add(new ItemRequest(null, removed.name(), removed.amount(), removed.unitPrice(), removed.discount(),
             removed.totalPrice(), removed.position()));
 
-        receiptFacade.updateRevision(userRevisionId, revisionUpdate(request));
+        receiptFacade.updateRevision(user, userRevisionId, revisionUpdate(request));
         flush();
 
         Set<UUID> itemIds = itemsOf(userRevisionId).stream().map(ItemRequest::id).collect(Collectors.toSet());
@@ -100,7 +103,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID receiptId = createReceiptFromJson();
         UUID otherStoreId = createStore("Lidl", "ul. Inna 2", "Kraków");
 
-        receiptFacade.updateReceipt(receiptId, new UpdateReceiptRequest("  Weekly shopping ", "groceries", otherStoreId));
+        receiptFacade.updateReceipt(user, receiptId, new UpdateReceiptRequest("  Weekly shopping ", "groceries", otherStoreId));
         flush();
 
         Map<String, Object> receipt = jdbcTemplate.queryForMap(
@@ -115,22 +118,75 @@ class ReceiptFacadeIT extends IntegrationTest {
     void updatingReceiptWithUnknownStoreFails() {
         UUID receiptId = createReceiptFromJson();
 
-        assertError(() -> receiptFacade.updateReceipt(receiptId, new UpdateReceiptRequest("name", null, UNKNOWN_ID)),
+        assertError(() -> receiptFacade.updateReceipt(user, receiptId, new UpdateReceiptRequest("name", null, UNKNOWN_ID)),
             AppRuntimeExceptionMessages.STORE_NOT_FOUND);
     }
 
-    static Stream<Named<Consumer<ReceiptFacade>>> callsWithUnknownReceipt() {
+    interface FacadeCall {
+        void call(ReceiptFacade facade, AuthenticatedUser user, UUID id);
+    }
+
+    static Stream<Named<FacadeCall>> receiptCalls() {
         return Stream.of(
-            Named.of("getReceiptDetails", facade -> facade.getReceiptDetails(UNKNOWN_ID)),
-            Named.of("createRevision", facade -> facade.createRevision(UNKNOWN_ID, new CreateRevisionRequest(UNKNOWN_ID, ReceiptResolverStrategyType.USER))),
-            Named.of("updateReceipt", facade -> facade.updateReceipt(UNKNOWN_ID, new UpdateReceiptRequest("name", null, UNKNOWN_ID))),
-            Named.of("deleteReceipt", facade -> facade.deleteReceipt(UNKNOWN_ID)));
+            Named.of("getReceiptDetails", (facade, user, id) -> facade.getReceiptDetails(user, id)),
+            Named.of("createRevision", (facade, user, id) -> facade.createRevision(user, id, new CreateRevisionRequest(UNKNOWN_ID, ReceiptResolverStrategyType.USER))),
+            Named.of("updateReceipt", (facade, user, id) -> facade.updateReceipt(user, id, new UpdateReceiptRequest("name", null, UNKNOWN_ID))),
+            Named.of("deleteReceipt", (facade, user, id) -> facade.deleteReceipt(user, id)));
     }
 
     @ParameterizedTest
-    @MethodSource("callsWithUnknownReceipt")
-    void unknownReceiptIsReported(Consumer<ReceiptFacade> call) {
-        assertError(() -> call.accept(receiptFacade), AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND);
+    @MethodSource("receiptCalls")
+    void unknownReceiptIsReported(FacadeCall call) {
+        assertError(() -> call.call(receiptFacade, user, UNKNOWN_ID), AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND);
+    }
+
+    @ParameterizedTest
+    @MethodSource("receiptCalls")
+    void otherUsersReceiptIsReportedAsUnknownAndStaysUntouched(FacadeCall call) {
+        UUID receiptId = createReceiptFromJson();
+        AuthenticatedUser stranger = new AuthenticatedUser(createUser(STRANGER_SUB));
+
+        assertError(() -> call.call(receiptFacade, stranger, receiptId), AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND);
+        flush();
+
+        assertThat(jdbcTemplate.queryForObject("SELECT name FROM receipt WHERE id = ?", String.class, receiptId)).isEqualTo("Biedronka 22.05");
+        assertThat(count("SELECT count(*) FROM receipt_revision WHERE receipt_id = ?", receiptId)).isEqualTo(1);
+        assertThat(count("SELECT count(*) FROM receipt_file_group WHERE receipt_id = ?", receiptId)).isEqualTo(1);
+    }
+
+    @Test
+    void otherUsersReceiptHasNoVisibleRevisions() {
+        UUID receiptId = createReceiptFromJson();
+        AuthenticatedUser stranger = new AuthenticatedUser(createUser(STRANGER_SUB));
+
+        assertThat(receiptFacade.getReceiptRevisions(stranger, receiptId)).isEmpty();
+        assertThat(receiptFacade.getReceiptRevisions(user, receiptId)).hasSize(1);
+    }
+
+    @Test
+    void receiptCannotBeAddedToOtherUsersWallet() {
+        UUID strangerWalletId = createWallet(createUser(STRANGER_SUB), "Stranger's wallet");
+
+        assertError(() -> receiptFacade.addReceipt(user, List.of(readResource(RECEIPT_JSON)),
+                new CreateReceiptRequest("Biedronka 22.05", null, ReceiptResolverStrategyType.BIEDRONKA_JSON, strangerWalletId, storeId)),
+            AppRuntimeExceptionMessages.WALLET_NOT_FOUND);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM receipt WHERE wallet_id = ?", strangerWalletId)).isZero();
+    }
+
+    @Test
+    void revisionCannotBeResolvedFromFileGroupOfOtherUsersReceipt() {
+        UUID receiptId = createReceiptFromJson();
+        UUID strangerId = createUser(STRANGER_SUB);
+        UUID strangerReceiptId = receiptFacade.addReceipt(new AuthenticatedUser(strangerId), List.of(readResource(RECEIPT_JSON)),
+            new CreateReceiptRequest("Stranger's receipt", null, ReceiptResolverStrategyType.BIEDRONKA_JSON,
+                createWallet(strangerId, "Stranger's wallet"), storeId)).id();
+        flush();
+        UUID strangerFileGroupId = jdbcTemplate.queryForObject("SELECT id FROM receipt_file_group WHERE receipt_id = ?", UUID.class, strangerReceiptId);
+
+        assertError(() -> receiptFacade.createRevision(user, receiptId, new CreateRevisionRequest(strangerFileGroupId, ReceiptResolverStrategyType.BIEDRONKA_JSON)),
+            AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
     }
 
     @Test
@@ -141,7 +197,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID fileGroupId = jdbcTemplate.queryForObject("SELECT source_file_group_id FROM receipt_revision WHERE id = ?", UUID.class, copyId);
         assertThat(fileGroupId).isNotNull();
 
-        receiptFacade.deleteReceipt(receiptId);
+        receiptFacade.deleteReceipt(user, receiptId);
         flush();
 
         assertThat(count("SELECT count(*) FROM receipt WHERE id = ?", receiptId)).isZero();
@@ -180,11 +236,11 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID originalId = revisionIdOf(receiptId);
         UUID copyId = copyRevision(originalId);
 
-        assertError(() -> receiptFacade.deleteRevision(originalId), AppRuntimeExceptionMessages.CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS);
+        assertError(() -> receiptFacade.deleteRevision(user, originalId), AppRuntimeExceptionMessages.CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS);
 
-        receiptFacade.deleteRevision(copyId);
+        receiptFacade.deleteRevision(user, copyId);
         flush();
-        receiptFacade.deleteRevision(originalId);
+        receiptFacade.deleteRevision(user, originalId);
         flush();
 
         assertThat(count("SELECT count(*) FROM receipt_revision WHERE receipt_id = ?", receiptId)).isZero();
@@ -197,7 +253,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID copyId = copyRevision(originalId);
         renameItem(copyId, ONION, "Cebula");
 
-        receiptFacade.updateAliasesByUserRevision(copyId);
+        receiptFacade.updateAliasesByUserRevision(user, copyId);
         flush();
 
         assertThat(aliasesOf("Cebula")).containsExactlyInAnyOrder("Cebula", ONION);
@@ -212,7 +268,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID copyId = copyRevision(originalId);
         renameItem(copyId, ONION, "Cebula");
 
-        receiptFacade.updateAliasesByUserRevision(copyId);
+        receiptFacade.updateAliasesByUserRevision(user, copyId);
         flush();
 
         assertThat(count("SELECT count(*) FROM product WHERE name = 'Cebula'")).isEqualTo(1);
@@ -225,12 +281,12 @@ class ReceiptFacadeIT extends IntegrationTest {
     void dictionaryLearnedFromOneReceiptIsUsedForNextOne() {
         UUID firstCopyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         renameItem(firstCopyId, ONION, "Cebula");
-        receiptFacade.updateAliasesByUserRevision(firstCopyId);
+        receiptFacade.updateAliasesByUserRevision(user, firstCopyId);
         flush();
 
         UUID secondRevisionId = revisionIdOf(createReceiptFromJson());
         UUID secondCopyId = copyRevision(secondRevisionId);
-        receiptFacade.updateAliasesByUserRevision(secondCopyId);
+        receiptFacade.updateAliasesByUserRevision(user, secondCopyId);
         flush();
 
         assertThat(count("SELECT count(*) FROM product")).isEqualTo(35);
@@ -242,10 +298,10 @@ class ReceiptFacadeIT extends IntegrationTest {
     void itemsWithSameNameShareOneProductAndRepeatedUpdateDoesNotDuplicateIt() {
         UUID originalId = revisionIdOf(createReceiptFromJson());
         UUID copyId = copyRevision(originalId);
-        receiptFacade.updateAliasesByUserRevision(copyId);
+        receiptFacade.updateAliasesByUserRevision(user, copyId);
         flush();
 
-        receiptFacade.updateAliasesByUserRevision(copyId);
+        receiptFacade.updateAliasesByUserRevision(user, copyId);
         flush();
 
         assertThat(count("SELECT count(*) FROM product")).isEqualTo(35);
@@ -262,10 +318,10 @@ class ReceiptFacadeIT extends IntegrationTest {
     void markingRevisionAsPreferredUnmarksOtherRevisionsOfReceipt() {
         UUID originalId = revisionIdOf(createReceiptFromJson());
         UUID copyId = copyRevision(originalId);
-        receiptFacade.updateRevision(originalId, preferredUpdate());
+        receiptFacade.updateRevision(user, originalId, preferredUpdate());
         flush();
 
-        receiptFacade.updateRevision(copyId, preferredUpdate());
+        receiptFacade.updateRevision(user, copyId, preferredUpdate());
         flush();
 
         assertThat(isPreferred(originalId)).isFalse();
@@ -277,7 +333,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         jdbcTemplate.update("UPDATE receipt_revision SET is_correct = false WHERE id = ?", copyId);
 
-        receiptFacade.updateRevision(copyId, revisionUpdate(Set.copyOf(itemsOf(copyId))));
+        receiptFacade.updateRevision(user, copyId, revisionUpdate(Set.copyOf(itemsOf(copyId))));
         flush();
 
         assertThat(isCorrect(copyId)).isTrue();
@@ -293,7 +349,7 @@ class ReceiptFacadeIT extends IntegrationTest {
                 : item)
             .collect(Collectors.toSet());
 
-        receiptFacade.updateRevision(copyId, revisionUpdate(items));
+        receiptFacade.updateRevision(user, copyId, revisionUpdate(items));
         flush();
 
         assertThat(isCorrect(copyId)).isFalse();
@@ -304,7 +360,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID revisionId = revisionIdOf(createReceiptFromJson());
         createProduct("Cebula", "Cebula Zolta Luz");
 
-        receiptFacade.updateProductDictInRevisionItems(revisionId);
+        receiptFacade.updateProductDictInRevisionItems(user, revisionId);
         flush();
 
         assertThat(productNameOfItem(itemNamed(revisionId, ONION).id())).contains("Cebula");
@@ -326,10 +382,10 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID originalId = revisionIdOf(createReceiptFromJson());
         UUID copyId = copyRevision(originalId);
         createProduct("Cebula", ONION);
-        receiptFacade.updateProductDictInRevisionItems(copyId);
+        receiptFacade.updateProductDictInRevisionItems(user, copyId);
         flush();
 
-        receiptFacade.rewriteProductNameToItems(copyId);
+        receiptFacade.rewriteProductNameToItems(user, copyId);
         flush();
 
         assertThat(itemsOf(copyId)).extracting(ItemRequest::name).contains("Cebula").doesNotContain(ONION);
@@ -340,23 +396,50 @@ class ReceiptFacadeIT extends IntegrationTest {
     void rewritingProductNamesIsRejectedForResolverRevision() {
         UUID originalId = revisionIdOf(createReceiptFromJson());
 
-        assertError(() -> receiptFacade.rewriteProductNameToItems(originalId), AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
+        assertError(() -> receiptFacade.rewriteProductNameToItems(user, originalId), AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
     }
 
-    static Stream<Named<Consumer<ReceiptFacade>>> callsWithUnknownRevision() {
+    static Stream<Named<FacadeCall>> revisionCalls() {
         return Stream.of(
-            Named.of("createRevisionCopy", facade -> facade.createRevisionCopy(UNKNOWN_ID)),
-            Named.of("getRevision", facade -> facade.getRevision(UNKNOWN_ID)),
-            Named.of("updateRevision", facade -> facade.updateRevision(UNKNOWN_ID, revisionUpdate(Set.of()))),
-            Named.of("updateProductDictInRevisionItems", facade -> facade.updateProductDictInRevisionItems(UNKNOWN_ID)),
-            Named.of("deleteRevision", facade -> facade.deleteRevision(UNKNOWN_ID)),
-            Named.of("rewriteProductNameToItems", facade -> facade.rewriteProductNameToItems(UNKNOWN_ID)));
+            Named.of("createRevisionCopy", (facade, user, id) -> facade.createRevisionCopy(user, id)),
+            Named.of("getRevision", (facade, user, id) -> facade.getRevision(user, id)),
+            Named.of("updateRevision", (facade, user, id) -> facade.updateRevision(user, id, revisionUpdate(Set.of()))),
+            Named.of("updateProductDictInRevisionItems", (facade, user, id) -> facade.updateProductDictInRevisionItems(user, id)),
+            Named.of("deleteRevision", (facade, user, id) -> facade.deleteRevision(user, id)),
+            Named.of("rewriteProductNameToItems", (facade, user, id) -> facade.rewriteProductNameToItems(user, id)));
     }
 
     @ParameterizedTest
-    @MethodSource("callsWithUnknownRevision")
-    void unknownRevisionIsReported(Consumer<ReceiptFacade> call) {
-        assertError(() -> call.accept(receiptFacade), AppRuntimeExceptionMessages.REVISION_NOT_FOUND);
+    @MethodSource("revisionCalls")
+    void unknownRevisionIsReported(FacadeCall call) {
+        assertError(() -> call.call(receiptFacade, user, UNKNOWN_ID), AppRuntimeExceptionMessages.REVISION_NOT_FOUND);
+    }
+
+    @ParameterizedTest
+    @MethodSource("revisionCalls")
+    void otherUsersRevisionIsReportedAsUnknownAndStaysUntouched(FacadeCall call) {
+        UUID receiptId = createReceiptFromJson();
+        UUID copyId = copyRevision(revisionIdOf(receiptId));
+        AuthenticatedUser stranger = new AuthenticatedUser(createUser(STRANGER_SUB));
+
+        assertError(() -> call.call(receiptFacade, stranger, copyId), AppRuntimeExceptionMessages.REVISION_NOT_FOUND);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM receipt_revision WHERE receipt_id = ?", receiptId)).isEqualTo(2);
+        assertThat(itemsOf(copyId)).hasSize(36);
+    }
+
+    @Test
+    void updatingAliasesOfOtherUsersRevisionChangesNothing() {
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+        renameItem(copyId, ONION, "Cebula");
+        AuthenticatedUser stranger = new AuthenticatedUser(createUser(STRANGER_SUB));
+
+        receiptFacade.updateAliasesByUserRevision(stranger, copyId);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM product")).isZero();
+        assertThat(count("SELECT count(*) FROM receipt_item WHERE receipt_revision_id = ? AND product_id IS NOT NULL", copyId)).isZero();
     }
 
     @Test
@@ -364,7 +447,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID receiptId = createReceiptFromJson();
         UUID fileGroupId = jdbcTemplate.queryForObject("SELECT id FROM receipt_file_group WHERE receipt_id = ?", UUID.class, receiptId);
 
-        assertError(() -> receiptFacade.createRevision(receiptId, new CreateRevisionRequest(fileGroupId, null)),
+        assertError(() -> receiptFacade.createRevision(user, receiptId, new CreateRevisionRequest(fileGroupId, null)),
             AppRuntimeExceptionMessages.STRATEGY_NOT_FOUND);
     }
 
@@ -372,7 +455,7 @@ class ReceiptFacadeIT extends IntegrationTest {
     void revisionFromUnknownFileGroupIsRejected() {
         UUID receiptId = createReceiptFromJson();
 
-        assertError(() -> receiptFacade.createRevision(receiptId, new CreateRevisionRequest(UNKNOWN_ID, ReceiptResolverStrategyType.BIEDRONKA_JSON)),
+        assertError(() -> receiptFacade.createRevision(user, receiptId, new CreateRevisionRequest(UNKNOWN_ID, ReceiptResolverStrategyType.BIEDRONKA_JSON)),
             AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
     }
 
@@ -382,7 +465,7 @@ class ReceiptFacadeIT extends IntegrationTest {
                 ? new ItemRequest(item.id(), to, item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position())
                 : item)
             .collect(Collectors.toSet());
-        receiptFacade.updateRevision(revisionId, revisionUpdate(items));
+        receiptFacade.updateRevision(user, revisionId, revisionUpdate(items));
         flush();
     }
 
@@ -405,7 +488,7 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     private String nameShownInRevision(UUID revisionId, String itemName) {
         UUID itemId = itemNamed(revisionId, itemName).id();
-        return receiptFacade.getRevision(revisionId).items().stream()
+        return receiptFacade.getRevision(user, revisionId).items().stream()
             .filter(item -> item.id().equals(itemId))
             .map(GetRevisionResponse.ItemResponse::name)
             .findFirst()
@@ -413,7 +496,7 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     private UUID createReceiptFromJson() {
-        UUID receiptId = receiptFacade.addReceipt(USER_SUB, List.of(readResource(RECEIPT_JSON)),
+        UUID receiptId = receiptFacade.addReceipt(user, List.of(readResource(RECEIPT_JSON)),
             new CreateReceiptRequest("Biedronka 22.05", "test receipt", ReceiptResolverStrategyType.BIEDRONKA_JSON, walletId, storeId)).id();
         flush();
         return receiptId;
@@ -426,7 +509,7 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     private UUID copyRevision(UUID revisionId) {
-        UUID copyId = receiptFacade.createRevisionCopy(revisionId).revisionId();
+        UUID copyId = receiptFacade.createRevisionCopy(user, revisionId).revisionId();
         flush();
         return copyId;
     }

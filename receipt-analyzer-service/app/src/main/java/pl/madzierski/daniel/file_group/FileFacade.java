@@ -5,7 +5,9 @@ import org.springframework.core.io.FileSystemResource;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
+import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
+import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -22,9 +24,12 @@ public class FileFacade {
     private final FileGroupRepository fileGroupRepository;
     private final FileGroupFactory fileGroupFactory;
     private final FileTypeDetector fileTypeDetector;
+    private final ReceiptQueryRepository receiptQueryRepository;
     private final String uploadDir;
 
-    public FileGroupDto save(UUID receiptId, List<byte[]> files, String userSub) {
+    public FileGroupDto save(AuthenticatedUser user, UUID receiptId, List<byte[]> files) {
+        if (!receiptQueryRepository.isAccessible(receiptId, user.id()))
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND);
         if (files == null || files.isEmpty()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
         }
@@ -37,11 +42,11 @@ public class FileFacade {
             }
         }
         if (fileType == null) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_TYPE_NOT_DETECTED);
-        FileGroup fileGroup = fileGroupRepository.save(new FileGroup(fileType, new ReceiptQuery(receiptId), true));
+        FileGroup fileGroup = fileGroupRepository.save(new FileGroup(fileType, new ReceiptQuery(receiptId), user.toUserQuery(), true));
         for (int partNumber = 0; partNumber < files.size(); partNumber++) {
             File file = new File(fileGroup, partNumber);
             file = fileRepository.save(file);
-            String path = createPath(userSub, file.getId(), fileGroup.getId(), fileType.getExtension(), receiptId);
+            String path = createPath(user, file.getId(), fileGroup.getId(), fileType.getExtension(), receiptId);
             file.setPath(path);
             fileRepository.save(file);
             saveFile(path, files.get(partNumber));
@@ -49,16 +54,16 @@ public class FileFacade {
         return fileGroupFactory.toDto(fileGroup);
     }
 
-    String createPath(String currentUserSub, UUID fileId, UUID fileGroupId, String fileExtension, UUID receiptId) {
+    String createPath(AuthenticatedUser user, UUID fileId, UUID fileGroupId, String fileExtension, UUID receiptId) {
         return uploadDir + java.io.File.separator + "user" + java.io.File.separator +
-               currentUserSub + java.io.File.separator + "receipts" + java.io.File.separator +
+               user.id() + java.io.File.separator + "receipts" + java.io.File.separator +
                receiptId + java.io.File.separator + "file_group" + java.io.File.separator +
                fileGroupId + java.io.File.separator + "file" + java.io.File.separator +
                fileId + "." + fileExtension;
     }
 
-    FileSystemResource getFile(UUID receiptFileId) {
-        File fileEntity = fileRepository.findById(receiptFileId)
+    FileSystemResource getFile(AuthenticatedUser user, UUID receiptFileId) {
+        File fileEntity = fileRepository.findAccessible(receiptFileId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_RECEIPT_NOT_FOUND));
         String path = fileEntity.getPath();
         if (path == null) {
@@ -89,8 +94,8 @@ public class FileFacade {
         }
     }
 
-    public List<byte[]> getFiles(UUID fileGroupId) {
-        return fileGroupQueryRepository.findFileGroupWithFiles(fileGroupId)
+    public List<byte[]> getFiles(UUID receiptId, UUID fileGroupId) {
+        return fileGroupQueryRepository.findFileGroupWithFiles(fileGroupId, receiptId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND))
             .files()
             .stream()
@@ -104,7 +109,9 @@ public class FileFacade {
             .toList();
     }
 
-    public void deleteFileGroupId(UUID fileGroupId, String userSub) {
+    public void deleteFileGroupId(AuthenticatedUser user, UUID fileGroupId) {
+        if (!fileGroupQueryRepository.isAccessible(fileGroupId, user.id()))
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
         if (fileGroupQueryRepository.isUsedByRevision(fileGroupId))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_USED_BY_REVISION);
         fileGroupRepository.deleteById(fileGroupId);

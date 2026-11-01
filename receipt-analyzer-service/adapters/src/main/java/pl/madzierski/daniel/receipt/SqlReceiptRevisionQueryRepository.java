@@ -26,10 +26,10 @@ public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryR
             rev.revision
         )
         FROM SqlReceiptRevision rev
-        WHERE rev.receipt.id = :receiptId
+        WHERE rev.receipt.id = :receiptId AND rev.receipt.ownerId = :ownerId
         """
     )
-    List<ReceiptRevisionDto> getRevisionsByReceiptId(UUID receiptId);
+    List<ReceiptRevisionDto> getRevisionsByReceiptId(UUID receiptId, UUID ownerId);
 
     @Query("""
         SELECT new pl.madzierski.daniel.receipt.model.ReceiptRevisionDto(
@@ -46,9 +46,9 @@ public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryR
             rev.revision
         )
         FROM SqlReceiptRevision rev
-        WHERE rev.id = :revisionId
+        WHERE rev.id = :revisionId AND rev.receipt.ownerId = :ownerId
         """
     )
-    Optional<ReceiptRevisionDto> getRevisionById(UUID revisionId);
+    Optional<ReceiptRevisionDto> getRevisionById(UUID revisionId, UUID ownerId);
 
 }

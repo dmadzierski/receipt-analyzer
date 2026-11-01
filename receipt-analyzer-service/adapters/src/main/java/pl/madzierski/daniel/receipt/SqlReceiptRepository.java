@@ -3,11 +3,13 @@ package pl.madzierski.daniel.receipt;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.Optional;
 import java.util.UUID;
 
 interface SqlReceiptRepository extends JpaRepository<SqlReceipt, UUID> {
+    Optional<SqlReceipt> findByIdAndOwnerId(UUID receiptId, UUID ownerId);
 }
 
 @AllArgsConstructor
@@ -22,8 +24,8 @@ class ReceiptRepositoryImpl implements ReceiptRepository {
     }
 
     @Override
-    public Optional<Receipt> findById(UUID receiptId) {
-        return this.repository.findById(receiptId).map(SqlReceipt::toReceipt);
+    public Optional<Receipt> findAccessible(UUID receiptId, UserQuery user) {
+        return this.repository.findByIdAndOwnerId(receiptId, user.getId()).map(SqlReceipt::toReceipt);
     }
 
     @Override

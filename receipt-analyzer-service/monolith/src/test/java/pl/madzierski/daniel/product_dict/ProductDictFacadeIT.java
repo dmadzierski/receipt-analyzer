@@ -91,7 +91,8 @@ class ProductDictFacadeIT extends IntegrationTest {
         UUID droppedAliasId = insertAlias(secondId, "Mleko typo");
         UUID thirdId = insertProduct("Mleko UHT");
         UUID thirdAliasId = insertAlias(thirdId, "MlekoUHT2%");
-        UUID revisionId = insertRevision(insertReceipt(null, null, "Receipt"), "USER", "10.00", true, null);
+        UUID userId = jdbcTemplate.queryForObject("SELECT id FROM app_user WHERE user_sub = ?", UUID.class, USER_SUB);
+        UUID revisionId = insertRevision(insertReceipt(createWallet(userId, "Home"), null, "Receipt"), "USER", "10.00", true, null);
         UUID secondItemId = insertItem(revisionId, "MlekoŁaciate1l", secondId);
         UUID thirdItemId = insertItem(revisionId, "MlekoUHT2%", thirdId);
         flush();

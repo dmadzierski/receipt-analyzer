@@ -7,9 +7,7 @@ import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
 import pl.madzierski.daniel.receipt.projection.WalletReceiptProjection;
 import pl.madzierski.daniel.store.StoreQueryRepository;
 import pl.madzierski.daniel.store.model.StoreDto;
-import pl.madzierski.daniel.user.UserQueryRepository;
-import pl.madzierski.daniel.user.model.UserDto;
-import pl.madzierski.daniel.user.model.UserQuery;
+import pl.madzierski.daniel.user.model.AuthenticatedUser;
 import pl.madzierski.daniel.wallet.model.*;
 
 import java.util.Collection;
@@ -27,26 +25,21 @@ public class WalletFacade {
     private final WalletRepository walletRepository;
     private final WalletQueryRepository walletQueryRepository;
     private final ReceiptQueryRepository receiptQueryRepository;
-    private final UserQueryRepository userQueryRepository;
     private final StoreQueryRepository storeQueryRepository;
 
-    CreateWalletResponse addWallet(CreateWalletRequest request, String userSub) {
-        UserDto user = userQueryRepository.findUser(userSub)
-            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.USER_NOT_FOUND));
-        Wallet savedWallet = walletRepository.save(Wallet.builder().name(request.name()).user(UserQuery.builder().id(user.id()).build()).build());
+    CreateWalletResponse addWallet(AuthenticatedUser user, CreateWalletRequest request) {
+        Wallet savedWallet = walletRepository.save(Wallet.builder().name(request.name()).owner(user.toUserQuery()).build());
         return new CreateWalletResponse(savedWallet.getId(), savedWallet.getName());
     }
 
-    GetWalletListResponse getWallets(String userSub) {
-        UserDto user = userQueryRepository.findUser(userSub)
-            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.USER_NOT_FOUND));
+    GetWalletListResponse getWallets(AuthenticatedUser user) {
         List<GetWalletListResponse.GetWalletListResponseItem> wallets =
             walletQueryRepository.findAllByUser(user.id()).stream().map(wallet -> new GetWalletListResponse.GetWalletListResponseItem(wallet.getId(), wallet.getName())).toList();
         return new GetWalletListResponse(wallets);
     }
 
-    GetWalletDetailsResponse getWalletDetails(UUID walletId) {
-        WalletDto walletDetails = walletQueryRepository.getWalletDetails(walletId)
+    GetWalletDetailsResponse getWalletDetails(AuthenticatedUser user, UUID walletId) {
+        WalletDto walletDetails = walletQueryRepository.getWalletDetails(walletId, user.id())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.WALLET_NOT_FOUND));
         Collection<WalletReceiptProjection> walletReceipts = receiptQueryRepository.getWalletReceipts(walletId);
         Set<UUID> storeIds = walletReceipts.stream()

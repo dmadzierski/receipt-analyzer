@@ -22,5 +22,5 @@ class Wallet {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
-    private UserQuery user;
+    private UserQuery owner;
 }

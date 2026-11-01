@@ -23,8 +23,19 @@ interface SqlFileGroupQueryRepository extends JpaRepository<SqlFileGroup, UUID> 
         """)
     List<SqlFileGroup> findAllByReceiptId(@Param(value = "receiptId") UUID receiptId);
 
+    @Query(value = """
+                SELECT rfg
+                FROM SqlFileGroup rfg
+                LEFT JOIN FETCH rfg.files rf
+                WHERE rfg.id = :fileGroupId AND rfg.receipt.id = :receiptId
+        """)
+    Optional<SqlFileGroup> findByIdAndReceiptId(UUID fileGroupId, UUID receiptId);
+
     @Query("SELECT COUNT(rev) > 0 FROM SqlReceiptRevision rev WHERE rev.sourceFileGroup.id = :fileGroupId")
     boolean isUsedByRevision(UUID fileGroupId);
+
+    @Query("SELECT COUNT(rfg) > 0 FROM SqlFileGroup rfg WHERE rfg.id = :fileGroupId AND rfg.ownerId = :ownerId")
+    boolean isAccessible(UUID fileGroupId, UUID ownerId);
 }
 
 @AllArgsConstructor
@@ -54,8 +65,8 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
     }
 
     @Override
-    public Optional<FileGroupDto> findFileGroupWithFiles(UUID fileGroupId) {
-        return sqlFileGroupQueryRepository.findById(fileGroupId)
+    public Optional<FileGroupDto> findFileGroupWithFiles(UUID fileGroupId, UUID receiptId) {
+        return sqlFileGroupQueryRepository.findByIdAndReceiptId(fileGroupId, receiptId)
             .map(it -> FileGroupDto.builder()
                 .id(it.getId())
                 .fileType(it.getFileType())
@@ -74,5 +85,10 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
     @Override
     public boolean isUsedByRevision(UUID fileGroupId) {
         return sqlFileGroupQueryRepository.isUsedByRevision(fileGroupId);
+    }
+
+    @Override
+    public boolean isAccessible(UUID fileGroupId, UUID ownerId) {
+        return sqlFileGroupQueryRepository.isAccessible(fileGroupId, ownerId);
     }
 }

@@ -16,6 +16,7 @@ import pl.madzierski.daniel.receipt.scan_resolver.impl.BiedronkaScanResolver;
 import pl.madzierski.daniel.receipt.scan_resolver.impl.UserResolver;
 import pl.madzierski.daniel.receipt.scan_resolver.service.PDFService;
 import pl.madzierski.daniel.receipt.scan_resolver.service.ReceiptResolverLocatorService;
+import pl.madzierski.daniel.wallet.WalletQueryRepository;
 
 import java.util.List;
 
@@ -34,7 +35,8 @@ class ReceiptConfiguration {
         StoreQueryRepository storeQueryRepository,
         @Lazy ProductDictFacade productDictFacade,
         FileGroupQueryRepository fileGroupQueryRepository,
-        ProductDictQueryRepository productDictQueryRepository
+        ProductDictQueryRepository productDictQueryRepository,
+        WalletQueryRepository walletQueryRepository
     ) {
         ReceiptItemFactory receiptItemFactory = new ReceiptItemFactory(productDictFacade);
         return new ReceiptFacade(
@@ -50,7 +52,8 @@ class ReceiptConfiguration {
             storeQueryRepository,
             productDictFacade,
             productDictQueryRepository,
-            fileGroupQueryRepository
+            fileGroupQueryRepository,
+            walletQueryRepository
         );
     }
 

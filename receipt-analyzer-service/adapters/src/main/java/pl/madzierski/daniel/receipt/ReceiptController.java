@@ -6,13 +6,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.madzierski.daniel.file_group.MultipartFileMapper;
 import pl.madzierski.daniel.receipt.model.*;
+import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,40 +27,40 @@ class ReceiptController {
     private final ReceiptFacade receiptFacade;
 
     @PostMapping(consumes = {MULTIPART_FORM_DATA_VALUE})
-    ResponseEntity<CreateReceiptResponse> addReceipt(@AuthenticationPrincipal Jwt jwt,
+    ResponseEntity<CreateReceiptResponse> addReceipt(AuthenticatedUser user,
                                                      @RequestPart(value = "file", required = false) List<MultipartFile> files,
                                                      @RequestPart(value = "body") @NotNull @Valid CreateReceiptRequest body) {
         List<byte[]> binaryFiles = MultipartFileMapper.toBytes(files);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(this.receiptFacade.addReceipt(jwt.getSubject(), binaryFiles, body));
+            .body(this.receiptFacade.addReceipt(user, binaryFiles, body));
     }
 
     @GetMapping(path = {"/{receiptId}"})
-    ResponseEntity<GetReceiptDetailsResponse> getReceiptDetails(@PathVariable UUID receiptId) {
-        return ResponseEntity.ok(this.receiptFacade.getReceiptDetails(receiptId));
+    ResponseEntity<GetReceiptDetailsResponse> getReceiptDetails(AuthenticatedUser user, @PathVariable UUID receiptId) {
+        return ResponseEntity.ok(this.receiptFacade.getReceiptDetails(user, receiptId));
     }
 
     @GetMapping(path = {"/{receiptId}/revisions"}, produces = {"application/json"})
-    ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(@PathVariable UUID receiptId) {
-        return ResponseEntity.ok(this.receiptFacade.getReceiptRevisions(receiptId));
+    ResponseEntity<List<GetReceiptRevisionsResponse>> getReceiptRevisions(AuthenticatedUser user, @PathVariable UUID receiptId) {
+        return ResponseEntity.ok(this.receiptFacade.getReceiptRevisions(user, receiptId));
     }
 
     @PostMapping(path = "/{receiptId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces =
         MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<CreateRevisionResponse> createRevision(@PathVariable UUID receiptId,
+    ResponseEntity<CreateRevisionResponse> createRevision(AuthenticatedUser user, @PathVariable UUID receiptId,
                                                           @RequestBody CreateRevisionRequest createRevisionRequest) {
-        return ResponseEntity.ok(receiptFacade.createRevision(receiptId, createRevisionRequest));
+        return ResponseEntity.ok(receiptFacade.createRevision(user, receiptId, createRevisionRequest));
     }
 
     @PutMapping(path = "/{receiptId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<UpdateReceiptResponse> updateReceipt(@PathVariable UUID receiptId,
+    ResponseEntity<UpdateReceiptResponse> updateReceipt(AuthenticatedUser user, @PathVariable UUID receiptId,
                                                         @RequestBody @Valid UpdateReceiptRequest request) {
-        return ResponseEntity.ok(receiptFacade.updateReceipt(receiptId, request));
+        return ResponseEntity.ok(receiptFacade.updateReceipt(user, receiptId, request));
     }
 
     @DeleteMapping(path = "/{receiptId}")
-    ResponseEntity<Void> deleteReceipt(@PathVariable UUID receiptId) {
-        receiptFacade.deleteReceipt(receiptId);
+    ResponseEntity<Void> deleteReceipt(AuthenticatedUser user, @PathVariable UUID receiptId) {
+        receiptFacade.deleteReceipt(user, receiptId);
         return ResponseEntity.noContent().build();
     }
 

@@ -6,13 +6,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.Optional;
 import java.util.UUID;
 
 interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision, UUID> {
-    @Query("SELECT r FROM SqlReceiptRevision r LEFT JOIN FETCH r.items item LEFT JOIN FETCH item.parentItem parentItem WHERE r.id = :revisionId")
-    Optional<SqlReceiptRevision> findByIdWithItems(UUID revisionId);
+    @Query("SELECT r FROM SqlReceiptRevision r LEFT JOIN FETCH r.items item LEFT JOIN FETCH item.parentItem parentItem " +
+        "WHERE r.id = :revisionId AND r.receipt.ownerId = :ownerId")
+    Optional<SqlReceiptRevision> findAccessibleWithItems(UUID revisionId, UUID ownerId);
+
+    @Query("SELECT r FROM SqlReceiptRevision r WHERE r.id = :revisionId AND r.receipt.ownerId = :ownerId")
+    Optional<SqlReceiptRevision> findAccessible(UUID revisionId, UUID ownerId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
@@ -47,14 +52,14 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     }
 
     @Override
-    public Optional<ReceiptRevision> findByIdWithItems(UUID revisionId) {
-        return repository.findByIdWithItems(revisionId)
+    public Optional<ReceiptRevision> findAccessibleWithItems(UUID revisionId, UserQuery user) {
+        return repository.findAccessibleWithItems(revisionId, user.getId())
             .map(SqlReceiptRevision::toReceiptRevision);
     }
 
     @Override
-    public Optional<ReceiptRevision> findById(UUID revisionId) {
-        return repository.findById(revisionId)
+    public Optional<ReceiptRevision> findAccessible(UUID revisionId, UserQuery user) {
+        return repository.findAccessible(revisionId, user.getId())
             .map(SqlReceiptRevision::toReceiptRevision);
     }
 

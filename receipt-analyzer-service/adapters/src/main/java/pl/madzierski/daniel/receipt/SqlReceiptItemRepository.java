@@ -9,6 +9,7 @@ import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
+import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,9 +28,10 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, UUID> {
         SELECT item FROM SqlReceiptItem item INNER JOIN FETCH item.parentItem parentItem 
         WHERE item.receiptRevision.id = :revisionId AND 
                 item.receiptRevision.resolver = pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND 
-                item.product IS NULL AND 
+                item.receiptRevision.receipt.ownerId = :ownerId AND
+                item.product IS NULL AND
                 parentItem.product IS NULL""")
-    Set<SqlReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId);
+    Set<SqlReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId, UUID ownerId);
 
     @Modifying
     @Query("""
@@ -92,8 +94,8 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     }
 
     @Override
-    public List<ReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId) {
-        return receiptItemRepository.findUnmatchedItemsByReceiptId(revisionId)
+    public List<ReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId, UserQuery user) {
+        return receiptItemRepository.findUnmatchedItemsByReceiptId(revisionId, user.getId())
             .stream()
             .map(SqlReceiptItem::toReceiptItem)
             .toList();

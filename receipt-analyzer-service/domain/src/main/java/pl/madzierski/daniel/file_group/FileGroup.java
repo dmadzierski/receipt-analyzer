@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
+import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -24,11 +25,13 @@ class FileGroup {
     private FileType fileType;
     private ReceiptQuery receipt;
     private Boolean isOriginal;
+    private UserQuery owner;
     private final Set<File> files = new HashSet<>();
 
-    public FileGroup(FileType fileType, ReceiptQuery receipt, Boolean isOriginal) {
+    public FileGroup(FileType fileType, ReceiptQuery receipt, UserQuery owner, Boolean isOriginal) {
         this.fileType = fileType;
         this.receipt = receipt;
+        this.owner = owner;
         this.isOriginal = isOriginal;
     }
 

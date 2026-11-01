@@ -9,7 +9,9 @@ import java.util.UUID;
 public interface FileGroupQueryRepository {
     List<FileGroupDto> findAllByReceiptId(UUID receiptId);
 
-    Optional<FileGroupDto> findFileGroupWithFiles(UUID fileGroupId);
+    Optional<FileGroupDto> findFileGroupWithFiles(UUID fileGroupId, UUID receiptId);
 
     boolean isUsedByRevision(UUID fileGroupId);
+
+    boolean isAccessible(UUID fileGroupId, UUID ownerId);
 }

@@ -3,6 +3,7 @@ package pl.madzierski.daniel.receipt;
 import lombok.*;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.store.model.StoreQuery;
+import pl.madzierski.daniel.user.model.UserQuery;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.time.LocalDateTime;
@@ -27,5 +28,6 @@ class Receipt {
     private String description;
     private WalletQuery wallet;
     private StoreQuery store;
+    private UserQuery owner;
 
 }

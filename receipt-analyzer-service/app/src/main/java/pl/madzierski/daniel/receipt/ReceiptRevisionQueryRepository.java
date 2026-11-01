@@ -7,8 +7,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ReceiptRevisionQueryRepository {
-    List<ReceiptRevisionDto> getRevisionsByReceiptId(UUID receiptId);
+    List<ReceiptRevisionDto> getRevisionsByReceiptId(UUID receiptId, UUID ownerId);
 
-    Optional<ReceiptRevisionDto> getRevisionById(UUID revisionId);
+    Optional<ReceiptRevisionDto> getRevisionById(UUID revisionId, UUID ownerId);
 
 }

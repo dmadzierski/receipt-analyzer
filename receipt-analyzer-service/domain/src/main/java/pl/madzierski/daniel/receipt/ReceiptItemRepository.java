@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.receipt;
 
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
+import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +17,7 @@ interface ReceiptItemRepository {
 
     List<ReceiptItem> saveAll(List<ReceiptItem> entities, UUID receiptRevisionId);
 
-    List<ReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId);
+    List<ReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId, UserQuery user);
 
     void updateProduct(ProductDictQuery productDictQuery, Collection<UUID> list);
 }

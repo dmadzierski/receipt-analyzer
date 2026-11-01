@@ -11,5 +11,7 @@ public interface ReceiptQueryRepository {
 
     Collection<WalletReceiptProjection> getWalletReceipts(UUID walletId);
 
-    Optional<ReceiptDto> findById(UUID receiptId);
+    Optional<ReceiptDto> findById(UUID receiptId, UUID ownerId);
+
+    boolean isAccessible(UUID receiptId, UUID ownerId);
 }

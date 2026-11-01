@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
+import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -28,26 +29,29 @@ class FileFacadeIT extends IntegrationTest {
     @Autowired
     private FileFacade fileFacade;
 
+    private AuthenticatedUser user;
     private UUID receiptId;
 
     @BeforeEach
     void createReceipt() {
-        receiptId = insertReceipt(createWallet(createUser(USER_SUB), "Home"), null, "Receipt");
+        UUID userId = createUser(USER_SUB);
+        user = new AuthenticatedUser(userId);
+        receiptId = insertReceipt(createWallet(userId, "Home"), null, "Receipt");
     }
 
     @Test
     void savesFilesAsOneGroupAndReadsThemBack() {
-        FileGroupDto group = fileFacade.save(receiptId, List.of(PNG, PNG), USER_SUB);
+        FileGroupDto group = fileFacade.save(user, receiptId, List.of(PNG, PNG));
         flush();
 
         assertThat(group.fileType()).isEqualTo(FileType.PNG);
         assertThat(group.isOriginal()).isTrue();
-        assertThat(fileFacade.getFiles(group.id())).hasSize(2).allSatisfy(content -> assertThat(content).isEqualTo(PNG));
+        assertThat(fileFacade.getFiles(receiptId, group.id())).hasSize(2).allSatisfy(content -> assertThat(content).isEqualTo(PNG));
     }
 
     @Test
     void recognisesJsonFile() {
-        assertThat(fileFacade.save(receiptId, List.of(JSON), USER_SUB).fileType()).isEqualTo(FileType.JSON);
+        assertThat(fileFacade.save(user, receiptId, List.of(JSON)).fileType()).isEqualTo(FileType.JSON);
     }
 
     @Test
@@ -68,10 +72,10 @@ class FileFacadeIT extends IntegrationTest {
 
     @Test
     void deletesFileGroupWithItsFiles() {
-        UUID groupId = fileFacade.save(receiptId, List.of(PNG), USER_SUB).id();
+        UUID groupId = fileFacade.save(user, receiptId, List.of(PNG)).id();
         flush();
 
-        fileFacade.deleteFileGroupId(groupId, USER_SUB);
+        fileFacade.deleteFileGroupId(user, groupId);
         flush();
 
         assertThat(count("SELECT count(*) FROM receipt_file_group WHERE id = ?", groupId)).isZero();
@@ -80,43 +84,83 @@ class FileFacadeIT extends IntegrationTest {
 
     @Test
     void fileGroupUsedAsRevisionSourceCannotBeDeleted() {
-        UUID groupId = fileFacade.save(receiptId, List.of(JSON), USER_SUB).id();
+        UUID groupId = fileFacade.save(user, receiptId, List.of(JSON)).id();
         flush();
         UUID revisionId = insertRevision(receiptId, "BIEDRONKA_JSON", "0", false, null);
         jdbcTemplate.update("UPDATE receipt_revision SET source_file_group_id = ? WHERE id = ?", groupId, revisionId);
 
-        assertError(() -> fileFacade.deleteFileGroupId(groupId, USER_SUB), AppRuntimeExceptionMessages.FILE_GROUP_USED_BY_REVISION);
+        assertError(() -> fileFacade.deleteFileGroupId(user, groupId), AppRuntimeExceptionMessages.FILE_GROUP_USED_BY_REVISION);
     }
 
     @Test
     void readsSingleFileFromDisk() throws IOException {
-        UUID fileId = fileIdOf(fileFacade.save(receiptId, List.of(PNG), USER_SUB).id());
+        UUID fileId = fileIdOf(fileFacade.save(user, receiptId, List.of(PNG)).id());
 
-        assertThat(fileFacade.getFile(fileId).getContentAsByteArray()).isEqualTo(PNG);
+        assertThat(fileFacade.getFile(user, fileId).getContentAsByteArray()).isEqualTo(PNG);
     }
 
     @Test
     void unknownFileIsReported() {
-        assertError(() -> fileFacade.getFile(UNKNOWN_ID), AppRuntimeExceptionMessages.FILE_RECEIPT_NOT_FOUND);
-        assertError(() -> fileFacade.getFiles(UNKNOWN_ID), AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
+        assertError(() -> fileFacade.getFile(user, UNKNOWN_ID), AppRuntimeExceptionMessages.FILE_RECEIPT_NOT_FOUND);
+        assertError(() -> fileFacade.getFiles(receiptId, UNKNOWN_ID), AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
     }
 
     @Test
     void fileWithoutPathIsReported() {
-        UUID fileId = fileIdOf(fileFacade.save(receiptId, List.of(PNG), USER_SUB).id());
+        UUID fileId = fileIdOf(fileFacade.save(user, receiptId, List.of(PNG)).id());
         jdbcTemplate.update("UPDATE receipt_file SET path = NULL WHERE id = ?", fileId);
 
-        assertError(() -> fileFacade.getFile(fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_PATH_NOT_FOUND);
+        assertError(() -> fileFacade.getFile(user, fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_PATH_NOT_FOUND);
     }
 
     @Test
     void fileMissingOnDiskIsReported() throws IOException {
-        UUID groupId = fileFacade.save(receiptId, List.of(PNG), USER_SUB).id();
+        UUID groupId = fileFacade.save(user, receiptId, List.of(PNG)).id();
         UUID fileId = fileIdOf(groupId);
         Files.delete(Path.of(jdbcTemplate.queryForObject("SELECT path FROM receipt_file WHERE id = ?", String.class, fileId)));
 
-        assertError(() -> fileFacade.getFile(fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);
-        assertError(() -> fileFacade.getFiles(groupId), AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);
+        assertError(() -> fileFacade.getFile(user, fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);
+        assertError(() -> fileFacade.getFiles(receiptId, groupId), AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);
+    }
+
+    @Test
+    void otherUserCannotReadFile() {
+        UUID fileId = fileIdOf(fileFacade.save(user, receiptId, List.of(PNG)).id());
+
+        assertError(() -> fileFacade.getFile(stranger(), fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_NOT_FOUND);
+    }
+
+    @Test
+    void otherUserCannotUploadFilesToReceipt() {
+        assertError(() -> fileFacade.save(stranger(), receiptId, List.of(PNG)), AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM receipt_file_group WHERE receipt_id = ?", receiptId)).isZero();
+    }
+
+    @Test
+    void otherUserCannotDeleteFileGroup() {
+        UUID groupId = fileFacade.save(user, receiptId, List.of(PNG)).id();
+        flush();
+
+        assertError(() -> fileFacade.deleteFileGroupId(stranger(), groupId), AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM receipt_file_group WHERE id = ?", groupId)).isEqualTo(1);
+        assertThat(count("SELECT count(*) FROM receipt_file WHERE file_group_id = ?", groupId)).isEqualTo(1);
+    }
+
+    @Test
+    void fileGroupIsReadOnlyThroughItsOwnReceipt() {
+        UUID groupId = fileFacade.save(user, receiptId, List.of(PNG)).id();
+        UUID otherReceiptId = insertReceipt(createWallet(createUser("stranger-2"), "Other"), null, "Other receipt");
+        flush();
+
+        assertError(() -> fileFacade.getFiles(otherReceiptId, groupId), AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
+    }
+
+    private AuthenticatedUser stranger() {
+        return new AuthenticatedUser(createUser("stranger"));
     }
 
     private UUID fileIdOf(UUID groupId) {
@@ -125,7 +169,7 @@ class FileFacadeIT extends IntegrationTest {
     }
 
     private void assertFileError(List<byte[]> files, AppRuntimeExceptionMessages expected) {
-        assertError(() -> fileFacade.save(receiptId, files, USER_SUB), expected);
+        assertError(() -> fileFacade.save(user, receiptId, files), expected);
     }
 
     private static byte[] png() {

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.user.model.AuthenticatedUser;
 import pl.madzierski.daniel.wallet.model.CreateWalletRequest;
 import pl.madzierski.daniel.wallet.model.GetWalletDetailsResponse;
 import pl.madzierski.daniel.wallet.model.GetWalletListResponse;
@@ -22,33 +23,29 @@ class WalletFacadeIT extends IntegrationTest {
 
     @Test
     void listsOnlyWalletsOfCurrentUser() {
-        createUser("anna");
+        AuthenticatedUser anna = new AuthenticatedUser(createUser("anna"));
         UUID otherUserId = createUser("bartek");
         createWallet(otherUserId, "Bartek's wallet");
 
-        UUID walletId = walletFacade.addWallet(new CreateWalletRequest("Home"), "anna").id();
+        UUID walletId = walletFacade.addWallet(anna, new CreateWalletRequest("Home")).id();
         flush();
 
-        assertThat(walletFacade.getWallets("anna").items())
+        assertThat(walletFacade.getWallets(anna).items())
             .extracting(GetWalletListResponse.GetWalletListResponseItem::id, GetWalletListResponse.GetWalletListResponseItem::name)
             .containsExactly(tuple(walletId, "Home"));
     }
 
     @Test
-    void addingWalletForUnknownUserFails() {
-        assertError(() -> walletFacade.addWallet(new CreateWalletRequest("Home"), "nobody"), AppRuntimeExceptionMessages.USER_NOT_FOUND);
-    }
-
-    @Test
     void walletDetailsShowCorrectRevisionAndStoreOfEachReceipt() {
-        UUID walletId = createWallet(createUser("anna"), "Home");
+        UUID annaId = createUser("anna");
+        UUID walletId = createWallet(annaId, "Home");
         UUID storeId = createStore("Biedronka", "ul. Testowa 1", "Poznań");
         UUID receiptId = insertReceipt(walletId, storeId, "Weekly shopping");
         insertRevision(receiptId, "BIEDRONKA_JSON", "999.99", false, null);
         insertRevision(receiptId, "USER", "330.75", true, LocalDateTime.of(2026, 5, 22, 10, 4));
         flush();
 
-        GetWalletDetailsResponse details = walletFacade.getWalletDetails(walletId);
+        GetWalletDetailsResponse details = walletFacade.getWalletDetails(new AuthenticatedUser(annaId), walletId);
 
         assertThat(details.name()).isEqualTo("Home");
         assertThat(details.receipts()).hasSize(1);
@@ -63,12 +60,13 @@ class WalletFacadeIT extends IntegrationTest {
 
     @Test
     void walletDetailsListReceiptWithoutCorrectRevision() {
-        UUID walletId = createWallet(createUser("anna"), "Home");
+        UUID annaId = createUser("anna");
+        UUID walletId = createWallet(annaId, "Home");
         UUID receiptId = insertReceipt(walletId, null, "Not checked yet");
         insertRevision(receiptId, "BIEDRONKA_JSON", "12.50", false, null);
         flush();
 
-        GetWalletDetailsResponse.Receipt receipt = walletFacade.getWalletDetails(walletId).receipts().getFirst();
+        GetWalletDetailsResponse.Receipt receipt = walletFacade.getWalletDetails(new AuthenticatedUser(annaId), walletId).receipts().getFirst();
 
         assertThat(receipt.name()).isEqualTo("Not checked yet");
         assertThat(receipt.totalPrice()).isNull();
@@ -76,7 +74,18 @@ class WalletFacadeIT extends IntegrationTest {
     }
 
     @Test
+    void otherUsersWalletIsReportedAsUnknown() {
+        UUID walletId = createWallet(createUser("anna"), "Home");
+        insertReceipt(walletId, null, "Anna's receipt");
+        AuthenticatedUser bartek = new AuthenticatedUser(createUser("bartek"));
+        flush();
+
+        assertError(() -> walletFacade.getWalletDetails(bartek, walletId), AppRuntimeExceptionMessages.WALLET_NOT_FOUND);
+        assertThat(walletFacade.getWallets(bartek).items()).isEmpty();
+    }
+
+    @Test
     void unknownWalletFails() {
-        assertError(() -> walletFacade.getWalletDetails(UNKNOWN_ID), AppRuntimeExceptionMessages.WALLET_NOT_FOUND);
+        assertError(() -> walletFacade.getWalletDetails(new AuthenticatedUser(UNKNOWN_ID), UNKNOWN_ID), AppRuntimeExceptionMessages.WALLET_NOT_FOUND);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import java.util.UUID;
 
@@ -21,8 +22,8 @@ class FileController {
     private final FileFacade fileFacade;
 
     @GetMapping(path = "/{receiptFileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    ResponseEntity<Resource> getFileReceipt(@PathVariable UUID receiptFileId) {
-        Resource fileReceipt = fileFacade.getFile(receiptFileId);
+    ResponseEntity<Resource> getFileReceipt(AuthenticatedUser user, @PathVariable UUID receiptFileId) {
+        Resource fileReceipt = fileFacade.getFile(user, receiptFileId);
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME_TEMPLATE.formatted(fileReceipt.getFilename()))
             .body(fileReceipt);

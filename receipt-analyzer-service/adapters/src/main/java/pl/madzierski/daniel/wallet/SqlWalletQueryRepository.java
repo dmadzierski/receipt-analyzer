@@ -11,10 +11,14 @@ import java.util.UUID;
 public interface SqlWalletQueryRepository extends WalletQueryRepository, Repository<SqlWallet, UUID> {
 
     @Query("SELECT new pl.madzierski.daniel.wallet.model.WalletDto(w.id, w.name, w.createdDate) FROM SqlWallet w " +
-        "WHERE w.user.id = :userId")
+        "WHERE w.owner.id = :userId")
     Collection<WalletDto> findAllByUser(UUID userId);
 
-    @Query("SELECT new pl.madzierski.daniel.wallet.model.WalletDto(w.id, w.name, w.createdDate) FROM SqlWallet w WHERE w.id = :walletId")
-    Optional<WalletDto> getWalletDetails(UUID walletId);
+    @Query("SELECT new pl.madzierski.daniel.wallet.model.WalletDto(w.id, w.name, w.createdDate) FROM SqlWallet w " +
+        "WHERE w.id = :walletId AND w.owner.id = :ownerId")
+    Optional<WalletDto> getWalletDetails(UUID walletId, UUID ownerId);
+
+    @Query("SELECT COUNT(w) > 0 FROM SqlWallet w WHERE w.id = :walletId AND w.owner.id = :ownerId")
+    boolean isAccessible(UUID walletId, UUID ownerId);
 
 }

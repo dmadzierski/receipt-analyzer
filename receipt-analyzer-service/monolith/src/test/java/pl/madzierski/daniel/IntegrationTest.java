@@ -81,8 +81,9 @@ public abstract class IntegrationTest {
 
     protected UUID insertReceipt(UUID walletId, UUID storeId, String name) {
         return jdbcTemplate.queryForObject(
-            "INSERT INTO receipt (id, created_date, name, wallet_id, store_id) VALUES (gen_random_uuid(), now(), ?, ?, ?) RETURNING id",
-            UUID.class, name, walletId, storeId);
+            "INSERT INTO receipt (id, created_date, name, wallet_id, store_id, owner_id) "
+                + "SELECT gen_random_uuid(), now(), ?, w.id, ?, w.user_id FROM wallet w WHERE w.id = ? RETURNING id",
+            UUID.class, name, storeId, walletId);
     }
 
     protected UUID insertRevision(UUID receiptId, String resolver, String totalPrice, boolean isCorrect, LocalDateTime paymentDate) {

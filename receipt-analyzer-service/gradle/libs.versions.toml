@@ -10,6 +10,7 @@ junit-platform = "1.12.2"
 testcontainers = "1.21.4"
 tika = "3.2.3"
 jakarta-validation = "4.0.0-M1"
+caffeine = "3.2.0"
 
 [libraries]
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
@@ -33,3 +34,4 @@ flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 tika-core = { module = "org.apache.tika:tika-core", version.ref = "tika" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }

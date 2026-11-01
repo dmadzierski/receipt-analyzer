@@ -9,7 +9,7 @@ import pl.madzierski.daniel.user.SqlUserQuery;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@EqualsAndHashCode(callSuper = true, exclude = "user")
+@EqualsAndHashCode(callSuper = true, exclude = "owner")
 @Entity
 @Setter
 @Table(name = "wallet")
@@ -19,12 +19,12 @@ class SqlWallet extends BaseEntity {
     private String name;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private SqlUserQuery user;
+    private SqlUserQuery owner;
 
     public static SqlWallet fromWallet(Wallet wallet) {
         SqlWallet sqlWallet = SqlWallet.builder()
             .name(wallet.getName())
-            .user(SqlUserQuery.fromUserQuery(wallet.getUser()))
+            .owner(SqlUserQuery.fromUserQuery(wallet.getOwner()))
             .build();
         sqlWallet.setId(wallet.getId());
         sqlWallet.setCreatedDate(wallet.getCreatedDate());
@@ -38,7 +38,7 @@ class SqlWallet extends BaseEntity {
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
             .name(name)
-            .user(user.toUserQuery())
+            .owner(owner.toUserQuery())
             .build();
     }
 }

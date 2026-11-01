@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.store.SqlStoreQuery;
+import pl.madzierski.daniel.user.model.UserQuery;
 import pl.madzierski.daniel.wallet.SqlWalletQuery;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,6 +31,8 @@ class SqlReceipt extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
     private SqlStoreQuery store;
+    @Column(name = "owner_id", nullable = false)
+    private UUID ownerId;
 
     public static SqlReceipt fromReceipt(Receipt receipt) {
         SqlReceipt sqlReceipt = new SqlReceipt();
@@ -39,6 +43,7 @@ class SqlReceipt extends BaseEntity {
         sqlReceipt.setDescription(receipt.getDescription());
         sqlReceipt.setWallet(receipt.getWallet() != null ? SqlWalletQuery.fromWalletQuery(receipt.getWallet()) : null);
         sqlReceipt.setStore(receipt.getStore() != null ? SqlStoreQuery.fromStoreQuery(receipt.getStore()) : null);
+        sqlReceipt.setOwnerId(receipt.getOwner() != null ? receipt.getOwner().getId() : null);
         return sqlReceipt;
     }
 
@@ -53,6 +58,7 @@ class SqlReceipt extends BaseEntity {
         receipt.setDescription(description);
         receipt.setWallet(wallet != null ? wallet.toWalletQuery() : null);
         receipt.setStore(store != null ? store.toStoreQuery() : null);
+        receipt.setOwner(ownerId != null ? new UserQuery(ownerId) : null);
         return receipt;
     }
 }

@@ -1,15 +1,17 @@
 package pl.madzierski.daniel.receipt;
 
 
+import pl.madzierski.daniel.user.model.UserQuery;
+
 import java.util.Optional;
 import java.util.UUID;
 
 interface ReceiptRevisionRepository {
     ReceiptRevision save(ReceiptRevision revision);
 
-    Optional<ReceiptRevision> findByIdWithItems(UUID revisionId);
+    Optional<ReceiptRevision> findAccessibleWithItems(UUID revisionId, UserQuery user);
 
-    Optional<ReceiptRevision> findById(UUID revisionId);
+    Optional<ReceiptRevision> findAccessible(UUID revisionId, UserQuery user);
 
     void deleteById(UUID revisionId);
 
