@@ -278,6 +278,23 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
+    void repeatedItemCorrectedToExistingProductAddsAliasOnce() {
+        UUID chickenId = createProduct("Kurczak", "Kurczak");
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        renameItem(copyId, CHICKEN, "Kurczak");
+
+        receiptFacade.updateAliasesByUserRevision(user, copyId);
+        flush();
+
+        assertThat(aliasesOf("Kurczak")).containsExactlyInAnyOrder("Kurczak", CHICKEN);
+        assertThat(itemsOf(originalId).stream()
+            .filter(item -> item.name().equals(CHICKEN))
+            .map(item -> jdbcTemplate.queryForObject("SELECT product_id FROM receipt_item WHERE id = ?", UUID.class, item.id()))
+            .collect(Collectors.toSet())).containsExactly(chickenId);
+    }
+
+    @Test
     void dictionaryLearnedFromOneReceiptIsUsedForNextOne() {
         UUID firstCopyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         renameItem(firstCopyId, ONION, "Cebula");

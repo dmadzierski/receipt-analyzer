@@ -267,7 +267,12 @@ public class ReceiptFacade {
                 ProductDto resolvedDict;
                 Optional<ProductDto> productDictEntityOptional = productDictFacade.findCanonicalName(alias, receiptItem.getName());
                 if (productDictEntityOptional.isPresent()) {
-                    resolvedDict = productDictEntityOptional.get();
+                    ProductDto found = productDictEntityOptional.get();
+                    resolvedDict = receiptItemToProductDictNameMap.keySet()
+                        .stream()
+                        .filter(dict -> dict.getId() != null && dict.getId().equals(found.getId()))
+                        .findFirst()
+                        .orElse(found);
                     if (resolvedDict.getAliases()
                         .stream()
                         .noneMatch(currAlias -> currAlias.getName()
