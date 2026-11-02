@@ -10,6 +10,7 @@
   </div>
   <div class="app-navbar__profile">
     Witaj {{ (profile?.firstName || '') + ' ' + (profile?.lastName || '') }}!
+    <button type="button" class="app-navbar__logout" (click)="logout()">Logout</button>
   </div>
 </nav>
 <router-outlet></router-outlet>

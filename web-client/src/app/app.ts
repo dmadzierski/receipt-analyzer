@@ -26,6 +26,10 @@ export class App implements OnInit {
       .subscribe(() => this.loadWallets());
   }
 
+  logout(): void {
+    this.keycloak.logout({redirectUri: document.baseURI});
+  }
+
   private loadWallets(): void {
     this.walletService.getWalletList().subscribe((result) => this.wallets.set(result.items ?? []));
   }
