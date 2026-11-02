@@ -7,51 +7,58 @@ import {WalletDetailsComponent} from './wallet-details/wallet-details.component'
 import {ProductDictListComponent} from './product-dict-list/product-dict-list-component';
 import {ProductCategoryListComponent} from './product-category-list/product-category-list.component';
 import {StoreListComponent} from './store-list/store-list.component';
+import {userSyncGuard} from './service/user-sync.guard';
 
 export const routes: Routes = [
   {
-    path: 'receipts/:id',
-    component: ReceiptDetailsComponent,
-    pathMatch: 'prefix',
-  },
-  {
-    path: 'wallets/new',
-    component: WalletAddComponent,
-    pathMatch: 'full',
-  },
-  {
-    path: 'wallets/:walletId',
-    component: WalletDetailsComponent,
-    pathMatch: 'full',
-  },
-  {
-    path: 'wallets/:walletId/receipts/new',
-    component: ReceiptAddComponent,
-    pathMatch: 'full',
-  },
-  {
-    path: 'wallets',
-    component: WalletListComponent,
-    pathMatch: 'full',
-  },
-  {
     path: '',
-    redirectTo: 'wallets',
-    pathMatch: 'full',
+    canActivate: [userSyncGuard],
+    children: [
+      {
+        path: 'receipts/:id',
+        component: ReceiptDetailsComponent,
+        pathMatch: 'prefix',
+      },
+      {
+        path: 'wallets/new',
+        component: WalletAddComponent,
+        pathMatch: 'full',
+      },
+      {
+        path: 'wallets/:walletId',
+        component: WalletDetailsComponent,
+        pathMatch: 'full',
+      },
+      {
+        path: 'wallets/:walletId/receipts/new',
+        component: ReceiptAddComponent,
+        pathMatch: 'full',
+      },
+      {
+        path: 'wallets',
+        component: WalletListComponent,
+        pathMatch: 'full',
+      },
+      {
+        path: '',
+        redirectTo: 'wallets',
+        pathMatch: 'full',
+      },
+      {
+        path: 'product-dicts',
+        component: ProductDictListComponent,
+        pathMatch: 'full',
+      },
+      {
+        path: 'product-categories',
+        component: ProductCategoryListComponent,
+        pathMatch: 'full',
+      },
+      {
+        path: 'stores',
+        component: StoreListComponent,
+        pathMatch: 'full',
+      }
+    ],
   },
-  {
-    path: 'product-dicts',
-    component: ProductDictListComponent,
-    pathMatch: 'full',
-  },
-  {
-    path: 'product-categories',
-    component: ProductCategoryListComponent,
-    pathMatch: 'full',
-  },
-  {
-    path: 'stores',
-    component: StoreListComponent,
-    pathMatch: 'full',
-  }
 ];

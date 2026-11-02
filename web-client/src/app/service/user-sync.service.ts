@@ -1,26 +1,17 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import Keycloak from 'keycloak-js';
+import {Observable, shareReplay, tap} from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class UserSyncService {
   private readonly http = inject(HttpClient);
-  private readonly keycloak = inject(Keycloak);
-  private synced = false;
+  private sync$?: Observable<void>;
 
-  syncMeOnce(): void {
-    if (this.synced || !this.keycloak.authenticated) {
-      return;
-    }
-
-    this.synced = true;
-
-    this.http.post('/api/users/sync/me', {}).subscribe({
-      next: () => console.info('User synced'),
-      error: (error) => {
-        console.error('User sync failed', error);
-        this.synced = false;
-      },
-    });
+  ensureSynced(): Observable<void> {
+    this.sync$ ??= this.http.post<void>('/api/users/sync/me', {}).pipe(
+      tap({error: () => (this.sync$ = undefined)}),
+      shareReplay(1),
+    );
+    return this.sync$;
   }
 }
