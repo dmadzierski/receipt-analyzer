@@ -87,10 +87,15 @@ public abstract class IntegrationTest {
     }
 
     protected UUID insertRevision(UUID receiptId, String resolver, String totalPrice, boolean isCorrect, LocalDateTime paymentDate) {
+        return insertRevision(receiptId, resolver, totalPrice, isCorrect, false, paymentDate);
+    }
+
+    protected UUID insertRevision(UUID receiptId, String resolver, String totalPrice, boolean isCorrect, boolean isPreferred,
+                                  LocalDateTime paymentDate) {
         return jdbcTemplate.queryForObject(
             "INSERT INTO receipt_revision (id, created_date, receipt_id, resolver, total_price, is_correct, is_preferred_revision, payment_date) "
-                + "VALUES (gen_random_uuid(), now(), ?, ?, CAST(? AS numeric), ?, false, ?) RETURNING id",
-            UUID.class, receiptId, resolver, totalPrice, isCorrect, paymentDate);
+                + "VALUES (gen_random_uuid(), now(), ?, ?, CAST(? AS numeric), ?, ?, ?) RETURNING id",
+            UUID.class, receiptId, resolver, totalPrice, isCorrect, isPreferred, paymentDate);
     }
 
     protected UUID insertItem(UUID revisionId, String name, UUID productId) {

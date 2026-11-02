@@ -36,13 +36,13 @@ class WalletFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void walletDetailsShowCorrectRevisionAndStoreOfEachReceipt() {
+    void walletDetailsShowPreferredRevisionAndStoreOfEachReceipt() {
         UUID annaId = createUser("anna");
         UUID walletId = createWallet(annaId, "Home");
         UUID storeId = createStore("Biedronka", "ul. Testowa 1", "Poznań");
         UUID receiptId = insertReceipt(walletId, storeId, "Weekly shopping");
         insertRevision(receiptId, "BIEDRONKA_JSON", "999.99", false, null);
-        insertRevision(receiptId, "USER", "330.75", true, LocalDateTime.of(2026, 5, 22, 10, 4));
+        insertRevision(receiptId, "USER", "330.75", true, true, LocalDateTime.of(2026, 5, 22, 10, 4));
         flush();
 
         GetWalletDetailsResponse details = walletFacade.getWalletDetails(new AuthenticatedUser(annaId), walletId);
@@ -59,11 +59,27 @@ class WalletFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void walletDetailsListReceiptWithoutCorrectRevision() {
+    void receiptWithManyCorrectRevisionsIsListedOnceWithPreferredRevision() {
+        UUID annaId = createUser("anna");
+        UUID walletId = createWallet(annaId, "Home");
+        UUID receiptId = insertReceipt(walletId, null, "Weekly shopping");
+        insertRevision(receiptId, "BIEDRONKA_JSON", "100.00", true, null);
+        insertRevision(receiptId, "USER", "110.00", true, true, null);
+        insertRevision(receiptId, "USER", "120.00", true, null);
+        flush();
+
+        GetWalletDetailsResponse details = walletFacade.getWalletDetails(new AuthenticatedUser(annaId), walletId);
+
+        assertThat(details.receipts()).singleElement()
+            .satisfies(receipt -> assertThat(receipt.totalPrice()).isEqualByComparingTo("110.00"));
+    }
+
+    @Test
+    void walletDetailsListReceiptWithoutPreferredRevision() {
         UUID annaId = createUser("anna");
         UUID walletId = createWallet(annaId, "Home");
         UUID receiptId = insertReceipt(walletId, null, "Not checked yet");
-        insertRevision(receiptId, "BIEDRONKA_JSON", "12.50", false, null);
+        insertRevision(receiptId, "BIEDRONKA_JSON", "12.50", true, null);
         flush();
 
         GetWalletDetailsResponse.Receipt receipt = walletFacade.getWalletDetails(new AuthenticatedUser(annaId), walletId).receipts().getFirst();

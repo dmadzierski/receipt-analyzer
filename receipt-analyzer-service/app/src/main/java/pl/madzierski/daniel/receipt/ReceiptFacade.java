@@ -208,9 +208,10 @@ public class ReceiptFacade {
             }
         }
         if (arePricesConsistent(revision)) revision.setIsCorrect(true);
-        revisionRepository.save(revision);
+        // before save: a receipt may have only one preferred revision (ux_receipt_revision_preferred)
         if (Boolean.TRUE.equals(revision.getIsPreferredRevision()) && revision.getReceipt() != null)
             revisionRepository.unsetPreferredInOtherRevisions(revision.getReceipt().getId(), revision.getId());
+        revisionRepository.save(revision);
         return UpdateRevisionResponse.map(toDto(revision), revision.getItems()
             .stream()
             .map(this::toDto)
