@@ -378,6 +378,16 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
+    void copyKeepsProductOfResolverRevisionItems() {
+        createProduct("Cebula", ONION);
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+
+        UUID copyId = copyRevision(originalId);
+
+        assertThat(productNameOfItem(itemNamed(copyId, ONION).id())).contains("Cebula");
+    }
+
+    @Test
     void rewritingProductNamesRenamesOnlyUserRevisionItems() {
         UUID originalId = revisionIdOf(createReceiptFromJson());
         UUID copyId = copyRevision(originalId);

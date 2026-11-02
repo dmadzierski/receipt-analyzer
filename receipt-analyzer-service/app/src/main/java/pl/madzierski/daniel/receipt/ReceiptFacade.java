@@ -142,7 +142,7 @@ public class ReceiptFacade {
                 newItem.setPosition(item.getPosition());
                 newItem.setDiscount(item.getDiscount());
                 newItem.setParentItem(new ReceiptItem(item.getId()));
-                if (item.getParentItem() != null) newItem.setNameDict(item.getNameDict());
+                newItem.setNameDict(item.getNameDict());
                 return newItem;
             })
             .collect(Collectors.toSet()));
