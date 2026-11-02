@@ -1,6 +1,5 @@
 package pl.madzierski.daniel.receipt.model;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
@@ -11,9 +10,9 @@ public record CreateReceiptRequest(
     String description,
     @NotNull
     ReceiptResolverStrategyType strategy,
-    @NotEmpty
+    @NotNull
     UUID walletId,
-    @NotEmpty
+    @NotNull
     UUID storeId
 ) {
 }
