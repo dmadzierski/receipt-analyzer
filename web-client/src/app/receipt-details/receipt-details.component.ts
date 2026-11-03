@@ -36,6 +36,10 @@ import {FileGroupSelectorComponent} from '../component/file-group-selector/file-
 import {FilePreviewComponent} from '../component/file-preview/file-preview.component';
 import {AddFilesDialogComponent} from '../component/add-files-dialog/add-files-dialog.component';
 import {
+  ImageEditorDialogComponent,
+  ImageEditorDialogData
+} from '../component/image-editor-dialog/image-editor-dialog.component';
+import {
   ConfirmDialogComponent,
   ConfirmDialogData
 } from '../component/confirm-dialog/confirm-dialog.component';
@@ -298,6 +302,30 @@ export class ReceiptDetailsComponent implements OnInit {
     });
   }
 
+  get isImagePreview(): boolean {
+    return this.previewFileIds.length > 0
+      && (this.previewType === FileType.JPEG || this.previewType === FileType.PNG || this.previewType === FileType.WEBP);
+  }
+
+  openImageEditor(): void {
+    if (!this.isImagePreview) return;
+    const knownGroupIds = new Set(this.fileGroups.map(group => group.id));
+    this.dialog.open(ImageEditorDialogComponent, {
+      width: '90vw',
+      maxWidth: '1200px',
+      disableClose: true,
+      data: {
+        receiptId: this.receiptDetails.id,
+        fileIds: this.previewFileIds,
+        type: this.previewType,
+      } as ImageEditorDialogData,
+    }).afterClosed().subscribe((saved?: boolean) => {
+      if (saved) {
+        this.refreshFileGroups(knownGroupIds);
+      }
+    });
+  }
+
   deleteReceipt(): void {
     if (!this.receiptId) return;
     const revisionCount = this.receiptDetails.revisions?.length ?? 0;
@@ -337,7 +365,7 @@ export class ReceiptDetailsComponent implements OnInit {
     });
   }
 
-  private refreshFileGroups(): void {
+  private refreshFileGroups(knownGroupIds?: Set<string>): void {
     if (!this.receiptId) {
       return;
     }
@@ -345,7 +373,8 @@ export class ReceiptDetailsComponent implements OnInit {
     this.receiptService.getReceiptDetails(this.receiptId).subscribe({
       next: (res) => {
         this.fileGroups = res.fileGroups ?? [];
-        this.selectPdfFile(this.selectedFileGroupId);
+        const newGroup = knownGroupIds ? this.fileGroups.find(group => !knownGroupIds.has(group.id)) : undefined;
+        this.selectPdfFile(newGroup?.id ?? this.selectedFileGroupId);
       }
     });
   }

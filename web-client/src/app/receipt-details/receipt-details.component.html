@@ -141,6 +141,12 @@
         <mat-icon>attach_file</mat-icon>
         Add files
       </button>
+      @if (isImagePreview) {
+        <button (click)="openImageEditor()" mat-stroked-button type="button">
+          <mat-icon>crop_rotate</mat-icon>
+          Edit image
+        </button>
+      }
     </div>
     @if (previewType === FileType.PDF && receiptFileId) {
       <app-pdf-viewer [receiptFileId]="receiptFileId"></app-pdf-viewer>

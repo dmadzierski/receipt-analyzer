@@ -1,0 +1,59 @@
+<h2 mat-dialog-title>Edit image</h2>
+
+<mat-dialog-content class="editor-content">
+  @if (loading) {
+    <div class="state">Loading...</div>
+  } @else if (error) {
+    <div class="state">Failed to load images</div>
+  } @else if (page) {
+    <div class="toolbar">
+      <button (click)="rotate(false)" mat-icon-button matTooltip="Rotate left" type="button">
+        <mat-icon>rotate_left</mat-icon>
+      </button>
+      <button (click)="rotate(true)" mat-icon-button matTooltip="Rotate right" type="button">
+        <mat-icon>rotate_right</mat-icon>
+      </button>
+      <button (click)="reset()" [disabled]="!page.edited" mat-button type="button" matTooltip="Restore the original image">
+        <mat-icon>restart_alt</mat-icon>
+        Reset
+      </button>
+      <span class="hint">Drag the frame edges to choose the area to keep.</span>
+    </div>
+
+    <div class="workspace">
+      @if (pages.length > 1) {
+        <div class="pages">
+          @for (item of pages; track $index; let i = $index) {
+            <button (click)="show(i)" [class.active]="i === current" class="page" type="button">
+              <img [src]="item.thumbnail" alt="Page {{ i + 1 }}">
+              <span>{{ i + 1 }}@if (item.edited) { *}</span>
+            </button>
+          }
+        </div>
+      }
+
+      <image-cropper
+        (cropperChange)="page.cropper = $event"
+        (imageCropped)="onCropped($event)"
+        (imageLoaded)="onImageLoaded($event)"
+        (loadImageFailed)="error = true"
+        (startCropImage)="onCropStart()"
+        [canvasRotation]="page.rotation"
+        [cropper]="page.cropper"
+        [format]="output?.format ?? 'png'"
+        [imageFile]="page.original"
+        [imageQuality]="95"
+        [maintainAspectRatio]="false"
+        class="cropper"
+        output="blob"/>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button (click)="cancel()" mat-button type="button">Cancel</button>
+  <button (click)="save()" [disabled]="!anyEdited || saving" color="primary" mat-flat-button type="button"
+          matTooltip="Uploads the edited images as a new file group, the original files stay unchanged">
+    {{ saving ? 'Saving...' : 'Save as new' }}
+  </button>
+</mat-dialog-actions>
