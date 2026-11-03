@@ -16,8 +16,12 @@ A modular web application for receipt digitization and expense tracking with adv
 **Key Features:**
 - Automatic data extraction from PDF and JSON receipts
 - Support for multiple receipt formats
+- Receipt files kept as file groups (PDF, JPEG/PNG/WEBP images, JSON exports)
+- Image editor: rotate and crop receipt photos, the result is saved as a new file group and the original stays untouched
 - Versioning system created for training an ML model to read receipt data
-- Product dictionary management
+- Editing receipt items with product autocomplete on the item name (free text still allowed) and CSV paste from the clipboard
+- Product dictionary management, with aliases learned from user corrections
+- Per-user data isolation: wallets, receipts and files are visible only to their owner
 - Authentication and authorization via Keycloak
 - Angular Material interface
 
@@ -76,12 +80,15 @@ flowchart TB
 ### Backend
 ```
 Language:           Java 21
-Framework:          Spring Boot 3.x
-Build Tool:         Gradle
+Framework:          Spring Boot 3.5
+Build Tool:         Gradle (multi-module: domain, app, adapters, monolith)
 Database:           PostgreSQL 17
-Authentication:     Keycloak 26.3
-OCR:                Tesseract
+Migrations:         Flyway
+Authentication:     Keycloak 26.3 (OAuth2 resource server, JWT)
+OCR:                Tesseract (tess4j)
+File type detection: Apache Tika
 Persistence:        Hibernate JPA
+Tests:              JUnit 5, Testcontainers (PostgreSQL)
 ```
 
 ### Frontend
@@ -96,6 +103,7 @@ UI Library:         Angular Material 20.2, Bootstrap 5.3
 Container:          Docker & Docker Compose
 Web Server:         Nginx 1.29.3
 Orchestration:      Docker Compose
+CI/CD:              Jenkins (integration tests, image build, push to a private registry)
 ```
 ---
 
@@ -109,6 +117,11 @@ Orchestration:      Docker Compose
 - [x] Versioning system to track data corrections (for ML training)
 - [x] Product dictionary with categorization
 - [x] Product aliases system
+- [x] Image file groups and image editor (rotate, crop, save as new)
+- [x] Manual linking of receipt items to products (autocomplete)
+- [x] Stores and store brands
+- [x] Per-user ownership of wallets, receipts and files (IDOR protection)
+- [x] Database schema versioned with Flyway
 - [x] Angular interface
 
 ### Architecture and Design
@@ -121,6 +134,10 @@ Orchestration:      Docker Compose
 - [x] Docker Compose setup (prod + local dev)
 - [x] Nginx reverse proxy
 - [x] Environment configuration
+- [x] Jenkins pipeline: integration tests, Docker image build and push
+
+### Tests
+- [x] Backend integration tests (Testcontainers + PostgreSQL)
 
 ---
 
@@ -142,11 +159,6 @@ Orchestration:      Docker Compose
 
 - [ ] **Automated Tests**
     - Backend unit tests
-    - Backend integration tests
-
-- [ ] **DevOps**
-    - GitHub Actions CI/CD
-    - Kubernetes deployment
 
 ---
 
