@@ -118,7 +118,8 @@ public record GetReceiptDetailsResponse(
             receiptItem.getUnitPrice(),
             receiptItem.getDiscount(),
             receiptItem.getTotalPrice(),
-            receiptItem.getPosition()
+            receiptItem.getPosition(),
+            receiptItem.getProductDictId()
         );
     }
 
@@ -146,7 +147,8 @@ public record GetReceiptDetailsResponse(
         BigDecimal unitPrice,
         BigDecimal discount,
         BigDecimal totalPrice,
-        Integer position
+        Integer position,
+        UUID productId
     ) {
     }
 

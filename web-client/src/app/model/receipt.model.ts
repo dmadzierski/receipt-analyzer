@@ -105,6 +105,7 @@ export interface Item {
   unitPrice: number
   discount?: number
   totalPrice: number
+  productId?: string | null
 }
 
 export interface ReceiptFile {

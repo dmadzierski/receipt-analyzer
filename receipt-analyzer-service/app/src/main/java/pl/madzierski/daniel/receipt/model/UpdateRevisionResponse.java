@@ -45,7 +45,8 @@ public record UpdateRevisionResponse(
             item.getUnitPrice(),
             item.getDiscount(),
             item.getTotalPrice(),
-            item.getPosition()
+            item.getPosition(),
+            item.getProductDictId()
         );
     }
 
@@ -56,7 +57,8 @@ public record UpdateRevisionResponse(
         BigDecimal unitPrice,
         BigDecimal discount,
         BigDecimal totalPrice,
-        Integer position
+        Integer position,
+        UUID productId
     ) {
     }
 }

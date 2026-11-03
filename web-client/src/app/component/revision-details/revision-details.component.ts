@@ -29,7 +29,13 @@ import {CommonModule, NgClass} from '@angular/common';
 import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatTooltip} from '@angular/material/tooltip';
+import {MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
 import Decimal from 'decimal.js';
+import {ProductDict} from '../../model/receipt-dict.model';
+import {ProductDictService} from '../../service/product-dict.service';
+
+const MAX_PRODUCT_OPTIONS = 30;
+const MIN_PRODUCT_QUERY_LENGTH = 2;
 
 @Component({
   selector: 'app-revision-details',
@@ -42,13 +48,15 @@ import Decimal from 'decimal.js';
     DragDropModule,
     MatTable,
     DragDropModule,
-    MatTableModule, MatIconModule, MatButtonModule, RouterModule, MatSortHeader, MatSort, MatFormField, MatInput, MatLabel, ReactiveFormsModule, FormsModule, MatDatepicker, MatDatepickerInput, MatHint, MatDatepickerToggle, MatSuffix, NgClass, MatCheckbox, MatTooltip
+    MatTableModule, MatIconModule, MatButtonModule, RouterModule, MatSortHeader, MatSort, MatFormField, MatInput, MatLabel, ReactiveFormsModule, FormsModule, MatDatepicker, MatDatepickerInput, MatHint, MatDatepickerToggle, MatSuffix, NgClass, MatCheckbox, MatTooltip, MatAutocompleteModule
   ],
   templateUrl: './revision-details.component.html',
   styleUrl: './revision-details.component.scss',
 })
 export class RevisionDetailsComponent implements OnChanges {
   displayedColumns: string[] = ['position', 'name', 'amount', 'unitPrice', 'totalPrice', 'discount', 'actions'];
+  private products: ProductDict[] = [];
+  private productsById = new Map<string, ProductDict>();
   revision: ModelSignal<RevisionDetails> = model({} as RevisionDetails)
   @Input()
   contentEditable: boolean = false;
@@ -58,7 +66,39 @@ export class RevisionDetailsComponent implements OnChanges {
     return this.revision()?.resolver === 'USER';
   }
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, productDictService: ProductDictService) {
+    productDictService.getProductDictList().subscribe(response => {
+      this.products = [...(response.items ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+      this.productsById = new Map(this.products.map(product => [product.id, product]));
+      this.cdr.markForCheck();
+    });
+  }
+
+  productNameOf(item: Item): string {
+    return item.productId ? this.productsById.get(item.productId)?.name ?? '' : '';
+  }
+
+  onNameChange(item: Item, name: string) {
+    item.name = name;
+    if (item.productId && this.productNameOf(item) !== name) {
+      item.productId = null;
+    }
+  }
+
+  selectProduct(item: Item, product: ProductDict) {
+    item.name = product.name;
+    item.productId = product.id;
+  }
+
+  filteredProducts(name: string | null | undefined): ProductDict[] {
+    const query = (name ?? '').trim().toLowerCase();
+    if (query.length < MIN_PRODUCT_QUERY_LENGTH) {
+      return [];
+    }
+    return this.products
+      .filter(product => product.name.toLowerCase().includes(query)
+        || product.aliases?.some(alias => alias.alias?.toLowerCase().includes(query)))
+      .slice(0, MAX_PRODUCT_OPTIONS);
   }
 
   isItemInvalid(item: Item): boolean {
@@ -212,8 +252,12 @@ export class RevisionDetailsComponent implements OnChanges {
     return Number.isNaN(parsed) ? null : parsed;
   }
 
-  protected onKeyDown($event: KeyboardEvent) {
+  protected onKeyDown($event: KeyboardEvent, autocomplete?: MatAutocompleteTrigger) {
     if ($event.key !== 'ArrowUp' && $event.key !== 'ArrowDown') {
+      return;
+    }
+    // arrows move through the open product list instead of jumping to another row
+    if (autocomplete?.panelOpen) {
       return;
     }
 

@@ -75,8 +75,30 @@
       <ng-container matColumnDef="name">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Name</th>
         <td *matCellDef="let element" mat-cell>
-          <input (keydown)="onKeyDown($event)" [(ngModel)]="element.name" [ngClass]="{'is-editing': contentEditable}"
-                 [readonly]="!contentEditable" class="table-input">
+          <div class="name-cell">
+          @if (contentEditable && isUserResolver) {
+            <input #nameTrigger="matAutocompleteTrigger"
+                   (keydown)="onKeyDown($event, nameTrigger)"
+                   (ngModelChange)="onNameChange(element, $event)"
+                   [matAutocomplete]="productAutocomplete"
+                   [ngModel]="element.name"
+                   class="table-input is-editing">
+            <mat-autocomplete #productAutocomplete="matAutocomplete">
+              @for (product of filteredProducts(element.name); track product.id) {
+                <mat-option (onSelectionChange)="$event.isUserInput && selectProduct(element, product)"
+                            [value]="product.name">
+                  {{ product.name }}
+                </mat-option>
+              }
+            </mat-autocomplete>
+          } @else {
+            <input (keydown)="onKeyDown($event)" [(ngModel)]="element.name" [ngClass]="{'is-editing': contentEditable}"
+                   [readonly]="!contentEditable" class="table-input">
+          }
+          @if (element.productId) {
+            <mat-icon class="product-linked-icon" matTooltip="Linked to product {{ productNameOf(element) }}">link</mat-icon>
+          }
+          </div>
         </td>
       </ng-container>
 

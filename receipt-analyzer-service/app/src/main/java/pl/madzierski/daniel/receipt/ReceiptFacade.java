@@ -179,6 +179,13 @@ public class ReceiptFacade {
                 .map(ReceiptItem::getId)
                 .filter(id -> !incomingIds.contains(id))
                 .toList();
+            updatedRevisionRequest.items()
+                .stream()
+                .map(UpdateRevisionRequest.ItemRequest::productId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(productId -> productDictQueryRepository.findNameById(productId)
+                    .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND)));
             receiptItemRepository.deleteAllByIdIn(itemsToRemove);
             itemsToRemove.forEach(revision::removeItem);
             for (UpdateRevisionRequest.ItemRequest incomingItem : updatedRevisionRequest.items()) {
@@ -194,14 +201,17 @@ public class ReceiptFacade {
                             entity.setDiscount(incomingItem.discount());
                             entity.setTotalPrice(incomingItem.totalPrice());
                             entity.setPosition(incomingItem.position());
+                            entity.setNameDict(incomingItem.productId() != null ? new ProductDictQuery(incomingItem.productId()) : null);
                             if (entity.getParentItem() != null) {
                                 entity.setParentItem(new ReceiptItem(entity.getParentItem().getId()));
                             }
                         });
                 } else {
-                    ProductDictQuery productDict = productDictFacade.findCanonicalName(incomingItem.name(), null)
-                        .map(item -> new ProductDictQuery(item.getId()))
-                        .orElse(null);
+                    ProductDictQuery productDict = incomingItem.productId() != null
+                        ? new ProductDictQuery(incomingItem.productId())
+                        : productDictFacade.findCanonicalName(incomingItem.name(), null)
+                            .map(item -> new ProductDictQuery(item.getId()))
+                            .orElse(null);
                     ReceiptItem newItem = new ReceiptItem(revision, incomingItem.name(), productDict, incomingItem.amount(), incomingItem.unitPrice(), incomingItem.discount(), incomingItem.totalPrice(), incomingItem.position(), null);
                     revision.addItem(newItem);
                 }
@@ -235,6 +245,8 @@ public class ReceiptFacade {
 
     private ReceiptItemDto toDto(ReceiptItem item) {
         return ReceiptItemDto.builder()
+            .id(item.getId())
+            .productDictId(item.getNameDict() != null ? item.getNameDict().getId() : null)
             .name(item.getName())
             .amount(item.getAmount())
             .unitPrice(item.getUnitPrice())

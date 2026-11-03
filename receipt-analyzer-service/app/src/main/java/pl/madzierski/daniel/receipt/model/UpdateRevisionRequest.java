@@ -27,7 +27,8 @@ public record UpdateRevisionRequest(
         BigDecimal unitPrice,
         BigDecimal discount,
         BigDecimal totalPrice,
-        Integer position
+        Integer position,
+        UUID productId
     ) {
     }
 }

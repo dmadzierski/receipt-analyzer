@@ -88,7 +88,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         ItemRequest removed = items.getFirst();
         Set<ItemRequest> request = new HashSet<>(items.subList(1, items.size()));
         request.add(new ItemRequest(null, removed.name(), removed.amount(), removed.unitPrice(), removed.discount(),
-            removed.totalPrice(), removed.position()));
+            removed.totalPrice(), removed.position(), null));
 
         receiptFacade.updateRevision(user, userRevisionId, revisionUpdate(request));
         flush();
@@ -362,7 +362,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         jdbcTemplate.update("UPDATE receipt_revision SET is_correct = false WHERE id = ?", copyId);
         Set<ItemRequest> items = itemsOf(copyId).stream()
             .map(item -> item.name().equals(ONION)
-                ? new ItemRequest(item.id(), item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice().add(BigDecimal.ONE), item.position())
+                ? new ItemRequest(item.id(), item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice().add(BigDecimal.ONE), item.position(), item.productId())
                 : item)
             .collect(Collectors.toSet());
 
@@ -402,6 +402,39 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID copyId = copyRevision(originalId);
 
         assertThat(productNameOfItem(itemNamed(copyId, ONION).id())).contains("Cebula");
+    }
+
+    @Test
+    void userCanSetAndClearProductOfItem() {
+        UUID onionId = createProduct("Cebula", "Cebula");
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+
+        setProductOfItem(copyId, ONION, onionId);
+        assertThat(productNameOfItem(itemNamed(copyId, ONION).id())).contains("Cebula");
+
+        setProductOfItem(copyId, ONION, null);
+        assertThat(productNameOfItem(itemNamed(copyId, ONION).id())).isEmpty();
+    }
+
+    @Test
+    void newItemGetsChosenProductInsteadOfMatchedOne() {
+        UUID onionId = createProduct("Cebula", "Cebula");
+        createProduct("Inny", "Nowa pozycja");
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+        Set<ItemRequest> items = new HashSet<>(itemsOf(copyId));
+        items.add(new ItemRequest(null, "Nowa pozycja", BigDecimal.ONE, BigDecimal.ONE, null, BigDecimal.ONE, 99, onionId));
+
+        receiptFacade.updateRevision(user, copyId, revisionUpdate(items));
+        flush();
+
+        assertThat(productNameOfItem(itemNamed(copyId, "Nowa pozycja").id())).contains("Cebula");
+    }
+
+    @Test
+    void settingUnknownProductIsRejected() {
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+
+        assertError(() -> setProductOfItem(copyId, ONION, UNKNOWN_ID), AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND);
     }
 
     @Test
@@ -489,7 +522,17 @@ class ReceiptFacadeIT extends IntegrationTest {
     private void renameItem(UUID revisionId, String from, String to) {
         Set<ItemRequest> items = itemsOf(revisionId).stream()
             .map(item -> item.name().equals(from)
-                ? new ItemRequest(item.id(), to, item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position())
+                ? new ItemRequest(item.id(), to, item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), item.productId())
+                : item)
+            .collect(Collectors.toSet());
+        receiptFacade.updateRevision(user, revisionId, revisionUpdate(items));
+        flush();
+    }
+
+    private void setProductOfItem(UUID revisionId, String itemName, UUID productId) {
+        Set<ItemRequest> items = itemsOf(revisionId).stream()
+            .map(item -> item.name().equals(itemName)
+                ? new ItemRequest(item.id(), item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), productId)
                 : item)
             .collect(Collectors.toSet());
         receiptFacade.updateRevision(user, revisionId, revisionUpdate(items));
@@ -543,10 +586,11 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     private List<ItemRequest> itemsOf(UUID revisionId) {
         return jdbcTemplate.query(
-            "SELECT id, name, amount, unit_price, discount, total_price, position "
+            "SELECT id, name, amount, unit_price, discount, total_price, position, product_id "
                 + "FROM receipt_item WHERE receipt_revision_id = ? ORDER BY position, id",
             (rs, rowNum) -> new ItemRequest(rs.getObject("id", UUID.class), rs.getString("name"), rs.getBigDecimal("amount"),
-                rs.getBigDecimal("unit_price"), rs.getBigDecimal("discount"), rs.getBigDecimal("total_price"), rs.getInt("position")),
+                rs.getBigDecimal("unit_price"), rs.getBigDecimal("discount"), rs.getBigDecimal("total_price"), rs.getInt("position"),
+                rs.getObject("product_id", UUID.class)),
             revisionId);
     }
 

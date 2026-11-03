@@ -49,7 +49,8 @@ public record GetRevisionResponse(
             receiptItemEntity.getUnitPrice(),
             receiptItemEntity.getDiscount(),
             receiptItemEntity.getTotalPrice(),
-            receiptItemEntity.getPosition()
+            receiptItemEntity.getPosition(),
+            receiptItemEntity.getProductDictId()
         );
     }
 
@@ -60,7 +61,8 @@ public record GetRevisionResponse(
         BigDecimal unitPrice,
         BigDecimal discount,
         BigDecimal totalPrice,
-        Integer position
+        Integer position,
+        UUID productId
     ) {
     }
 }
