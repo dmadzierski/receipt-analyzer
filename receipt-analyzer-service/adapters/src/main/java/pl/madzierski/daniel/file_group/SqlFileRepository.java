@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 interface SqlFileRepository extends JpaRepository<SqlFile, UUID> {
-    @Query("SELECT f FROM SqlFile f JOIN FETCH f.fileGroup g WHERE f.id = :fileId AND g.ownerId = :ownerId")
+    @Query("SELECT f FROM SqlFile f JOIN f.fileGroup g WHERE f.id = :fileId AND g.ownerId = :ownerId")
     Optional<SqlFile> findAccessible(UUID fileId, UUID ownerId);
 }
 @AllArgsConstructor
@@ -20,12 +20,7 @@ class FileRepositoryImpl implements FileRepository {
 
     @Override
     public Optional<File> findAccessible(UUID fileId, UserQuery user) {
-        return fileRepository.findAccessible(fileId, user.getId()).map((SqlFile file) -> file.toFile(file.getFileGroup().toFileGroup()));
-    }
-
-    @Override
-    public File save(File fileEntity) {
-        return fileRepository.save(SqlFile.fromFile(fileEntity, SqlFileGroup.fromFileGroup(fileEntity.getFileGroup()))).toFile(fileEntity.getFileGroup());
+        return fileRepository.findAccessible(fileId, user.getId()).map(SqlFile::toFile);
     }
 
 }

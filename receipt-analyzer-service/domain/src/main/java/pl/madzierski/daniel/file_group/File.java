@@ -11,19 +11,17 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = "fileGroup")
+@EqualsAndHashCode
 class File {
 
     private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
-    private FileGroup fileGroup;
     private String path;
     private String rawData;
     private Integer partNumber;
 
-    public File(FileGroup fileGroup, Integer partNumber) {
-        this.fileGroup = fileGroup;
+    public File(Integer partNumber) {
         this.partNumber = partNumber;
     }
 }

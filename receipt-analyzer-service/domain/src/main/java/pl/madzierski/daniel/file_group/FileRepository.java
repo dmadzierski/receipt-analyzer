@@ -7,6 +7,4 @@ import java.util.UUID;
 
 interface FileRepository {
     Optional<File> findAccessible(UUID fileId, UserQuery user);
-
-    File save(File fileEntity);
 }

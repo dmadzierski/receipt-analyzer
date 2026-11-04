@@ -15,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @AllArgsConstructor
 public class FileFacade {
@@ -42,16 +44,14 @@ public class FileFacade {
             }
         }
         if (fileType == null) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_TYPE_NOT_DETECTED);
-        FileGroup fileGroup = fileGroupRepository.save(new FileGroup(fileType, new ReceiptQuery(receiptId), user.toUserQuery(), true));
-        for (int partNumber = 0; partNumber < files.size(); partNumber++) {
-            File file = new File(fileGroup, partNumber);
-            file = fileRepository.save(file);
-            String path = createPath(user, file.getId(), fileGroup.getId(), fileType.getExtension(), receiptId);
-            file.setPath(path);
-            fileRepository.save(file);
-            saveFile(path, files.get(partNumber));
-        }
-        return fileGroupFactory.toDto(fileGroup);
+        String extension = fileType.getExtension();
+        FileGroup fileGroup = new FileGroup(fileType, new ReceiptQuery(receiptId), user.toUserQuery(), true);
+        fileGroup.addFiles(IntStream.range(0, files.size()).mapToObj(File::new).collect(Collectors.toSet()));
+        FileGroup savedFileGroup = fileGroupRepository.save(fileGroup);
+        savedFileGroup.getFiles().forEach(file -> file.setPath(createPath(user, file.getId(), savedFileGroup.getId(), extension, receiptId)));
+        FileGroup fileGroupWithPaths = fileGroupRepository.save(savedFileGroup);
+        fileGroupWithPaths.getFiles().forEach(file -> saveFile(file.getPath(), files.get(file.getPartNumber())));
+        return fileGroupFactory.toDto(fileGroupWithPaths);
     }
 
     String createPath(AuthenticatedUser user, UUID fileId, UUID fileGroupId, String fileExtension, UUID receiptId) {

@@ -17,30 +17,28 @@ import pl.madzierski.daniel.common.entity.BaseEntity;
 class SqlFile extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_group_id")
+    @JoinColumn(name = "file_group_id", insertable = false, updatable = false)
     private SqlFileGroup fileGroup;
     private String path;
     @Column(name = "raw_data", columnDefinition = "TEXT")
     private String rawData;
     private Integer partNumber;
 
-    static SqlFile fromFile(File file, SqlFileGroup fileGroup) {
+    static SqlFile fromFile(File file) {
         SqlFile sqlFile = new SqlFile();
         sqlFile.id = file.getId();
         sqlFile.path = file.getPath();
         sqlFile.rawData = file.getRawData();
         sqlFile.partNumber = file.getPartNumber();
-        sqlFile.fileGroup = fileGroup;
         return sqlFile;
     }
 
-    File toFile(FileGroup fileGroup) {
+    File toFile() {
         File file = new File();
         file.setId(this.id);
         file.setPath(this.path);
         file.setRawData(this.rawData);
         file.setPartNumber(this.partNumber);
-        file.setFileGroup(fileGroup);
         return file;
     }
 

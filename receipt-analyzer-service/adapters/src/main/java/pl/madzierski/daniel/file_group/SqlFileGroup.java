@@ -30,7 +30,8 @@ class SqlFileGroup extends BaseEntity {
     @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
     @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "fileGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "file_group_id", nullable = false)
     private final Set<SqlFile> files = new HashSet<>();
 
     public static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
@@ -43,8 +44,7 @@ class SqlFileGroup extends BaseEntity {
         sqlFileGroup.setOwnerId(fileGroup.getOwner() != null ? fileGroup.getOwner().getId() : null);
         sqlFileGroup.setReceipt(fileGroup.getReceipt() != null ? new SqlReceiptQuery(fileGroup.getReceipt().getId()) :
             null);
-        sqlFileGroup.addFiles(fileGroup.getFiles().stream().map((File file) -> SqlFile.fromFile(file, sqlFileGroup)).collect(Collectors.toSet()));
-        sqlFileGroup.files.forEach(sqlFile -> sqlFile.setFileGroup(sqlFileGroup));
+        sqlFileGroup.addFiles(fileGroup.getFiles().stream().map(SqlFile::fromFile).collect(Collectors.toSet()));
         return sqlFileGroup;
     }
 
@@ -65,7 +65,7 @@ class SqlFileGroup extends BaseEntity {
         fileGroup.setCreatedDate(this.createdDate);
         fileGroup.setModifiedDate(this.modifiedDate);
         fileGroup.setId(id);
-        fileGroup.addFiles(this.files.stream().map((SqlFile file) -> file.toFile(fileGroup)).collect(Collectors.toSet()));
+        fileGroup.addFiles(this.files.stream().map(SqlFile::toFile).collect(Collectors.toSet()));
         return fileGroup;
     }
 }
