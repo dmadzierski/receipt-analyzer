@@ -7,13 +7,11 @@ import pl.madzierski.daniel.store.SqlStoreQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 import pl.madzierski.daniel.wallet.SqlWalletQuery;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"receiptRevisions", "wallet", "store"})
+@EqualsAndHashCode(callSuper = true, exclude = {"wallet", "store"})
 @Entity
 @Getter
 @Setter
@@ -26,8 +24,6 @@ class SqlReceipt extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id")
     private SqlWalletQuery wallet;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "receipt")
-    private final Set<SqlReceiptRevision> receiptRevisions = new HashSet<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
     private SqlStoreQuery store;

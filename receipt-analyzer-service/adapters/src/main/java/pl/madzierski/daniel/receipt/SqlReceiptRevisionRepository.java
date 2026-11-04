@@ -19,6 +19,8 @@ interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision,
     @Query("SELECT r FROM SqlReceiptRevision r WHERE r.id = :revisionId AND r.receipt.ownerId = :ownerId")
     Optional<SqlReceiptRevision> findAccessible(UUID revisionId, UUID ownerId);
 
+    boolean existsByParentReceiptRevisionId(UUID parentRevisionId);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
         UPDATE SqlReceiptRevision r
@@ -61,6 +63,11 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     public Optional<ReceiptRevision> findAccessible(UUID revisionId, UserQuery user) {
         return repository.findAccessible(revisionId, user.getId())
             .map(SqlReceiptRevision::toReceiptRevision);
+    }
+
+    @Override
+    public boolean hasChildRevisions(UUID revisionId) {
+        return repository.existsByParentReceiptRevisionId(revisionId);
     }
 
     @Override

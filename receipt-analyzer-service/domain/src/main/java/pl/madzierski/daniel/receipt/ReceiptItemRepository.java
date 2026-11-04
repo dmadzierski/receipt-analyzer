@@ -11,11 +11,9 @@ interface ReceiptItemRepository {
 
     void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList);
 
-    void deleteAllByIdIn(List<UUID> ids);
 
     void deleteAllByReceiptId(UUID receiptId);
 
-    List<ReceiptItem> saveAll(List<ReceiptItem> entities, UUID receiptRevisionId);
 
     List<ReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId, UserQuery user);
 

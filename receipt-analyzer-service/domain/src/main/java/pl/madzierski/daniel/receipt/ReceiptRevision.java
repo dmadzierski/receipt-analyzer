@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"items", "receipt", "parentReceiptRevision", "childReceiptRevisions", "sourceFileGroup"})
+@EqualsAndHashCode(exclude = {"items", "receipt", "parentReceiptRevision", "sourceFileGroup"})
 class ReceiptRevision {
     private UUID id;
     private LocalDateTime createdDate;
@@ -29,7 +29,6 @@ class ReceiptRevision {
     private Receipt receipt;
     private ReceiptRevision parentReceiptRevision;
     private Set<ReceiptItem> items = new HashSet<>();
-    private Set<ReceiptRevision> childReceiptRevisions = new HashSet<>();
     private FileGroupQuery sourceFileGroup;
 
     public Set<ReceiptItem> getItems() {

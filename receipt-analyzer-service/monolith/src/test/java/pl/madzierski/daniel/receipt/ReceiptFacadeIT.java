@@ -584,6 +584,32 @@ class ReceiptFacadeIT extends IntegrationTest {
         return copyId;
     }
 
+    @Test
+    void assignsDictionaryProductsToRevisionItemsAndKeepsItemsInRevision() {
+        createProduct("Mleko", "Mleko 3,2% 1l");
+        UUID revisionId = insertRevision(insertReceipt(walletId, storeId, "Receipt"), "USER", "10.00", true, null);
+        UUID milkItemId = insertItem(revisionId, "Mleko 3,2% 1l", null);
+        UUID unknownItemId = insertItem(revisionId, "Zzzz qqq", null);
+        flush();
+
+        receiptFacade.updateProductDictInRevisionItems(user, revisionId);
+        flush();
+
+        assertThat(itemsOf(revisionId)).extracting(ItemRequest::id).containsExactlyInAnyOrder(milkItemId, unknownItemId);
+        assertThat(productNameOfItem(milkItemId)).contains("Mleko");
+        assertThat(productNameOfItem(unknownItemId)).isEmpty();
+    }
+
+    @Test
+    void doesNotAssignDictionaryProductsInSomeoneElsesRevision() {
+        UUID revisionId = insertRevision(insertReceipt(walletId, storeId, "Receipt"), "USER", "10.00", true, null);
+        AuthenticatedUser stranger = new AuthenticatedUser(createUser(STRANGER_SUB));
+        flush();
+
+        assertError(() -> receiptFacade.updateProductDictInRevisionItems(stranger, revisionId),
+            AppRuntimeExceptionMessages.REVISION_NOT_FOUND);
+    }
+
     private List<ItemRequest> itemsOf(UUID revisionId) {
         return jdbcTemplate.query(
             "SELECT id, name, amount, unit_price, discount, total_price, position, product_id "

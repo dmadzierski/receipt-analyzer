@@ -13,6 +13,8 @@ interface ReceiptRevisionRepository {
 
     Optional<ReceiptRevision> findAccessible(UUID revisionId, UserQuery user);
 
+    boolean hasChildRevisions(UUID revisionId);
+
     void deleteById(UUID revisionId);
 
     void deleteAllByReceiptId(UUID receiptId);

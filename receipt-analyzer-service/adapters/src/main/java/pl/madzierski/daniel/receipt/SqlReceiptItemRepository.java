@@ -42,10 +42,6 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, UUID> {
     void updateProduct(SqlProductDictQuery product, Collection<UUID> ids);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("DELETE FROM SqlReceiptItem i WHERE i.id IN :ids")
-    void deleteByIds(Collection<UUID> ids);
-
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
         UPDATE SqlReceiptItem i
         SET i.parentItem = null
@@ -67,7 +63,6 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, UUID> {
 class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
 
     private final SqlReceiptItemRepository receiptItemRepository;
-    private final SqlReceiptRevisionRepository receiptRevisionRepository;
 
     @Override
     public void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList) {
@@ -75,22 +70,9 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     }
 
     @Override
-    public void deleteAllByIdIn(List<UUID> ids) {
-        if (ids.isEmpty()) return;
-        this.receiptItemRepository.deleteByIds(ids);
-    }
-
-    @Override
     public void deleteAllByReceiptId(UUID receiptId) {
         this.receiptItemRepository.detachParentItemsByReceiptId(receiptId);
         this.receiptItemRepository.deleteByReceiptId(receiptId);
-    }
-    @Override
-    public List<ReceiptItem> saveAll(List<ReceiptItem> entities, UUID receiptRevisionId) {
-        SqlReceiptRevision sqlReceiptRevision =
-            this.receiptRevisionRepository.findById(receiptRevisionId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_REVISION_NOT_FOUND));
-        return receiptItemRepository.saveAll(entities.stream().map(item -> SqlReceiptItem.fromReceiptItem(item,
-            sqlReceiptRevision)).collect(Collectors.toSet())).stream().map(SqlReceiptItem::toReceiptItem).toList();
     }
 
     @Override

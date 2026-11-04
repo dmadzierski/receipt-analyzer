@@ -16,7 +16,7 @@ public interface SqlReceiptQueryRepository extends ReceiptQueryRepository, Repos
         SELECT new pl.madzierski.daniel.receipt.projection.WalletReceiptProjection(r.id, r.name, rr.paymentDate, rr.isCorrect, rr.totalPrice, r.createdDate, s.id)
         FROM SqlReceipt r
         LEFT JOIN r.store s
-        LEFT JOIN r.receiptRevisions rr ON rr.isPreferredRevision = true
+        LEFT JOIN SqlReceiptRevision rr ON rr.receipt = r AND rr.isPreferredRevision = true
         WHERE r.wallet.id = :walletId
         """)
     Collection<WalletReceiptProjection> getWalletReceipts(@Param("walletId") UUID walletId);

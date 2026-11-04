@@ -6,8 +6,6 @@ import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "receipt_item")
@@ -15,10 +13,11 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"receiptRevision", "parentItem", "childItems", "product"})
+@EqualsAndHashCode(callSuper = true, exclude = {"receiptRevision", "parentItem", "product"})
 class SqlReceiptItem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receipt_revision_id", insertable = false, updatable = false)
     private SqlReceiptRevision receiptRevision;
     private String name;
     @ManyToOne
@@ -36,9 +35,6 @@ class SqlReceiptItem extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_item_id")
     private SqlReceiptItem parentItem;
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "parentItem")
-    private final Set<SqlReceiptItem> childItems = new HashSet<>();
 
     public static SqlReceiptItem fromReceiptItem(ReceiptItem item) {
         SqlReceiptItem sqlReceiptItem = new SqlReceiptItem();
@@ -53,23 +49,6 @@ class SqlReceiptItem extends BaseEntity {
         if (item.getNameDict() != null) {
             sqlReceiptItem.setProduct(SqlProductDictQuery.fromProductDict(item.getNameDict()));
         }
-        return sqlReceiptItem;
-    }
-
-    public static SqlReceiptItem fromReceiptItem(ReceiptItem item, SqlReceiptRevision receiptRevision) {
-        SqlReceiptItem sqlReceiptItem = new SqlReceiptItem();
-        sqlReceiptItem.setId(item.getId());
-        sqlReceiptItem.setName(item.getName());
-        sqlReceiptItem.setAmount(item.getAmount());
-        sqlReceiptItem.setUnitPrice(item.getUnitPrice());
-        sqlReceiptItem.setDiscount(item.getDiscount());
-        sqlReceiptItem.setTotalPrice(item.getTotalPrice());
-        sqlReceiptItem.setPosition(item.getPosition());
-        sqlReceiptItem.setParentItem(item.getParentItem() != null ?
-            SqlReceiptItem.fromReceiptItem(item.getParentItem(), null) : null);
-        if(item.getNameDict() != null)
-            sqlReceiptItem.setProduct(SqlProductDictQuery.fromProductDict(item.getNameDict()));
-        sqlReceiptItem.setReceiptRevision(receiptRevision);
         return sqlReceiptItem;
     }
 

@@ -183,7 +183,6 @@ public class ReceiptFacade {
                 .distinct()
                 .forEach(productId -> productDictQueryRepository.findNameById(productId)
                     .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND)));
-            receiptItemRepository.deleteAllByIdIn(itemsToRemove);
             itemsToRemove.forEach(revision::removeItem);
             for (UpdateRevisionRequest.ItemRequest incomingItem : updatedRevisionRequest.items()) {
                 if (incomingItem.id() != null) {
@@ -215,7 +214,6 @@ public class ReceiptFacade {
             }
         }
         if (arePricesConsistent(revision)) revision.setIsCorrect(true);
-        // before save: a receipt may have only one preferred revision (ux_receipt_revision_preferred)
         if (Boolean.TRUE.equals(revision.getIsPreferredRevision()) && revision.getReceipt() != null)
             revisionRepository.unsetPreferredInOtherRevisions(revision.getReceipt().getId(), revision.getId());
         revisionRepository.save(revision);
@@ -350,14 +348,14 @@ public class ReceiptFacade {
                     .toList()));
     }
 
+    @Transactional
     void updateProductDictInRevisionItems(AuthenticatedUser user, UUID revisionId) {
-        receiptItemRepository.saveAll(revisionRepository.findAccessible(revisionId, user.toUserQuery())
-            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND))
-            .getItems()
-            .stream()
-            .peek(item -> productDictFacade.findCanonicalName(item.getName(), null)
-                .ifPresent(productDict -> item.setNameDict(new ProductDictQuery(productDict.getId()))))
-            .toList(), revisionId);
+        ReceiptRevision revision = revisionRepository.findAccessibleWithItems(revisionId, user.toUserQuery())
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+        revision.getItems()
+            .forEach(item -> productDictFacade.findCanonicalName(item.getName(), null)
+                .ifPresent(productDict -> item.setNameDict(new ProductDictQuery(productDict.getId()))));
+        revisionRepository.save(revision);
     }
 
     CreateRevisionResponse createRevision(AuthenticatedUser user, UUID receiptId, CreateRevisionRequest body) {
@@ -399,14 +397,11 @@ public class ReceiptFacade {
     }
 
     void deleteRevision(AuthenticatedUser user, UUID revisionId) {
-        if (revisionRepository.findAccessible(revisionId, user.toUserQuery())
-            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND))
-            .getChildReceiptRevisions()
-            .isEmpty()) {
-            revisionRepository.deleteById(revisionId);
-        } else {
+        revisionRepository.findAccessible(revisionId, user.toUserQuery())
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+        if (revisionRepository.hasChildRevisions(revisionId))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS);
-        }
+        revisionRepository.deleteById(revisionId);
     }
 
     @Transactional
