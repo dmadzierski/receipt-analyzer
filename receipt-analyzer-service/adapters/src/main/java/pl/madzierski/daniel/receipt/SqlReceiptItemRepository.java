@@ -5,14 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import pl.madzierski.daniel.exception.AppRuntimeException;
-import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
-import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, UUID> {
 
@@ -23,39 +19,6 @@ interface SqlReceiptItemRepository extends JpaRepository<SqlReceiptItem, UUID> {
         WHERE r.product.id IN (:productDictIdList)
         """)
     void reassignProductDict(SqlProductDictQuery dict, List<UUID> productDictIdList);
-
-    @Query("""
-        SELECT item FROM SqlReceiptItem item INNER JOIN FETCH item.parentItem parentItem 
-        WHERE item.receiptRevision.id = :revisionId AND 
-                item.receiptRevision.resolver = pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND 
-                item.receiptRevision.receipt.ownerId = :ownerId AND
-                item.product IS NULL AND
-                parentItem.product IS NULL""")
-    Set<SqlReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId, UUID ownerId);
-
-    @Modifying
-    @Query("""
-        UPDATE SqlReceiptItem i
-        SET i.product = :product
-        WHERE i.id IN :ids
-        """)
-    void updateProduct(SqlProductDictQuery product, Collection<UUID> ids);
-
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("""
-        UPDATE SqlReceiptItem i
-        SET i.parentItem = null
-        WHERE i.receiptRevision.id IN (SELECT r.id FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId)
-        """)
-    void detachParentItemsByReceiptId(UUID receiptId);
-
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("""
-        DELETE FROM SqlReceiptItem i
-        WHERE i.receiptRevision.id IN (SELECT r.id FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId)
-        """)
-    void deleteByReceiptId(UUID receiptId);
-
 }
 
 @AllArgsConstructor
@@ -67,24 +30,5 @@ class ReceiptItemRepositoryImpl implements ReceiptItemRepository {
     @Override
     public void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList) {
         this.receiptItemRepository.reassignProductDict(SqlProductDictQuery.fromProductDict(dict), productDictIdList);
-    }
-
-    @Override
-    public void deleteAllByReceiptId(UUID receiptId) {
-        this.receiptItemRepository.detachParentItemsByReceiptId(receiptId);
-        this.receiptItemRepository.deleteByReceiptId(receiptId);
-    }
-
-    @Override
-    public List<ReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId, UserQuery user) {
-        return receiptItemRepository.findUnmatchedItemsByReceiptId(revisionId, user.getId())
-            .stream()
-            .map(SqlReceiptItem::toReceiptItem)
-            .toList();
-    }
-
-    @Override
-    public void updateProduct(ProductDictQuery product, Collection<UUID> itemIds) {
-        receiptItemRepository.updateProduct(SqlProductDictQuery.fromProductDict(product), itemIds);
     }
 }

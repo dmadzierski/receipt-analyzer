@@ -43,18 +43,10 @@ class SqlReceipt extends BaseEntity {
         return sqlReceipt;
     }
 
-
-
     public Receipt toReceipt() {
-        Receipt receipt = new Receipt();
-        receipt.setId(id);
-        receipt.setCreatedDate(createdDate);
-        receipt.setModifiedDate(modifiedDate);
-        receipt.setName(name);
-        receipt.setDescription(description);
-        receipt.setWallet(wallet != null ? wallet.toWalletQuery() : null);
-        receipt.setStore(store != null ? store.toStoreQuery() : null);
-        receipt.setOwner(ownerId != null ? new UserQuery(ownerId) : null);
-        return receipt;
+        return Receipt.restore(id, createdDate, modifiedDate, name, description,
+            wallet != null ? wallet.toWalletQuery() : null,
+            store != null ? store.toStoreQuery() : null,
+            ownerId != null ? new UserQuery(ownerId) : null);
     }
 }

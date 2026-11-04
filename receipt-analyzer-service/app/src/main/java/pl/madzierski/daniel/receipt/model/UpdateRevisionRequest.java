@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.receipt.model;
 
+import jakarta.validation.constraints.NotNull;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ public record UpdateRevisionRequest(
     LocalDateTime paymentDate,
     Boolean isPreferredRevision,
     Boolean isCorrect,
+    @NotNull
     Set<ItemRequest> items
 ) {
 

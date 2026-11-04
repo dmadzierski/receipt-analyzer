@@ -1,43 +1,19 @@
 package pl.madzierski.daniel.receipt;
 
-import lombok.RequiredArgsConstructor;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
+import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
-@RequiredArgsConstructor
 class ReceiptRevisionFactory {
 
-    private final ReceiptItemFactory receiptItemFactory;
-
-    ReceiptRevision from(ReceiptRevisionDto receiptRevisionDto) {
-        ReceiptRevision receiptRevision = new ReceiptRevision();
-        receiptRevision.setId(receiptRevisionDto.getId());
-        receiptRevision.setRevision(receiptRevisionDto.getRevision());
-        receiptRevision.setResolver(receiptRevisionDto.getResolver());
-        receiptRevision.setTotalPrice(receiptRevisionDto.getTotalPrice());
-        receiptRevision.setPaymentDate(receiptRevisionDto.getPaymentDate());
-        receiptRevision.setIsPreferredRevision(receiptRevisionDto.getIsPreferredRevision());
-        receiptRevision.setIsCorrect(receiptRevisionDto.getIsCorrect());
-        return receiptRevision;
-    }
-
-    ReceiptRevision from(DigitizedReceipt receiptRevisionDto) {
-        ReceiptRevision receiptRevision = new ReceiptRevision();
-        receiptRevision.setRevision(receiptRevisionDto.revisionVersion());
-        receiptRevision.setResolver(receiptRevisionDto.strategy());
-        receiptRevision.setTotalPrice(receiptRevisionDto.totalPrice());
-        receiptRevision.setPaymentDate(receiptRevisionDto.paymentDate());
-        receiptRevision.setIsPreferredRevision(false);
-        receiptRevision.setIsCorrect(false);
-        if (receiptRevisionDto.items() != null && !receiptRevisionDto.items()
-            .isEmpty()) {
-            receiptRevision.addItems(receiptRevisionDto.items()
-                .stream()
-                .map(receiptItemFactory::from)
-                .collect(Collectors.toSet()));
-        }
-        return receiptRevision;
+    ReceiptRevision from(DigitizedReceipt digitizedReceipt, Receipt receipt, FileGroupQuery sourceFileGroup) {
+        List<ReceiptItem> items = digitizedReceipt.items() == null ? List.of() : digitizedReceipt.items()
+            .stream()
+            .map(item -> ReceiptItem.create(item.name(), null, item.amount(), item.unitPrice(), item.discount(),
+                item.totalPrice(), item.position()))
+            .toList();
+        return ReceiptRevision.createDigitized(digitizedReceipt.revisionVersion(), digitizedReceipt.strategy(),
+            digitizedReceipt.totalPrice(), digitizedReceipt.paymentDate(), items, receipt, sourceFileGroup);
     }
 }

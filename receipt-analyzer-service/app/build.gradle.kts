@@ -2,7 +2,6 @@ dependencies {
     implementation(project(":domain"))
     implementation(libs.pdfbox)
     implementation(libs.tess4j)
-    implementation(libs.commons.text)
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.jakarta.validation.api)

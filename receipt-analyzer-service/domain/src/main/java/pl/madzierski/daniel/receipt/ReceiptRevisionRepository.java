@@ -9,7 +9,7 @@ import java.util.UUID;
 interface ReceiptRevisionRepository {
     ReceiptRevision save(ReceiptRevision revision);
 
-    Optional<ReceiptRevision> findAccessibleWithItems(UUID revisionId, UserQuery user);
+    Optional<ReceiptRevision> findByIdWithItems(UUID revisionId, UserQuery user);
 
     Optional<ReceiptRevision> findAccessible(UUID revisionId, UserQuery user);
 

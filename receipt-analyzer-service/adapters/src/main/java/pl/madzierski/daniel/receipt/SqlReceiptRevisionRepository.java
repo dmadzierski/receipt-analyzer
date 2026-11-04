@@ -22,14 +22,6 @@ interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision,
     boolean existsByParentReceiptRevisionId(UUID parentRevisionId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("""
-        UPDATE SqlReceiptRevision r
-        SET r.parentReceiptRevision = null, r.sourceFileGroup = null
-        WHERE r.receipt.id = :receiptId
-        """)
-    void detachReferencesByReceiptId(UUID receiptId);
-
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId")
     void deleteByReceiptId(UUID receiptId);
 
@@ -54,7 +46,7 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     }
 
     @Override
-    public Optional<ReceiptRevision> findAccessibleWithItems(UUID revisionId, UserQuery user) {
+    public Optional<ReceiptRevision> findByIdWithItems(UUID revisionId, UserQuery user) {
         return repository.findAccessibleWithItems(revisionId, user.getId())
             .map(SqlReceiptRevision::toReceiptRevision);
     }
@@ -77,7 +69,6 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
 
     @Override
     public void deleteAllByReceiptId(UUID receiptId) {
-        repository.detachReferencesByReceiptId(receiptId);
         repository.deleteByReceiptId(receiptId);
     }
 

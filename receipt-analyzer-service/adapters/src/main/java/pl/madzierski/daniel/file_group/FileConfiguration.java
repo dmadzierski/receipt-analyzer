@@ -10,9 +10,10 @@ class FileConfiguration {
     @Bean
     FileFacade fileFacade(final FileRepository fileRepository,
                           final FileGroupQueryRepository fileGroupQueryRepository, final FileGroupRepository fileGroupRepository,
-                          final FileTypeDetector fileTypeDetector, final ReceiptQueryRepository receiptQueryRepository,
+                          final FileTypeDetector fileTypeDetector, final FileStorage fileStorage,
+                          final ReceiptQueryRepository receiptQueryRepository,
                           @Value("${file.upload-dir}") final String uploadDir) {
         return new FileFacade(fileRepository, fileGroupQueryRepository, fileGroupRepository, new FileGroupFactory(new FileFactory()), fileTypeDetector,
-            receiptQueryRepository, uploadDir);
+            fileStorage, receiptQueryRepository, uploadDir);
     }
 }

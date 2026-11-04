@@ -42,8 +42,6 @@ export interface UpdateReceiptResponse {
 
 export interface CreateReceiptResponse {
   id: string
-  name: string
-  description: string
 }
 
 export interface StoreDetails {

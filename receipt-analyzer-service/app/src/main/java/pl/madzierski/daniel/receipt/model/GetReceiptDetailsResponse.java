@@ -8,7 +8,6 @@ import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -27,129 +26,52 @@ public record GetReceiptDetailsResponse(
     StoreDetailsResponse store
 ) {
 
+    public GetReceiptDetailsResponse(ReceiptDto receipt, ReceiptRevisionDto preferredRevision, List<FileGroupDto> fileGroups,
+                                     Collection<ReceiptItemDto> items, Collection<ReceiptRevisionDto> revisions,
+                                     StoreDetailsResponse store) {
+        this(
+            receipt.getId(),
+            receipt.getName(),
+            receipt.getDescription(),
+            receipt.getWallet() != null ? receipt.getWallet().getId() : null,
+            preferredRevision != null ? new PreferredRevisionResponse(preferredRevision, items) : null,
+            revisions.stream()
+                .map(RevisionResponse::new)
+                .collect(Collectors.toSet()),
+            receipt.getCreatedDate(),
+            receipt.getModifiedDate(),
+            fileGroups.stream()
+                .map(FileGroupResponse::new)
+                .toList(),
+            store);
+    }
+
     public record FileGroupResponse(
         UUID id,
         String fileType,
         boolean isOriginal,
         Set<FileResponse> files
     ) {
+        FileGroupResponse(FileGroupDto fileGroup) {
+            this(
+                fileGroup.id(),
+                fileGroup.fileType().name(),
+                fileGroup.isOriginal(),
+                fileGroup.files()
+                    .stream()
+                    .map(FileResponse::new)
+                    .collect(Collectors.toSet()));
+        }
+
         public record FileResponse(
             UUID id,
             String path,
             Integer partNumber
         ) {
-            public static FileResponse fileMapper(FileDto file) {
-                return new FileResponse(
-                    file.getId(),
-                    file.getPath(),
-                    file.getPartNumber()
-                );
+            FileResponse(FileDto file) {
+                this(file.getId(), file.getPath(), file.getPartNumber());
             }
         }
-
-    }
-
-    public static FileGroupResponse fileGroupMapper(FileGroupDto fileGroup) {
-        return new FileGroupResponse(
-            fileGroup.id(),
-            fileGroup.fileType().name(),
-            fileGroup.isOriginal(),
-            fileGroup.files()
-                .stream()
-                .map(FileGroupResponse.FileResponse::fileMapper)
-                .collect(Collectors.toSet())
-        );
-    }
-
-    public static GetReceiptDetailsResponse receiptDetailsMapper(
-        ReceiptDto receiptEntity,
-        ReceiptRevisionDto preferredRevisionEntity,
-        List<FileGroupDto> fileGroups,
-        Collection<ReceiptItemDto> items,
-        Collection<ReceiptRevisionDto> revisions,
-        StoreDetailsResponse store
-    ) {
-        return new GetReceiptDetailsResponse(
-            receiptEntity.getId(),
-            receiptEntity.getName(),
-            receiptEntity.getDescription(),
-            receiptEntity.getWallet() != null ? receiptEntity.getWallet().getId() : null,
-            preferredRevisionMapper(preferredRevisionEntity, items),
-            receiptRevisionMapper(revisions),
-            receiptEntity.getCreatedDate(),
-            receiptEntity.getModifiedDate(),
-            fileGroups.stream()
-                .map(GetReceiptDetailsResponse::fileGroupMapper)
-                .toList(),
-            store
-        );
-    }
-
-    public static PreferredRevisionResponse preferredRevisionMapper(ReceiptRevisionDto revisionEntity, Collection<ReceiptItemDto> items) {
-        if (revisionEntity == null) {
-            return null;
-        }
-
-        Set<ItemResponse> mappedItems = null;
-        if (items != null) {
-            mappedItems = items.stream()
-                .map(GetReceiptDetailsResponse::itemMapper)
-                .collect(Collectors.toSet());
-        }
-
-        return new PreferredRevisionResponse(
-            revisionEntity.getId(),
-            revisionEntity.getResolver(),
-            revisionEntity.getCreatedDate(),
-            revisionEntity.getTotalPrice(),
-            revisionEntity.getPaymentDate(),
-            revisionEntity.getIsPreferredRevision(),
-            revisionEntity.getIsCorrect(),
-            mappedItems
-        );
-    }
-
-    public static ItemResponse itemMapper(ReceiptItemDto receiptItem) {
-        String name = receiptItem.getName();
-        return new ItemResponse(
-            receiptItem.getId(),
-            name,
-            receiptItem.getAmount(),
-            receiptItem.getUnitPrice(),
-            receiptItem.getDiscount(),
-            receiptItem.getTotalPrice(),
-            receiptItem.getPosition(),
-            receiptItem.getProductDictId()
-        );
-    }
-
-    public static Set<RevisionResponse> receiptRevisionMapper(Collection<ReceiptRevisionDto> receiptRevisions) {
-        if (receiptRevisions != null && !receiptRevisions.isEmpty()) {
-            return receiptRevisions.stream()
-                .map(it -> new RevisionResponse(
-                    it.getId(),
-                    it.getResolver(),
-                    it.getCreatedDate(),
-                    it.getTotalPrice(),
-                    it.getPaymentDate(),
-                    it.getIsPreferredRevision(),
-                    it.getIsCorrect()
-                ))
-                .collect(Collectors.toSet());
-        }
-        return Collections.emptySet();
-    }
-
-    public record ItemResponse(
-        UUID id,
-        String name,
-        BigDecimal amount,
-        BigDecimal unitPrice,
-        BigDecimal discount,
-        BigDecimal totalPrice,
-        Integer position,
-        UUID productId
-    ) {
     }
 
     public record PreferredRevisionResponse(
@@ -162,6 +84,19 @@ public record GetReceiptDetailsResponse(
         Boolean isCorrect,
         Set<ItemResponse> items
     ) {
+        PreferredRevisionResponse(ReceiptRevisionDto revision, Collection<ReceiptItemDto> items) {
+            this(
+                revision.getId(),
+                revision.getResolver(),
+                revision.getCreatedDate(),
+                revision.getTotalPrice(),
+                revision.getPaymentDate(),
+                revision.getIsPreferredRevision(),
+                revision.getIsCorrect(),
+                items.stream()
+                    .map(ItemResponse::new)
+                    .collect(Collectors.toSet()));
+        }
     }
 
     public record RevisionResponse(
@@ -173,6 +108,38 @@ public record GetReceiptDetailsResponse(
         Boolean isPreferredRevision,
         Boolean isCorrect
     ) {
+        RevisionResponse(ReceiptRevisionDto revision) {
+            this(
+                revision.getId(),
+                revision.getResolver(),
+                revision.getCreatedDate(),
+                revision.getTotalPrice(),
+                revision.getPaymentDate(),
+                revision.getIsPreferredRevision(),
+                revision.getIsCorrect());
+        }
     }
 
+    public record ItemResponse(
+        UUID id,
+        String name,
+        BigDecimal amount,
+        BigDecimal unitPrice,
+        BigDecimal discount,
+        BigDecimal totalPrice,
+        Integer position,
+        UUID productId
+    ) {
+        ItemResponse(ReceiptItemDto item) {
+            this(
+                item.getId(),
+                item.getName(),
+                item.getAmount(),
+                item.getUnitPrice(),
+                item.getDiscount(),
+                item.getTotalPrice(),
+                item.getPosition(),
+                item.getProductDictId());
+        }
+    }
 }

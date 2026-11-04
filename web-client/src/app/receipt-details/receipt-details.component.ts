@@ -30,6 +30,7 @@ import {PdfViewerComponent} from '../component/pdf-viewer/pdf-viewer.component';
 import {RevisionListComponent} from '../component/revision-list/revision-list.component';
 import {MatIcon} from '@angular/material/icon';
 import {RevisionService} from '../service/revision.service';
+import {UpdateRevisionResponse} from '../model/revision.model';
 import {FileGroupService} from '../service/file-group.service';
 import {debounceTime, distinctUntilChanged, map, Observable, of, Subject, switchMap} from 'rxjs';
 import {FileGroupSelectorComponent} from '../component/file-group-selector/file-group-selector.component';
@@ -224,9 +225,9 @@ export class ReceiptDetailsComponent implements OnInit {
   protected saveRevision() {
     this.revisionService.updateRevision(this.receiptDetails.preferredRevision!!).subscribe(
       {
-        next: (revision: RevisionDetails) => {
+        next: (response: UpdateRevisionResponse) => {
           this.editMode = false;
-          this.refreshRevisionDetails(revision.id);
+          this.refreshRevisionDetails(response.id);
           this.refreshRevisions();
         }
       }

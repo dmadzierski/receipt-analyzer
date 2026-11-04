@@ -29,12 +29,12 @@ class ReceiptConfiguration {
         ProductDictQueryRepository productDictQueryRepository,
         WalletQueryRepository walletQueryRepository
     ) {
-        ReceiptItemFactory receiptItemFactory = new ReceiptItemFactory(productDictFacade);
         return new ReceiptFacade(
             receiptItemRepository,
             receiptItemQueryRepository,
             revisionRepository,
-            new ReceiptRevisionFactory(receiptItemFactory),
+            new ReceiptFactory(),
+            new ReceiptRevisionFactory(),
             receiptRepository,
             fileFacade,
             digitizationFacade,

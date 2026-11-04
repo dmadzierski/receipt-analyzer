@@ -7,6 +7,4 @@ import java.util.UUID;
 
 public interface ReceiptItemQueryRepository {
     List<ReceiptItemDto> findReceiptItemsByRevisionId(UUID revisionId);
-
-    List<ReceiptItemDto> findAllMissingAliasesInRevision(UUID revisionId);
 }

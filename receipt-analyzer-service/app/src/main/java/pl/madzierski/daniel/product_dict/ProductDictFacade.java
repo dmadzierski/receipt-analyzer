@@ -1,30 +1,27 @@
 package pl.madzierski.daniel.product_dict;
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.product_dict.model.*;
-import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
 import pl.madzierski.daniel.receipt.ReceiptFacade;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class ProductDictFacade {
 
     private final ProductDictRepository productDictRepository;
     private final ProductDictQueryRepository productDictQueryRepository;
-    private final ProductDictFactory productDictFactory;
     private final ProductAliasRepository productAliasRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ReceiptFacade receiptFacade;
-    private final Double minRequiredStringSimilarity;
+    private final ProductMatcher productMatcher;
 
     GetProductDictListResponse getProductDictList() {
-        Set<ProductDictWithAliasesAndCategoryProjection> allWithCategoryAndAliases = productDictQueryRepository.findAllWithCategoryAndAliases();
-        return new GetProductDictListResponse(allWithCategoryAndAliases.stream().map(productDict -> new GetProductDictListResponse.ProductDict(productDict.getId(), productDict.getName(), productDict.getCategories().stream().map(category -> new GetProductDictListResponse.ProductDict.ProductCategory(category.getId(), category.getName())).toList(), productDict.getAliases().stream().map(alias -> new GetProductDictListResponse.ProductDict.Alias(alias.getId(), alias.getName())).toList())).toList());
+        return new GetProductDictListResponse(productDictQueryRepository.findAllWithCategoryAndAliases());
     }
 
     @Transactional
@@ -33,15 +30,12 @@ public class ProductDictFacade {
             List<UUID> dictIds = item.productDictList();
             UUID primaryId = dictIds.getFirst();
             List<UUID> sourceIds = dictIds.subList(1, dictIds.size());
-
             ProductDict product = productDictRepository.findById(primaryId)
                 .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
-
             String canonicalName = item.canonicalName().trim();
             updateAliases(product, canonicalName, item.aliasIds());
             product.setProductCategories(loadCategories(item.productCategoryIds()));
             productDictRepository.save(product);
-
             mergeProducts(primaryId, sourceIds);
         });
     }
@@ -57,7 +51,6 @@ public class ProductDictFacade {
                 .findFirst()
                 .orElseGet(() -> ProductAlias.builder().name(name).build()));
         }
-
         product.setAliases(chosen);
         product.setName(name);
     }
@@ -77,30 +70,49 @@ public class ProductDictFacade {
         return found;
     }
 
-    public Optional<ProductDto> findCanonicalName(String alias, String userTranslation) {
-        List<ProductDto> productDtoList = productDictQueryRepository.findAllProducts();
-        Optional<ProductDto> exactMatch = productDtoList.stream().filter(productDto -> productDto.getAliases().stream().anyMatch(productAliasDto -> productAliasDto.getName().equalsIgnoreCase(alias) || productAliasDto.getName().equalsIgnoreCase(userTranslation))).findAny();
-        if (exactMatch.isPresent()) return exactMatch;
-        String normalizedSearchAlias = alias.trim().toUpperCase();
-        int searchLength = normalizedSearchAlias.length();
-        return productDtoList.parallelStream().flatMap(productDto -> productDto.getAliases().stream().map(aliasDto -> {
-            String normalizedKnownAlias = aliasDto.getName().trim().toUpperCase();
-            int knownLength = normalizedKnownAlias.length();
-            int maxLength = Math.max(searchLength, knownLength);
-            if (maxLength == 0) return Map.entry(productDto, 1.0);
-            int maxAllowedDifference = (int) Math.ceil(maxLength * (1.0 - minRequiredStringSimilarity));
-            double distance = new LevenshteinDistance(maxAllowedDifference).apply(normalizedSearchAlias, normalizedKnownAlias);
-            if (distance == -1) {
-                return Map.entry(productDto, 0.0);
-            }
-            double similarityScore = (maxLength - distance) / maxLength;
-            return Map.entry(productDto, similarityScore);
-        })).filter(entry -> entry.getValue() >= minRequiredStringSimilarity).max(Map.Entry.comparingByValue()).map(Map.Entry::getKey);
+    public Map<String, ProductDictQuery> findCanonicalNames(Set<String> aliases) {
+        if (aliases.isEmpty()) return Map.of();
+        List<ProductDict> products = productDictRepository.findAll();
+        Map<String, ProductDictQuery> productsByAlias = new HashMap<>();
+        aliases.stream()
+            .filter(Objects::nonNull)
+            .forEach(alias -> productMatcher.match(products, alias, null)
+                .ifPresent(product -> productsByAlias.put(alias, new ProductDictQuery(product.getId()))));
+        return productsByAlias;
     }
 
-    public List<ProductDto> saveAll(Set<ProductDto> productDictEntities) {
-        return productDictRepository.saveAll(productDictEntities.stream().map(productDictFactory::from).toList())
-                .stream().map(product -> ProductDto.builder().id(product.getId()).name(product.getName()).build()).toList();
+    @Transactional
+    public Map<AliasToLearn, ProductDictQuery> learnAliases(Collection<AliasToLearn> aliasesToLearn) {
+        List<ProductDict> products = new ArrayList<>(productDictRepository.findAll());
+        Map<AliasToLearn, ProductDict> productsByAlias = new HashMap<>();
+        aliasesToLearn.forEach(aliasToLearn -> {
+            ProductDict product;
+            if (aliasToLearn.productId() != null) product = productById(products, aliasToLearn.productId());
+            else product = productMatcher.match(products, aliasToLearn.alias(), aliasToLearn.productName())
+                .orElseGet(() -> {
+                    ProductDict created = ProductDict.create(aliasToLearn.productName());
+                    products.add(created);
+                    return created;
+                });
+            product.addAliasIfMissing(aliasToLearn.alias());
+            productsByAlias.put(aliasToLearn, product);
+        });
+        Map<String, UUID> savedIdsByName = productsByAlias.values()
+            .stream()
+            .distinct()
+            .map(productDictRepository::save)
+            .collect(Collectors.toMap(ProductDict::getName, ProductDict::getId));
+        return productsByAlias.entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey,
+                entry -> new ProductDictQuery(savedIdsByName.get(entry.getValue().getName()))));
+    }
+
+    private ProductDict productById(Collection<ProductDict> products, UUID productId) {
+        return products.stream()
+            .filter(product -> productId.equals(product.getId()))
+            .findFirst()
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
     }
 
     GetProductCategoryListResponse getProductCategoryList() {

@@ -14,13 +14,17 @@ Two apps live in this repo:
 
 Backend (run from `receipt-analyzer-service/`):
 ```bash
-./gradlew build                      # compile all modules
+./gradlew build                      # compile all modules and run all tests
 ./gradlew :monolith:bootJar          # build the runnable jar (what the Dockerfile does)
 ./gradlew :monolith:bootRun          # run locally (needs the env vars below)
+./gradlew test                       # all tests (what Jenkins runs)
+./gradlew :domain:test               # domain unit tests, no Spring or Docker
 ./gradlew :monolith:test              # integration tests, need Docker running (Testcontainers)
 ./gradlew :monolith:test --tests '*ReceiptFacadeIT'          # single test class
 ```
-Tests live in `monolith/src/test` (the only module with the Spring Boot application class). They are integration tests: `IntegrationTest` starts one `postgres:17` container with Testcontainers for the whole run (`@ServiceConnection` wires the datasource) and Flyway migrates it from scratch, so Docker must be running. Each test runs in a rolled-back transaction, uploads go to `monolith/build/test-uploads`, and Keycloak is never contacted. Call `flush()` before checking Hibernate changes with plain SQL. Receipt fixtures are in `monolith/src/test/resources/receipts`.
+Domain unit tests live in `domain/src/test` (JUnit 5 + AssertJ), in the same package as the class under test because domain classes are package-private. They cover the behaviour of domain objects (e.g. `ReceiptRevision`, `ReceiptItem`) without Spring or a database. Unit test classes end with `UT` (e.g. `ReceiptRevisionUT`), integration test classes with `IT`.
+
+Integration tests live in `monolith/src/test` (the only module with the Spring Boot application class): `IntegrationTest` starts one `postgres:17` container with Testcontainers for the whole run (`@ServiceConnection` wires the datasource) and Flyway migrates it from scratch, so Docker must be running. Each test runs in a rolled-back transaction, uploads go to `monolith/build/test-uploads`, and Keycloak is never contacted. Call `flush()` before checking Hibernate changes with plain SQL. Receipt fixtures are in `monolith/src/test/resources/receipts`.
 
 Frontend (run from `web-client/`):
 ```bash
@@ -41,7 +45,7 @@ The browser talks only to Nginx (`nginx.conf`): `/auth/` goes to Keycloak and `/
 ## Backend architecture (hexagonal + CQRS)
 
 Gradle modules and their dependency direction:
-- `domain`: domain entities (`Receipt`, `ReceiptRevision`, `Wallet`, `ProductDict`, …) and **write-side** repository ports (`WalletRepository`, …). Depends only on Lombok. Entities and ports are mostly package-private.
+- `domain`: domain entities (`Receipt`, `ReceiptRevision`, `Wallet`, `ProductDict`, …) and **write-side** repository ports (`WalletRepository`, …). Depends only on Lombok and framework-free libraries (e.g. `commons-text` for Levenshtein in `ProductMatcher`), never on Spring or JPA. Entities and ports are mostly package-private.
 - `app`: use cases. Each feature exposes a `*Facade`, plus **read-side** ports (`*QueryRepository`), factories and DTOs/requests/responses under `model/`. No Spring annotations: facades are plain classes.
 - `adapters`: Spring web/JPA/security. REST controllers, JPA entities (`Sql*`), repository implementations, and the `*Configuration` classes that wire facades as `@Bean`s by hand.
 - `monolith`: only `ReceiptAnalyzerServiceApplication` (the Spring Boot entry point), which depends on `adapters`.
@@ -52,11 +56,14 @@ Conventions that span modules:
 - **Read side:** an app port such as `WalletQueryRepository` is implemented directly by a Spring Data interface (`SqlWalletQueryRepository extends WalletQueryRepository, Repository<…>`) whose JPQL `@Query` methods project straight into DTOs with `SELECT new …Dto(...)`. Changing a query DTO's constructor means updating these JPQL strings.
 - `Sql*Query` entities are lightweight read/reference mappings; `*Query` domain models (e.g. `UserQuery`, `FileGroupQuery`) are id references to other aggregates.
 - Every JPA entity extends `common.entity.BaseEntity` (adapters), which holds `id` (`@UuidGenerator`), `createdDate` and `modifiedDate` (Spring Data auditing). Subclasses use `@EqualsAndHashCode(callSuper = true)` so the id stays part of equality, and set the inherited fields with setters, since Lombok constructors and builders only cover a class's own fields.
-- Errors: throw `AppRuntimeException` with a constant from `AppRuntimeExceptionMessages`. `GlobalExceptionController` turns it into the HTTP response.
+- **State changes go through aggregates:** load the aggregate (e.g. `findByIdWithItems`), call a domain method, save it. Read-side queries may decide which aggregate to load, but never modify data. Bulk JPQL updates are only for mass operations across many aggregates that break no domain rule (e.g. `reassignProductDict` when merging products).
+- **Commands return ids, queries return data.** Facade methods that change state (create, update, copy) return a response with only the id (e.g. `CreateReceiptResponse(id)`, `UpdateRevisionResponse(id)`); the client fetches fresh data through a query endpoint. Response records build themselves from read-side DTOs through constructors, and each response keeps its own nested records.
+- **Factory vs mapper (app):** a `*Factory` creates a new domain object that will get its own identity and be saved (`ReceiptFactory.from(request, user)` calls `Receipt.create`), and may combine several inputs or hold creation logic. A `*Mapper` (static methods, next to the facade in the feature package) only reshapes data one to one without logic, e.g. a request into a domain value object (`ReceiptMapper.toItemChange` builds a `ReceiptItemChange`); the aggregate decides what the data means. JPA mapping stays in `SqlX.fromX(...)` / `toX()`.
+- Errors: throw `AppRuntimeException` with a constant from `AppRuntimeExceptionMessages`. `GlobalExceptionController` turns it into the HTTP response. Domain classes cannot see it (it lives in `app` and uses Spring's `HttpStatus`), so a broken domain rule that the facade should have prevented throws `AppIllegalStateException` with a constant from `AppIllegalStateExceptionMessages` (domain, codes only); it is logged as an error and returned as 409 Conflict.
 - **Ownership (IDOR):** controllers take an `AuthenticatedUser user` parameter (app record holding `app_user.id`, resolved from the JWT `sub` by `security.AuthenticatedUserArgumentResolver` with a Caffeine cache) and pass it to the facade, which maps it to the domain `UserQuery` with `toUserQuery()` for ports and owner fields. Naming: in requests (controllers, facades, ports) it is `user`, because it is only the requester until the query proves ownership; in domain models and JPA entities the field is `owner` (`Receipt`/`FileGroup`: column `owner_id`, `Wallet`: column `user_id`). Ownership is part of the query (`findAccessible(id, user)`, `... AND r.ownerId = :ownerId`), never a separate check, and someone else's resource throws the same `*_NOT_FOUND` as a missing one. Children (revisions, items, files) are checked through their root.
 - Circular facade dependencies are resolved with `@Lazy` in the configuration (e.g. `ProductDictFacade` in `ReceiptConfiguration`).
 
-Features: `receipt`, `digitization` (reading data from receipt files, see below), `wallet`, `file_group` (uploaded files grouped per receipt, type detection via Tika), `product_dict` (product dictionary, aliases and categories; fuzzy matching threshold `product-dict.min-required-similarity`), `store`, `user`.
+Features: `receipt`, `digitization` (reading data from receipt files, see below), `wallet`, `file_group` (uploaded files grouped per receipt, type detection via Tika), `product_dict` (product dictionary, aliases and categories; alias matching lives in the domain `ProductMatcher`, fuzzy matching threshold `product-dict.min-required-similarity`), `store`, `user`.
 
 ### Receipts, revisions and resolvers
 
@@ -74,7 +81,7 @@ Reading data from receipt files is a separate `digitization` feature (`app/.../d
 
 ## Deployment
 
-`dockhand/` contains the production compose file, nginx config, realm export and a `Jenkinsfile`. Jenkins first runs the integration tests (`Test` stage, `gradle:9.3.0-jdk21` image with the Docker socket mounted for Testcontainers; a failing test stops the pipeline), then builds the backend image and pushes it to a private registry as `receipt-analyzer-service:0.0.<build>` and `:latest`. The backend Dockerfile builds `:monolith:bootJar -x test` and installs `tesseract-ocr` in the runtime image.
+`dockhand/` contains the production compose file, nginx config, realm export and a `Jenkinsfile`. Jenkins first runs all tests with `gradle test`, i.e. domain unit tests and integration tests (`Test` stage, `gradle:9.3.0-jdk21` image with the Docker socket mounted for Testcontainers; a failing test stops the pipeline), then builds the backend image and pushes it to a private registry as `receipt-analyzer-service:0.0.<build>` and `:latest`. The backend Dockerfile builds `:monolith:bootJar -x test` and installs `tesseract-ocr` in the runtime image.
 
 ## Commits
 

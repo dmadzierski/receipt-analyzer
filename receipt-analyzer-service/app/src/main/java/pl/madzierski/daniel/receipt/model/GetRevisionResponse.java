@@ -20,16 +20,8 @@ public record GetRevisionResponse(
     Set<ItemResponse> items
 ) {
 
-    public static GetRevisionResponse revisionMapper(ReceiptRevisionDto revision, Collection<ReceiptItemDto> items) {
-        if (revision == null) {
-            return null;
-        }
-
-        Set<ItemResponse> mappedItems = items.stream()
-            .map(GetRevisionResponse::itemMapper)
-            .collect(Collectors.toSet());
-
-        return new GetRevisionResponse(
+    public GetRevisionResponse(ReceiptRevisionDto revision, Collection<ReceiptItemDto> items) {
+        this(
             revision.getId(),
             revision.getResolver(),
             revision.getCreatedDate(),
@@ -37,21 +29,9 @@ public record GetRevisionResponse(
             revision.getPaymentDate(),
             revision.getIsPreferredRevision(),
             revision.getIsCorrect(),
-            mappedItems
-        );
-    }
-
-    public static ItemResponse itemMapper(ReceiptItemDto receiptItemEntity) {
-        return new ItemResponse(
-            receiptItemEntity.getId(),
-            receiptItemEntity.getName(),
-            receiptItemEntity.getAmount(),
-            receiptItemEntity.getUnitPrice(),
-            receiptItemEntity.getDiscount(),
-            receiptItemEntity.getTotalPrice(),
-            receiptItemEntity.getPosition(),
-            receiptItemEntity.getProductDictId()
-        );
+            items.stream()
+                .map(ItemResponse::new)
+                .collect(Collectors.toSet()));
     }
 
     public record ItemResponse(
@@ -64,5 +44,16 @@ public record GetRevisionResponse(
         Integer position,
         UUID productId
     ) {
+        ItemResponse(ReceiptItemDto item) {
+            this(
+                item.getId(),
+                item.getName(),
+                item.getAmount(),
+                item.getUnitPrice(),
+                item.getDiscount(),
+                item.getTotalPrice(),
+                item.getPosition(),
+                item.getProductDictId());
+        }
     }
 }

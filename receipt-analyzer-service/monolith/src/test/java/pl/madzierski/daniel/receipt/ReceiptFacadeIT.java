@@ -253,7 +253,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID copyId = copyRevision(originalId);
         renameItem(copyId, ONION, "Cebula");
 
-        receiptFacade.updateAliasesByUserRevision(user, copyId);
+        receiptFacade.learnProductsFromCorrections(user, copyId);
         flush();
 
         assertThat(aliasesOf("Cebula")).containsExactlyInAnyOrder("Cebula", ONION);
@@ -268,7 +268,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID copyId = copyRevision(originalId);
         renameItem(copyId, ONION, "Cebula");
 
-        receiptFacade.updateAliasesByUserRevision(user, copyId);
+        receiptFacade.learnProductsFromCorrections(user, copyId);
         flush();
 
         assertThat(count("SELECT count(*) FROM product WHERE name = 'Cebula'")).isEqualTo(1);
@@ -278,13 +278,62 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
+    void productChosenByUserLearnsOriginalNameAsAliasAndIsAssignedToOriginalItem() {
+        UUID chosenId = createProduct("Kapusta", "Kapusta");
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        setProductOfItem(copyId, ONION, chosenId);
+
+        receiptFacade.learnProductsFromCorrections(user, copyId);
+        flush();
+
+        assertThat(aliasesOf("Kapusta")).containsExactlyInAnyOrder("Kapusta", ONION);
+        assertThat(productIdsOfItemsNamed(originalId, ONION)).containsExactly(chosenId);
+        assertThat(productIdsOfItemsNamed(copyId, ONION)).containsExactly(chosenId);
+        assertThat(count("SELECT count(*) FROM product_alias WHERE name = ?", ONION)).isEqualTo(1);
+    }
+
+    @Test
+    void learnedProductIsAssignedToItemsOfBothRevisions() {
+        UUID onionId = createProduct("Cebula", "Cebula");
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        renameItem(copyId, ONION, "Cebula");
+
+        receiptFacade.learnProductsFromCorrections(user, copyId);
+        flush();
+
+        assertThat(productIdsOfItemsNamed(originalId, ONION)).containsExactly(onionId);
+        assertThat(productIdsOfItemsNamed(copyId, "Cebula")).containsExactly(onionId);
+    }
+
+    @Test
+    void learningAliasKeepsCategoriesAndAliasesOfExistingProduct() {
+        UUID onionId = createProduct("Cebula", "Cebula", "Cebula czerwona");
+        UUID categoryId = jdbcTemplate.queryForObject(
+            "INSERT INTO product_category (id, created_date, name) VALUES (gen_random_uuid(), now(), 'Warzywa') RETURNING id",
+            UUID.class);
+        jdbcTemplate.update("INSERT INTO product_category_mapping (category_id, product_id) VALUES (?, ?)", categoryId, onionId);
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        renameItem(copyId, ONION, "Cebula");
+
+        receiptFacade.learnProductsFromCorrections(user, copyId);
+        flush();
+
+        assertThat(aliasesOf("Cebula")).containsExactlyInAnyOrder("Cebula", "Cebula czerwona", ONION);
+        assertThat(jdbcTemplate.queryForList("SELECT category_id FROM product_category_mapping WHERE product_id = ?",
+            UUID.class, onionId)).containsExactly(categoryId);
+    }
+
+    @Test
     void repeatedItemCorrectedToExistingProductAddsAliasOnce() {
         UUID chickenId = createProduct("Kurczak", "Kurczak");
         UUID originalId = revisionIdOf(createReceiptFromJson());
         UUID copyId = copyRevision(originalId);
         renameItem(copyId, CHICKEN, "Kurczak");
 
-        receiptFacade.updateAliasesByUserRevision(user, copyId);
+        receiptFacade.learnProductsFromCorrections(user, copyId);
         flush();
 
         assertThat(aliasesOf("Kurczak")).containsExactlyInAnyOrder("Kurczak", CHICKEN);
@@ -298,12 +347,12 @@ class ReceiptFacadeIT extends IntegrationTest {
     void dictionaryLearnedFromOneReceiptIsUsedForNextOne() {
         UUID firstCopyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         renameItem(firstCopyId, ONION, "Cebula");
-        receiptFacade.updateAliasesByUserRevision(user, firstCopyId);
+        receiptFacade.learnProductsFromCorrections(user, firstCopyId);
         flush();
 
         UUID secondRevisionId = revisionIdOf(createReceiptFromJson());
         UUID secondCopyId = copyRevision(secondRevisionId);
-        receiptFacade.updateAliasesByUserRevision(user, secondCopyId);
+        receiptFacade.learnProductsFromCorrections(user, secondCopyId);
         flush();
 
         assertThat(count("SELECT count(*) FROM product")).isEqualTo(35);
@@ -315,10 +364,10 @@ class ReceiptFacadeIT extends IntegrationTest {
     void itemsWithSameNameShareOneProductAndRepeatedUpdateDoesNotDuplicateIt() {
         UUID originalId = revisionIdOf(createReceiptFromJson());
         UUID copyId = copyRevision(originalId);
-        receiptFacade.updateAliasesByUserRevision(user, copyId);
+        receiptFacade.learnProductsFromCorrections(user, copyId);
         flush();
 
-        receiptFacade.updateAliasesByUserRevision(user, copyId);
+        receiptFacade.learnProductsFromCorrections(user, copyId);
         flush();
 
         assertThat(count("SELECT count(*) FROM product")).isEqualTo(35);
@@ -332,13 +381,61 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
+    void differentItemsCorrectedToSameTextShareOneNewProduct() {
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        renameItem(copyId, ONION, "Warzywa");
+        renameItem(copyId, CHICKEN, "Warzywa");
+
+        receiptFacade.learnProductsFromCorrections(user, copyId);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM product WHERE name = 'Warzywa'")).isEqualTo(1);
+        assertThat(aliasesOf("Warzywa")).containsExactlyInAnyOrder("Warzywa", ONION, CHICKEN);
+        assertThat(productIdsOfItemsNamed(originalId, ONION)).isEqualTo(productIdsOfItemsNamed(originalId, CHICKEN));
+    }
+
+    @Test
+    void correctionsDifferingOnlyInLetterCaseShareOneNewProduct() {
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        renameItem(copyId, ONION, "Cebula");
+        renameItem(copyId, CHICKEN, "cebula");
+
+        receiptFacade.learnProductsFromCorrections(user, copyId);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM product WHERE LOWER(name) = 'cebula'")).isEqualTo(1);
+        Set<UUID> onionProductIds = productIdsOfItemsNamed(originalId, ONION);
+        assertThat(onionProductIds).hasSize(1).isEqualTo(productIdsOfItemsNamed(originalId, CHICKEN));
+        Set<String> aliases = aliasesOfProduct(onionProductIds.iterator().next());
+        assertThat(aliases).contains(ONION, CHICKEN);
+        assertThat(aliases).filteredOn(alias -> alias.equalsIgnoreCase("cebula")).hasSize(1);
+    }
+
+    @Test
+    void aliasDifferingOnlyInLetterCaseIsNotAddedToExistingProduct() {
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        String lowerCaseOnion = ONION.toLowerCase();
+        UUID onionId = createProduct("Cebula", lowerCaseOnion);
+        renameItem(copyId, ONION, "Cebula");
+
+        receiptFacade.learnProductsFromCorrections(user, copyId);
+        flush();
+
+        assertThat(aliasesOf("Cebula")).containsExactly(lowerCaseOnion);
+        assertThat(productIdsOfItemsNamed(originalId, ONION)).containsExactly(onionId);
+    }
+
+    @Test
     void markingRevisionAsPreferredUnmarksOtherRevisionsOfReceipt() {
         UUID originalId = revisionIdOf(createReceiptFromJson());
         UUID copyId = copyRevision(originalId);
-        receiptFacade.updateRevision(user, originalId, preferredUpdate());
+        receiptFacade.updateRevision(user, originalId, preferredUpdate(originalId));
         flush();
 
-        receiptFacade.updateRevision(user, copyId, preferredUpdate());
+        receiptFacade.updateRevision(user, copyId, preferredUpdate(copyId));
         flush();
 
         assertThat(isPreferred(originalId)).isFalse();
@@ -459,6 +556,13 @@ class ReceiptFacadeIT extends IntegrationTest {
         assertError(() -> receiptFacade.rewriteProductNameToItems(user, originalId), AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
     }
 
+    @Test
+    void updatingAliasesIsRejectedForResolverRevision() {
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+
+        assertError(() -> receiptFacade.learnProductsFromCorrections(user, originalId), AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
+    }
+
     static Stream<Named<FacadeCall>> revisionCalls() {
         return Stream.of(
             Named.of("createRevisionCopy", (facade, user, id) -> facade.createRevisionCopy(user, id)),
@@ -490,12 +594,12 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void updatingAliasesOfOtherUsersRevisionChangesNothing() {
+    void updatingAliasesOfOtherUsersRevisionIsRejectedAndChangesNothing() {
         UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         renameItem(copyId, ONION, "Cebula");
         AuthenticatedUser stranger = new AuthenticatedUser(createUser(STRANGER_SUB));
 
-        receiptFacade.updateAliasesByUserRevision(stranger, copyId);
+        assertError(() -> receiptFacade.learnProductsFromCorrections(stranger, copyId), AppRuntimeExceptionMessages.REVISION_NOT_FOUND);
         flush();
 
         assertThat(count("SELECT count(*) FROM product")).isZero();
@@ -509,6 +613,18 @@ class ReceiptFacadeIT extends IntegrationTest {
 
         assertError(() -> receiptFacade.createRevision(user, receiptId, new CreateRevisionRequest(fileGroupId, null)),
             AppRuntimeExceptionMessages.STRATEGY_NOT_FOUND);
+    }
+
+    @Test
+    void updatingAliasesIsRejectedForUserRevisionWithoutParent() {
+        UUID receiptId = createReceiptFromJson();
+        UUID fileGroupId = jdbcTemplate.queryForObject("SELECT id FROM receipt_file_group WHERE receipt_id = ?", UUID.class, receiptId);
+        UUID userRevisionId = receiptFacade.createRevision(user, receiptId,
+            new CreateRevisionRequest(fileGroupId, ReceiptResolverStrategyType.USER)).revisionId();
+        flush();
+
+        assertError(() -> receiptFacade.learnProductsFromCorrections(user, userRevisionId),
+            AppRuntimeExceptionMessages.REVISION_WITHOUT_PARENT);
     }
 
     @Test
@@ -539,8 +655,8 @@ class ReceiptFacadeIT extends IntegrationTest {
         flush();
     }
 
-    private static UpdateRevisionRequest preferredUpdate() {
-        return new UpdateRevisionRequest(null, null, null, null, null, true, null, null);
+    private UpdateRevisionRequest preferredUpdate(UUID revisionId) {
+        return new UpdateRevisionRequest(null, null, null, null, null, true, null, Set.copyOf(itemsOf(revisionId)));
     }
 
     private boolean isPreferred(UUID revisionId) {
@@ -608,6 +724,17 @@ class ReceiptFacadeIT extends IntegrationTest {
 
         assertError(() -> receiptFacade.updateProductDictInRevisionItems(stranger, revisionId),
             AppRuntimeExceptionMessages.REVISION_NOT_FOUND);
+    }
+
+    private Set<UUID> productIdsOfItemsNamed(UUID revisionId, String name) {
+        return itemsOf(revisionId).stream()
+            .filter(item -> item.name().equals(name))
+            .map(item -> jdbcTemplate.queryForObject("SELECT product_id FROM receipt_item WHERE id = ?", UUID.class, item.id()))
+            .collect(Collectors.toSet());
+    }
+
+    private Set<String> aliasesOfProduct(UUID productId) {
+        return Set.copyOf(jdbcTemplate.queryForList("SELECT name FROM product_alias WHERE product_id = ?", String.class, productId));
     }
 
     private List<ItemRequest> itemsOf(UUID revisionId) {

@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.receipt;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,13 +31,13 @@ class ReceiptRevisionController {
     }
 
     @PutMapping(path = "/{revisionId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<UpdateRevisionResponse> updateRevision(AuthenticatedUser user, @PathVariable UUID revisionId, @RequestBody UpdateRevisionRequest revision) {
+    ResponseEntity<UpdateRevisionResponse> updateRevision(AuthenticatedUser user, @PathVariable UUID revisionId, @RequestBody @Valid UpdateRevisionRequest revision) {
         return ResponseEntity.ok(receiptFacade.updateRevision(user, revisionId, revision));
     }
 
     @PostMapping(path = "/{revisionId}/aliases")
-    void updateAliasesByUserRevision(AuthenticatedUser user, @PathVariable UUID revisionId) {
-        receiptFacade.updateAliasesByUserRevision(user, revisionId);
+    void learnProductsFromCorrections(AuthenticatedUser user, @PathVariable UUID revisionId) {
+        receiptFacade.learnProductsFromCorrections(user, revisionId);
     }
 
     @PostMapping(path = "/{revisionId}/update-product-dict")

@@ -5,10 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.product_dict.model.ProductDto;
-import pl.madzierski.daniel.product_dict.model.ProductAliasDto;
-import pl.madzierski.daniel.product_dict.model.ProductCategoryDto;
 import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
-import pl.madzierski.daniel.product_dict.projection.SimpleProductProjection;
 
 import java.util.*;
 
@@ -17,6 +14,8 @@ interface SqlProductDictQueryRepository extends JpaRepository<SqlProductDict, UU
     Set<ProductDictWithAliasesAndCategoryProjection> findAllWithCategoryAndAliases();
 
     long countProductDictEntitiesByCategoriesIdIn(Set<UUID> productCategoryIds);
+
+    long countByIdIn(Collection<UUID> ids);
 }
 
 @RequiredArgsConstructor
@@ -36,22 +35,12 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
     }
 
     @Override
-    public List<ProductDto> findAllProducts() {
-        return this.sqlProductDictQueryRepository.findAll().stream().map(
-                product -> {
-                    ProductDto productDto = new ProductDto(
-                        product.getId(),
-                        product.getName()
-                    );
-                    product.getAliases().forEach(alias -> productDto.addAlias(new ProductAliasDto(alias.getId(), alias.getName())));
-                    product.getCategories().forEach(category -> productDto.addCategory(new ProductCategoryDto(category.getId(), category.getName())));
-                    return productDto;
-                }
-        ).toList();
+    public Optional<ProductDto> findNameById(UUID id) {
+        return this.sqlProductDictQueryRepository.findById(id).map(product-> ProductDto.builder().id(product.getId()).name(product.getName()).build());
     }
 
     @Override
-    public Optional<ProductDto> findNameById(UUID id) {
-        return this.sqlProductDictQueryRepository.findById(id).map(product-> ProductDto.builder().id(product.getId()).name(product.getName()).build());
+    public long countByIdIn(Collection<UUID> ids) {
+        return sqlProductDictQueryRepository.countByIdIn(ids);
     }
 }

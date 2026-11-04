@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +23,18 @@ class ProductDict {
     private Set<ProductAlias> aliases = new HashSet<>();
     @Getter(AccessLevel.NONE)
     private Set<ProductCategory> productCategories = new HashSet<>();
+
+    static ProductDict create(String name) {
+        ProductDict product = new ProductDict();
+        product.name = name;
+        product.addAliasIfMissing(name);
+        return product;
+    }
+
+    void addAliasIfMissing(String alias) {
+        if (aliases.stream().noneMatch(existing -> existing.getName().equalsIgnoreCase(alias)))
+            aliases.add(ProductAlias.builder().name(alias).build());
+    }
 
     public void addAlias(ProductAlias productAlias) {
         this.aliases.add(productAlias);

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.file_group.SqlFileGroupQuery;
+import pl.madzierski.daniel.receipt.model.ReceiptRevisionQuery;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -69,22 +70,12 @@ class SqlReceiptRevision extends BaseEntity {
     }
     
     public ReceiptRevision toReceiptRevision() {
-        return ReceiptRevision.builder()
-            .id(id)
-            .revision(revision)
-            .createdDate(createdDate)
-            .modifiedDate(modifiedDate)
-            .totalPrice(totalPrice)
-            .paymentDate(paymentDate)
-            .isPreferredRevision(isPreferredRevision)
-            .isCorrect(isCorrect)
-            .receipt(receipt != null ? receipt.toReceipt() : null)
-            .resolver(resolver)
-            .parentReceiptRevision(parentReceiptRevision != null ? ReceiptRevision.builder().id(parentReceiptRevision.getId()).build() : null)
-            .sourceFileGroup(sourceFileGroup != null ? sourceFileGroup.toFileGroupQuery() : null)
-            .items(items.stream()
+        return ReceiptRevision.restore(id, createdDate, modifiedDate, revision, resolver, totalPrice, paymentDate,
+            isPreferredRevision, isCorrect, receipt != null ? receipt.toReceipt() : null,
+            parentReceiptRevision != null ? new ReceiptRevisionQuery(parentReceiptRevision.getId()) : null,
+            items.stream()
                 .map(SqlReceiptItem::toReceiptItem)
-                .collect(Collectors.toSet()))
-            .build();
+                .collect(Collectors.toSet()),
+            sourceFileGroup != null ? sourceFileGroup.toFileGroupQuery() : null);
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
+import pl.madzierski.daniel.receipt.model.ReceiptItemQuery;
 
 import java.math.BigDecimal;
 
@@ -13,12 +14,9 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"receiptRevision", "parentItem", "product"})
+@EqualsAndHashCode(callSuper = true, exclude = {"parentItem", "product"})
 class SqlReceiptItem extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receipt_revision_id", insertable = false, updatable = false)
-    private SqlReceiptRevision receiptRevision;
     private String name;
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -45,7 +43,11 @@ class SqlReceiptItem extends BaseEntity {
         sqlReceiptItem.setDiscount(item.getDiscount());
         sqlReceiptItem.setTotalPrice(item.getTotalPrice());
         sqlReceiptItem.setPosition(item.getPosition());
-        sqlReceiptItem.setParentItem(item.getParentItem() != null ? SqlReceiptItem.fromReceiptItem(item.getParentItem()) : null);
+        if (item.getParentItem() != null) {
+            SqlReceiptItem parent = new SqlReceiptItem();
+            parent.setId(item.getParentItem().getId());
+            sqlReceiptItem.setParentItem(parent);
+        }
         if (item.getNameDict() != null) {
             sqlReceiptItem.setProduct(SqlProductDictQuery.fromProductDict(item.getNameDict()));
         }
@@ -53,16 +55,8 @@ class SqlReceiptItem extends BaseEntity {
     }
 
     public ReceiptItem toReceiptItem() {
-        ReceiptItem receiptItem = new ReceiptItem();
-        receiptItem.setId(this.id);
-        receiptItem.setName(this.name);
-        receiptItem.setAmount(this.amount);
-        receiptItem.setUnitPrice(this.unitPrice);
-        receiptItem.setDiscount(this.discount);
-        receiptItem.setTotalPrice(this.totalPrice);
-        receiptItem.setPosition(this.position);
-        receiptItem.setNameDict(this.product != null ? this.product.toProductDictQuery() : null);
-        receiptItem.setParentItem(this.parentItem != null ? this.parentItem.toReceiptItem() : null);
-        return receiptItem;
+        return ReceiptItem.restore(id, createdDate, modifiedDate, name,
+            product != null ? product.toProductDictQuery() : null, amount, unitPrice, discount, totalPrice, position,
+            parentItem != null ? new ReceiptItemQuery(parentItem.getId()) : null);
     }
 }

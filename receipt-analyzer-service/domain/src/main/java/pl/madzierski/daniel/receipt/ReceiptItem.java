@@ -2,25 +2,22 @@ package pl.madzierski.daniel.receipt;
 
 import lombok.*;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
+import pl.madzierski.daniel.receipt.model.ReceiptItemQuery;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
-@Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(exclude = {"childItems", "receiptRevision", "parentItem"})
+@Builder(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@EqualsAndHashCode
 class ReceiptItem {
 
-    private final Set<ReceiptItem> childItems = new HashSet<>();
     private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
-    private ReceiptRevision receiptRevision;
     private String name;
     private ProductDictQuery nameDict;
     private BigDecimal amount;
@@ -28,23 +25,81 @@ class ReceiptItem {
     private BigDecimal discount;
     private BigDecimal totalPrice;
     private Integer position;
-    private ReceiptItem parentItem;
+    private ReceiptItemQuery parentItem;
 
-    public ReceiptItem(UUID id) {
-        this.id = id;
+    static ReceiptItem create(String name, ProductDictQuery nameDict, BigDecimal amount, BigDecimal unitPrice,
+                              BigDecimal discount, BigDecimal totalPrice, Integer position) {
+        return builder()
+            .name(name)
+            .nameDict(nameDict)
+            .amount(amount)
+            .unitPrice(unitPrice)
+            .discount(discount)
+            .totalPrice(totalPrice)
+            .position(position)
+            .build();
     }
 
-    public ReceiptItem(ReceiptRevision receiptRevision, String name, ProductDictQuery nameDict, BigDecimal amount,
-                       BigDecimal unitPrice, BigDecimal discount, BigDecimal totalPrice, Integer position, ReceiptItem parentItem) {
-        this.receiptRevision = receiptRevision;
-        this.name = name;
+    static ReceiptItem create(ReceiptItemChange change) {
+        return create(change.name(), change.nameDict(), change.amount(), change.unitPrice(), change.discount(),
+            change.totalPrice(), change.position());
+    }
+
+    static ReceiptItem restore(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String name,
+                               ProductDictQuery nameDict, BigDecimal amount, BigDecimal unitPrice, BigDecimal discount,
+                               BigDecimal totalPrice, Integer position, ReceiptItemQuery parentItem) {
+        return builder()
+            .id(id)
+            .createdDate(createdDate)
+            .modifiedDate(modifiedDate)
+            .name(name)
+            .nameDict(nameDict)
+            .amount(amount)
+            .unitPrice(unitPrice)
+            .discount(discount)
+            .totalPrice(totalPrice)
+            .position(position)
+            .parentItem(parentItem)
+            .build();
+    }
+
+    ReceiptItem copy() {
+        return builder()
+            .name(name)
+            .nameDict(nameDict)
+            .amount(amount)
+            .unitPrice(unitPrice)
+            .discount(discount)
+            .totalPrice(totalPrice)
+            .position(position)
+            .parentItem(new ReceiptItemQuery(id))
+            .build();
+    }
+
+    void apply(ReceiptItemChange change) {
+        this.name = change.name();
+        this.nameDict = change.nameDict();
+        this.amount = change.amount();
+        this.unitPrice = change.unitPrice();
+        this.discount = change.discount();
+        this.totalPrice = change.totalPrice();
+        this.position = change.position();
+    }
+
+    void assignProduct(ProductDictQuery nameDict) {
         this.nameDict = nameDict;
-        this.amount = amount;
-        this.unitPrice = unitPrice;
-        this.discount = discount;
-        this.totalPrice = totalPrice;
-        this.position = position;
-        this.parentItem = parentItem;
     }
 
+    void rename(String name) {
+        this.name = name;
+    }
+
+    boolean isPriceConsistent() {
+        if (amount == null || unitPrice == null || totalPrice == null) return false;
+        BigDecimal itemDiscount = discount != null ? discount : BigDecimal.ZERO;
+        BigDecimal expectedTotal = amount.multiply(unitPrice)
+            .setScale(2, RoundingMode.HALF_UP)
+            .subtract(itemDiscount);
+        return expectedTotal.compareTo(totalPrice) == 0;
+    }
 }

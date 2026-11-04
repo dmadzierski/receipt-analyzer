@@ -10,7 +10,6 @@ import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -26,6 +25,7 @@ public class FileFacade {
     private final FileGroupRepository fileGroupRepository;
     private final FileGroupFactory fileGroupFactory;
     private final FileTypeDetector fileTypeDetector;
+    private final FileStorage fileStorage;
     private final ReceiptQueryRepository receiptQueryRepository;
     private final String uploadDir;
 
@@ -50,7 +50,7 @@ public class FileFacade {
         FileGroup savedFileGroup = fileGroupRepository.save(fileGroup);
         savedFileGroup.getFiles().forEach(file -> file.setPath(createPath(user, file.getId(), savedFileGroup.getId(), extension, receiptId)));
         FileGroup fileGroupWithPaths = fileGroupRepository.save(savedFileGroup);
-        fileGroupWithPaths.getFiles().forEach(file -> saveFile(file.getPath(), files.get(file.getPartNumber())));
+        fileGroupWithPaths.getFiles().forEach(file -> fileStorage.save(file.getPath(), files.get(file.getPartNumber())));
         return fileGroupFactory.toDto(fileGroupWithPaths);
     }
 
@@ -77,21 +77,6 @@ public class FileFacade {
         }
 
         return new FileSystemResource(file);
-    }
-
-    private void saveFile(String path, byte[] file) {
-        try {
-            java.io.File destFile = new java.io.File(path);
-            if (destFile.getParentFile() != null) {
-                destFile.getParentFile()
-                    .mkdirs();
-            }
-            try (OutputStream outputStream = Files.newOutputStream(destFile.toPath())) {
-                outputStream.write(file);
-            }
-        } catch (IOException e) {
-            throw new AppRuntimeException(AppRuntimeExceptionMessages.ERROR_DURING_SAVING_FILE);
-        }
     }
 
     public List<byte[]> getFiles(UUID receiptId, UUID fileGroupId) {

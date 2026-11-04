@@ -17,40 +17,4 @@ public interface SqlReceiptItemQueryRepository extends ReceiptItemQueryRepositor
             WHERE ri.receipt_revision_id = :revisionId
         """)
     List<ReceiptItemDto> findReceiptItemsByRevisionId(UUID revisionId);
-
-
-    @Query(value = """
-        SELECT new pl.madzierski.daniel.receipt.model.ReceiptItemDto(
-            r.id,
-            NULL,
-            r.name,
-            r.amount,
-            r.unitPrice,
-            r.discount,
-            r.totalPrice,
-            r.position,
-            new pl.madzierski.daniel.receipt.model.ReceiptItemDto(
-                rp.id,
-                NULL,
-                rp.name,
-                rp.amount,
-                rp.unitPrice,
-                rp.discount,
-                rp.totalPrice,
-                rp.position
-            )
-        )
-        FROM SqlReceiptItem r
-            LEFT JOIN r.receiptRevision rr
-            LEFT JOIN r.parentItem rp
-            LEFT JOIN rp.receiptRevision rrp
-        WHERE
-            rr.resolver = pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND
-            rrp.resolver <> pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER AND
-            rr.id = :revisionId AND
-            r.product IS NULL AND
-            rp.product IS NULL
-        """
-    )
-    List<ReceiptItemDto> findAllMissingAliasesInRevision(UUID revisionId);
 }

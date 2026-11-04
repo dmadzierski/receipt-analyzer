@@ -27,12 +27,12 @@ pipeline {
 			}
 			steps {
 				dir('receipt-analyzer-service') {
-					sh 'gradle :monolith:test --no-daemon'
+					sh 'gradle test --no-daemon'
 				}
 			}
 			post {
 				always {
-					junit allowEmptyResults: true, testResults: 'receipt-analyzer-service/monolith/build/test-results/test/*.xml'
+					junit allowEmptyResults: true, testResults: 'receipt-analyzer-service/*/build/test-results/test/*.xml'
 				}
 			}
 		}

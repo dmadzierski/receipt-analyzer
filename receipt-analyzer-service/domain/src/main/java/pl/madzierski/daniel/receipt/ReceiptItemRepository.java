@@ -1,21 +1,11 @@
 package pl.madzierski.daniel.receipt;
 
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
-import pl.madzierski.daniel.user.model.UserQuery;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 interface ReceiptItemRepository {
 
     void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList);
-
-
-    void deleteAllByReceiptId(UUID receiptId);
-
-
-    List<ReceiptItem> findUnmatchedItemsByReceiptId(UUID revisionId, UserQuery user);
-
-    void updateProduct(ProductDictQuery productDictQuery, Collection<UUID> list);
 }

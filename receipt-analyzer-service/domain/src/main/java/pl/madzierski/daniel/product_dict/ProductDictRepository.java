@@ -7,9 +7,9 @@ import java.util.UUID;
 interface ProductDictRepository {
     Optional<ProductDict> findById(UUID productDictId);
 
+    List<ProductDict> findAll();
+
     void deleteAllByIdIn(List<UUID> productDictIdList);
 
-    List<ProductDict> saveAll(List<ProductDict> entities);
-
-    void save(ProductDict productDict);
+    ProductDict save(ProductDict productDict);
 }

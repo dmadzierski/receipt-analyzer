@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {RevisionDetails,} from '../model/receipt.model';
-import {CreateRevisionCopy} from '../model/revision.model';
+import {CreateRevisionCopy, UpdateRevisionResponse} from '../model/revision.model';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +25,7 @@ export class RevisionService {
     const body = paymentDate instanceof Date
       ? {...revision, paymentDate: formatDate(paymentDate, "yyyy-MM-dd'T'HH:mm:ss", 'en-US')}
       : revision;
-    return this.httpClient.put<RevisionDetails>(`/api/revisions/${revision.id}`, body)
+    return this.httpClient.put<UpdateRevisionResponse>(`/api/revisions/${revision.id}`, body)
   }
 
   deleteRevision(id: string) {
