@@ -1,7 +1,7 @@
-package pl.madzierski.daniel.receipt.scan_resolver;
+package pl.madzierski.daniel.digitization;
 
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
 
 import java.util.List;
 
@@ -9,5 +9,5 @@ public interface ReceiptResolverStrategy {
 
     ReceiptResolverStrategyType strategy();
 
-    ReceiptRevisionResolveData execute(List<byte[]> files);
+    DigitizedReceipt execute(List<byte[]> files);
 }

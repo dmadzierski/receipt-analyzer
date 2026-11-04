@@ -56,16 +56,16 @@ Conventions that span modules:
 - **Ownership (IDOR):** controllers take an `AuthenticatedUser user` parameter (app record holding `app_user.id`, resolved from the JWT `sub` by `security.AuthenticatedUserArgumentResolver` with a Caffeine cache) and pass it to the facade, which maps it to the domain `UserQuery` with `toUserQuery()` for ports and owner fields. Naming: in requests (controllers, facades, ports) it is `user`, because it is only the requester until the query proves ownership; in domain models and JPA entities the field is `owner` (`Receipt`/`FileGroup`: column `owner_id`, `Wallet`: column `user_id`). Ownership is part of the query (`findAccessible(id, user)`, `... AND r.ownerId = :ownerId`), never a separate check, and someone else's resource throws the same `*_NOT_FOUND` as a missing one. Children (revisions, items, files) are checked through their root.
 - Circular facade dependencies are resolved with `@Lazy` in the configuration (e.g. `ProductDictFacade` in `ReceiptConfiguration`).
 
-Features: `receipt`, `wallet`, `file_group` (uploaded files grouped per receipt, type detection via Tika), `product_dict` (product dictionary, aliases and categories; fuzzy matching threshold `product-dict.min-required-similarity`), `store`, `user`.
+Features: `receipt`, `digitization` (reading data from receipt files, see below), `wallet`, `file_group` (uploaded files grouped per receipt, type detection via Tika), `product_dict` (product dictionary, aliases and categories; fuzzy matching threshold `product-dict.min-required-similarity`), `store`, `user`.
 
 ### Receipts, revisions and resolvers
 
 A `Receipt` has many `ReceiptRevision`s, forming a tree through `parentReceiptRevision`. Each revision records the `resolver` (a `ReceiptResolverStrategyType`) that produced it, plus `isPreferredRevision` and `isCorrect` flags. Machine-produced revisions come from resolvers. User edits create user revisions (`UserResolver`), and only those are meant to be editable in the UI.
 
-Parsing uses the strategy pattern in `app/.../receipt/scan_resolver`. `ReceiptResolverStrategy` implementations (`BiedronkaScanResolver` for PDF→OCR, `BiedronkaJsonResolver`, `UserResolver`) are registered as beans in `ReceiptConfiguration`. `ReceiptResolverLocatorService` then picks one by `strategy()`. To support a new store or format:
+Reading data from receipt files is a separate `digitization` feature (`app/.../digitization`, wired in `adapters/.../digitization/DigitizationConfiguration`). `ReceiptFacade` only calls `DigitizationFacade.digitize(files, strategy)`, which returns a `DigitizedReceipt`, and builds the revision from it, so the receipt feature knows no parser. Digitization uses the strategy pattern: `ReceiptResolverStrategy` implementations (`BiedronkaScanResolver` for PDF→OCR, `BiedronkaJsonResolver`, `UserResolver`, in `digitization/impl`) are beans, and `DigitizationFacade` picks one by `strategy()`. `ReceiptResolverStrategyType` stays in the receipt domain because revisions persist it. To support a new store or format:
 1. add an enum value to `ReceiptResolverStrategyType`;
-2. implement the strategy;
-3. register it as a bean;
+2. implement the strategy in `digitization/impl`;
+3. register it as a bean in `DigitizationConfiguration`;
 4. optionally add a `receipt-resolver-strategy.<name>.version` property.
 
 ## Frontend structure

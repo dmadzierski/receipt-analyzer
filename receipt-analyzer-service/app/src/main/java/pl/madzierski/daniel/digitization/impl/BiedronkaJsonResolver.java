@@ -1,14 +1,14 @@
-package pl.madzierski.daniel.receipt.scan_resolver.impl;
+package pl.madzierski.daniel.digitization.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
-import pl.madzierski.daniel.receipt.scan_resolver.model.BiedronkaJsonReceipt;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt.DigitizedReceiptItem;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategy;
+import pl.madzierski.daniel.digitization.model.BiedronkaJsonReceipt;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -31,7 +31,7 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
     }
 
     @Override
-    public ReceiptRevisionResolveData execute(List<byte[]> files) {
+    public DigitizedReceipt execute(List<byte[]> files) {
         if (files == null || files.size() != 1) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.INVALID_INPUT_AMOUNT_OF_INPUT_FILES);
         }
@@ -47,11 +47,11 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
         }
         Result result = new Result(receipt, rawData);
 
-        List<ReceiptRevisionResolveDataItem> items = new ArrayList<>();
+        List<DigitizedReceiptItem> items = new ArrayList<>();
         int position = 1;
 
         if (result.receipt().body() == null)
-            return new ReceiptRevisionResolveData(resolverVersion, items, null, this.strategy(),
+            return new DigitizedReceipt(resolverVersion, items, null, this.strategy(),
                 null);
 
         for (BiedronkaJsonReceipt.Body bodyItem : result.receipt().body()) {
@@ -59,27 +59,27 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
                 continue;
             if (bodyItem.sellLine() != null) {
                 BiedronkaJsonReceipt.Body.SellLine sellLine = bodyItem.sellLine();
-                ReceiptRevisionResolveDataItem receiptRevisionResolveDataItem = getReceiptRevisionResolveDataItem(sellLine, position++);
-                items.add(receiptRevisionResolveDataItem);
+                DigitizedReceiptItem digitizedItem = getDigitizedReceiptItem(sellLine, position++);
+                items.add(digitizedItem);
             } else if (bodyItem.discountLine() != null) {
                 BiedronkaJsonReceipt.Body.DiscountLine discountLine = bodyItem.discountLine();
-                ReceiptRevisionResolveDataItem receiptRevisionResolveDataItem = getReceiptRevisionResolveDataItem(items.getLast(), discountLine);
-                items.set(items.size() - 1, receiptRevisionResolveDataItem);
+                DigitizedReceiptItem digitizedItem = getDigitizedReceiptItem(items.getLast(), discountLine);
+                items.set(items.size() - 1, digitizedItem);
             }
         }
 
         BigDecimal totalPrice =
             BigDecimal.valueOf(result.receipt().body().stream().filter(b -> b.sumInCurrency() != null).findFirst().map(b -> b.sumInCurrency().fiscalTotal()).orElse(0), 0).divide(BigDecimal.valueOf(100, 0));
-        return new ReceiptRevisionResolveData(resolverVersion, items, null, this.strategy(),
+        return new DigitizedReceipt(resolverVersion, items, null, this.strategy(),
             totalPrice);
     }
 
-    private ReceiptRevisionResolveDataItem getReceiptRevisionResolveDataItem(BiedronkaJsonReceipt.Body.SellLine sellLine, Integer position) {
+    private DigitizedReceiptItem getDigitizedReceiptItem(BiedronkaJsonReceipt.Body.SellLine sellLine, Integer position) {
         String name = extractName(sellLine);
         BigDecimal amount = parseBigDecimal(sellLine.quantity());
         BigDecimal unitPrice = sellLine.price() != null ? BigDecimal.valueOf(sellLine.price() / 100.0) : null;
         BigDecimal totalPrice = sellLine.total() != null ? BigDecimal.valueOf(sellLine.total() / 100.0) : null;
-        return new ReceiptRevisionResolveDataItem(name, amount, unitPrice, null, totalPrice, position);
+        return new DigitizedReceiptItem(name, amount, unitPrice, null, totalPrice, position);
     }
 
     private String extractName(BiedronkaJsonReceipt.Body.SellLine sellLine) {
@@ -90,10 +90,10 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
         return null;
     }
 
-    private ReceiptRevisionResolveDataItem getReceiptRevisionResolveDataItem(ReceiptRevisionResolveDataItem lastItem, BiedronkaJsonReceipt.Body.DiscountLine discountLine) {
+    private DigitizedReceiptItem getDigitizedReceiptItem(DigitizedReceiptItem lastItem, BiedronkaJsonReceipt.Body.DiscountLine discountLine) {
         BigDecimal discount = BigDecimal.valueOf(discountLine.value() != null ? discountLine.value() / 100.0 : 0.0);
         BigDecimal newTotalPrice = lastItem.totalPrice().subtract(discount);
-        return new ReceiptRevisionResolveDataItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), discount, newTotalPrice, lastItem.position());
+        return new DigitizedReceiptItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), discount, newTotalPrice, lastItem.position());
     }
 
     private BigDecimal parseBigDecimal(String valStr) {

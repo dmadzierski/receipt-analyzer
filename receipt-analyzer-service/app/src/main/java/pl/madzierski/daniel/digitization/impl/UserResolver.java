@@ -1,9 +1,9 @@
-package pl.madzierski.daniel.receipt.scan_resolver.impl;
+package pl.madzierski.daniel.digitization.impl;
 
 import lombok.AllArgsConstructor;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategy;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class UserResolver implements ReceiptResolverStrategy {
     }
 
     @Override
-    public ReceiptRevisionResolveData execute(List<byte[]> files) {
-        return ReceiptRevisionResolveData.builder().strategy(strategy()).build();
+    public DigitizedReceipt execute(List<byte[]> files) {
+        return DigitizedReceipt.builder().strategy(strategy()).build();
     }
 }

@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.receipt.scan_resolver.impl;
+package pl.madzierski.daniel.digitization.impl;
 
 import jakarta.annotation.Nonnull;
 import lombok.AllArgsConstructor;
@@ -7,9 +7,9 @@ import net.sourceforge.tess4j.TesseractException;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
-import pl.madzierski.daniel.receipt.scan_resolver.service.PDFService;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategy;
+import pl.madzierski.daniel.digitization.PDFService;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -51,7 +51,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
 
 
     @Override
-    public ReceiptRevisionResolveData execute(List<byte[]> files) {
+    public DigitizedReceipt execute(List<byte[]> files) {
         if (files == null || files.size() != 1)
             throw new AppRuntimeException(AppRuntimeExceptionMessages.INVALID_INPUT_AMOUNT_OF_INPUT_FILES);
 
@@ -70,19 +70,19 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
 
         rawItemList = cleanLines(rawItemList);
 
-        List<ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem> items = extractItems(rawItemList);
+        List<DigitizedReceipt.DigitizedReceiptItem> items = extractItems(rawItemList);
 
         BigDecimal totalPrice = items.stream()
             .map(it -> it.totalPrice() != null ? it.totalPrice() : BigDecimal.ZERO)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new ReceiptRevisionResolveData(resolverVersion, items, null,
+        return new DigitizedReceipt(resolverVersion, items, null,
             strategy(), totalPrice);
     }
 
     @Nonnull
-    private List<ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem> extractItems(List<String> rawItemList) {
-        List<ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem> items = new ArrayList<>();
+    private List<DigitizedReceipt.DigitizedReceiptItem> extractItems(List<String> rawItemList) {
+        List<DigitizedReceipt.DigitizedReceiptItem> items = new ArrayList<>();
 
         for (String line : rawItemList) {
             Matcher itemMatcher = ITEM_PATTERN_REGEX.matcher(line);
@@ -96,20 +96,20 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
                 items.add(extractItem(items.size() + 1, itemWithoutPtuMatcher));
             } else if (discountMatcher.matches()) {
                 if (!items.isEmpty()) {
-                    ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem lastItem = items.getLast();
+                    DigitizedReceipt.DigitizedReceiptItem lastItem = items.getLast();
                     BigDecimal discount = parseBigDecimal(getValueFromGroup(discountMatcher, DISCOUNT));
-                    items.set(items.size() - 1, new ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), discount, lastItem.totalPrice(), lastItem.position()));
+                    items.set(items.size() - 1, new DigitizedReceipt.DigitizedReceiptItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), discount, lastItem.totalPrice(), lastItem.position()));
                 }
             } else if (discountedPriceMatcher.matches() && !items.isEmpty()) {
-                ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem lastItem = items.getLast();
+                DigitizedReceipt.DigitizedReceiptItem lastItem = items.getLast();
                 BigDecimal totalPrice = parseBigDecimal(getValueFromGroup(discountedPriceMatcher, TOTAL_PRICE));
-                items.set(items.size() - 1, new ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), lastItem.discount(), totalPrice, lastItem.position()));
+                items.set(items.size() - 1, new DigitizedReceipt.DigitizedReceiptItem(lastItem.name(), lastItem.amount(), lastItem.unitPrice(), lastItem.discount(), totalPrice, lastItem.position()));
             }
         }
 
         for (int i = 0; i < items.size(); i++) {
-            ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem item = items.get(i);
-            items.set(i, new ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), i + 1));
+            DigitizedReceipt.DigitizedReceiptItem item = items.get(i);
+            items.set(i, new DigitizedReceipt.DigitizedReceiptItem(item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), i + 1));
         }
         return items;
     }
@@ -180,7 +180,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
         return rawDataList;
     }
 
-    private ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem extractItem(int index, Matcher matcher) {
+    private DigitizedReceipt.DigitizedReceiptItem extractItem(int index, Matcher matcher) {
         String name = getValueFromGroup(matcher, "name");
         if (name != null) {
             name = name.replaceAll(WEIGHT_UNIT_PATTER, "g");
@@ -190,7 +190,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
         BigDecimal unitPrice = parseBigDecimal(getValueFromGroup(matcher, "unitPrice"));
         BigDecimal totalPrice = parseBigDecimal(getValueFromGroup(matcher, "totalPrice"));
 
-        return new ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem(name, amount, unitPrice, null, totalPrice, index);
+        return new DigitizedReceipt.DigitizedReceiptItem(name, amount, unitPrice, null, totalPrice, index);
     }
 
     private String getValueFromGroup(Matcher matcher, String group) {

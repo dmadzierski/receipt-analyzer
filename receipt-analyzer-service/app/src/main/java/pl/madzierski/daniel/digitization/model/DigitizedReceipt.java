@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.receipt.model;
+package pl.madzierski.daniel.digitization.model;
 
 import lombok.Builder;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
@@ -8,14 +8,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record ReceiptRevisionResolveData(
+public record DigitizedReceipt(
     String revisionVersion,
-    List<ReceiptRevisionResolveDataItem> items,
+    List<DigitizedReceiptItem> items,
     LocalDateTime paymentDate,
     ReceiptResolverStrategyType strategy,
     BigDecimal totalPrice
 ) {
-    public record ReceiptRevisionResolveDataItem(
+    public record DigitizedReceiptItem(
         String name,
         BigDecimal amount,
         BigDecimal unitPrice,

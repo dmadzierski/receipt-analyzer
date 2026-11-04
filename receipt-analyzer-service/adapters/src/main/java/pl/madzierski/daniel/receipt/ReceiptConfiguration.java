@@ -1,24 +1,15 @@
 package pl.madzierski.daniel.receipt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
+import pl.madzierski.daniel.digitization.DigitizationFacade;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.ProductDictQueryRepository;
-import pl.madzierski.daniel.receipt.scan_resolver.ReceiptResolverStrategy;
 import pl.madzierski.daniel.store.StoreQueryRepository;
-import pl.madzierski.daniel.receipt.scan_resolver.impl.BiedronkaJsonResolver;
-import pl.madzierski.daniel.receipt.scan_resolver.impl.BiedronkaScanResolver;
-import pl.madzierski.daniel.receipt.scan_resolver.impl.UserResolver;
-import pl.madzierski.daniel.receipt.scan_resolver.service.PDFService;
-import pl.madzierski.daniel.receipt.scan_resolver.service.ReceiptResolverLocatorService;
 import pl.madzierski.daniel.wallet.WalletQueryRepository;
-
-import java.util.List;
 
 @Configuration
 class ReceiptConfiguration {
@@ -29,7 +20,7 @@ class ReceiptConfiguration {
         ReceiptRevisionRepository revisionRepository,
         ReceiptRepository receiptRepository,
         FileFacade fileFacade,
-        List<ReceiptResolverStrategy> strategyMap,
+        DigitizationFacade digitizationFacade,
         ReceiptQueryRepository receiptQueryRepository,
         ReceiptRevisionQueryRepository receiptRevisionQueryRepository,
         StoreQueryRepository storeQueryRepository,
@@ -46,7 +37,7 @@ class ReceiptConfiguration {
             new ReceiptRevisionFactory(receiptItemFactory),
             receiptRepository,
             fileFacade,
-            new ReceiptResolverLocatorService(strategyMap),
+            digitizationFacade,
             receiptQueryRepository,
             receiptRevisionQueryRepository,
             storeQueryRepository,
@@ -55,25 +46,5 @@ class ReceiptConfiguration {
             fileGroupQueryRepository,
             walletQueryRepository
         );
-    }
-
-    @Bean
-    BiedronkaJsonResolver biedronkaJsonResolver(@Value("${receipt-resolver-strategy.biedronka-json.version:1.0}") String resolverVersion, ObjectMapper objectMapper) {
-        return new BiedronkaJsonResolver(resolverVersion, objectMapper);
-    }
-
-    @Bean
-    BiedronkaScanResolver biedronkaScanResolver(@Value("${ocr.tesseract.dataPath}") String tesseractDataPath, @Value("${receipt-resolver-strategy.biedronka.version:1.0}") String resolverVersion, PDFService pdfService) {
-        return new BiedronkaScanResolver(tesseractDataPath, resolverVersion, pdfService);
-    }
-
-    @Bean
-    UserResolver userResolver() {
-        return new UserResolver();
-    }
-
-    @Bean
-    PDFService pdfService() {
-        return new PDFService();
     }
 }

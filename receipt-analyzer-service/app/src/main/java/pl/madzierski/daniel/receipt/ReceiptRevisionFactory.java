@@ -2,7 +2,7 @@ package pl.madzierski.daniel.receipt;
 
 import lombok.RequiredArgsConstructor;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
 
 import java.util.stream.Collectors;
 
@@ -23,7 +23,7 @@ class ReceiptRevisionFactory {
         return receiptRevision;
     }
 
-    ReceiptRevision from(ReceiptRevisionResolveData receiptRevisionDto) {
+    ReceiptRevision from(DigitizedReceipt receiptRevisionDto) {
         ReceiptRevision receiptRevision = new ReceiptRevision();
         receiptRevision.setRevision(receiptRevisionDto.revisionVersion());
         receiptRevision.setResolver(receiptRevisionDto.strategy());

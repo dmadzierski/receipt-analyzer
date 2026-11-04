@@ -1,12 +1,12 @@
-package pl.madzierski.daniel.receipt.scan_resolver.impl;
+package pl.madzierski.daniel.digitization.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt.DigitizedReceiptItem;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -23,12 +23,12 @@ class BiedronkaJsonResolverIT extends IntegrationTest {
 
     @Test
     void readsItemsInOrderWithWeighedItemDetails() {
-        ReceiptRevisionResolveData result = resolver.execute(List.of(readResource(RECEIPT)));
+        DigitizedReceipt result = resolver.execute(List.of(readResource(RECEIPT)));
 
         assertThat(result.strategy()).isEqualTo(ReceiptResolverStrategyType.BIEDRONKA_JSON);
-        assertThat(result.items()).extracting(ReceiptRevisionResolveDataItem::position)
+        assertThat(result.items()).extracting(DigitizedReceiptItem::position)
             .containsExactlyElementsOf(IntStream.rangeClosed(1, 36).boxed().toList());
-        ReceiptRevisionResolveDataItem onion = result.items().getFirst();
+        DigitizedReceiptItem onion = result.items().getFirst();
         assertThat(onion.name()).isEqualTo("Cebula Żółta Luz");
         assertThat(onion.amount()).isEqualByComparingTo("0.542");
         assertThat(onion.unitPrice()).isEqualByComparingTo("3.49");

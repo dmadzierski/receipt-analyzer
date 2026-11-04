@@ -5,7 +5,7 @@ import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.receipt.model.ReceiptItemDto;
-import pl.madzierski.daniel.receipt.model.ReceiptRevisionResolveData;
+import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
 
 import java.util.Optional;
 
@@ -31,7 +31,7 @@ class ReceiptItemFactory {
         return receiptItem;
     }
 
-    public ReceiptItem from(ReceiptRevisionResolveData.ReceiptRevisionResolveDataItem resolveDataItem) {
+    public ReceiptItem from(DigitizedReceipt.DigitizedReceiptItem resolveDataItem) {
         ReceiptItem receiptItem = new ReceiptItem();
         receiptItem.setName(resolveDataItem.name());
         receiptItem.setAmount(resolveDataItem.amount());

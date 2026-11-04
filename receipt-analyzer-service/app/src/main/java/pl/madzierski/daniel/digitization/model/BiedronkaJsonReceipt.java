@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.receipt.scan_resolver.model;
+package pl.madzierski.daniel.digitization.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

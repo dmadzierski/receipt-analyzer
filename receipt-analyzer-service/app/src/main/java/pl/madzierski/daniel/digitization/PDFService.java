@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.receipt.scan_resolver.service;
+package pl.madzierski.daniel.digitization;
 
 import lombok.AllArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
