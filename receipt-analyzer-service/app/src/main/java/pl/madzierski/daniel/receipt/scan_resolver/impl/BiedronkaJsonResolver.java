@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
 
-    public static final String BRAND = "Biedronka";
     private final String resolverVersion;
     private final ObjectMapper objectMapper;
     private static final Pattern NAME_PATTERN = Pattern.compile("^(?<name>.*)\\w*[ABC]");
@@ -52,7 +51,7 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
         int position = 1;
 
         if (result.receipt().body() == null)
-            return new ReceiptRevisionResolveData(resolverVersion, BRAND, items, null, null, this.strategy(),
+            return new ReceiptRevisionResolveData(resolverVersion, items, null, this.strategy(),
                 null);
 
         for (BiedronkaJsonReceipt.Body bodyItem : result.receipt().body()) {
@@ -71,7 +70,7 @@ public class BiedronkaJsonResolver implements ReceiptResolverStrategy {
 
         BigDecimal totalPrice =
             BigDecimal.valueOf(result.receipt().body().stream().filter(b -> b.sumInCurrency() != null).findFirst().map(b -> b.sumInCurrency().fiscalTotal()).orElse(0), 0).divide(BigDecimal.valueOf(100, 0));
-        return new ReceiptRevisionResolveData(resolverVersion, BRAND, items, null, null, this.strategy(),
+        return new ReceiptRevisionResolveData(resolverVersion, items, null, this.strategy(),
             totalPrice);
     }
 

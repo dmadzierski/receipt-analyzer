@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Builder
 class SqlReceiptRevision extends BaseEntity {
 
-    private String name;
     private String revision;
     @Enumerated(EnumType.STRING)
     private ReceiptResolverStrategyType resolver;
@@ -51,7 +50,6 @@ class SqlReceiptRevision extends BaseEntity {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();
         sqlReceiptRevision.setId(revision.getId());
         sqlReceiptRevision.setRevision(revision.getRevision());
-        sqlReceiptRevision.setName(revision.getName());
         sqlReceiptRevision.setTotalPrice(revision.getTotalPrice());
         sqlReceiptRevision.setPaymentDate(revision.getPaymentDate());
         sqlReceiptRevision.setIsPreferredRevision(revision.getIsPreferredRevision());
@@ -77,7 +75,6 @@ class SqlReceiptRevision extends BaseEntity {
     public ReceiptRevision toReceiptRevision() {
         return ReceiptRevision.builder()
             .id(id)
-            .name(name)
             .revision(revision)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)

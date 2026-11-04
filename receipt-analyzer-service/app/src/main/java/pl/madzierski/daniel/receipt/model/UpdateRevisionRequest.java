@@ -11,10 +11,8 @@ public record UpdateRevisionRequest(
     UUID id,
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
-    String brand,
     BigDecimal totalPrice,
     LocalDateTime paymentDate,
-    String address,
     Boolean isPreferredRevision,
     Boolean isCorrect,
     Set<ItemRequest> items

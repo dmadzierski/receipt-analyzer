@@ -540,7 +540,7 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     private static UpdateRevisionRequest preferredUpdate() {
-        return new UpdateRevisionRequest(null, null, null, null, null, null, null, true, null, null);
+        return new UpdateRevisionRequest(null, null, null, null, null, true, null, null);
     }
 
     private boolean isPreferred(UUID revisionId) {
@@ -616,6 +616,6 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     private static UpdateRevisionRequest revisionUpdate(Set<ItemRequest> items) {
-        return new UpdateRevisionRequest(null, null, null, null, null, null, null, null, null, items);
+        return new UpdateRevisionRequest(null, null, null, null, null, null, null, items);
     }
 }

@@ -10,10 +10,8 @@ import java.util.List;
 @Builder
 public record ReceiptRevisionResolveData(
     String revisionVersion,
-    String brand,
     List<ReceiptRevisionResolveDataItem> items,
     LocalDateTime paymentDate,
-    String address,
     ReceiptResolverStrategyType strategy,
     BigDecimal totalPrice
 ) {

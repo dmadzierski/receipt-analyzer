@@ -120,9 +120,7 @@ public class ReceiptFacade {
 
     private ReceiptRevision copyRevisionWithItems(ReceiptRevision revision) {
         ReceiptRevision revisionCopy = ReceiptRevision.builder()
-            .name(revision.getName() + "(copy)")
             .resolver(ReceiptResolverStrategyType.USER)
-            .address(revision.getAddress())
             .isPreferredRevision(false)
             .totalPrice(revision.getTotalPrice())
             .paymentDate(revision.getPaymentDate())
@@ -161,10 +159,8 @@ public class ReceiptFacade {
     UpdateRevisionResponse updateRevision(AuthenticatedUser user, UUID revisionId, UpdateRevisionRequest updatedRevisionRequest) {
         ReceiptRevision revision = revisionRepository.findAccessibleWithItems(revisionId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
-        if (updatedRevisionRequest.brand() != null) revision.setBrand(updatedRevisionRequest.brand());
         if (updatedRevisionRequest.totalPrice() != null) revision.setTotalPrice(updatedRevisionRequest.totalPrice());
         if (updatedRevisionRequest.paymentDate() != null) revision.setPaymentDate(updatedRevisionRequest.paymentDate());
-        if (updatedRevisionRequest.address() != null) revision.setAddress(updatedRevisionRequest.address());
         if (updatedRevisionRequest.isPreferredRevision() != null)
             revision.setIsPreferredRevision(updatedRevisionRequest.isPreferredRevision());
         if (updatedRevisionRequest.isCorrect() != null) revision.setIsCorrect(updatedRevisionRequest.isCorrect());
@@ -260,7 +256,6 @@ public class ReceiptFacade {
         return ReceiptRevisionDto.builder()
             .id(revision.getId())
             .createdDate(revision.getCreatedDate())
-            .name(revision.getName())
             .resolver(revision.getResolver())
             .totalPrice(revision.getTotalPrice())
             .paymentDate(revision.getPaymentDate())

@@ -16,7 +16,6 @@ import java.util.UUID;
 public class ReceiptRevisionDto {
     private UUID id;
     private LocalDateTime createdDate;
-    private String name;
     private ReceiptResolverStrategyType resolver;
     private BigDecimal totalPrice;
     private LocalDateTime paymentDate;

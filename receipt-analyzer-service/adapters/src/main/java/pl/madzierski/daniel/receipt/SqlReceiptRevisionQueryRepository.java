@@ -15,7 +15,6 @@ public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryR
         SELECT new pl.madzierski.daniel.receipt.model.ReceiptRevisionDto(
             rev.id,
             rev.createdDate,
-            rev.name,
             rev.resolver,
             rev.totalPrice,
             rev.paymentDate,
@@ -35,7 +34,6 @@ public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryR
         SELECT new pl.madzierski.daniel.receipt.model.ReceiptRevisionDto(
             rev.id,
             rev.createdDate,
-            rev.name,
             rev.resolver,
             rev.totalPrice,
             rev.paymentDate,

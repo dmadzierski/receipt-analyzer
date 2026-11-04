@@ -87,10 +87,8 @@ export interface RevisionDetails {
   id: string
   resolver: any
   createdDate: string
-  brand: string
   totalPrice: Number
   paymentDate: string
-  address: string
   isPreferredRevision: boolean
   isCorrect: boolean
   items: Item[]
@@ -118,10 +116,8 @@ export interface Revision {
   id: string
   resolver: any
   createdDate: string
-  brand: string
   totalPrice: Number
   paymentDate: string
-  address: string
   isPreferredRevision: boolean
   isCorrect: boolean
 }

@@ -40,7 +40,6 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
     private static final String PATTERN_TO_CLEAN_LINE = "^.*?(?=\\d[.,]\\d{3}|[ABC]\\s)";
     private static final String TOTAL_PRICE = "totalPrice";
     private static final String DISCOUNT = "discount";
-    private static final String BIEDRONKA_BRAND_NAME = "Biedronka";
     private final String tesseractDataPath;
     private final String resolverVersion;
     private final PDFService pdfService;
@@ -77,7 +76,7 @@ public class BiedronkaScanResolver implements ReceiptResolverStrategy {
             .map(it -> it.totalPrice() != null ? it.totalPrice() : BigDecimal.ZERO)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new ReceiptRevisionResolveData(resolverVersion, BIEDRONKA_BRAND_NAME, items, null, null,
+        return new ReceiptRevisionResolveData(resolverVersion, items, null,
             strategy(), totalPrice);
     }
 

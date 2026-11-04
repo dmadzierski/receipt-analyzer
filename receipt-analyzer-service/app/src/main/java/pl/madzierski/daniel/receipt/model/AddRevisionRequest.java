@@ -8,10 +8,8 @@ import java.util.UUID;
 public record AddRevisionRequest(
     UUID receiptId,
     LocalDateTime createdDate,
-    String brand,
     BigDecimal totalPrice,
     LocalDateTime paymentDate,
-    String address,
     Set<AddRevisionItemRequest> items
 ) {
     public record AddRevisionItemRequest(

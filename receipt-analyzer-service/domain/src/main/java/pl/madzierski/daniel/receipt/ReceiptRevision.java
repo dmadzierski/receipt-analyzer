@@ -20,13 +20,10 @@ class ReceiptRevision {
     private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
-    private String name;
     private String revision;
     private ReceiptResolverStrategyType resolver;
-    private String brand;
     private BigDecimal totalPrice;
     private LocalDateTime paymentDate;
-    private String address;
     private Boolean isPreferredRevision;
     private Boolean isCorrect;
     private Receipt receipt;

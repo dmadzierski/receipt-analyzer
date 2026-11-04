@@ -26,7 +26,6 @@ class BiedronkaJsonResolverIT extends IntegrationTest {
         ReceiptRevisionResolveData result = resolver.execute(List.of(readResource(RECEIPT)));
 
         assertThat(result.strategy()).isEqualTo(ReceiptResolverStrategyType.BIEDRONKA_JSON);
-        assertThat(result.brand()).isEqualTo("Biedronka");
         assertThat(result.items()).extracting(ReceiptRevisionResolveDataItem::position)
             .containsExactlyElementsOf(IntStream.rangeClosed(1, 36).boxed().toList());
         ReceiptRevisionResolveDataItem onion = result.items().getFirst();
