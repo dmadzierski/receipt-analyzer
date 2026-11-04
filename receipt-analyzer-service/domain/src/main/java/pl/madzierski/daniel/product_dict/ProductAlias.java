@@ -11,18 +11,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(exclude = "productDict")
+@EqualsAndHashCode
 class ProductAlias {
 
     private UUID id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
-    private ProductDict productDict;
-
-    public ProductAlias(UUID id, String name, ProductDict productDict) {
-        this.id = id;
-        this.name = name;
-        this.productDict = productDict;
-    }
 }

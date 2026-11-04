@@ -20,7 +20,7 @@ class SqlProductDict extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String name;
     @Getter(AccessLevel.NONE)
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany
     @JoinTable(
         name = "product_category_mapping",
         joinColumns = @JoinColumn(name = "product_id"),
@@ -28,7 +28,8 @@ class SqlProductDict extends BaseEntity {
     )
     private final Set<SqlProductCategory> categories = new HashSet<>();
     @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "productDict", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
     private final Set<SqlProductAlias> aliases = new HashSet<>();
 
     public Set<SqlProductAlias> getAliases() {
@@ -47,7 +48,7 @@ class SqlProductDict extends BaseEntity {
         sqlProductDict.setModifiedDate(s.getModifiedDate());
         sqlProductDict.aliases.addAll(s.getAliases()
             .stream()
-            .map(productAlias -> SqlProductAlias.fromProductAlias(productAlias, sqlProductDict))
+            .map(SqlProductAlias::fromProductAlias)
             .toList());
         sqlProductDict.categories.addAll(s.getProductCategories()
             .stream()
@@ -62,7 +63,7 @@ class SqlProductDict extends BaseEntity {
         productDict.setName(this.name);
         productDict.setCreatedDate(this.createdDate);
         productDict.setModifiedDate(this.modifiedDate);
-        productDict.addAllAlias(this.aliases.stream().map(alias -> alias.toProductAlias(productDict)).toList());
+        productDict.addAllAlias(this.aliases.stream().map(SqlProductAlias::toProductAlias).toList());
         productDict.addAllCategories(this.categories.stream().map(SqlProductCategory::toProductCategory).toList());
         return productDict;
     }

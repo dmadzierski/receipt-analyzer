@@ -32,7 +32,7 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void createsCategoryWithTrimmedName() {
-        productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("  Warzywa "));
+        productDictFacade.addProductCategory(new CreateProductCategoryRequest("  Warzywa "));
         flush();
 
         assertThat(productDictFacade.getProductCategoryList().items())
@@ -42,17 +42,17 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void rejectsCategoryThatDiffersOnlyInLetterCase() {
-        productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa"));
+        productDictFacade.addProductCategory(new CreateProductCategoryRequest("Warzywa"));
         flush();
 
-        assertError(() -> productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("WARZYWA")),
+        assertError(() -> productDictFacade.addProductCategory(new CreateProductCategoryRequest("WARZYWA")),
             AppRuntimeExceptionMessages.PRODUCT_CATEGORY_ALREADY_EXISTS);
     }
 
     @Test
     void renamesCategoryButNotToNameOfAnotherCategory() {
-        UUID vegetablesId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
-        productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Owoce"));
+        UUID vegetablesId = productDictFacade.addProductCategory(new CreateProductCategoryRequest("Warzywa")).id();
+        productDictFacade.addProductCategory(new CreateProductCategoryRequest("Owoce"));
         flush();
 
         productDictFacade.updateProductCategory(vegetablesId, new UpdateProductCategoryRequest("warzywa"));
@@ -67,8 +67,8 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void categoryUsedByProductCannotBeDeleted() {
-        UUID usedId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
-        UUID unusedId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Owoce")).id();
+        UUID usedId = productDictFacade.addProductCategory(new CreateProductCategoryRequest("Warzywa")).id();
+        UUID unusedId = productDictFacade.addProductCategory(new CreateProductCategoryRequest("Owoce")).id();
         flush();
         assignCategory(insertProduct("Cebula"), usedId);
 
@@ -83,7 +83,7 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void mergingProductsKeepsChosenAliasesAndMovesItemsAndCategoriesToPrimaryProduct() {
-        UUID categoryId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Nabiał")).id();
+        UUID categoryId = productDictFacade.addProductCategory(new CreateProductCategoryRequest("Nabiał")).id();
         UUID primaryId = insertProduct("Mleko");
         UUID primaryAliasId = insertAlias(primaryId, "Mleko 3,2% 1l");
         UUID secondId = insertProduct("Mleko łaciate");
@@ -153,8 +153,8 @@ class ProductDictFacadeIT extends IntegrationTest {
 
     @Test
     void updatingProductReplacesItsCategories() {
-        UUID vegetablesId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Warzywa")).id();
-        UUID organicId = productDictFacade.addProductCategory(USER_SUB, new CreateProductCategoryRequest("Eko")).id();
+        UUID vegetablesId = productDictFacade.addProductCategory(new CreateProductCategoryRequest("Warzywa")).id();
+        UUID organicId = productDictFacade.addProductCategory(new CreateProductCategoryRequest("Eko")).id();
         flush();
         UUID productId = insertProduct("Cebula");
         UUID aliasId = insertAlias(productId, "Cebula");

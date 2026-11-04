@@ -8,7 +8,7 @@ import java.util.UUID;
 interface ProductCategoryRepository {
     List<ProductCategory> findAllByOrderByNameAsc();
 
-    boolean existsByNameAndUser(String name, String userSub);
+    boolean existsByName(String name);
 
     boolean existsByNameAndIdNot(String name, UUID id);
 

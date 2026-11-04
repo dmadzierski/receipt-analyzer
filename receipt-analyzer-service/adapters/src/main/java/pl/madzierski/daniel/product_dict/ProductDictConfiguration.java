@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import pl.madzierski.daniel.receipt.ReceiptFacade;
-import pl.madzierski.daniel.user.UserQueryRepository;
 
 @Configuration
 class ProductDictConfiguration {
@@ -17,7 +16,6 @@ class ProductDictConfiguration {
         ProductCategoryRepository productCategoryRepository,
         ProductCategoryFactory productCategoryFactory,
         ProductAliasFactory productAliasFactory,
-        UserQueryRepository userQueryRepository,
         @Lazy ReceiptFacade receiptFacade,
         @Value("${product-dict.min-required-similarity}") Double minRequiredStringSimilarity) {
         return new ProductDictFacade(
@@ -27,8 +25,7 @@ class ProductDictConfiguration {
             productAliasRepository,
             productCategoryRepository,
             receiptFacade,
-            minRequiredStringSimilarity,
-            userQueryRepository
+            minRequiredStringSimilarity
         );
     }
 

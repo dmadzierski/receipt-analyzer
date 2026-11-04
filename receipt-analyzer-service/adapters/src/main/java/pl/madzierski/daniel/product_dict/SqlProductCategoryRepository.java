@@ -31,7 +31,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     }
 
     @Override
-    public boolean existsByNameAndUser(String name, String userSub) {
+    public boolean existsByName(String name) {
         return this.repository.existsByNameIgnoreCase(name);
     }
 
@@ -42,7 +42,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
 
     @Override
     public ProductCategory save(ProductCategory productCategory) {
-        return this.repository.save(SqlProductCategory.formProductCategory(productCategory)).toProductCategory();
+        return this.repository.save(SqlProductCategory.fromProductCategory(productCategory)).toProductCategory();
     }
 
     @Override
@@ -53,7 +53,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
 
     @Override
     public void delete(ProductCategory productCategory) {
-        this.repository.delete(SqlProductCategory.formProductCategory(productCategory));
+        this.repository.delete(SqlProductCategory.fromProductCategory(productCategory));
     }
 
     @Override

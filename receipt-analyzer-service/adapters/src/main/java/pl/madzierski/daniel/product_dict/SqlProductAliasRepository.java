@@ -23,6 +23,6 @@ class ProductAliasRepositoryImpl implements ProductAliasRepository {
     @Override
     public Set<ProductAlias> findAllByIds(Set<UUID> aliasIdList) {
         return sqlProductAliasRepository.findAllByIdIn(aliasIdList).stream()
-            .map(alias -> alias.toProductAlias(alias.getProductDict().toProductDict())).collect(Collectors.toSet());
+            .map(SqlProductAlias::toProductAlias).collect(Collectors.toSet());
     }
 }

@@ -4,8 +4,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pl.madzierski.daniel.product_dict.model.*;
@@ -26,9 +24,8 @@ class ProductCategoryController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<CreateProductCategoryResponse> addProductCategory( @AuthenticationPrincipal Jwt jwt,
-        @RequestBody @Valid CreateProductCategoryRequest request) {
-        return ResponseEntity.ok(productDictFacade.addProductCategory(jwt.getSubject(), request));
+    ResponseEntity<CreateProductCategoryResponse> addProductCategory(@RequestBody @Valid CreateProductCategoryRequest request) {
+        return ResponseEntity.ok(productDictFacade.addProductCategory(request));
     }
 
     @PutMapping(path = "/{productCategoryId}", consumes = MediaType.APPLICATION_JSON_VALUE)
