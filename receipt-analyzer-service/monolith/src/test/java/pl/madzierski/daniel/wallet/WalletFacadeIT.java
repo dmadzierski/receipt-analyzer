@@ -36,6 +36,16 @@ class WalletFacadeIT extends IntegrationTest {
     }
 
     @Test
+    void addedWalletGetsTrimmedName() {
+        AuthenticatedUser anna = new AuthenticatedUser(createUser("anna"));
+
+        UUID walletId = walletFacade.addWallet(anna, new CreateWalletRequest("  Home  ")).id();
+        flush();
+
+        assertThat(jdbcTemplate.queryForObject("SELECT name FROM wallet WHERE id = ?", String.class, walletId)).isEqualTo("Home");
+    }
+
+    @Test
     void walletDetailsShowPreferredRevisionAndStoreOfEachReceipt() {
         UUID annaId = createUser("anna");
         UUID walletId = createWallet(annaId, "Home");

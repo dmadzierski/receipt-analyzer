@@ -7,7 +7,6 @@ import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -21,7 +20,5 @@ public class ReceiptRevisionDto {
     private LocalDateTime paymentDate;
     private Boolean isPreferredRevision;
     private Boolean isCorrect;
-    private Collection<ReceiptItemDto> items;
     private UUID receiptId;
-    private String revision;
 }

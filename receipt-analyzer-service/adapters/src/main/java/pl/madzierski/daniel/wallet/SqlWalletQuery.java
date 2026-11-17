@@ -21,7 +21,7 @@ public class SqlWalletQuery extends BaseEntity {
     }
 
     public static SqlWalletQuery fromWalletQuery(WalletQuery wallet) {
-        return new SqlWalletQuery(wallet.getId());
+        return new SqlWalletQuery(wallet.id());
     }
 
     public WalletQuery toWalletQuery() {

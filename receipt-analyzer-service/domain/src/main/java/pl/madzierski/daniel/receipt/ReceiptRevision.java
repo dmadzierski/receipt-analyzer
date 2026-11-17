@@ -5,6 +5,7 @@ import pl.madzierski.daniel.exception.AppIllegalStateException;
 import pl.madzierski.daniel.exception.AppIllegalStateExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
+import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionQuery;
 
 import java.math.BigDecimal;
@@ -25,23 +26,21 @@ class ReceiptRevision {
     private ReceiptResolverStrategyType resolver;
     private BigDecimal totalPrice;
     private LocalDateTime paymentDate;
-    private Boolean isPreferredRevision;
     private Boolean isCorrect;
-    private Receipt receipt;
+    private ReceiptQuery receipt;
     private ReceiptRevisionQuery parentReceiptRevision;
     @Builder.Default
     private Set<ReceiptItem> items = new HashSet<>();
     private FileGroupQuery sourceFileGroup;
 
     static ReceiptRevision createDigitized(String revision, ReceiptResolverStrategyType resolver, BigDecimal totalPrice,
-                                           LocalDateTime paymentDate, Collection<ReceiptItem> items, Receipt receipt,
+                                           LocalDateTime paymentDate, Collection<ReceiptItem> items, ReceiptQuery receipt,
                                            FileGroupQuery sourceFileGroup) {
         ReceiptRevision created = builder()
             .revision(revision)
             .resolver(resolver)
             .totalPrice(totalPrice)
             .paymentDate(paymentDate)
-            .isPreferredRevision(false)
             .receipt(receipt)
             .sourceFileGroup(sourceFileGroup)
             .items(new HashSet<>(items))
@@ -52,7 +51,7 @@ class ReceiptRevision {
 
     static ReceiptRevision restore(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String revision,
                                    ReceiptResolverStrategyType resolver, BigDecimal totalPrice, LocalDateTime paymentDate,
-                                   Boolean isPreferredRevision, Boolean isCorrect, Receipt receipt,
+                                   Boolean isCorrect, ReceiptQuery receipt,
                                    ReceiptRevisionQuery parentReceiptRevision, Collection<ReceiptItem> items,
                                    FileGroupQuery sourceFileGroup) {
         return builder()
@@ -63,7 +62,6 @@ class ReceiptRevision {
             .resolver(resolver)
             .totalPrice(totalPrice)
             .paymentDate(paymentDate)
-            .isPreferredRevision(isPreferredRevision)
             .isCorrect(isCorrect)
             .receipt(receipt)
             .parentReceiptRevision(parentReceiptRevision)
@@ -75,7 +73,6 @@ class ReceiptRevision {
     ReceiptRevision copyAsUserRevision() {
         return builder()
             .resolver(ReceiptResolverStrategyType.USER)
-            .isPreferredRevision(false)
             .totalPrice(totalPrice)
             .paymentDate(paymentDate)
             .isCorrect(isCorrect)
@@ -92,19 +89,18 @@ class ReceiptRevision {
         return Collections.unmodifiableSet(items);
     }
 
-    boolean isPreferred() {
-        return Boolean.TRUE.equals(isPreferredRevision);
-    }
-
     boolean canEditItems() {
         return resolver == ReceiptResolverStrategyType.USER;
     }
 
-    void updateDetails(BigDecimal totalPrice, LocalDateTime paymentDate, Boolean isPreferredRevision, Boolean isCorrect) {
-        if (totalPrice != null) this.totalPrice = totalPrice;
-        if (paymentDate != null) this.paymentDate = paymentDate;
-        if (isPreferredRevision != null) this.isPreferredRevision = isPreferredRevision;
-        if (isCorrect != null) this.isCorrect = isCorrect;
+    void changeSummary(BigDecimal totalPrice, LocalDateTime paymentDate) {
+        this.totalPrice = totalPrice;
+        this.paymentDate = paymentDate;
+        markCorrectIfPricesConsistent();
+    }
+
+    void markCorrect(boolean correct) {
+        this.isCorrect = correct;
         markCorrectIfPricesConsistent();
     }
 
@@ -146,13 +142,13 @@ class ReceiptRevision {
 
     List<ItemCorrection> itemCorrections(ReceiptRevision original) {
         ensureCanEditItems();
-        if (parentReceiptRevision == null || !parentReceiptRevision.getId().equals(original.id))
+        if (parentReceiptRevision == null || !parentReceiptRevision.id().equals(original.id))
             throw new AppIllegalStateException(AppIllegalStateExceptionMessages.REVISION_NOT_PARENT);
         Map<UUID, ReceiptItem> originalItemsById = original.items.stream()
             .collect(Collectors.toMap(ReceiptItem::getId, Function.identity()));
         return items.stream()
             .filter(item -> item.getParentItem() != null)
-            .flatMap(item -> Optional.ofNullable(originalItemsById.get(item.getParentItem().getId()))
+            .flatMap(item -> Optional.ofNullable(originalItemsById.get(item.getParentItem().id()))
                 .filter(originalItem -> originalItem.getNameDict() == null)
                 .map(originalItem -> new ItemCorrection(originalItem.getId(), originalItem.getName(), item.getName(), item.getNameDict()))
                 .stream())
@@ -166,7 +162,7 @@ class ReceiptRevision {
     void assignProductsByParentItemId(Map<UUID, ProductDictQuery> productsByParentItemId) {
         items.stream()
             .filter(item -> item.getParentItem() != null && item.getNameDict() == null)
-            .forEach(item -> Optional.ofNullable(productsByParentItemId.get(item.getParentItem().getId()))
+            .forEach(item -> Optional.ofNullable(productsByParentItemId.get(item.getParentItem().id()))
                 .ifPresent(item::assignProduct));
     }
 

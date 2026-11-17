@@ -7,6 +7,7 @@ import {
   GetStoreBrandListResponse,
   GetStoreListResponse,
 } from '../model/store.model';
+import {StoreDetails} from '../model/receipt.model';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +25,12 @@ export class StoreService {
   getStoreBrands(query: string = ''): Observable<GetStoreBrandListResponse> {
     return this.httpClient.get<GetStoreBrandListResponse>('/api/store-brands', {
       params: {query},
+      withCredentials: true,
+    });
+  }
+
+  getStoreDetails(storeId: string): Observable<StoreDetails> {
+    return this.httpClient.get<StoreDetails>(`/api/stores/${storeId}`, {
       withCredentials: true,
     });
   }

@@ -9,7 +9,7 @@ import {StoreAutocompleteComponent} from '../component/store-autocomplete/store-
 import {ReceiptService} from '../service/receipt.service';
 import {StoreService} from '../service/store.service';
 import {CreateReceiptData, ResolverStrategy} from '../model/receipt.model';
-import {CreateStoreResponse, GetStoreListResponseItem} from '../model/store.model';
+import {GetStoreListResponseItem} from '../model/store.model';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime, distinctUntilChanged, map, of, Subject, switchMap} from 'rxjs';
@@ -107,7 +107,7 @@ export class ReceiptAddComponent {
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe((createdStore?: CreateStoreResponse) => {
+    dialogRef.afterClosed().subscribe((createdStore?: GetStoreListResponseItem) => {
       if (createdStore) {
         this.data.storeId = createdStore.id;
         this.storeSearchText = `${createdStore.brand} - ${createdStore.city} ${createdStore.address}`;

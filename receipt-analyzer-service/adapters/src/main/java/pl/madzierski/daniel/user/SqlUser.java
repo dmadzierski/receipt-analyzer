@@ -26,11 +26,6 @@ public class SqlUser extends BaseEntity {
     }
 
     public User toUser() {
-        return new User(
-            this.id,
-            this.userSub,
-            this.createdDate,
-            this.modifiedDate
-        );
+        return User.restore(id, userSub, createdDate, modifiedDate);
     }
 }

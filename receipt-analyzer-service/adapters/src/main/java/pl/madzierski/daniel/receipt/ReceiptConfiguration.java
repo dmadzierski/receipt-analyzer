@@ -15,7 +15,6 @@ import pl.madzierski.daniel.wallet.WalletQueryRepository;
 class ReceiptConfiguration {
     @Bean
     ReceiptFacade receiptFacade(
-        ReceiptItemRepository receiptItemRepository,
         ReceiptItemQueryRepository receiptItemQueryRepository,
         ReceiptRevisionRepository revisionRepository,
         ReceiptRepository receiptRepository,
@@ -30,7 +29,6 @@ class ReceiptConfiguration {
         WalletQueryRepository walletQueryRepository
     ) {
         return new ReceiptFacade(
-            receiptItemRepository,
             receiptItemQueryRepository,
             revisionRepository,
             new ReceiptFactory(),

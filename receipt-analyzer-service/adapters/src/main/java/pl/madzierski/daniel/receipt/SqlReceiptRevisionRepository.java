@@ -6,8 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
+import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,13 +28,13 @@ interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision,
     @Query("DELETE FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId")
     void deleteByReceiptId(UUID receiptId);
 
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Modifying
     @Query("""
-        UPDATE SqlReceiptRevision r
-        SET r.isPreferredRevision = false
-        WHERE r.receipt.id = :receiptId AND r.id <> :preferredRevisionId AND r.isPreferredRevision = true
+        UPDATE SqlReceiptItem i
+        SET i.product = :dict
+        WHERE i.product.id IN (:productDictIdList)
         """)
-    void unsetPreferredInOtherRevisions(UUID receiptId, UUID preferredRevisionId);
+    void reassignProductDict(SqlProductDictQuery dict, List<UUID> productDictIdList);
 }
 
 @AllArgsConstructor
@@ -47,13 +50,13 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
 
     @Override
     public Optional<ReceiptRevision> findByIdWithItems(UUID revisionId, UserQuery user) {
-        return repository.findAccessibleWithItems(revisionId, user.getId())
+        return repository.findAccessibleWithItems(revisionId, user.id())
             .map(SqlReceiptRevision::toReceiptRevision);
     }
 
     @Override
     public Optional<ReceiptRevision> findAccessible(UUID revisionId, UserQuery user) {
-        return repository.findAccessible(revisionId, user.getId())
+        return repository.findAccessible(revisionId, user.id())
             .map(SqlReceiptRevision::toReceiptRevision);
     }
 
@@ -73,7 +76,7 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     }
 
     @Override
-    public void unsetPreferredInOtherRevisions(UUID receiptId, UUID preferredRevisionId) {
-        repository.unsetPreferredInOtherRevisions(receiptId, preferredRevisionId);
+    public void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList) {
+        repository.reassignProductDict(SqlProductDictQuery.fromProductDict(dict), productDictIdList);
     }
 }

@@ -13,7 +13,6 @@ export interface CreateProductCategoryRequest {
 
 export interface CreateProductCategoryResponse {
   id: string;
-  name: string;
 }
 
 export interface UpdateProductCategoryRequest {
@@ -22,5 +21,4 @@ export interface UpdateProductCategoryRequest {
 
 export interface UpdateProductCategoryResponse {
   id: string;
-  name: string;
 }

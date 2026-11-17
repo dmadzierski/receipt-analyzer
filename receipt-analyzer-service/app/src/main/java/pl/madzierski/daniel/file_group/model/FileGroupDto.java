@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Builder
-public record FileGroupDto(UUID id, FileType fileType, boolean isOriginal, Set<FileDto> files) {
+public record FileGroupDto(UUID id, FileType fileType, Set<FileDto> files) {
 
     @Override
     public Set<FileDto> files() {

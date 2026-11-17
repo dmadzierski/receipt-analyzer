@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.wallet;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ class WalletController {
     private final WalletFacade walletFacade;
 
     @PostMapping
-    ResponseEntity<CreateWalletResponse> addWallet(AuthenticatedUser user, @RequestBody CreateWalletRequest request) {
+    ResponseEntity<CreateWalletResponse> addWallet(AuthenticatedUser user, @RequestBody @Valid CreateWalletRequest request) {
         return ResponseEntity.ok(this.walletFacade.addWallet(user, request));
     }
 

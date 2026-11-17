@@ -2,7 +2,6 @@ package pl.madzierski.daniel.store;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.madzierski.daniel.store.model.StoreRepository;
 
 @Configuration
 public class StoreConfiguration {

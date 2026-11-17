@@ -3,7 +3,6 @@ package pl.madzierski.daniel.store;
 import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.BaseEntity;
-import pl.madzierski.daniel.store.model.Store;
 
 
 @Entity
@@ -16,16 +15,16 @@ import pl.madzierski.daniel.store.model.Store;
 class SqlStore extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private SqlStoreBrand brand;
+    private SqlStoreBrandQuery brand;
 
     private String address;
     private String city;
     private String postalCode;
     private String country;
 
-    public static SqlStore fromStore(Store store) {
+    static SqlStore fromStore(Store store) {
         SqlStore sqlStore = new SqlStore(
-                SqlStoreBrand.fromStoreBrand(store.getBrand()),
+                store.getBrand() != null ? SqlStoreBrandQuery.fromStoreBrandQuery(store.getBrand()) : null,
                 store.getAddress(),
                 store.getCity(),
                 store.getPostalCode(),
@@ -37,16 +36,8 @@ class SqlStore extends BaseEntity {
         return sqlStore;
     }
 
-    public Store toStore() {
-        return new Store(
-                this.id,
-                this.brand.toStoreBrand(),
-                this.address,
-                this.city,
-                this.postalCode,
-                this.country,
-                this.createdDate,
-                this.modifiedDate
-        );
+    Store toStore() {
+        return Store.restore(id, brand != null ? brand.toStoreBrandQuery() : null, address, city, postalCode, country,
+            createdDate, modifiedDate);
     }
 }

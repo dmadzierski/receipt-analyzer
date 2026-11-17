@@ -7,7 +7,8 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {debounceTime, distinctUntilChanged, map, of, Subject, switchMap} from 'rxjs';
 import {StoreService} from '../../service/store.service';
-import {CreateStoreRequest, CreateStoreResponse, StoreBrandItem} from '../../model/store.model';
+import {CreateStoreRequest, StoreBrandItem} from '../../model/store.model';
+import {StoreDetails} from '../../model/receipt.model';
 
 @Component({
   selector: 'app-store-create-dialog',
@@ -93,9 +94,11 @@ export class StoreCreateDialogComponent {
     }
 
     this.model.brandName = brandName;
-    this.storeService.createStore(this.model).subscribe((createdStore: CreateStoreResponse) => {
-      this.dialogRef.close(createdStore);
-    });
+    this.storeService.createStore(this.model)
+      .pipe(switchMap(created => this.storeService.getStoreDetails(created.id)))
+      .subscribe((createdStore: StoreDetails) => {
+        this.dialogRef.close(createdStore);
+      });
   }
 
   cancel(): void {

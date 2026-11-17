@@ -214,11 +214,11 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID copyId = copyRevision(originalId);
 
         Map<String, Object> copy = jdbcTemplate.queryForMap(
-            "SELECT c.resolver, c.is_preferred_revision, c.is_correct, c.total_price, c.parent_receipt_revision_id, "
+            "SELECT c.resolver, c.is_correct, c.total_price, c.parent_receipt_revision_id, "
                 + "c.source_file_group_id = o.source_file_group_id AS same_source "
                 + "FROM receipt_revision c JOIN receipt_revision o ON o.id = ? WHERE c.id = ?", originalId, copyId);
         assertThat(copy.get("resolver")).isEqualTo("USER");
-        assertThat(copy.get("is_preferred_revision")).isEqualTo(false);
+        assertThat(isPreferred(copyId)).isFalse();
         assertThat(copy.get("is_correct")).isEqualTo(true);
         assertThat(copy.get("parent_receipt_revision_id")).isEqualTo(originalId);
         assertThat(copy.get("same_source")).isEqualTo(true);
@@ -635,6 +635,235 @@ class ReceiptFacadeIT extends IntegrationTest {
             AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND);
     }
 
+    @Test
+    void receiptDetailsShowPreferredRevisionWithItemsAllRevisionsStoreAndFilePartsInOrder() {
+        UUID receiptId = createReceiptFromJson();
+        UUID originalId = revisionIdOf(receiptId);
+        UUID copyId = copyRevision(originalId);
+        receiptFacade.updateRevision(user, copyId, preferredUpdate(copyId));
+        List<byte[]> pages = List.of(png(3), png(1), png(2));
+        UUID imagesGroupId = fileFacade.save(user, receiptId, pages);
+        flush();
+
+        GetReceiptDetailsResponse details = receiptFacade.getReceiptDetails(user, receiptId);
+
+        assertThat(details.id()).isEqualTo(receiptId);
+        assertThat(details.name()).isEqualTo("Biedronka 22.05");
+        assertThat(details.description()).isEqualTo("test receipt");
+        assertThat(details.walletId()).isEqualTo(walletId);
+        assertThat(details.store()).extracting(StoreDetailsResponse::id, StoreDetailsResponse::brand, StoreDetailsResponse::city)
+            .containsExactly(storeId, "Biedronka", "Poznań");
+        assertThat(details.preferredRevision().id()).isEqualTo(copyId);
+        assertThat(details.preferredRevision().resolver()).isEqualTo(ReceiptResolverStrategyType.USER);
+        assertThat(details.preferredRevision().totalPrice()).isEqualByComparingTo("330.75");
+        assertThat(details.preferredRevision().items()).hasSize(36)
+            .extracting(GetReceiptDetailsResponse.ItemResponse::id)
+            .containsExactlyInAnyOrderElementsOf(itemsOf(copyId).stream().map(ItemRequest::id).toList());
+        assertThat(details.revisions())
+            .extracting(GetReceiptDetailsResponse.RevisionResponse::id, GetReceiptDetailsResponse.RevisionResponse::isPreferredRevision)
+            .containsExactlyInAnyOrder(tuple(originalId, false), tuple(copyId, true));
+        assertThat(details.fileGroups()).extracting(GetReceiptDetailsResponse.FileGroupResponse::fileType)
+            .containsExactlyInAnyOrder("JSON", "PNG");
+        GetReceiptDetailsResponse.FileGroupResponse images = details.fileGroups().stream()
+            .filter(group -> group.id().equals(imagesGroupId))
+            .findFirst()
+            .orElseThrow();
+        assertThat(images.files()).extracting(GetReceiptDetailsResponse.FileGroupResponse.FileResponse::partNumber)
+            .containsExactly(0, 1, 2);
+    }
+
+    @Test
+    void receiptWithoutPreferredRevisionShowsNoPreferredItems() {
+        UUID receiptId = createReceiptFromJson();
+
+        GetReceiptDetailsResponse details = receiptFacade.getReceiptDetails(user, receiptId);
+
+        assertThat(details.preferredRevision()).isNull();
+        assertThat(details.revisions()).singleElement()
+            .satisfies(revision -> assertThat(revision.resolver()).isEqualTo(ReceiptResolverStrategyType.BIEDRONKA_JSON));
+    }
+
+    @Test
+    void revisionSummaryChangesOnlyWhenValuesAreSent() {
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+        LocalDateTime paymentDate = LocalDateTime.of(2026, 6, 1, 18, 30);
+
+        receiptFacade.updateRevision(user, copyId, summaryUpdate(copyId, new BigDecimal("100.00"), paymentDate, null, null));
+        flush();
+        receiptFacade.updateRevision(user, copyId, summaryUpdate(copyId, null, null, null, null));
+        flush();
+
+        GetRevisionResponse revision = receiptFacade.getRevision(user, copyId);
+        assertThat(revision.totalPrice()).isEqualByComparingTo("100.00");
+        assertThat(revision.paymentDate()).isEqualTo(paymentDate);
+        assertThat(revision.isCorrect()).isTrue();
+    }
+
+    @Test
+    void unmarkingPreferredRevisionLeavesReceiptWithoutPreferredRevision() {
+        UUID receiptId = createReceiptFromJson();
+        UUID originalId = revisionIdOf(receiptId);
+        receiptFacade.updateRevision(user, originalId, preferredUpdate(originalId));
+        flush();
+
+        receiptFacade.updateRevision(user, originalId, summaryUpdate(originalId, null, null, false, null));
+        flush();
+
+        assertThat(isPreferred(originalId)).isFalse();
+        assertThat(receiptFacade.getReceiptDetails(user, receiptId).preferredRevision()).isNull();
+    }
+
+    @Test
+    void unmarkingOtherRevisionKeepsPreferredRevisionOfReceipt() {
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        receiptFacade.updateRevision(user, originalId, preferredUpdate(originalId));
+        flush();
+
+        receiptFacade.updateRevision(user, copyId, summaryUpdate(copyId, null, null, false, null));
+        flush();
+
+        assertThat(isPreferred(originalId)).isTrue();
+        assertThat(isPreferred(copyId)).isFalse();
+    }
+
+    @Test
+    void deletingPreferredRevisionLeavesReceiptWithoutPreferredRevision() {
+        UUID receiptId = createReceiptFromJson();
+        UUID copyId = copyRevision(revisionIdOf(receiptId));
+        receiptFacade.updateRevision(user, copyId, preferredUpdate(copyId));
+        flush();
+
+        receiptFacade.deleteRevision(user, copyId);
+        flush();
+
+        assertThat(jdbcTemplate.queryForObject("SELECT preferred_revision_id FROM receipt WHERE id = ?", UUID.class, receiptId)).isNull();
+        assertThat(receiptFacade.getReceiptDetails(user, receiptId).preferredRevision()).isNull();
+    }
+
+    @Test
+    void markingAlreadyPreferredRevisionAgainKeepsItPreferred() {
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        receiptFacade.updateRevision(user, originalId, preferredUpdate(originalId));
+        flush();
+
+        receiptFacade.updateRevision(user, originalId, preferredUpdate(originalId));
+        flush();
+
+        assertThat(isPreferred(originalId)).isTrue();
+    }
+
+    @Test
+    void updatingResolverRevisionChangesSummaryAndFlagsButKeepsItsItems() {
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        List<ItemRequest> itemsBefore = itemsOf(originalId);
+
+        receiptFacade.updateRevision(user, originalId,
+            new UpdateRevisionRequest(null, null, null, new BigDecimal("1.00"), null, true, null, Set.of()));
+        flush();
+
+        assertThat(itemsOf(originalId)).containsExactlyElementsOf(itemsBefore);
+        assertThat(isPreferred(originalId)).isTrue();
+        assertThat(jdbcTemplate.queryForObject("SELECT total_price FROM receipt_revision WHERE id = ?", BigDecimal.class, originalId))
+            .isEqualByComparingTo("1.00");
+    }
+
+    @Test
+    void userCanMarkInconsistentRevisionAsCorrectButCannotUnmarkConsistentOne() {
+        UUID originalId = revisionIdOf(createReceiptFromJson());
+        UUID copyId = copyRevision(originalId);
+        receiptFacade.updateRevision(user, copyId, summaryUpdate(copyId, new BigDecimal("1.00"), null, null, null));
+        jdbcTemplate.update("UPDATE receipt_revision SET is_correct = false WHERE id = ?", copyId);
+        flush();
+
+        receiptFacade.updateRevision(user, copyId, summaryUpdate(copyId, null, null, null, true));
+        receiptFacade.updateRevision(user, originalId, summaryUpdate(originalId, null, null, null, false));
+        flush();
+
+        assertThat(isCorrect(copyId)).isTrue();
+        assertThat(isCorrect(originalId)).isTrue();
+    }
+
+    @Test
+    void revisionResolvedAgainFromStoredFileGroupGetsItemsAndDictionaryProducts() {
+        UUID receiptId = createReceiptFromJson();
+        UUID fileGroupId = jdbcTemplate.queryForObject("SELECT id FROM receipt_file_group WHERE receipt_id = ?", UUID.class, receiptId);
+        UUID onionId = createProduct("Cebula", ONION);
+
+        UUID revisionId = receiptFacade.createRevision(user, receiptId,
+            new CreateRevisionRequest(fileGroupId, ReceiptResolverStrategyType.BIEDRONKA_JSON)).revisionId();
+        flush();
+
+        Map<String, Object> revision = jdbcTemplate.queryForMap(
+            "SELECT resolver, source_file_group_id, is_correct, total_price FROM receipt_revision WHERE id = ?", revisionId);
+        assertThat(revision.get("resolver")).isEqualTo("BIEDRONKA_JSON");
+        assertThat(revision.get("source_file_group_id")).isEqualTo(fileGroupId);
+        assertThat(isPreferred(revisionId)).isFalse();
+        assertThat(revision.get("is_correct")).isEqualTo(true);
+        assertThat((BigDecimal) revision.get("total_price")).isEqualByComparingTo("330.75");
+        assertThat(itemsOf(revisionId)).hasSize(36);
+        assertThat(productIdsOfItemsNamed(revisionId, ONION)).containsExactly(onionId);
+        assertThat(receiptFacade.getReceiptRevisions(user, receiptId)).hasSize(2);
+    }
+
+    @Test
+    void receiptLifecycleFromUploadThroughCorrectionAndLearningToDeletion() {
+        UUID receiptId = createReceiptFromJson();
+        UUID originalId = revisionIdOf(receiptId);
+        UUID copyId = copyRevision(originalId);
+        List<ItemRequest> copiedItems = itemsOf(copyId);
+        ItemRequest removed = itemNamed(copyId, "OgórekSzkLuz");
+        Set<ItemRequest> edited = copiedItems.stream()
+            .filter(item -> !item.id().equals(removed.id()))
+            .map(item -> item.name().equals(ONION)
+                ? new ItemRequest(item.id(), "Cebula", item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), null)
+                : item)
+            .collect(Collectors.toCollection(HashSet::new));
+        edited.add(new ItemRequest(null, "Torba", BigDecimal.ONE, new BigDecimal("0.99"), null, new BigDecimal("0.99"), 99, null));
+
+        receiptFacade.updateRevision(user, copyId,
+            new UpdateRevisionRequest(null, null, null, new BigDecimal("330.75"), null, true, null, edited));
+        flush();
+        receiptFacade.learnProductsFromCorrections(user, copyId);
+        flush();
+
+        GetReceiptDetailsResponse details = receiptFacade.getReceiptDetails(user, receiptId);
+        assertThat(details.preferredRevision().id()).isEqualTo(copyId);
+        assertThat(details.preferredRevision().items()).hasSize(36)
+            .extracting(GetReceiptDetailsResponse.ItemResponse::name)
+            .contains("Cebula", "Torba", CHICKEN)
+            .doesNotContain(ONION, removed.name());
+        assertThat(details.preferredRevision().isCorrect()).isTrue();
+        assertThat(productNameOfItem(itemNamed(originalId, ONION).id())).contains("Cebula");
+        assertThat(productIdsOfItemsNamed(copyId, "Cebula")).isEqualTo(productIdsOfItemsNamed(originalId, ONION));
+        assertThat(productIdsOfItemsNamed(copyId, CHICKEN)).hasSize(1).doesNotContainNull();
+        assertThat(itemsOf(originalId)).hasSize(36).extracting(ItemRequest::name).contains(ONION, removed.name());
+        assertError(() -> receiptFacade.deleteRevision(user, originalId),
+            AppRuntimeExceptionMessages.CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS);
+
+        receiptFacade.deleteReceipt(user, receiptId);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM receipt WHERE id = ?", receiptId)).isZero();
+        assertThat(count("SELECT count(*) FROM receipt_revision WHERE receipt_id = ?", receiptId)).isZero();
+        assertThat(count("SELECT count(*) FROM receipt_file_group WHERE receipt_id = ?", receiptId)).isZero();
+        assertThat(count("SELECT count(*) FROM product WHERE name = 'Cebula'")).isEqualTo(1);
+    }
+
+    private UpdateRevisionRequest summaryUpdate(UUID revisionId, BigDecimal totalPrice, LocalDateTime paymentDate,
+                                                Boolean isPreferred, Boolean isCorrect) {
+        return new UpdateRevisionRequest(null, null, null, totalPrice, paymentDate, isPreferred, isCorrect, Set.copyOf(itemsOf(revisionId)));
+    }
+
+    private static byte[] png(int size) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            ImageIO.write(new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB), "png", out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private void renameItem(UUID revisionId, String from, String to) {
         Set<ItemRequest> items = itemsOf(revisionId).stream()
             .map(item -> item.name().equals(from)
@@ -660,7 +889,8 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     private boolean isPreferred(UUID revisionId) {
-        return jdbcTemplate.queryForObject("SELECT is_preferred_revision FROM receipt_revision WHERE id = ?", Boolean.class, revisionId);
+        return jdbcTemplate.queryForObject("SELECT r.preferred_revision_id IS NOT DISTINCT FROM rr.id FROM receipt_revision rr JOIN receipt r ON r.id = rr.receipt_id WHERE rr.id = ?",
+            Boolean.class, revisionId);
     }
 
     private boolean isCorrect(UUID revisionId) {

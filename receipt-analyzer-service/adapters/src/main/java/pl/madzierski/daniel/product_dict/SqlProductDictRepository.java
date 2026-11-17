@@ -39,6 +39,6 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
 
     @Override
     public ProductDict save(ProductDict productDict) {
-        return repository.save(SqlProductDict.fromProductDict(productDict)).toProductDict();
+        return repository.saveAndFlush(SqlProductDict.fromProductDict(productDict)).toProductDict();
     }
 }

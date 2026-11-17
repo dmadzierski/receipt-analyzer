@@ -22,8 +22,4 @@ public class ReceiptDto {
     private String description;
     private WalletQuery wallet;
     private StoreQuery store;
-
-    public ReceiptDto(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String name, String description, WalletQuery wallet) {
-        this(id, createdDate, modifiedDate, name, description, wallet, null);
-    }
 }

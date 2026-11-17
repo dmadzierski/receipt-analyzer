@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface SqlUserQueryRepository extends UserQueryRepository, Repository<SqlUser, UUID> {
 
     @Query(value = """
-        SELECT new pl.madzierski.daniel.user.model.UserDto(u.id, u.userSub)
+        SELECT new pl.madzierski.daniel.user.model.UserDto(u.id)
         FROM SqlUser u WHERE u.userSub = :userSub
         """)
     Optional<UserDto> findUser(String userSub);

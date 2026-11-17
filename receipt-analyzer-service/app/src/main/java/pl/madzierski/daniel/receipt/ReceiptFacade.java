@@ -6,7 +6,6 @@ import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
-import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.ProductDictQueryRepository;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ReceiptFacade {
 
-    private final ReceiptItemRepository receiptItemRepository;
     private final ReceiptItemQueryRepository receiptItemQueryRepository;
     private final ReceiptRevisionRepository revisionRepository;
     private final ReceiptFactory receiptFactory;
@@ -50,8 +48,8 @@ public class ReceiptFacade {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.WALLET_NOT_FOUND);
         DigitizedReceipt digitizedReceipt = digitizationFacade.digitize(files, body.strategy());
         Receipt receipt = receiptRepository.save(receiptFactory.from(body, user));
-        FileGroupDto fileGroupDto = fileFacade.save(user, receipt.getId(), files);
-        ReceiptRevision revision = receiptRevisionFactory.from(digitizedReceipt, receipt, new FileGroupQuery(fileGroupDto.id()));
+        UUID fileGroupId = fileFacade.save(user, receipt.getId(), files);
+        ReceiptRevision revision = receiptRevisionFactory.from(digitizedReceipt, new ReceiptQuery(receipt.getId()), new FileGroupQuery(fileGroupId));
         revision.assignProducts(productDictFacade::findCanonicalNames);
         revisionRepository.save(revision);
         return new CreateReceiptResponse(receipt.getId());
@@ -69,7 +67,7 @@ public class ReceiptFacade {
         Collection<ReceiptItemDto> items = preferredRevision == null ? List.of()
             : receiptItemQueryRepository.findReceiptItemsByRevisionId(preferredRevision.getId());
         StoreDetailsResponse store = Optional.ofNullable(receipt.getStore())
-            .flatMap(storeQuery -> storeQueryRepository.findStoreById(storeQuery.getId()))
+            .flatMap(storeQuery -> storeQueryRepository.findStoreById(storeQuery.id()))
             .map(StoreDetailsResponse::storeMapper)
             .orElse(null);
         return new GetReceiptDetailsResponse(receipt, preferredRevision,
@@ -111,11 +109,19 @@ public class ReceiptFacade {
             revision.updateItems(itemChanges);
             revision.assignProductsToNewItems(productDictFacade::findCanonicalNames);
         }
-        revision.updateDetails(updatedRevisionRequest.totalPrice(), updatedRevisionRequest.paymentDate(),
-            updatedRevisionRequest.isPreferredRevision(), updatedRevisionRequest.isCorrect());
-        if (revision.isPreferred())
-            revisionRepository.unsetPreferredInOtherRevisions(revision.getReceipt().getId(), revision.getId());
+        revision.changeSummary(updatedRevisionRequest.totalPrice(), updatedRevisionRequest.paymentDate());
+        revision.markCorrect(Boolean.TRUE.equals(updatedRevisionRequest.isCorrect()));
+        if (updatedRevisionRequest.isPreferredRevision() != null)
+            changePreferredRevision(user, revision, updatedRevisionRequest.isPreferredRevision());
         return new UpdateRevisionResponse(revisionRepository.save(revision).getId());
+    }
+
+    private void changePreferredRevision(AuthenticatedUser user, ReceiptRevision revision, boolean preferred) {
+        Receipt receipt = receiptRepository.findAccessible(revision.getReceipt().id(), user.toUserQuery())
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
+        if (preferred) receipt.choosePreferredRevision(revision);
+        else receipt.unmarkPreferredRevision(revision);
+        receiptRepository.save(receipt);
     }
 
     @Transactional
@@ -124,14 +130,14 @@ public class ReceiptFacade {
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         if (!userRevision.canEditItems()) throw new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
         if (userRevision.getParentReceiptRevision() == null) throw new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_WITHOUT_PARENT);
-        ReceiptRevision originalRevision = revisionRepository.findByIdWithItems(userRevision.getParentReceiptRevision().getId(), user.toUserQuery())
+        ReceiptRevision originalRevision = revisionRepository.findByIdWithItems(userRevision.getParentReceiptRevision().id(), user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         List<ItemCorrection> corrections = userRevision.itemCorrections(originalRevision);
         if (corrections.isEmpty()) return;
         Map<UUID, AliasToLearn> aliasesByOriginalItemId = corrections.stream()
             .collect(Collectors.toMap(ItemCorrection::originalItemId,
                 item -> new AliasToLearn(item.originalName(), item.correctedName(),
-                    item.chosenProduct() != null ? item.chosenProduct().getId() : null), (first, second) -> first));
+                    item.chosenProduct() != null ? item.chosenProduct().id() : null), (first, second) -> first));
         Map<AliasToLearn, ProductDictQuery> learnedProducts = productDictFacade.learnAliases(aliasesByOriginalItemId.values());
         Map<UUID, ProductDictQuery> productsByOriginalItemId = aliasesByOriginalItemId.entrySet()
             .stream()
@@ -144,7 +150,7 @@ public class ReceiptFacade {
 
     @Transactional
     public void reassignProductDict(ProductDictQuery primaryDict, List<UUID> productDictIdList) {
-        receiptItemRepository.reassignProductDict(primaryDict, productDictIdList);
+        revisionRepository.reassignProductDict(primaryDict, productDictIdList);
     }
 
     @Transactional
@@ -159,7 +165,7 @@ public class ReceiptFacade {
         Set<UUID> productIds = itemChanges.stream()
             .map(ReceiptItemChange::nameDict)
             .filter(Objects::nonNull)
-            .map(ProductDictQuery::getId)
+            .map(ProductDictQuery::id)
             .collect(Collectors.toSet());
         if (!productIds.isEmpty() && productDictQueryRepository.countByIdIn(productIds) != productIds.size())
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND);
@@ -172,7 +178,7 @@ public class ReceiptFacade {
         List<byte[]> files = fileFacade.getFiles(receiptId, body.fileGroupId());
         if (files.isEmpty()) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
         DigitizedReceipt digitizedReceipt = digitizationFacade.digitize(files, body.strategy());
-        ReceiptRevision revision = receiptRevisionFactory.from(digitizedReceipt, receipt, new FileGroupQuery(body.fileGroupId()));
+        ReceiptRevision revision = receiptRevisionFactory.from(digitizedReceipt, new ReceiptQuery(receipt.getId()), new FileGroupQuery(body.fileGroupId()));
         revision.assignProducts(productDictFacade::findCanonicalNames);
         return new CreateRevisionResponse(revisionRepository.save(revision).getId());
     }
@@ -185,8 +191,7 @@ public class ReceiptFacade {
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND));
         receipt.updateData(request.name().trim(), request.description(), new StoreQuery(request.storeId()));
         Receipt savedReceipt = receiptRepository.save(receipt);
-        return new UpdateReceiptResponse(savedReceipt.getId(), savedReceipt.getName(), savedReceipt.getDescription(),
-            savedReceipt.getStore() != null ? savedReceipt.getStore().getId() : null);
+        return new UpdateReceiptResponse(savedReceipt.getId());
     }
 
     @Transactional
@@ -212,7 +217,7 @@ public class ReceiptFacade {
         ReceiptRevision revision = revisionRepository.findAccessible(revisionId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         if (!revision.canEditItems()) throw new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
-        revision.renameItemsToProductNames(nameDict -> productDictQueryRepository.findNameById(nameDict.getId())
+        revision.renameItemsToProductNames(nameDict -> productDictQueryRepository.findNameById(nameDict.id())
             .map(ProductDto::getName));
         revisionRepository.save(revision);
     }

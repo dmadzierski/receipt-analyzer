@@ -1,9 +1,7 @@
 package pl.madzierski.daniel.user;
 
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
 
-@Service
 @AllArgsConstructor
 public class UserFacade {
 
@@ -11,6 +9,6 @@ public class UserFacade {
 
     void syncMe(String userSub) {
         if (userRepository.findUserByUserSub(userSub).isEmpty())
-            userRepository.save(new User(userSub));
+            userRepository.save(User.register(userSub));
     }
 }

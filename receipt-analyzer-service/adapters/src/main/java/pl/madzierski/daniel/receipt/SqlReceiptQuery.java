@@ -21,8 +21,6 @@ public class SqlReceiptQuery extends BaseEntity {
     }
 
     public ReceiptQuery toReceipt() {
-        ReceiptQuery receiptQuery = new ReceiptQuery();
-        receiptQuery.setId(this.id);
-        return receiptQuery;
+        return new ReceiptQuery(id);
     }
 }

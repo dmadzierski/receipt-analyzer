@@ -26,7 +26,6 @@ class SqlFileGroup extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "receipt_id")
     private SqlReceiptQuery receipt;
-    private Boolean isOriginal;
     @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
     @Getter(AccessLevel.NONE)
@@ -40,9 +39,8 @@ class SqlFileGroup extends BaseEntity {
         sqlFileGroup.setCreatedDate(fileGroup.getCreatedDate());
         sqlFileGroup.setModifiedDate(fileGroup.getModifiedDate());
         sqlFileGroup.setFileType(fileGroup.getFileType());
-        sqlFileGroup.setIsOriginal(fileGroup.getIsOriginal());
-        sqlFileGroup.setOwnerId(fileGroup.getOwner() != null ? fileGroup.getOwner().getId() : null);
-        sqlFileGroup.setReceipt(fileGroup.getReceipt() != null ? new SqlReceiptQuery(fileGroup.getReceipt().getId()) :
+        sqlFileGroup.setOwnerId(fileGroup.getOwner() != null ? fileGroup.getOwner().id() : null);
+        sqlFileGroup.setReceipt(fileGroup.getReceipt() != null ? new SqlReceiptQuery(fileGroup.getReceipt().id()) :
             null);
         sqlFileGroup.addFiles(fileGroup.getFiles().stream().map(SqlFile::fromFile).collect(Collectors.toSet()));
         return sqlFileGroup;
@@ -57,15 +55,7 @@ class SqlFileGroup extends BaseEntity {
     }
 
     public FileGroup toFileGroup() {
-        FileGroup fileGroup = new FileGroup();
-        fileGroup.setFileType(this.fileType);
-        fileGroup.setReceipt(this.receipt.toReceipt());
-        fileGroup.setIsOriginal(this.isOriginal);
-        fileGroup.setOwner(this.ownerId != null ? new UserQuery(this.ownerId) : null);
-        fileGroup.setCreatedDate(this.createdDate);
-        fileGroup.setModifiedDate(this.modifiedDate);
-        fileGroup.setId(id);
-        fileGroup.addFiles(this.files.stream().map(SqlFile::toFile).collect(Collectors.toSet()));
-        return fileGroup;
+        return FileGroup.restore(id, createdDate, modifiedDate, fileType, receipt.toReceipt(),
+            ownerId != null ? new UserQuery(ownerId) : null, files.stream().map(SqlFile::toFile).toList());
     }
 }

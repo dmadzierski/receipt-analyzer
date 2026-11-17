@@ -49,6 +49,47 @@ class LocalFileStorageIT extends IntegrationTest {
         Files.delete(path);
     }
 
+    @Test
+    void deletedFileIsRemovedOnlyAfterCommit() throws IOException {
+        Path path = storedFile();
+
+        newTransaction().executeWithoutResult(status -> {
+            fileStorage.delete(path.toString());
+            assertThat(path).exists();
+        });
+
+        assertThat(path).doesNotExist();
+    }
+
+    @Test
+    void deletedFileIsKeptWhenTransactionRollsBack() throws IOException {
+        Path path = storedFile();
+
+        newTransaction().executeWithoutResult(status -> {
+            fileStorage.delete(path.toString());
+            status.setRollbackOnly();
+        });
+
+        assertThat(path).exists();
+        Files.delete(path);
+    }
+
+    @Test
+    void readReturnsContentOrEmptyForMissingFile() throws IOException {
+        Path path = storedFile();
+
+        assertThat(fileStorage.read(path.toString())).contains(CONTENT);
+        Files.delete(path);
+        assertThat(fileStorage.read(path.toString())).isEmpty();
+    }
+
+    private Path storedFile() throws IOException {
+        Path path = uploadDir().resolve("storage-test").resolve(UUID.randomUUID() + ".txt");
+        Files.createDirectories(path.getParent());
+        Files.write(path, CONTENT);
+        return path;
+    }
+
     private TransactionTemplate newTransaction() {
         TransactionTemplate template = new TransactionTemplate(transactionManager);
         template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);

@@ -1,8 +1,10 @@
 package pl.madzierski.daniel.receipt;
 
 
+import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,5 +21,5 @@ interface ReceiptRevisionRepository {
 
     void deleteAllByReceiptId(UUID receiptId);
 
-    void unsetPreferredInOtherRevisions(UUID receiptId, UUID preferredRevisionId);
+    void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList);
 }

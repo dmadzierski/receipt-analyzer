@@ -33,7 +33,7 @@ public record GetReceiptDetailsResponse(
             receipt.getId(),
             receipt.getName(),
             receipt.getDescription(),
-            receipt.getWallet() != null ? receipt.getWallet().getId() : null,
+            receipt.getWallet() != null ? receipt.getWallet().id() : null,
             preferredRevision != null ? new PreferredRevisionResponse(preferredRevision, items) : null,
             revisions.stream()
                 .map(RevisionResponse::new)
@@ -49,14 +49,12 @@ public record GetReceiptDetailsResponse(
     public record FileGroupResponse(
         UUID id,
         String fileType,
-        boolean isOriginal,
         Set<FileResponse> files
     ) {
         FileGroupResponse(FileGroupDto fileGroup) {
             this(
                 fileGroup.id(),
                 fileGroup.fileType().name(),
-                fileGroup.isOriginal(),
                 fileGroup.files()
                     .stream()
                     .map(FileResponse::new)

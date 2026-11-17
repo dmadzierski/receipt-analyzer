@@ -21,13 +21,11 @@ public class SqlUserQuery extends BaseEntity {
     }
 
     public static SqlUserQuery fromUserQuery(UserQuery user) {
-        return new SqlUserQuery(user.getId());
+        return new SqlUserQuery(user.id());
     }
 
     public UserQuery toUserQuery() {
-        return UserQuery.builder()
-            .id(id)
-            .build();
+        return new UserQuery(id);
     }
 
 }

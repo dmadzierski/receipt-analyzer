@@ -18,7 +18,6 @@ export class AddWalletData {
 
 export interface AddWalletResponse {
   id: string;
-  name: string;
 }
 
 export interface WalletDetails {

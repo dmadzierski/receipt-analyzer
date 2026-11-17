@@ -18,11 +18,9 @@ public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryR
             rev.resolver,
             rev.totalPrice,
             rev.paymentDate,
-            rev.isPreferredRevision,
+            CASE WHEN rev.receipt.preferredRevisionId = rev.id THEN true ELSE false END,
             rev.isCorrect,
-            null,
-            rev.receipt.id,
-            rev.revision
+            rev.receipt.id
         )
         FROM SqlReceiptRevision rev
         WHERE rev.receipt.id = :receiptId AND rev.receipt.ownerId = :ownerId
@@ -37,11 +35,9 @@ public interface SqlReceiptRevisionQueryRepository extends ReceiptRevisionQueryR
             rev.resolver,
             rev.totalPrice,
             rev.paymentDate,
-            rev.isPreferredRevision,
+            CASE WHEN rev.receipt.preferredRevisionId = rev.id THEN true ELSE false END,
             rev.isCorrect,
-            null,
-            rev.receipt.id,
-            rev.revision
+            rev.receipt.id
         )
         FROM SqlReceiptRevision rev
         WHERE rev.id = :revisionId AND rev.receipt.ownerId = :ownerId

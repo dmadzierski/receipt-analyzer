@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.store;
 
 import lombok.AllArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.store.model.*;
@@ -27,27 +28,24 @@ public class StoreFacade {
         );
     }
 
+    @Transactional
     CreateStoreResponse addStore(CreateStoreRequest request) {
-        StoreBrand storeBrand;
-        if (request.storeBrandId() != null)
-            storeBrand = storeBrandRepository.findById(request.storeBrandId()).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_BRAND_NOT_FOUND));
-       else
-            storeBrand = storeBrandRepository.save(StoreBrand.builder().name(request.brandName()).build());
-        Store store = storeRepository.save(Store.builder()
-            .brand(storeBrand)
-            .address(request.address())
-            .city(request.city())
-            .postalCode(request.postalCode())
-            .country(request.country())
-            .build());
-        return new CreateStoreResponse(
-            store.getId(),
-            store.getBrand().getName(),
-            store.getAddress(),
-            store.getCity(),
-            store.getPostalCode(),
-            store.getCountry()
-        );
+        StoreBrandQuery brand = request.storeBrandId() != null ? existingBrand(request.storeBrandId()) : newBrand(request.brandName());
+        Store store = storeRepository.save(Store.create(brand, request.address(), request.city(), request.postalCode(),
+            request.country()));
+        return new CreateStoreResponse(store.getId());
+    }
+
+    private StoreBrandQuery existingBrand(UUID storeBrandId) {
+        return storeBrandRepository.findById(storeBrandId)
+            .map(brand -> new StoreBrandQuery(brand.getId()))
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_BRAND_NOT_FOUND));
+    }
+
+    private StoreBrandQuery newBrand(String brandName) {
+        if (brandName == null || brandName.isBlank())
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.INVALID_REQUEST);
+        return new StoreBrandQuery(storeBrandRepository.save(StoreBrand.create(brandName)).getId());
     }
 
     public StoreBrandListResponse getStoreBrands(String query) {

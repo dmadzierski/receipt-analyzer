@@ -21,7 +21,7 @@ public class SqlStoreQuery extends BaseEntity {
     }
 
     public static SqlStoreQuery fromStoreQuery(StoreQuery store) {
-        return new SqlStoreQuery(store.getId());
+        return new SqlStoreQuery(store.id());
     }
 
     public StoreQuery toStoreQuery() {

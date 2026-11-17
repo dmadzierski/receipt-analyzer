@@ -13,7 +13,7 @@ import {
   StoreDetails,
   UpdateReceiptRequest
 } from '../model/receipt.model';
-import {CreateStoreResponse, GetStoreListResponseItem} from '../model/store.model';
+import {GetStoreListResponseItem} from '../model/store.model';
 import {StoreAutocompleteComponent} from '../component/store-autocomplete/store-autocomplete.component';
 import {StoreCreateDialogComponent} from '../component/store-create-dialog/store-create-dialog.component';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -153,7 +153,7 @@ export class ReceiptDetailsComponent implements OnInit {
   openCreateStoreDialog(): void {
     this.dialog.open(StoreCreateDialogComponent, {width: '500px', disableClose: true})
       .afterClosed()
-      .subscribe((createdStore?: CreateStoreResponse) => {
+      .subscribe((createdStore?: GetStoreListResponseItem) => {
         if (createdStore) {
           this.stores = [createdStore];
           this.selectStore(createdStore);
@@ -182,8 +182,6 @@ export class ReceiptDetailsComponent implements OnInit {
 
   selectPdfFile(fileGroupId?: string): void {
     const group = (fileGroupId ? this.fileGroups.find(g => g.id === fileGroupId) : undefined)
-      ?? this.fileGroups.find(g => g.fileType === FileType.PDF && g.isOriginal)
-      ?? this.fileGroups.find(g => g.isOriginal)
       ?? this.fileGroups.find(g => g.fileType === FileType.PDF)
       ?? this.fileGroups[0];
 

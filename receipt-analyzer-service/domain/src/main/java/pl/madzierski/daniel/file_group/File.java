@@ -1,16 +1,15 @@
 package pl.madzierski.daniel.file_group;
 
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@NoArgsConstructor
 @Getter
-@Setter
+@Builder(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 class File {
 
@@ -18,10 +17,25 @@ class File {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String path;
-    private String rawData;
     private Integer partNumber;
 
-    public File(Integer partNumber) {
-        this.partNumber = partNumber;
+    static File create(int partNumber) {
+        return builder()
+            .partNumber(partNumber)
+            .build();
+    }
+
+    static File restore(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String path, Integer partNumber) {
+        return builder()
+            .id(id)
+            .createdDate(createdDate)
+            .modifiedDate(modifiedDate)
+            .path(path)
+            .partNumber(partNumber)
+            .build();
+    }
+
+    void assignPath(String path) {
+        this.path = path;
     }
 }

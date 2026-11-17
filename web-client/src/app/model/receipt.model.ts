@@ -35,9 +35,6 @@ export interface UpdateReceiptRequest {
 
 export interface UpdateReceiptResponse {
   id: string
-  name: string
-  description: string
-  storeId: string
 }
 
 export interface CreateReceiptResponse {
@@ -69,7 +66,6 @@ export interface GetReceiptDetailsResponse {
 export interface FileGroup {
   id: string
   fileType: string
-  isOriginal: boolean
   files: ReceiptFile[]
 }
 

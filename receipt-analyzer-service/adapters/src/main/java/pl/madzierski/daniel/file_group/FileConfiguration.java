@@ -13,7 +13,7 @@ class FileConfiguration {
                           final FileTypeDetector fileTypeDetector, final FileStorage fileStorage,
                           final ReceiptQueryRepository receiptQueryRepository,
                           @Value("${file.upload-dir}") final String uploadDir) {
-        return new FileFacade(fileRepository, fileGroupQueryRepository, fileGroupRepository, new FileGroupFactory(new FileFactory()), fileTypeDetector,
+        return new FileFacade(fileRepository, fileGroupQueryRepository, fileGroupRepository, fileTypeDetector,
             fileStorage, receiptQueryRepository, uploadDir);
     }
 }

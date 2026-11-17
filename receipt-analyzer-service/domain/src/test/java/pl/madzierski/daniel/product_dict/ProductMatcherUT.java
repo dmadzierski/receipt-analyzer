@@ -44,7 +44,7 @@ class ProductMatcherUT {
     private static ProductDict product(String name, String... aliases) {
         ProductDict product = ProductDict.create(name);
         for (String alias : aliases) {
-            product.addAliasIfMissing(alias);
+            product.addAlias(alias);
         }
         return product;
     }

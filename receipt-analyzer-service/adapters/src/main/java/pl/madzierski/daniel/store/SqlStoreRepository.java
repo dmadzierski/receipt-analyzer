@@ -3,8 +3,6 @@ package pl.madzierski.daniel.store;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pl.madzierski.daniel.store.model.Store;
-import pl.madzierski.daniel.store.model.StoreRepository;
 
 import java.util.UUID;
 

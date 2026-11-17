@@ -31,9 +31,4 @@ export interface CreateStoreRequest {
 
 export interface CreateStoreResponse {
   id: string;
-  brand: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  country: string;
 }

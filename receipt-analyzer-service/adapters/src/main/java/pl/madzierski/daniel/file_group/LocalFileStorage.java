@@ -10,6 +10,7 @@ import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -28,17 +29,44 @@ class LocalFileStorage implements FileStorage {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
-                    if (status == STATUS_ROLLED_BACK) delete(destination);
+                    if (status == STATUS_ROLLED_BACK) deleteQuietly(destination);
                 }
             });
         }
     }
 
-    private void delete(Path path) {
+    @Override
+    public Optional<byte[]> read(String path) {
+        Path source = Path.of(path);
+        if (!Files.isRegularFile(source)) return Optional.empty();
+        try {
+            return Optional.of(Files.readAllBytes(source));
+        } catch (IOException e) {
+            log.warn("Could not read file {}", source, e);
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void delete(String path) {
+        Path target = Path.of(path);
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            deleteQuietly(target);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                deleteQuietly(target);
+            }
+        });
+    }
+
+    private void deleteQuietly(Path path) {
         try {
             Files.deleteIfExists(path);
         } catch (IOException e) {
-            log.warn("Could not delete file {} after rollback", path, e);
+            log.warn("Could not delete file {}", path, e);
         }
     }
 }

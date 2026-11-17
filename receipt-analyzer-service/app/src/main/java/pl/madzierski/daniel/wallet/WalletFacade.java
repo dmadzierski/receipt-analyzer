@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.wallet;
 
 import lombok.AllArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
@@ -27,9 +28,9 @@ public class WalletFacade {
     private final ReceiptQueryRepository receiptQueryRepository;
     private final StoreQueryRepository storeQueryRepository;
 
+    @Transactional
     CreateWalletResponse addWallet(AuthenticatedUser user, CreateWalletRequest request) {
-        Wallet savedWallet = walletRepository.save(Wallet.builder().name(request.name()).owner(user.toUserQuery()).build());
-        return new CreateWalletResponse(savedWallet.getId(), savedWallet.getName());
+        return new CreateWalletResponse(walletRepository.save(Wallet.create(request.name(), user.toUserQuery())).getId());
     }
 
     GetWalletListResponse getWallets(AuthenticatedUser user) {

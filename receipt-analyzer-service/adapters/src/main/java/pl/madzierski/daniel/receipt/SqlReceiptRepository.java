@@ -25,7 +25,7 @@ class ReceiptRepositoryImpl implements ReceiptRepository {
 
     @Override
     public Optional<Receipt> findAccessible(UUID receiptId, UserQuery user) {
-        return this.repository.findByIdAndOwnerId(receiptId, user.getId()).map(SqlReceipt::toReceipt);
+        return this.repository.findByIdAndOwnerId(receiptId, user.id()).map(SqlReceipt::toReceipt);
     }
 
     @Override

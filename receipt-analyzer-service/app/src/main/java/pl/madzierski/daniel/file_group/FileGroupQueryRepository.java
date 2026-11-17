@@ -12,6 +12,4 @@ public interface FileGroupQueryRepository {
     Optional<FileGroupDto> findFileGroupWithFiles(UUID fileGroupId, UUID receiptId);
 
     boolean isUsedByRevision(UUID fileGroupId);
-
-    boolean isAccessible(UUID fileGroupId, UUID ownerId);
 }

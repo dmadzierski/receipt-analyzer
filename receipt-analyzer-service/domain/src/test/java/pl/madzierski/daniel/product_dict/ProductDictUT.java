@@ -18,7 +18,7 @@ class ProductDictUT {
     void addsMissingAlias() {
         ProductDict product = ProductDict.create("Cebula");
 
-        product.addAliasIfMissing("CEB ZOL");
+        product.addAlias("CEB ZOL");
 
         assertThat(product.getAliases()).extracting(ProductAlias::getName).containsExactlyInAnyOrder("Cebula", "CEB ZOL");
     }
@@ -27,7 +27,7 @@ class ProductDictUT {
     void doesNotAddAliasDifferingOnlyInLetterCase() {
         ProductDict product = ProductDict.create("Cebula");
 
-        product.addAliasIfMissing("CEBULA");
+        product.addAlias("CEBULA");
 
         assertThat(product.getAliases()).extracting(ProductAlias::getName).containsExactly("Cebula");
     }

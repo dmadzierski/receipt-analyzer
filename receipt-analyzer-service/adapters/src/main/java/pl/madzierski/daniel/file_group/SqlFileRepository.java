@@ -20,7 +20,7 @@ class FileRepositoryImpl implements FileRepository {
 
     @Override
     public Optional<File> findAccessible(UUID fileId, UserQuery user) {
-        return fileRepository.findAccessible(fileId, user.getId()).map(SqlFile::toFile);
+        return fileRepository.findAccessible(fileId, user.id()).map(SqlFile::toFile);
     }
 
 }

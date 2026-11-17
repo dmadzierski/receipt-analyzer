@@ -45,7 +45,7 @@ class SqlReceiptItem extends BaseEntity {
         sqlReceiptItem.setPosition(item.getPosition());
         if (item.getParentItem() != null) {
             SqlReceiptItem parent = new SqlReceiptItem();
-            parent.setId(item.getParentItem().getId());
+            parent.setId(item.getParentItem().id());
             sqlReceiptItem.setParentItem(parent);
         }
         if (item.getNameDict() != null) {

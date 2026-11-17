@@ -1,0 +1,51 @@
+package pl.madzierski.daniel.file_group;
+
+import org.junit.jupiter.api.Test;
+import pl.madzierski.daniel.receipt.model.ReceiptQuery;
+import pl.madzierski.daniel.user.model.UserQuery;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+class FileGroupUT {
+
+    @Test
+    void createdGroupHasOneFileWithoutPathPerPart() {
+        ReceiptQuery receipt = new ReceiptQuery(UUID.randomUUID());
+        UserQuery owner = new UserQuery(UUID.randomUUID());
+
+        FileGroup group = FileGroup.create(FileType.PNG, receipt, owner, 3);
+
+        assertThat(group.getId()).isNull();
+        assertThat(group.getFileType()).isEqualTo(FileType.PNG);
+        assertThat(group.getReceipt()).isEqualTo(receipt);
+        assertThat(group.getOwner()).isEqualTo(owner);
+        assertThat(group.getFiles()).extracting(File::getPartNumber).containsExactlyInAnyOrder(0, 1, 2);
+        assertThat(group.getFiles()).extracting(File::getPath).containsOnlyNulls();
+    }
+
+    @Test
+    void assignPathsUsesPolicyForEveryFile() {
+        UUID firstId = UUID.randomUUID();
+        UUID secondId = UUID.randomUUID();
+        FileGroup group = FileGroup.restore(UUID.randomUUID(), null, null, FileType.PDF, null, null, List.of(
+            File.restore(firstId, null, null, null, 0),
+            File.restore(secondId, null, null, null, 1)));
+
+        group.assignPaths((fileGroup, file) -> fileGroup.getId() + "/" + file.getId() + "." + fileGroup.getFileType().getExtension());
+
+        assertThat(group.getFiles()).extracting(File::getPath).containsExactlyInAnyOrder(
+            group.getId() + "/" + firstId + ".pdf",
+            group.getId() + "/" + secondId + ".pdf");
+    }
+
+    @Test
+    void filesCannotBeModifiedFromOutside() {
+        FileGroup group = FileGroup.create(FileType.PNG, null, null, 1);
+
+        assertThatThrownBy(() -> group.getFiles().add(File.create(1))).isInstanceOf(UnsupportedOperationException.class);
+    }
+}

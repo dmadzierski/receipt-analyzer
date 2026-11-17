@@ -13,6 +13,7 @@ dependencies {
     testImplementation(libs.spring.boot.testcontainers)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.junit.jupiter)
+    testImplementation(libs.flyway.core)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

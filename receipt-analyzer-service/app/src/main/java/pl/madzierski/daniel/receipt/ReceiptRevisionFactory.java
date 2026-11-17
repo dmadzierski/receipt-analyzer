@@ -2,12 +2,13 @@ package pl.madzierski.daniel.receipt;
 
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
+import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 
 import java.util.List;
 
 class ReceiptRevisionFactory {
 
-    ReceiptRevision from(DigitizedReceipt digitizedReceipt, Receipt receipt, FileGroupQuery sourceFileGroup) {
+    ReceiptRevision from(DigitizedReceipt digitizedReceipt, ReceiptQuery receipt, FileGroupQuery sourceFileGroup) {
         List<ReceiptItem> items = digitizedReceipt.items() == null ? List.of() : digitizedReceipt.items()
             .stream()
             .map(item -> ReceiptItem.create(item.name(), null, item.amount(), item.unitPrice(), item.discount(),

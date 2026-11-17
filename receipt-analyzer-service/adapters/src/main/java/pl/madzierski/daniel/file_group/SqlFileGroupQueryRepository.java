@@ -33,9 +33,6 @@ interface SqlFileGroupQueryRepository extends JpaRepository<SqlFileGroup, UUID> 
 
     @Query("SELECT COUNT(rev) > 0 FROM SqlReceiptRevision rev WHERE rev.sourceFileGroup.id = :fileGroupId")
     boolean isUsedByRevision(UUID fileGroupId);
-
-    @Query("SELECT COUNT(rfg) > 0 FROM SqlFileGroup rfg WHERE rfg.id = :fileGroupId AND rfg.ownerId = :ownerId")
-    boolean isAccessible(UUID fileGroupId, UUID ownerId);
 }
 
 @AllArgsConstructor
@@ -59,7 +56,6 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
                         .partNumber(file.getPartNumber())
                         .build())
                     .collect(Collectors.toSet()))
-                .isOriginal(it.getIsOriginal())
                 .build())
             .toList();
     }
@@ -78,17 +74,11 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
                         .partNumber(file.getPartNumber())
                         .build())
                     .collect(Collectors.toSet()))
-                .isOriginal(it.getIsOriginal())
                 .build());
     }
 
     @Override
     public boolean isUsedByRevision(UUID fileGroupId) {
         return sqlFileGroupQueryRepository.isUsedByRevision(fileGroupId);
-    }
-
-    @Override
-    public boolean isAccessible(UUID fileGroupId, UUID ownerId) {
-        return sqlFileGroupQueryRepository.isAccessible(fileGroupId, ownerId);
     }
 }

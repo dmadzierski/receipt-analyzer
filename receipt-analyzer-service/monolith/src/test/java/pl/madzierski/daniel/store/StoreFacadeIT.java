@@ -35,7 +35,7 @@ class StoreFacadeIT extends IntegrationTest {
             new CreateStoreRequest(brandId, null, "ul. Inna 2", "Gniezno", "62-200", "Polska"));
         flush();
 
-        assertThat(second.brand()).isEqualTo("Biedronka");
+        assertThat(storeFacade.getStoreDetails(second.id()).brand()).isEqualTo("Biedronka");
         assertThat(count("SELECT count(*) FROM store_brand")).isEqualTo(1);
         assertThat(jdbcTemplate.queryForObject("SELECT brand_id FROM store WHERE id = ?", UUID.class, second.id())).isEqualTo(brandId);
     }
@@ -45,6 +45,25 @@ class StoreFacadeIT extends IntegrationTest {
         CreateStoreRequest request = new CreateStoreRequest(UNKNOWN_ID, null, "ul. Testowa 1", "Poznań", "60-001", "Polska");
 
         assertError(() -> storeFacade.addStore(request), AppRuntimeExceptionMessages.STORE_BRAND_NOT_FOUND);
+    }
+
+    @Test
+    void newBrandGetsTrimmedName() {
+        UUID storeId = storeFacade.addStore(
+            new CreateStoreRequest(null, "  Lidl ", "ul. Testowa 1", "Poznań", "60-001", "Polska")).id();
+        flush();
+
+        assertThat(storeFacade.getStoreDetails(storeId).brand()).isEqualTo("Lidl");
+    }
+
+    @Test
+    void creatingStoreWithoutBrandFails() {
+        CreateStoreRequest request = new CreateStoreRequest(null, " ", "ul. Testowa 1", "Poznań", "60-001", "Polska");
+
+        assertError(() -> storeFacade.addStore(request), AppRuntimeExceptionMessages.INVALID_REQUEST);
+        flush();
+
+        assertThat(count("SELECT count(*) FROM store_brand")).isZero();
     }
 
     @Test

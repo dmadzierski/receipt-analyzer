@@ -23,7 +23,7 @@ export class FileGroupSelectorComponent {
   @Output() fileGroupDelete = new EventEmitter<string>();
 
   label(group: FileGroup): string {
-    return `${group.fileType} (${group.isOriginal ? 'original' : 'copy'})`;
+    return group.fileType;
   }
 
   get selectedLabel(): string {

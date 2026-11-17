@@ -20,26 +20,20 @@ class SqlFile extends BaseEntity {
     @JoinColumn(name = "file_group_id", insertable = false, updatable = false)
     private SqlFileGroup fileGroup;
     private String path;
-    @Column(name = "raw_data", columnDefinition = "TEXT")
-    private String rawData;
     private Integer partNumber;
 
     static SqlFile fromFile(File file) {
         SqlFile sqlFile = new SqlFile();
         sqlFile.id = file.getId();
+        sqlFile.createdDate = file.getCreatedDate();
+        sqlFile.modifiedDate = file.getModifiedDate();
         sqlFile.path = file.getPath();
-        sqlFile.rawData = file.getRawData();
         sqlFile.partNumber = file.getPartNumber();
         return sqlFile;
     }
 
     File toFile() {
-        File file = new File();
-        file.setId(this.id);
-        file.setPath(this.path);
-        file.setRawData(this.rawData);
-        file.setPartNumber(this.partNumber);
-        return file;
+        return File.restore(id, createdDate, modifiedDate, path, partNumber);
     }
 
 }

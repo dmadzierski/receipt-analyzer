@@ -33,12 +33,6 @@ class SqlWallet extends BaseEntity {
     }
 
     public Wallet toWallet() {
-        return Wallet.builder()
-            .id(id)
-            .createdDate(createdDate)
-            .modifiedDate(modifiedDate)
-            .name(name)
-            .owner(owner.toUserQuery())
-            .build();
+        return Wallet.restore(id, createdDate, modifiedDate, name, owner.toUserQuery());
     }
 }

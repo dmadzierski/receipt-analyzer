@@ -21,7 +21,7 @@ public class SqlProductDictQuery extends BaseEntity {
 
 
     public static SqlProductDictQuery fromProductDict(ProductDictQuery nameDict) {
-        return new SqlProductDictQuery(nameDict.getId());
+        return new SqlProductDictQuery(nameDict.id());
     }
 
     public ProductDictQuery toProductDictQuery() {

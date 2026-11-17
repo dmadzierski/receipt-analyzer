@@ -1,25 +1,35 @@
 package pl.madzierski.daniel.user;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
-@Setter
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode
-public class User {
+class User {
 
     private UUID id;
     private String userSub;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 
+    static User register(String userSub) {
+        return builder()
+            .userSub(userSub)
+            .build();
+    }
 
-    public User(String userSub) {
-        this.userSub = userSub;
+    static User restore(UUID id, String userSub, LocalDateTime createdDate, LocalDateTime modifiedDate) {
+        return builder()
+            .id(id)
+            .userSub(userSub)
+            .createdDate(createdDate)
+            .modifiedDate(modifiedDate)
+            .build();
     }
 }

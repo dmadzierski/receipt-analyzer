@@ -27,17 +27,13 @@ class ProductDict {
     static ProductDict create(String name) {
         ProductDict product = new ProductDict();
         product.name = name;
-        product.addAliasIfMissing(name);
+        product.addAlias(name);
         return product;
     }
 
-    void addAliasIfMissing(String alias) {
+    void addAlias(String alias) {
         if (aliases.stream().noneMatch(existing -> existing.getName().equalsIgnoreCase(alias)))
             aliases.add(ProductAlias.builder().name(alias).build());
-    }
-
-    public void addAlias(ProductAlias productAlias) {
-        this.aliases.add(productAlias);
     }
 
     public void addAllAlias(Collection<ProductAlias> aliases) {

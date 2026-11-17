@@ -6,6 +6,7 @@ import pl.madzierski.daniel.exception.AppIllegalStateExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptItemQuery;
+import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,17 +24,16 @@ class ReceiptRevisionUT {
     private static final ProductDictQuery MILK = new ProductDictQuery(UUID.randomUUID());
 
     @Test
-    void digitizedRevisionIsNotPreferredAndIsCorrectWhenPricesAddUp() {
-        Receipt receipt = receipt();
+    void digitizedRevisionIsCorrectWhenPricesAddUp() {
+        ReceiptQuery receipt = receipt();
         FileGroupQuery sourceFileGroup = new FileGroupQuery(UUID.randomUUID());
 
         ReceiptRevision revision = ReceiptRevision.createDigitized("1.0", BIEDRONKA_JSON, dec("5.00"), null,
             List.of(item("Cebula", "2", "2.50", "5.00")), receipt, sourceFileGroup);
 
-        assertThat(revision.getIsPreferredRevision()).isFalse();
         assertThat(revision.getIsCorrect()).isTrue();
         assertThat(revision.getResolver()).isEqualTo(BIEDRONKA_JSON);
-        assertThat(revision.getReceipt()).isSameAs(receipt);
+        assertThat(revision.getReceipt()).isEqualTo(receipt);
         assertThat(revision.getSourceFileGroup()).isEqualTo(sourceFileGroup);
         assertThat(revision.getItems()).extracting(ReceiptItem::getName).containsExactly("Cebula");
     }
@@ -77,30 +77,29 @@ class ReceiptRevisionUT {
     }
 
     @Test
-    void copyIsNotPreferredUserRevisionWithCopiedItemsPointingToOriginal() {
+    void copyIsUserRevisionWithCopiedItemsPointingToOriginal() {
         UUID originalId = UUID.randomUUID();
         UUID itemId = UUID.randomUUID();
-        Receipt receipt = receipt();
+        ReceiptQuery receipt = receipt();
         FileGroupQuery sourceFileGroup = new FileGroupQuery(UUID.randomUUID());
         LocalDateTime paymentDate = LocalDateTime.of(2026, 5, 22, 10, 0);
         ReceiptRevision original = ReceiptRevision.restore(originalId, null, null, "1.0", BIEDRONKA_JSON, dec("1.90"),
-            paymentDate, true, true, receipt, null,
+            paymentDate, true, receipt, null,
             List.of(restoredItem(itemId, "Cebula", ONION, "1", "2.00", "0.10", "1.90", 3)), sourceFileGroup);
 
         ReceiptRevision copy = original.copyAsUserRevision();
 
         assertThat(copy.getId()).isNull();
         assertThat(copy.getResolver()).isEqualTo(USER);
-        assertThat(copy.getIsPreferredRevision()).isFalse();
-        assertThat(copy.getParentReceiptRevision().getId()).isEqualTo(originalId);
-        assertThat(copy.getReceipt()).isSameAs(receipt);
+        assertThat(copy.getParentReceiptRevision().id()).isEqualTo(originalId);
+        assertThat(copy.getReceipt()).isEqualTo(receipt);
         assertThat(copy.getSourceFileGroup()).isEqualTo(sourceFileGroup);
         assertThat(copy.getTotalPrice()).isEqualTo(dec("1.90"));
         assertThat(copy.getPaymentDate()).isEqualTo(paymentDate);
         assertThat(copy.getIsCorrect()).isTrue();
         assertThat(copy.getItems()).singleElement().satisfies(item -> {
             assertThat(item.getId()).isNull();
-            assertThat(item.getParentItem().getId()).isEqualTo(itemId);
+            assertThat(item.getParentItem().id()).isEqualTo(itemId);
             assertThat(item)
                 .extracting(ReceiptItem::getName, ReceiptItem::getNameDict, ReceiptItem::getAmount, ReceiptItem::getUnitPrice,
                     ReceiptItem::getDiscount, ReceiptItem::getTotalPrice, ReceiptItem::getPosition)
@@ -109,26 +108,37 @@ class ReceiptRevisionUT {
     }
 
     @Test
-    void updateDetailsChangesOnlyProvidedValues() {
+    void changeSummarySetsTotalPriceAndPaymentDate() {
         LocalDateTime newDate = LocalDateTime.of(2026, 6, 1, 12, 0);
         ReceiptRevision revision = ReceiptRevision.restore(null, null, null, null, USER, dec("1.00"),
-            LocalDateTime.of(2026, 5, 1, 12, 0), false, false, null, null, List.of(), null);
+            LocalDateTime.of(2026, 5, 1, 12, 0), false, null, null, List.of(), null);
 
-        revision.updateDetails(null, newDate, true, null);
+        revision.changeSummary(dec("2.00"), newDate);
 
-        assertThat(revision.getTotalPrice()).isEqualTo(dec("1.00"));
+        assertThat(revision.getTotalPrice()).isEqualTo(dec("2.00"));
         assertThat(revision.getPaymentDate()).isEqualTo(newDate);
-        assertThat(revision.getIsPreferredRevision()).isTrue();
         assertThat(revision.getIsCorrect()).isFalse();
     }
 
     @Test
-    void updateDetailsMarksRevisionCorrectWhenTotalMatchesItems() {
+    void changeSummaryMarksRevisionCorrectWhenTotalMatchesItems() {
         ReceiptRevision revision = userRevision("9.99", false, item("Cebula", "1", "1.00", "1.00"));
 
-        revision.updateDetails(dec("1.00"), null, null, null);
+        revision.changeSummary(dec("1.00"), null);
 
         assertThat(revision.getIsCorrect()).isTrue();
+    }
+
+    @Test
+    void markCorrectSetsFlagUnlessPricesAreConsistent() {
+        ReceiptRevision inconsistent = userRevision("9.99", false, item("Cebula", "1", "1.00", "1.00"));
+        ReceiptRevision consistent = userRevision("1.00", true, item("Cebula", "1", "1.00", "1.00"));
+
+        inconsistent.markCorrect(true);
+        consistent.markCorrect(false);
+
+        assertThat(inconsistent.getIsCorrect()).isTrue();
+        assertThat(consistent.getIsCorrect()).isTrue();
     }
 
     @Test
@@ -146,7 +156,7 @@ class ReceiptRevisionUT {
     void updatesNeverClearCorrectFlagWhenPricesAreInconsistent() {
         ReceiptRevision revision = userRevision("9.99", true, item("Cebula", "1", "1.00", "1.00"));
 
-        revision.updateDetails(null, null, null, null);
+        revision.changeSummary(revision.getTotalPrice(), revision.getPaymentDate());
         revision.updateItems(List.of(change(null, "Mleko", null, "1", "2.00", null, "2.00", 1)));
 
         assertThat(revision.getIsCorrect()).isTrue();
@@ -347,12 +357,6 @@ class ReceiptRevisionUT {
     }
 
     @Test
-    void isPreferredTreatsMissingFlagAsNotPreferred() {
-        assertThat(restoredWithPreferred(null).isPreferred()).isFalse();
-        assertThat(restoredWithPreferred(true).isPreferred()).isTrue();
-    }
-
-    @Test
     void itemsCannotBeModifiedFromOutside() {
         ReceiptRevision revision = revision(USER);
 
@@ -360,8 +364,8 @@ class ReceiptRevisionUT {
             .isInstanceOf(UnsupportedOperationException.class);
     }
 
-    private static Receipt receipt() {
-        return Receipt.restore(UUID.randomUUID(), null, null, "Paragon", null, null, null, null);
+    private static ReceiptQuery receipt() {
+        return new ReceiptQuery(UUID.randomUUID());
     }
 
     private static ReceiptRevision digitized(String totalPrice, ReceiptItem... items) {
@@ -369,23 +373,18 @@ class ReceiptRevisionUT {
     }
 
     private static ReceiptRevision userRevision(String totalPrice, boolean isCorrect, ReceiptItem... items) {
-        return ReceiptRevision.restore(null, null, null, null, USER, dec(totalPrice), null, false, isCorrect, null, null,
+        return ReceiptRevision.restore(null, null, null, null, USER, dec(totalPrice), null, isCorrect, null, null,
             List.of(items), null);
     }
 
     private static ReceiptRevision savedRevision(ReceiptResolverStrategyType resolver, ReceiptItem... items) {
-        return ReceiptRevision.restore(UUID.randomUUID(), null, null, null, resolver, null, null, false, false, null, null,
+        return ReceiptRevision.restore(UUID.randomUUID(), null, null, null, resolver, null, null, false, null, null,
             List.of(items), null);
     }
 
     private static ReceiptRevision revision(ReceiptResolverStrategyType resolver, ReceiptItem... items) {
-        return ReceiptRevision.restore(null, null, null, null, resolver, null, null, false, false, null, null,
+        return ReceiptRevision.restore(null, null, null, null, resolver, null, null, false, null, null,
             List.of(items), null);
-    }
-
-    private static ReceiptRevision restoredWithPreferred(Boolean isPreferredRevision) {
-        return ReceiptRevision.restore(null, null, null, null, USER, null, null, isPreferredRevision, false, null, null,
-            List.of(), null);
     }
 
     private static ReceiptItem restoredItem(UUID id, String name, ProductDictQuery nameDict, String amount, String unitPrice,

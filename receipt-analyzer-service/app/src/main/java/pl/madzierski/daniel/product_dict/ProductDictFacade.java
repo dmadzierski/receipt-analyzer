@@ -94,7 +94,7 @@ public class ProductDictFacade {
                     products.add(created);
                     return created;
                 });
-            product.addAliasIfMissing(aliasToLearn.alias());
+            product.addAlias(aliasToLearn.alias());
             productsByAlias.put(aliasToLearn, product);
         });
         Map<String, UUID> savedIdsByName = productsByAlias.values()
@@ -126,7 +126,7 @@ public class ProductDictFacade {
         if (productCategoryRepository.existsByName(name))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_ALREADY_EXISTS);
         ProductCategory savedProductCategory = productCategoryRepository.save(new ProductCategory(name));
-        return new CreateProductCategoryResponse(savedProductCategory.getId(), savedProductCategory.getName());
+        return new CreateProductCategoryResponse(savedProductCategory.getId());
     }
 
     @Transactional
@@ -140,7 +140,7 @@ public class ProductDictFacade {
 
         productCategory.setName(name);
         ProductCategory savedProductCategory = productCategoryRepository.save(productCategory);
-        return new UpdateProductCategoryResponse(savedProductCategory.getId(), savedProductCategory.getName());
+        return new UpdateProductCategoryResponse(savedProductCategory.getId());
     }
 
     @Transactional

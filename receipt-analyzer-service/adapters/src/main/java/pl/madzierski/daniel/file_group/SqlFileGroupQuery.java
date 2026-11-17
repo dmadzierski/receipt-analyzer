@@ -20,7 +20,7 @@ public class SqlFileGroupQuery extends BaseEntity {
     }
 
     public static SqlFileGroupQuery fromFileGroupQuery(FileGroupQuery sourceFileGroup) {
-        return new SqlFileGroupQuery(sourceFileGroup.getId());
+        return new SqlFileGroupQuery(sourceFileGroup.id());
     }
 
     public FileGroupQuery toFileGroupQuery() {
