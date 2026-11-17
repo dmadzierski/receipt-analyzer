@@ -170,6 +170,56 @@ class ProductDictFacadeIT extends IntegrationTest {
             String.class, productId)).containsExactly("Eko");
     }
 
+    @Test
+    void eachProductGroupInOneRequestIsMergedSeparately() {
+        UUID milkId = insertProduct("Mleko");
+        UUID milkAliasId = insertAlias(milkId, "Mleko");
+        UUID otherMilkId = insertProduct("Mleko 2");
+        UUID otherMilkAliasId = insertAlias(otherMilkId, "MLK 3,2");
+        UUID breadId = insertProduct("Chleb");
+        UUID breadAliasId = insertAlias(breadId, "Chleb");
+        UUID otherBreadId = insertProduct("Chleb 2");
+        UUID otherBreadAliasId = insertAlias(otherBreadId, "CHL ZYT");
+        UUID untouchedId = insertProduct("Cebula");
+        UUID userId = jdbcTemplate.queryForObject("SELECT id FROM app_user WHERE user_sub = ?", UUID.class, USER_SUB);
+        UUID revisionId = insertRevision(insertReceipt(createWallet(userId, "Home"), null, "Receipt"), "USER", "10.00", true, null);
+        UUID milkItemId = insertItem(revisionId, "MLK 3,2", otherMilkId);
+        UUID breadItemId = insertItem(revisionId, "CHL ZYT", otherBreadId);
+        UUID onionItemId = insertItem(revisionId, "CEB", untouchedId);
+        flush();
+
+        productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(
+            new UpdateProductDict("Mleko", List.of(), List.of(milkId, otherMilkId), Set.of(milkAliasId, otherMilkAliasId)),
+            new UpdateProductDict("Chleb", List.of(), List.of(breadId, otherBreadId), Set.of(breadAliasId, otherBreadAliasId)))));
+        flush();
+
+        assertThat(jdbcTemplate.queryForList("SELECT name FROM product", String.class)).containsExactlyInAnyOrder("Mleko", "Chleb", "Cebula");
+        assertThat(aliasesOf(milkId)).containsExactlyInAnyOrder("Mleko", "MLK 3,2");
+        assertThat(aliasesOf(breadId)).containsExactlyInAnyOrder("Chleb", "CHL ZYT");
+        assertThat(productOfItem(milkItemId)).isEqualTo(milkId);
+        assertThat(productOfItem(breadItemId)).isEqualTo(breadId);
+        assertThat(productOfItem(onionItemId)).isEqualTo(untouchedId);
+    }
+
+    @Test
+    void renamingProductAddsNewCanonicalAliasAndDropsAliasesNotChosen() {
+        UUID productId = insertProduct("Cebul");
+        insertAlias(productId, "Cebul");
+        UUID keptAliasId = insertAlias(productId, "CEB ZOL");
+        flush();
+
+        productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(new UpdateProductDict(
+            "  Cebula ", List.of(), List.of(productId), Set.of(keptAliasId)))));
+        flush();
+
+        assertThat(jdbcTemplate.queryForObject("SELECT name FROM product WHERE id = ?", String.class, productId)).isEqualTo("Cebula");
+        assertThat(aliasesOf(productId)).containsExactlyInAnyOrder("Cebula", "CEB ZOL");
+    }
+
+    private UUID productOfItem(UUID itemId) {
+        return jdbcTemplate.queryForObject("SELECT product_id FROM receipt_item WHERE id = ?", UUID.class, itemId);
+    }
+
     private Set<String> aliasesOf(UUID productId) {
         return Set.copyOf(jdbcTemplate.queryForList("SELECT name FROM product_alias WHERE product_id = ?", String.class, productId));
     }

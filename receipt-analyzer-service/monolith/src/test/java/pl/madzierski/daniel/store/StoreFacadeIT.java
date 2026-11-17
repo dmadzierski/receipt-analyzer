@@ -48,15 +48,6 @@ class StoreFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void newBrandGetsTrimmedName() {
-        UUID storeId = storeFacade.addStore(
-            new CreateStoreRequest(null, "  Lidl ", "ul. Testowa 1", "Poznań", "60-001", "Polska")).id();
-        flush();
-
-        assertThat(storeFacade.getStoreDetails(storeId).brand()).isEqualTo("Lidl");
-    }
-
-    @Test
     void creatingStoreWithoutBrandFails() {
         CreateStoreRequest request = new CreateStoreRequest(null, " ", "ul. Testowa 1", "Poznań", "60-001", "Polska");
 

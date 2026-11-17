@@ -10,6 +10,8 @@ dependencies {
     testImplementation(project(":app"))
     testImplementation(project(":domain"))
     testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.boot.starter.web)
+    testImplementation(libs.spring.boot.starter.oauth2.resource.server)
     testImplementation(libs.spring.boot.testcontainers)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.junit.jupiter)

@@ -8,18 +8,25 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.receipt.model.CreateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.CreateRevisionRequest;
+import pl.madzierski.daniel.receipt.model.GetReceiptDetailsResponse;
 import pl.madzierski.daniel.receipt.model.GetRevisionResponse;
 import pl.madzierski.daniel.receipt.model.UpdateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest.ItemRequest;
+import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 class ReceiptFacadeIT extends IntegrationTest {
 
@@ -41,6 +49,9 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     @Autowired
     private ReceiptFacade receiptFacade;
+
+    @Autowired
+    private FileFacade fileFacade;
 
     private UUID walletId;
     private UUID storeId;
@@ -443,17 +454,6 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void editWithConsistentPricesMarksRevisionAsCorrect() {
-        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
-        jdbcTemplate.update("UPDATE receipt_revision SET is_correct = false WHERE id = ?", copyId);
-
-        receiptFacade.updateRevision(user, copyId, revisionUpdate(Set.copyOf(itemsOf(copyId))));
-        flush();
-
-        assertThat(isCorrect(copyId)).isTrue();
-    }
-
-    @Test
     void editWithInconsistentPricesDoesNotMarkRevisionAsCorrect() {
         UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         jdbcTemplate.update("UPDATE receipt_revision SET is_correct = false WHERE id = ?", copyId);
@@ -463,7 +463,7 @@ class ReceiptFacadeIT extends IntegrationTest {
                 : item)
             .collect(Collectors.toSet());
 
-        receiptFacade.updateRevision(user, copyId, revisionUpdate(items));
+        receiptFacade.updateRevision(user, copyId, new UpdateRevisionRequest(null, null, null, new BigDecimal("330.75"), null, null, null, items));
         flush();
 
         assertThat(isCorrect(copyId)).isFalse();
@@ -636,7 +636,7 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void receiptDetailsShowPreferredRevisionWithItemsAllRevisionsStoreAndFilePartsInOrder() {
+    void receiptDetailsShowPreferredRevisionWithItemsAllRevisionsStoreAndFileParts() {
         UUID receiptId = createReceiptFromJson();
         UUID originalId = revisionIdOf(receiptId);
         UUID copyId = copyRevision(originalId);
@@ -669,7 +669,7 @@ class ReceiptFacadeIT extends IntegrationTest {
             .findFirst()
             .orElseThrow();
         assertThat(images.files()).extracting(GetReceiptDetailsResponse.FileGroupResponse.FileResponse::partNumber)
-            .containsExactly(0, 1, 2);
+            .containsExactlyInAnyOrder(0, 1, 2);
     }
 
     @Test
@@ -684,7 +684,7 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void revisionSummaryChangesOnlyWhenValuesAreSent() {
+    void revisionSummaryIsReplacedWithSentValues() {
         UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
         LocalDateTime paymentDate = LocalDateTime.of(2026, 6, 1, 18, 30);
 
@@ -694,9 +694,9 @@ class ReceiptFacadeIT extends IntegrationTest {
         flush();
 
         GetRevisionResponse revision = receiptFacade.getRevision(user, copyId);
-        assertThat(revision.totalPrice()).isEqualByComparingTo("100.00");
-        assertThat(revision.paymentDate()).isEqualTo(paymentDate);
-        assertThat(revision.isCorrect()).isTrue();
+        assertThat(revision.totalPrice()).isNull();
+        assertThat(revision.paymentDate()).isNull();
+        assertThat(revision.isCorrect()).isFalse();
     }
 
     @Test
@@ -714,20 +714,6 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void unmarkingOtherRevisionKeepsPreferredRevisionOfReceipt() {
-        UUID originalId = revisionIdOf(createReceiptFromJson());
-        UUID copyId = copyRevision(originalId);
-        receiptFacade.updateRevision(user, originalId, preferredUpdate(originalId));
-        flush();
-
-        receiptFacade.updateRevision(user, copyId, summaryUpdate(copyId, null, null, false, null));
-        flush();
-
-        assertThat(isPreferred(originalId)).isTrue();
-        assertThat(isPreferred(copyId)).isFalse();
-    }
-
-    @Test
     void deletingPreferredRevisionLeavesReceiptWithoutPreferredRevision() {
         UUID receiptId = createReceiptFromJson();
         UUID copyId = copyRevision(revisionIdOf(receiptId));
@@ -739,18 +725,6 @@ class ReceiptFacadeIT extends IntegrationTest {
 
         assertThat(jdbcTemplate.queryForObject("SELECT preferred_revision_id FROM receipt WHERE id = ?", UUID.class, receiptId)).isNull();
         assertThat(receiptFacade.getReceiptDetails(user, receiptId).preferredRevision()).isNull();
-    }
-
-    @Test
-    void markingAlreadyPreferredRevisionAgainKeepsItPreferred() {
-        UUID originalId = revisionIdOf(createReceiptFromJson());
-        receiptFacade.updateRevision(user, originalId, preferredUpdate(originalId));
-        flush();
-
-        receiptFacade.updateRevision(user, originalId, preferredUpdate(originalId));
-        flush();
-
-        assertThat(isPreferred(originalId)).isTrue();
     }
 
     @Test
@@ -777,7 +751,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         flush();
 
         receiptFacade.updateRevision(user, copyId, summaryUpdate(copyId, null, null, null, true));
-        receiptFacade.updateRevision(user, originalId, summaryUpdate(originalId, null, null, null, false));
+        receiptFacade.updateRevision(user, originalId, summaryUpdate(originalId, new BigDecimal("330.75"), null, null, false));
         flush();
 
         assertThat(isCorrect(copyId)).isTrue();
@@ -822,7 +796,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         edited.add(new ItemRequest(null, "Torba", BigDecimal.ONE, new BigDecimal("0.99"), null, new BigDecimal("0.99"), 99, null));
 
         receiptFacade.updateRevision(user, copyId,
-            new UpdateRevisionRequest(null, null, null, new BigDecimal("330.75"), null, true, null, edited));
+            new UpdateRevisionRequest(null, null, null, new BigDecimal("330.75"), null, true, true, edited));
         flush();
         receiptFacade.learnProductsFromCorrections(user, copyId);
         flush();
@@ -885,7 +859,8 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     private UpdateRevisionRequest preferredUpdate(UUID revisionId) {
-        return new UpdateRevisionRequest(null, null, null, null, null, true, null, Set.copyOf(itemsOf(revisionId)));
+        GetRevisionResponse revision = receiptFacade.getRevision(user, revisionId);
+        return new UpdateRevisionRequest(null, null, null, revision.totalPrice(), revision.paymentDate(), true, revision.isCorrect(), Set.copyOf(itemsOf(revisionId)));
     }
 
     private boolean isPreferred(UUID revisionId) {

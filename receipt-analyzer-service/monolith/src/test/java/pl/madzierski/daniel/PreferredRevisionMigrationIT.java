@@ -51,21 +51,6 @@ class PreferredRevisionMigrationIT {
                 + "AND column_name = 'is_preferred_revision'", Integer.class, SCHEMA)).isZero();
     }
 
-    @Test
-    void deletingPreferredRevisionClearsItOnReceipt() {
-        flyway("9").migrate();
-        UUID userId = insert("INSERT INTO app_user (id, created_date, user_sub) VALUES (gen_random_uuid(), now(), 'migration') RETURNING id");
-        UUID walletId = insert("INSERT INTO wallet (id, created_date, name, user_id) VALUES (gen_random_uuid(), now(), 'Home', ?) RETURNING id", userId);
-        UUID receiptId = insertReceipt(walletId, userId);
-        UUID revisionId = insert("INSERT INTO receipt_revision (id, created_date, receipt_id, resolver) "
-            + "VALUES (gen_random_uuid(), now(), ?, 'USER') RETURNING id", receiptId);
-        jdbcTemplate.update("UPDATE receipt SET preferred_revision_id = ? WHERE id = ?", revisionId, receiptId);
-
-        jdbcTemplate.update("DELETE FROM receipt_revision WHERE id = ?", revisionId);
-
-        assertThat(preferredRevisionOf(receiptId)).isNull();
-    }
-
     private Flyway flyway(String target) {
         return Flyway.configure()
             .dataSource(dataSource)

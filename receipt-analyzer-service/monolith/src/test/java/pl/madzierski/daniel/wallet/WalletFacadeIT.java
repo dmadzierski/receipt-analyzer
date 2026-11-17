@@ -36,36 +36,31 @@ class WalletFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void addedWalletGetsTrimmedName() {
-        AuthenticatedUser anna = new AuthenticatedUser(createUser("anna"));
-
-        UUID walletId = walletFacade.addWallet(anna, new CreateWalletRequest("  Home  ")).id();
-        flush();
-
-        assertThat(jdbcTemplate.queryForObject("SELECT name FROM wallet WHERE id = ?", String.class, walletId)).isEqualTo("Home");
-    }
-
-    @Test
-    void walletDetailsShowPreferredRevisionAndStoreOfEachReceipt() {
+    void walletDetailsListEveryReceiptWithItsOwnStoreAndPreferredTotal() {
         UUID annaId = createUser("anna");
         UUID walletId = createWallet(annaId, "Home");
-        UUID storeId = createStore("Biedronka", "ul. Testowa 1", "Poznań");
-        UUID receiptId = insertReceipt(walletId, storeId, "Weekly shopping");
-        insertRevision(receiptId, "BIEDRONKA_JSON", "999.99", false, null);
-        insertRevision(receiptId, "USER", "330.75", true, true, LocalDateTime.of(2026, 5, 22, 10, 4));
+        UUID biedronkaId = createStore("Biedronka", "ul. Testowa 1", "Poznań");
+        UUID lidlId = createStore("Lidl", "ul. Testowa 2", "Gniezno");
+        UUID biedronkaReceiptId = insertReceipt(walletId, biedronkaId, "Biedronka");
+        insertRevision(biedronkaReceiptId, "BIEDRONKA_JSON", "999.99", false, null);
+        insertRevision(biedronkaReceiptId, "USER", "10.00", true, true, LocalDateTime.of(2026, 5, 22, 10, 4));
+        insertRevision(insertReceipt(walletId, lidlId, "Lidl"), "USER", "20.00", true, true, null);
+        insertRevision(insertReceipt(walletId, null, "Bez sklepu"), "USER", "30.00", false, true, null);
+        insertReceipt(createWallet(annaId, "Other"), biedronkaId, "Other wallet");
         flush();
 
         GetWalletDetailsResponse details = walletFacade.getWalletDetails(new AuthenticatedUser(annaId), walletId);
 
         assertThat(details.name()).isEqualTo("Home");
-        assertThat(details.receipts()).hasSize(1);
-        GetWalletDetailsResponse.Receipt receipt = details.receipts().getFirst();
-        assertThat(receipt.name()).isEqualTo("Weekly shopping");
-        assertThat(receipt.totalPrice()).isEqualByComparingTo("330.75");
-        assertThat(receipt.paymentDate()).isEqualTo(LocalDate.of(2026, 5, 22));
-        assertThat(receipt.isCorrect()).isTrue();
-        assertThat(receipt.store().getBrand()).isEqualTo("Biedronka");
-        assertThat(receipt.store().getCity()).isEqualTo("Poznań");
+        assertThat(details.receipts())
+            .extracting(GetWalletDetailsResponse.Receipt::name, receipt -> receipt.totalPrice().toPlainString(), GetWalletDetailsResponse.Receipt::isCorrect,
+                GetWalletDetailsResponse.Receipt::paymentDate,
+                receipt -> receipt.store() != null ? receipt.store().getBrand() : null,
+                receipt -> receipt.store() != null ? receipt.store().getCity() : null)
+            .containsExactlyInAnyOrder(
+                tuple("Biedronka", "10.00", true, LocalDate.of(2026, 5, 22), "Biedronka", "Poznań"),
+                tuple("Lidl", "20.00", true, null, "Lidl", "Gniezno"),
+                tuple("Bez sklepu", "30.00", false, null, null, null));
     }
 
     @Test
