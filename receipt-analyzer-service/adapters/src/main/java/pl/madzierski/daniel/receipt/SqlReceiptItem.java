@@ -37,6 +37,8 @@ class SqlReceiptItem extends BaseEntity {
     public static SqlReceiptItem fromReceiptItem(ReceiptItem item) {
         SqlReceiptItem sqlReceiptItem = new SqlReceiptItem();
         sqlReceiptItem.setId(item.getId());
+        sqlReceiptItem.setCreatedDate(item.getCreatedDate());
+        sqlReceiptItem.setModifiedDate(item.getModifiedDate());
         sqlReceiptItem.setName(item.getName());
         sqlReceiptItem.setAmount(item.getAmount());
         sqlReceiptItem.setUnitPrice(item.getUnitPrice());

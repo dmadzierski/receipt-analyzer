@@ -2,7 +2,7 @@ package pl.madzierski.daniel.product_dict;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.madzierski.daniel.common.entity.BaseEntity;
+import pl.madzierski.daniel.common.entity.VersionedEntity;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,7 +15,7 @@ import java.util.Set;
 @Entity
 @Table(name = "product")
 @EqualsAndHashCode(callSuper = true, exclude = {"categories", "aliases"})
-class SqlProductDict extends BaseEntity {
+class SqlProductDict extends VersionedEntity {
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -43,6 +43,7 @@ class SqlProductDict extends BaseEntity {
     public static <S extends ProductDict> SqlProductDict fromProductDict(S s) {
         SqlProductDict sqlProductDict = new SqlProductDict();
         sqlProductDict.setId(s.getId());
+        sqlProductDict.setVersion(s.getVersion());
         sqlProductDict.setName(s.getName());
         sqlProductDict.setCreatedDate(s.getCreatedDate());
         sqlProductDict.setModifiedDate(s.getModifiedDate());
@@ -60,6 +61,7 @@ class SqlProductDict extends BaseEntity {
     public ProductDict toProductDict() {
         ProductDict productDict = new ProductDict();
         productDict.setId(this.id);
+        productDict.setVersion(this.version);
         productDict.setName(this.name);
         productDict.setCreatedDate(this.createdDate);
         productDict.setModifiedDate(this.modifiedDate);

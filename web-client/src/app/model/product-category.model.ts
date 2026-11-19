@@ -4,6 +4,7 @@ export interface GetProductCategoryListResponse {
 
 export interface ProductCategory {
   id: string;
+  version: number;
   name: string;
 }
 
@@ -16,6 +17,7 @@ export interface CreateProductCategoryResponse {
 }
 
 export interface UpdateProductCategoryRequest {
+  version: number;
   name: string;
 }
 

@@ -134,6 +134,7 @@ class FileFacadeIT extends IntegrationTest {
     void fileWithoutPathIsReported() {
         UUID fileId = fileIdOf(fileFacade.save(user, receiptId, List.of(PNG)));
         jdbcTemplate.update("UPDATE receipt_file SET path = NULL WHERE id = ?", fileId);
+        flush();
 
         assertError(() -> fileFacade.getFile(user, fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_PATH_NOT_FOUND);
     }

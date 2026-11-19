@@ -16,6 +16,7 @@ import java.util.UUID;
 class StoreBrand {
 
     private UUID id;
+    private Long version;
     private String name;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
@@ -27,9 +28,10 @@ class StoreBrand {
             .build();
     }
 
-    static StoreBrand restore(UUID id, String name, LocalDateTime createdDate, LocalDateTime modifiedDate) {
+    static StoreBrand restore(UUID id, Long version, String name, LocalDateTime createdDate, LocalDateTime modifiedDate) {
         return builder()
             .id(id)
+            .version(version)
             .name(name)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)

@@ -12,6 +12,7 @@ import {
   UpdateProductCategoryRequest
 } from '../model/product-category.model';
 import {ProductCategoryService} from '../service/product-category.service';
+import {isVersionConflict} from '../error/version-conflict';
 
 interface EditableProductCategory extends ProductCategory {
   draftName: string;
@@ -72,10 +73,18 @@ export class ProductCategoryListComponent implements OnInit {
       return;
     }
 
-    const request: UpdateProductCategoryRequest = {name};
-    this.productCategoryService.updateProductCategory(category.id, request).subscribe(() => {
-      this.editingId = null;
-      this.loadCategories();
+    const request: UpdateProductCategoryRequest = {version: category.version, name};
+    this.productCategoryService.updateProductCategory(category.id, request).subscribe({
+      next: () => {
+        this.editingId = null;
+        this.loadCategories();
+      },
+      error: (error: unknown) => {
+        if (isVersionConflict(error)) {
+          this.editingId = null;
+          this.loadCategories();
+        }
+      }
     });
   }
 

@@ -101,11 +101,11 @@ class ReceiptUT {
     }
 
     private static Receipt receipt() {
-        return Receipt.restore(UUID.randomUUID(), null, null, "Paragon", null, null, null, null, null);
+        return Receipt.restore(UUID.randomUUID(), null, null, null, "Paragon", null, null, null, null, null);
     }
 
     private static ReceiptRevision revisionOf(Receipt receipt) {
-        return ReceiptRevision.restore(UUID.randomUUID(), null, null, null, ReceiptResolverStrategyType.USER, null, null,
+        return ReceiptRevision.restore(UUID.randomUUID(), null, null, null, null, ReceiptResolverStrategyType.USER, null, null,
             false, new ReceiptQuery(receipt.getId()), null, List.of(), null);
     }
 }

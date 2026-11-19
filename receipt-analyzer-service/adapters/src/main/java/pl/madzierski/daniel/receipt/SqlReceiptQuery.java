@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.receipt;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
@@ -15,6 +16,9 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class SqlReceiptQuery extends BaseEntity {
+
+    @Column(name = "owner_id", insertable = false, updatable = false)
+    private UUID ownerId;
 
     public SqlReceiptQuery(UUID id) {
         this.id = id;

@@ -16,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ReceiptDto {
     private UUID id;
+    private long version;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;

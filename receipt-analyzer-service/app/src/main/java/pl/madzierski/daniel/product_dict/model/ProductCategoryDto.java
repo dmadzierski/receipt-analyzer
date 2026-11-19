@@ -11,5 +11,6 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class ProductCategoryDto {
     private UUID id;
+    private long version;
     private String name;
 }

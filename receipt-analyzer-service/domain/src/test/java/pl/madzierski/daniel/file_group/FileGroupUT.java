@@ -31,7 +31,7 @@ class FileGroupUT {
     void assignPathsUsesPolicyForEveryFile() {
         UUID firstId = UUID.randomUUID();
         UUID secondId = UUID.randomUUID();
-        FileGroup group = FileGroup.restore(UUID.randomUUID(), null, null, FileType.PDF, null, null, List.of(
+        FileGroup group = FileGroup.restore(UUID.randomUUID(), null, null, null, FileType.PDF, null, null, List.of(
             File.restore(firstId, null, null, null, 0),
             File.restore(secondId, null, null, null, 1)));
 

@@ -2,7 +2,7 @@ package pl.madzierski.daniel.receipt;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.madzierski.daniel.common.entity.BaseEntity;
+import pl.madzierski.daniel.common.entity.VersionedEntity;
 import pl.madzierski.daniel.file_group.SqlFileGroupQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionQuery;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-class SqlReceiptRevision extends BaseEntity {
+class SqlReceiptRevision extends VersionedEntity {
 
     private String revision;
     @Enumerated(EnumType.STRING)
@@ -31,10 +31,10 @@ class SqlReceiptRevision extends BaseEntity {
     private LocalDateTime paymentDate;
     private Boolean isCorrect;
     @ManyToOne(fetch = FetchType.LAZY)
-    private SqlReceipt receipt;
+    private SqlReceiptQuery receipt;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_receipt_revision_id")
-    private SqlReceiptRevision parentReceiptRevision;
+    private SqlReceiptRevisionQuery parentReceiptRevision;
     @Getter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "receipt_revision_id", nullable = false)
@@ -47,24 +47,23 @@ class SqlReceiptRevision extends BaseEntity {
     public static SqlReceiptRevision fromReceiptRevision(ReceiptRevision revision) {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();
         sqlReceiptRevision.setId(revision.getId());
+        sqlReceiptRevision.setVersion(revision.getVersion());
+        sqlReceiptRevision.setCreatedDate(revision.getCreatedDate());
+        sqlReceiptRevision.setModifiedDate(revision.getModifiedDate());
         sqlReceiptRevision.setRevision(revision.getRevision());
         sqlReceiptRevision.setTotalPrice(revision.getTotalPrice());
         sqlReceiptRevision.setPaymentDate(revision.getPaymentDate());
         sqlReceiptRevision.setResolver(revision.getResolver());
         sqlReceiptRevision.setIsCorrect(revision.getIsCorrect());
         if (revision.getReceipt() != null) {
-            SqlReceipt receipt = new SqlReceipt();
-            receipt.setId(revision.getReceipt().id());
-            sqlReceiptRevision.setReceipt(receipt);
+            sqlReceiptRevision.setReceipt(new SqlReceiptQuery(revision.getReceipt().id()));
         }
         sqlReceiptRevision.setItems(revision.getItems() != null ? new HashSet<>(revision.getItems()
             .stream()
             .map(SqlReceiptItem::fromReceiptItem)
             .toList()) : Collections.emptySet());
         if (revision.getParentReceiptRevision() != null) {
-            SqlReceiptRevision parent = new SqlReceiptRevision();
-            parent.setId(revision.getParentReceiptRevision().id());
-            sqlReceiptRevision.setParentReceiptRevision(parent);
+            sqlReceiptRevision.setParentReceiptRevision(new SqlReceiptRevisionQuery(revision.getParentReceiptRevision().id()));
         }
         if (revision.getSourceFileGroup() != null) {
             sqlReceiptRevision.setSourceFileGroup(SqlFileGroupQuery.fromFileGroupQuery(revision.getSourceFileGroup()));
@@ -73,7 +72,7 @@ class SqlReceiptRevision extends BaseEntity {
     }
     
     public ReceiptRevision toReceiptRevision() {
-        return ReceiptRevision.restore(id, createdDate, modifiedDate, revision, resolver, totalPrice, paymentDate,
+        return ReceiptRevision.restore(id, version, createdDate, modifiedDate, revision, resolver, totalPrice, paymentDate,
             isCorrect, receipt != null ? new ReceiptQuery(receipt.getId()) : null,
             parentReceiptRevision != null ? new ReceiptRevisionQuery(parentReceiptRevision.getId()) : null,
             items.stream()

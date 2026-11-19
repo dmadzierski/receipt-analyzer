@@ -2,7 +2,7 @@ package pl.madzierski.daniel.receipt;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.madzierski.daniel.common.entity.BaseEntity;
+import pl.madzierski.daniel.common.entity.VersionedEntity;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionQuery;
 import pl.madzierski.daniel.store.SqlStoreQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @Setter
 @Table(name = "receipt")
 @Builder
-class SqlReceipt extends BaseEntity {
+class SqlReceipt extends VersionedEntity {
 
     private String name;
     private String description;
@@ -36,6 +36,7 @@ class SqlReceipt extends BaseEntity {
     public static SqlReceipt fromReceipt(Receipt receipt) {
         SqlReceipt sqlReceipt = new SqlReceipt();
         sqlReceipt.setId(receipt.getId());
+        sqlReceipt.setVersion(receipt.getVersion());
         sqlReceipt.setCreatedDate(receipt.getCreatedDate());
         sqlReceipt.setModifiedDate(receipt.getModifiedDate());
         sqlReceipt.setName(receipt.getName());
@@ -48,7 +49,7 @@ class SqlReceipt extends BaseEntity {
     }
 
     public Receipt toReceipt() {
-        return Receipt.restore(id, createdDate, modifiedDate, name, description,
+        return Receipt.restore(id, version, createdDate, modifiedDate, name, description,
             wallet != null ? wallet.toWalletQuery() : null,
             store != null ? store.toStoreQuery() : null,
             ownerId != null ? new UserQuery(ownerId) : null,

@@ -1,6 +1,9 @@
 package pl.madzierski.daniel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.assertj.core.api.ThrowableAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,8 +17,12 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.kafka.KafkaContainer;
 import pl.madzierski.daniel.exception.AppRuntimeException;
-import pl.madzierski.daniel.event.OutboxEventPublisher;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.event.EventTypes;
+import pl.madzierski.daniel.event.OutboxEventPublisher;
+import pl.madzierski.daniel.event.PublishedEvent;
+import pl.madzierski.daniel.readmodel.ReadModelProjector;
+import pl.madzierski.daniel.readmodel.ReadModelRebuild;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,7 +64,21 @@ public abstract class IntegrationTest {
     protected EntityManager entityManager;
 
     @Autowired
+    protected ReadModelRebuild readModelRebuild;
+
+    @Autowired
+    protected ReadModelProjector readModelProjector;
+
+    @Autowired
     private OutboxEventPublisher outboxEventPublisher;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void clearReadModel() {
+        readModelProjector.clear();
+    }
 
     @DynamicPropertySource
     static void uploadDirProperty(DynamicPropertyRegistry registry) {
@@ -72,6 +93,7 @@ public abstract class IntegrationTest {
         publishPendingEvents();
         entityManager.flush();
         entityManager.clear();
+        readModelRebuild.projectDirectly();
     }
 
     protected byte[] readResource(String path) {
@@ -152,13 +174,39 @@ public abstract class IntegrationTest {
     }
 
     protected List<OutboxEvent> outboxEvents() {
+        return publishedEvents().stream()
+            .map(event -> new OutboxEvent(event.type(), event.aggregateId(), event.correlationId(), event.payload()))
+            .toList();
+    }
+
+    protected List<PublishedEvent> publishedEvents() {
         publishPendingEvents();
-        return jdbcTemplate.query("SELECT type, aggregate_id, correlation_id, payload::text AS payload FROM outbox_event ORDER BY position",
-            (rs, rowNum) -> new OutboxEvent(rs.getString("type"), rs.getObject("aggregate_id", UUID.class),
-                rs.getObject("correlation_id", UUID.class), rs.getString("payload")));
+        return jdbcTemplate.queryForList("SELECT serialized_event FROM event_publication ORDER BY publication_date", String.class).stream()
+            .map(json -> read(json, PublishedEvent.class))
+            .toList();
     }
 
     protected record OutboxEvent(String type, UUID aggregateId, UUID correlationId, String payload) {
+    }
+
+    protected void projectOutboxEvents() {
+        publishedEvents().forEach(event -> readModelProjector.project(event.id(), event.correlationId(),
+            read(event.payload(), EventTypes.classOf(event.type()))));
+    }
+
+    private <T> T read(String json, Class<T> type) {
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    protected long version(String table, UUID id) {
+        entityManager.flush();
+        return jdbcTemplate.queryForList("SELECT version FROM " + table + " WHERE id = ?", Long.class, id).stream()
+            .findFirst()
+            .orElse(0L);
     }
 
     protected int count(String sql, Object... args) {

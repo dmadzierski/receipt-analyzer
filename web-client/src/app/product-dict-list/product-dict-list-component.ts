@@ -17,9 +17,11 @@ import {
 import {ProductDictService} from '../service/product-dict.service';
 import {ProductCategory} from '../model/product-category.model';
 import {ProductCategoryService} from '../service/product-category.service';
+import {isVersionConflict} from '../error/version-conflict';
 
 interface EditableProductDictGroup {
   primaryId: string;
+  version: number;
   canonicalName: string;
   categoryIds: string[];
   aliases: Alias[];
@@ -74,10 +76,15 @@ export class ProductDictListComponent implements OnInit {
       items: changedItems
     };
 
-    this.productDictService.updateProductDictList(request).subscribe(() => {
-      this.contentEditable = false;
-      this.clearDragState();
-      this.refreshProductDictList();
+    this.productDictService.updateProductDictList(request).subscribe({
+      next: () => {
+        this.contentEditable = false;
+        this.clearDragState();
+        this.refreshProductDictList();
+      },
+      error: (error: unknown) => {
+        if (isVersionConflict(error)) this.declineEdit();
+      }
     });
   }
 
@@ -186,6 +193,7 @@ export class ProductDictListComponent implements OnInit {
   private toGroup(item: ProductDict): EditableProductDictGroup {
     return {
       primaryId: item.id,
+      version: item.version,
       canonicalName: item.name,
       categoryIds: this.resolveCategoryIds(item),
       aliases: item.aliases.map((alias) => ({...alias})),
@@ -196,6 +204,7 @@ export class ProductDictListComponent implements OnInit {
   private toProductDict(group: EditableProductDictGroup): ProductDict {
     return {
       id: group.primaryId,
+      version: group.version,
       name: group.canonicalName,
       productCategoryIds: [...group.categoryIds],
       aliases: group.aliases.map((alias) => ({...alias}))
@@ -204,6 +213,7 @@ export class ProductDictListComponent implements OnInit {
 
   private toRequestItem(group: EditableProductDictGroup): UpdateProductDictListRequestItem {
     return {
+      version: group.version,
       canonicalName: group.canonicalName,
       productCategoryIds: [...group.categoryIds],
       productDictList: [group.primaryId, ...group.mergedDicts.map((dict) => dict.id)],
@@ -295,11 +305,13 @@ export class ProductDictListComponent implements OnInit {
   private cloneGroups(groups: EditableProductDictGroup[]): EditableProductDictGroup[] {
     return groups.map((group) => ({
       primaryId: group.primaryId,
+      version: group.version,
       canonicalName: group.canonicalName,
       categoryIds: [...group.categoryIds],
       aliases: group.aliases.map((alias) => ({...alias})),
       mergedDicts: group.mergedDicts.map((dict) => ({
         id: dict.id,
+        version: dict.version,
         name: dict.name,
         productCategoryIds: this.resolveCategoryIds(dict),
         aliases: dict.aliases.map((alias) => ({...alias}))

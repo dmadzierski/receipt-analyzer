@@ -17,6 +17,7 @@ import java.util.UUID;
 class Wallet {
 
     private UUID id;
+    private Long version;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
@@ -30,9 +31,10 @@ class Wallet {
             .build();
     }
 
-    static Wallet restore(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String name, UserQuery owner) {
+    static Wallet restore(UUID id, Long version, LocalDateTime createdDate, LocalDateTime modifiedDate, String name, UserQuery owner) {
         return builder()
             .id(id)
+            .version(version)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
             .name(name)

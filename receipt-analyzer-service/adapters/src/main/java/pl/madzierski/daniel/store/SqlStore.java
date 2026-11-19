@@ -2,7 +2,7 @@ package pl.madzierski.daniel.store;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.madzierski.daniel.common.entity.BaseEntity;
+import pl.madzierski.daniel.common.entity.VersionedEntity;
 
 
 @Entity
@@ -12,7 +12,7 @@ import pl.madzierski.daniel.common.entity.BaseEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true, exclude = {"brand"})
-class SqlStore extends BaseEntity {
+class SqlStore extends VersionedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private SqlStoreBrandQuery brand;
@@ -31,13 +31,14 @@ class SqlStore extends BaseEntity {
                 store.getCountry()
         );
         sqlStore.setId(store.getId());
+        sqlStore.setVersion(store.getVersion());
         sqlStore.setCreatedDate(store.getCreatedDate());
         sqlStore.setModifiedDate(store.getModifiedDate());
         return sqlStore;
     }
 
     Store toStore() {
-        return Store.restore(id, brand != null ? brand.toStoreBrandQuery() : null, address, city, postalCode, country,
+        return Store.restore(id, version, brand != null ? brand.toStoreBrandQuery() : null, address, city, postalCode, country,
             createdDate, modifiedDate);
     }
 }

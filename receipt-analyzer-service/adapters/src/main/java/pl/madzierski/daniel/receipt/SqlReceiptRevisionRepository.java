@@ -9,7 +9,6 @@ import pl.madzierski.daniel.event.EventPublisher;
 import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.event.ItemProductsReassigned;
-import pl.madzierski.daniel.receipt.event.RevisionChanged;
 import pl.madzierski.daniel.receipt.event.RevisionDeleted;
 import pl.madzierski.daniel.user.model.UserQuery;
 
@@ -48,12 +47,9 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
 
     @Override
     public ReceiptRevision save(ReceiptRevision revision) {
-        SqlReceiptRevision entity = repository.save(SqlReceiptRevision.fromReceiptRevision(revision));
-        eventPublisher.publishLatest(entity.getId(), () -> {
-            ReceiptRevision saved = entity.toReceiptRevision();
-            return changed(saved);
-        });
-        return entity.toReceiptRevision();
+        SqlReceiptRevision saved = repository.save(SqlReceiptRevision.fromReceiptRevision(revision));
+        eventPublisher.publishLatest(saved.getId(), () -> ReceiptSnapshots.changed(saved.toReceiptRevision()));
+        return saved.toReceiptRevision();
     }
 
     @Override
@@ -88,19 +84,5 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     public void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList) {
         repository.reassignProductDict(SqlProductDictQuery.fromProductDict(dict), productDictIdList);
         eventPublisher.publish(new ItemProductsReassigned(dict.id(), List.copyOf(productDictIdList)));
-    }
-
-    private static RevisionChanged changed(ReceiptRevision revision) {
-        return new RevisionChanged(revision.getId(), revision.getReceipt() != null ? revision.getReceipt().id() : null,
-            revision.getResolver(), revision.getCreatedDate(), revision.getTotalPrice(), revision.getPaymentDate(),
-            revision.getIsCorrect(),
-            revision.getParentReceiptRevision() != null ? revision.getParentReceiptRevision().id() : null,
-            revision.getSourceFileGroup() != null ? revision.getSourceFileGroup().id() : null,
-            revision.getItems().stream()
-                .map(item -> new RevisionChanged.Item(item.getId(), item.getName(),
-                    item.getNameDict() != null ? item.getNameDict().id() : null, item.getAmount(), item.getUnitPrice(),
-                    item.getDiscount(), item.getTotalPrice(), item.getPosition(),
-                    item.getParentItem() != null ? item.getParentItem().id() : null))
-                .toList());
     }
 }

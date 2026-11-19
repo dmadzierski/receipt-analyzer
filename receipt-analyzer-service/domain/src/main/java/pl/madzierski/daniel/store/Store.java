@@ -15,6 +15,7 @@ import java.util.UUID;
 class Store {
 
     private UUID id;
+    private Long version;
     private StoreBrandQuery brand;
     private String address;
     private String city;
@@ -33,10 +34,11 @@ class Store {
             .build();
     }
 
-    static Store restore(UUID id, StoreBrandQuery brand, String address, String city, String postalCode, String country,
+    static Store restore(UUID id, Long version, StoreBrandQuery brand, String address, String city, String postalCode, String country,
                          LocalDateTime createdDate, LocalDateTime modifiedDate) {
         return builder()
             .id(id)
+            .version(version)
             .brand(brand)
             .address(address)
             .city(city)

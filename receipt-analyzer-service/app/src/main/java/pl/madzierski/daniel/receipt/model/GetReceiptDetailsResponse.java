@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 public record GetReceiptDetailsResponse(
     UUID id,
+    long version,
     String name,
     String description,
     UUID walletId,
@@ -31,6 +32,7 @@ public record GetReceiptDetailsResponse(
                                      StoreDetailsResponse store) {
         this(
             receipt.getId(),
+            receipt.getVersion(),
             receipt.getName(),
             receipt.getDescription(),
             receipt.getWallet() != null ? receipt.getWallet().id() : null,
@@ -74,6 +76,7 @@ public record GetReceiptDetailsResponse(
 
     public record PreferredRevisionResponse(
         UUID id,
+        long version,
         ReceiptResolverStrategyType resolver,
         LocalDateTime createdDate,
         BigDecimal totalPrice,
@@ -85,6 +88,7 @@ public record GetReceiptDetailsResponse(
         PreferredRevisionResponse(ReceiptRevisionDto revision, Collection<ReceiptItemDto> items) {
             this(
                 revision.getId(),
+                revision.getVersion(),
                 revision.getResolver(),
                 revision.getCreatedDate(),
                 revision.getTotalPrice(),

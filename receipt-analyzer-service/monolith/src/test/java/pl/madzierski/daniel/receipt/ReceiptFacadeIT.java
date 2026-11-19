@@ -101,7 +101,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         request.add(new ItemRequest(null, removed.name(), removed.amount(), removed.unitPrice(), removed.discount(),
             removed.totalPrice(), removed.position(), null));
 
-        receiptFacade.updateRevision(user, userRevisionId, revisionUpdate(request));
+        receiptFacade.updateRevision(user, userRevisionId, revisionUpdate(userRevisionId, request));
         flush();
 
         Set<UUID> itemIds = itemsOf(userRevisionId).stream().map(ItemRequest::id).collect(Collectors.toSet());
@@ -114,7 +114,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         UUID receiptId = createReceiptFromJson();
         UUID otherStoreId = createStore("Lidl", "ul. Inna 2", "Kraków");
 
-        receiptFacade.updateReceipt(user, receiptId, new UpdateReceiptRequest("  Weekly shopping ", "groceries", otherStoreId));
+        receiptFacade.updateReceipt(user, receiptId, new UpdateReceiptRequest(version("receipt", receiptId), "  Weekly shopping ", "groceries", otherStoreId));
         flush();
 
         Map<String, Object> receipt = jdbcTemplate.queryForMap(
@@ -126,10 +126,48 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
+    void updatingReceiptWithStaleVersionFailsAndKeepsNewerData() {
+        UUID receiptId = createReceiptFromJson();
+        long staleVersion = version("receipt", receiptId);
+        receiptFacade.updateReceipt(user, receiptId, new UpdateReceiptRequest(staleVersion, "First", null, storeId));
+        flush();
+
+        assertError(() -> receiptFacade.updateReceipt(user, receiptId, new UpdateReceiptRequest(staleVersion, "Second", null, storeId)),
+            AppRuntimeExceptionMessages.VERSION_CONFLICT);
+        assertThat(jdbcTemplate.queryForObject("SELECT name FROM receipt WHERE id = ?", String.class, receiptId)).isEqualTo("First");
+    }
+
+    @Test
+    void updatingRevisionWithStaleVersionFails() {
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+        UpdateRevisionRequest stale = summaryUpdate(copyId, new BigDecimal("1.00"), null, null, null);
+        receiptFacade.updateRevision(user, copyId, stale);
+        flush();
+
+        assertError(() -> receiptFacade.updateRevision(user, copyId, stale), AppRuntimeExceptionMessages.VERSION_CONFLICT);
+    }
+
+    @Test
+    void editingOnlyItemsOfRevisionIncreasesItsVersion() {
+        UUID copyId = copyRevision(revisionIdOf(createReceiptFromJson()));
+        GetRevisionResponse revision = receiptFacade.getRevision(user, copyId);
+        Set<ItemRequest> items = itemsOf(copyId).stream()
+            .map(item -> item.name().equals(ONION)
+                ? new ItemRequest(item.id(), "Cebula", item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), item.productId())
+                : item)
+            .collect(Collectors.toSet());
+
+        receiptFacade.updateRevision(user, copyId, new UpdateRevisionRequest(null, revision.version(), null, null,
+            revision.totalPrice(), revision.paymentDate(), null, revision.isCorrect(), items));
+
+        assertThat(version("receipt_revision", copyId)).isEqualTo(revision.version() + 1);
+    }
+
+    @Test
     void updatingReceiptWithUnknownStoreFails() {
         UUID receiptId = createReceiptFromJson();
 
-        assertError(() -> receiptFacade.updateReceipt(user, receiptId, new UpdateReceiptRequest("name", null, UNKNOWN_ID)),
+        assertError(() -> receiptFacade.updateReceipt(user, receiptId, new UpdateReceiptRequest(version("receipt", receiptId), "name", null, UNKNOWN_ID)),
             AppRuntimeExceptionMessages.STORE_NOT_FOUND);
     }
 
@@ -141,7 +179,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         return Stream.of(
             Named.of("getReceiptDetails", (facade, user, id) -> facade.getReceiptDetails(user, id)),
             Named.of("createRevision", (facade, user, id) -> facade.createRevision(user, id, new CreateRevisionRequest(UNKNOWN_ID, ReceiptResolverStrategyType.USER))),
-            Named.of("updateReceipt", (facade, user, id) -> facade.updateReceipt(user, id, new UpdateReceiptRequest("name", null, UNKNOWN_ID))),
+            Named.of("updateReceipt", (facade, user, id) -> facade.updateReceipt(user, id, new UpdateReceiptRequest(0L, "name", null, UNKNOWN_ID))),
             Named.of("deleteReceipt", (facade, user, id) -> facade.deleteReceipt(user, id)));
     }
 
@@ -463,7 +501,7 @@ class ReceiptFacadeIT extends IntegrationTest {
                 : item)
             .collect(Collectors.toSet());
 
-        receiptFacade.updateRevision(user, copyId, new UpdateRevisionRequest(null, null, null, new BigDecimal("330.75"), null, null, null, items));
+        receiptFacade.updateRevision(user, copyId, new UpdateRevisionRequest(null, version("receipt_revision", copyId), null, null, new BigDecimal("330.75"), null, null, null, items));
         flush();
 
         assertThat(isCorrect(copyId)).isFalse();
@@ -521,7 +559,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         Set<ItemRequest> items = new HashSet<>(itemsOf(copyId));
         items.add(new ItemRequest(null, "Nowa pozycja", BigDecimal.ONE, BigDecimal.ONE, null, BigDecimal.ONE, 99, onionId));
 
-        receiptFacade.updateRevision(user, copyId, revisionUpdate(items));
+        receiptFacade.updateRevision(user, copyId, revisionUpdate(copyId, items));
         flush();
 
         assertThat(productNameOfItem(itemNamed(copyId, "Nowa pozycja").id())).contains("Cebula");
@@ -567,7 +605,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         return Stream.of(
             Named.of("createRevisionCopy", (facade, user, id) -> facade.createRevisionCopy(user, id)),
             Named.of("getRevision", (facade, user, id) -> facade.getRevision(user, id)),
-            Named.of("updateRevision", (facade, user, id) -> facade.updateRevision(user, id, revisionUpdate(Set.of()))),
+            Named.of("updateRevision", (facade, user, id) -> facade.updateRevision(user, id, new UpdateRevisionRequest(null, 0L, null, null, null, null, null, null, Set.of()))),
             Named.of("updateProductDictInRevisionItems", (facade, user, id) -> facade.updateProductDictInRevisionItems(user, id)),
             Named.of("deleteRevision", (facade, user, id) -> facade.deleteRevision(user, id)),
             Named.of("rewriteProductNameToItems", (facade, user, id) -> facade.rewriteProductNameToItems(user, id)));
@@ -733,7 +771,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         List<ItemRequest> itemsBefore = itemsOf(originalId);
 
         receiptFacade.updateRevision(user, originalId,
-            new UpdateRevisionRequest(null, null, null, new BigDecimal("1.00"), null, true, null, Set.of()));
+            new UpdateRevisionRequest(null, version("receipt_revision", originalId), null, null, new BigDecimal("1.00"), null, true, null, Set.of()));
         flush();
 
         assertThat(itemsOf(originalId)).containsExactlyElementsOf(itemsBefore);
@@ -796,7 +834,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         edited.add(new ItemRequest(null, "Torba", BigDecimal.ONE, new BigDecimal("0.99"), null, new BigDecimal("0.99"), 99, null));
 
         receiptFacade.updateRevision(user, copyId,
-            new UpdateRevisionRequest(null, null, null, new BigDecimal("330.75"), null, true, true, edited));
+            new UpdateRevisionRequest(null, version("receipt_revision", copyId), null, null, new BigDecimal("330.75"), null, true, true, edited));
         flush();
         receiptFacade.learnProductsFromCorrections(user, copyId);
         flush();
@@ -826,7 +864,7 @@ class ReceiptFacadeIT extends IntegrationTest {
 
     private UpdateRevisionRequest summaryUpdate(UUID revisionId, BigDecimal totalPrice, LocalDateTime paymentDate,
                                                 Boolean isPreferred, Boolean isCorrect) {
-        return new UpdateRevisionRequest(null, null, null, totalPrice, paymentDate, isPreferred, isCorrect, Set.copyOf(itemsOf(revisionId)));
+        return new UpdateRevisionRequest(null, version("receipt_revision", revisionId), null, null, totalPrice, paymentDate, isPreferred, isCorrect, Set.copyOf(itemsOf(revisionId)));
     }
 
     private static byte[] png(int size) {
@@ -844,7 +882,7 @@ class ReceiptFacadeIT extends IntegrationTest {
                 ? new ItemRequest(item.id(), to, item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), item.productId())
                 : item)
             .collect(Collectors.toSet());
-        receiptFacade.updateRevision(user, revisionId, revisionUpdate(items));
+        receiptFacade.updateRevision(user, revisionId, revisionUpdate(revisionId, items));
         flush();
     }
 
@@ -854,13 +892,13 @@ class ReceiptFacadeIT extends IntegrationTest {
                 ? new ItemRequest(item.id(), item.name(), item.amount(), item.unitPrice(), item.discount(), item.totalPrice(), item.position(), productId)
                 : item)
             .collect(Collectors.toSet());
-        receiptFacade.updateRevision(user, revisionId, revisionUpdate(items));
+        receiptFacade.updateRevision(user, revisionId, revisionUpdate(revisionId, items));
         flush();
     }
 
     private UpdateRevisionRequest preferredUpdate(UUID revisionId) {
         GetRevisionResponse revision = receiptFacade.getRevision(user, revisionId);
-        return new UpdateRevisionRequest(null, null, null, revision.totalPrice(), revision.paymentDate(), true, revision.isCorrect(), Set.copyOf(itemsOf(revisionId)));
+        return new UpdateRevisionRequest(null, revision.version(), null, null, revision.totalPrice(), revision.paymentDate(), true, revision.isCorrect(), Set.copyOf(itemsOf(revisionId)));
     }
 
     private boolean isPreferred(UUID revisionId) {
@@ -973,7 +1011,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         return productId;
     }
 
-    private static UpdateRevisionRequest revisionUpdate(Set<ItemRequest> items) {
-        return new UpdateRevisionRequest(null, null, null, null, null, null, null, items);
+    private UpdateRevisionRequest revisionUpdate(UUID revisionId, Set<ItemRequest> items) {
+        return new UpdateRevisionRequest(null, version("receipt_revision", revisionId), null, null, null, null, null, null, items);
     }
 }

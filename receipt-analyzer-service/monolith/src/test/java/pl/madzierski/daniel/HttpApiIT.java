@@ -97,6 +97,7 @@ class HttpApiIT extends IntegrationTest {
         String walletId = idOf(mockMvc.perform(json(as(userSub, post(CONTEXT_PATH + "/wallets")), "{\"name\": \"  Home \"}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.*", hasSize(1))));
+        flush();
 
         mockMvc.perform(as(userSub, get(CONTEXT_PATH + "/wallets")))
             .andExpect(status().isOk())
@@ -134,6 +135,7 @@ class HttpApiIT extends IntegrationTest {
                 "{\"brandName\": \" Lidl \", \"address\": \"ul. Testowa 1\", \"city\": \"Poznań\", \"postalCode\": \"60-001\", \"country\": \"Polska\"}"))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.*", hasSize(1))));
+        flush();
 
         mockMvc.perform(as(userSub, get(CONTEXT_PATH + "/stores/" + storeId)))
             .andExpect(status().isOk())
@@ -151,12 +153,20 @@ class HttpApiIT extends IntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.*", hasSize(1))));
 
-        mockMvc.perform(json(as(userSub, put(CONTEXT_PATH + "/product-categories/" + categoryId)), "{\"name\": \"Owoce\"}"))
+        flush();
+        Integer version = JsonPath.read(mockMvc.perform(as(userSub, get(CONTEXT_PATH + "/product-categories")))
+            .andReturn().getResponse().getContentAsString(), "$.items[0].version");
+        String rename = "{\"version\": %d, \"name\": \"Owoce\"}".formatted(version);
+
+        mockMvc.perform(json(as(userSub, put(CONTEXT_PATH + "/product-categories/" + categoryId)), rename))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.*", hasSize(1)))
             .andExpect(jsonPath("$.id").value(categoryId));
+        flush();
         mockMvc.perform(as(userSub, get(CONTEXT_PATH + "/product-categories")))
             .andExpect(jsonPath("$.items[0].name").value("Owoce"));
+        expectError(mockMvc.perform(json(as(userSub, put(CONTEXT_PATH + "/product-categories/" + categoryId)), rename)),
+            409, "EXCEPTION.VERSION_CONFLICT");
         expectError(mockMvc.perform(json(as(userSub, post(CONTEXT_PATH + "/product-categories")), "{\"name\": \"owoce\"}")),
             400, "EXCEPTION.PRODUCT_CATEGORY_ALREADY_EXISTS");
     }
@@ -194,13 +204,15 @@ class HttpApiIT extends IntegrationTest {
             .andExpect(content().bytes(receiptJson));
 
         mockMvc.perform(json(as(userSub, put(CONTEXT_PATH + "/receipts/" + receiptId)),
-                "{\"name\": \" Zakupy \", \"description\": \"tydzień\", \"storeId\": \"%s\"}".formatted(storeId)))
+                "{\"version\": %d, \"name\": \" Zakupy \", \"description\": \"tydzień\", \"storeId\": \"%s\"}"
+                    .formatted(JsonPath.<Integer>read(details, "$.version"), storeId)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.*", hasSize(1)));
         String copyId = idOf(mockMvc.perform(json(as(userSub, post(CONTEXT_PATH + "/revisions/" + revisionId + "/copy")), "{}"))
             .andExpect(status().isCreated()), "$.revisionId");
         mockMvc.perform(json(as(userSub, put(CONTEXT_PATH + "/revisions/" + copyId)),
-                "{\"totalPrice\": 330.75, \"paymentDate\": \"2026-05-22T10:04:00\", \"isPreferredRevision\": true, \"items\": []}"))
+                "{\"version\": %d, \"totalPrice\": 330.75, \"paymentDate\": \"2026-05-22T10:04:00\", \"isPreferredRevision\": true, \"items\": []}"
+                    .formatted(version("receipt_revision", UUID.fromString(copyId)))))
             .andExpect(status().isOk());
         flush();
 

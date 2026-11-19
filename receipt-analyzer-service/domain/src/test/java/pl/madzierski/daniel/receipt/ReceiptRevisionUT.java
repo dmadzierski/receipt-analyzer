@@ -83,7 +83,7 @@ class ReceiptRevisionUT {
         ReceiptQuery receipt = receipt();
         FileGroupQuery sourceFileGroup = new FileGroupQuery(UUID.randomUUID());
         LocalDateTime paymentDate = LocalDateTime.of(2026, 5, 22, 10, 0);
-        ReceiptRevision original = ReceiptRevision.restore(originalId, null, null, "1.0", BIEDRONKA_JSON, dec("1.90"),
+        ReceiptRevision original = ReceiptRevision.restore(originalId, null, null, null, "1.0", BIEDRONKA_JSON, dec("1.90"),
             paymentDate, true, receipt, null,
             List.of(restoredItem(itemId, "Cebula", ONION, "1", "2.00", "0.10", "1.90", 3)), sourceFileGroup);
 
@@ -110,7 +110,7 @@ class ReceiptRevisionUT {
     @Test
     void changeSummarySetsTotalPriceAndPaymentDate() {
         LocalDateTime newDate = LocalDateTime.of(2026, 6, 1, 12, 0);
-        ReceiptRevision revision = ReceiptRevision.restore(null, null, null, null, USER, dec("1.00"),
+        ReceiptRevision revision = ReceiptRevision.restore(null, null, null, null, null, USER, dec("1.00"),
             LocalDateTime.of(2026, 5, 1, 12, 0), false, null, null, List.of(), null);
 
         revision.changeSummary(dec("2.00"), newDate);
@@ -373,17 +373,17 @@ class ReceiptRevisionUT {
     }
 
     private static ReceiptRevision userRevision(String totalPrice, boolean isCorrect, ReceiptItem... items) {
-        return ReceiptRevision.restore(null, null, null, null, USER, dec(totalPrice), null, isCorrect, null, null,
+        return ReceiptRevision.restore(null, null, null, null, null, USER, dec(totalPrice), null, isCorrect, null, null,
             List.of(items), null);
     }
 
     private static ReceiptRevision savedRevision(ReceiptResolverStrategyType resolver, ReceiptItem... items) {
-        return ReceiptRevision.restore(UUID.randomUUID(), null, null, null, resolver, null, null, false, null, null,
+        return ReceiptRevision.restore(UUID.randomUUID(), null, null, null, null, resolver, null, null, false, null, null,
             List.of(items), null);
     }
 
     private static ReceiptRevision revision(ReceiptResolverStrategyType resolver, ReceiptItem... items) {
-        return ReceiptRevision.restore(null, null, null, null, resolver, null, null, false, null, null,
+        return ReceiptRevision.restore(null, null, null, null, null, resolver, null, null, false, null, null,
             List.of(items), null);
     }
 

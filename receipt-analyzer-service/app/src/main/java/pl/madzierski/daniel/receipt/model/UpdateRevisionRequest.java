@@ -10,6 +10,8 @@ import java.util.UUID;
 
 public record UpdateRevisionRequest(
     UUID id,
+    @NotNull
+    Long version,
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
     BigDecimal totalPrice,

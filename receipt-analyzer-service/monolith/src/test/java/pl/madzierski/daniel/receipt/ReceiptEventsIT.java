@@ -44,9 +44,9 @@ class ReceiptEventsIT extends IntegrationTest {
             .containsExactly("ReceiptChanged", "FileGroupChanged", "RevisionChanged");
         assertThat(events).extracting(OutboxEvent::correlationId).containsOnly(events.getFirst().correlationId());
         assertThat(events.getFirst().aggregateId()).isEqualTo(receiptId);
-        assertThat(events.getFirst().payload()).contains("\"walletId\": \"" + walletId, "\"storeId\": \"" + storeId);
-        assertThat(events.get(1).payload()).contains("\"partNumber\": 0", "\"path\": \"");
-        assertThat(events.getLast().payload()).contains("\"receiptId\": \"" + receiptId, "\"resolver\": \"BIEDRONKA_JSON\"");
+        assertThat(events.getFirst().payload()).contains("\"walletId\":\"" + walletId, "\"storeId\":\"" + storeId);
+        assertThat(events.get(1).payload()).contains("\"partNumber\":0", "\"path\":\"");
+        assertThat(events.getLast().payload()).contains("\"receiptId\":\"" + receiptId, "\"resolver\":\"BIEDRONKA_JSON\"");
     }
 
     @Test
@@ -56,19 +56,32 @@ class ReceiptEventsIT extends IntegrationTest {
         int before = outboxEvents().size();
 
         receiptFacade.updateRevision(user, revisionId,
-            new UpdateRevisionRequest(null, null, null, null, null, true, null, Set.of()));
+            new UpdateRevisionRequest(null, version("receipt_revision", revisionId), null, null, null, null, true, null, Set.of()));
 
         List<OutboxEvent> events = outboxEvents().subList(before, outboxEvents().size());
         assertThat(events).extracting(OutboxEvent::type, OutboxEvent::aggregateId)
             .containsExactly(tuple("ReceiptChanged", receiptId), tuple("RevisionChanged", revisionId));
-        assertThat(events.getFirst().payload()).contains("\"preferredRevisionId\": \"" + revisionId);
+        assertThat(events.getFirst().payload()).contains("\"preferredRevisionId\":\"" + revisionId);
+    }
+
+    @Test
+    void revisionSnapshotCarriesVersionOfSavedRevision() {
+        UUID revisionId = revisionIdOf(addReceipt());
+        int before = outboxEvents().size();
+
+        receiptFacade.updateRevision(user, revisionId,
+            new UpdateRevisionRequest(null, version("receipt_revision", revisionId), null, null, null, null, null, null, Set.of()));
+
+        List<OutboxEvent> events = outboxEvents().subList(before, outboxEvents().size());
+        assertThat(events).extracting(OutboxEvent::type).containsExactly("RevisionChanged");
+        assertThat(events.getFirst().payload()).contains("\"version\":" + version("receipt_revision", revisionId) + ",");
     }
 
     @Test
     void deletingPreferredRevisionUnmarksItOnReceiptBeforeRevisionIsDeleted() {
         UUID receiptId = addReceipt();
         UUID copyId = receiptFacade.createRevisionCopy(user, revisionIdOf(receiptId)).revisionId();
-        receiptFacade.updateRevision(user, copyId, new UpdateRevisionRequest(null, null, null, null, null, true, null, Set.of()));
+        receiptFacade.updateRevision(user, copyId, new UpdateRevisionRequest(null, version("receipt_revision", copyId), null, null, null, null, true, null, Set.of()));
         int before = outboxEvents().size();
 
         receiptFacade.deleteRevision(user, copyId);
@@ -76,7 +89,7 @@ class ReceiptEventsIT extends IntegrationTest {
         List<OutboxEvent> events = outboxEvents().subList(before, outboxEvents().size());
         assertThat(events).extracting(OutboxEvent::type, OutboxEvent::aggregateId)
             .containsExactly(tuple("ReceiptChanged", receiptId), tuple("RevisionDeleted", copyId));
-        assertThat(events.getFirst().payload()).contains("\"preferredRevisionId\": null");
+        assertThat(events.getFirst().payload()).contains("\"preferredRevisionId\":null");
     }
 
     @Test

@@ -60,6 +60,7 @@ class StoreFacadeIT extends IntegrationTest {
     @Test
     void returnsStoreDetails() {
         UUID storeId = createStore("Lidl", "ul. Testowa 3", "Kraków");
+        flush();
 
         StoreDetailsResponse details = storeFacade.getStoreDetails(storeId);
 
@@ -77,6 +78,7 @@ class StoreFacadeIT extends IntegrationTest {
     void searchesBrandsRegardlessOfLetterCase() {
         createStore("Biedronka", "ul. Testowa 1", "Poznań");
         createStore("Lidl", "ul. Testowa 2", "Poznań");
+        flush();
 
         assertThat(storeFacade.getStoreBrands("BIEDR").storeBrands())
             .extracting(StoreBrandListResponse.StoreBrandItem::name)
@@ -86,6 +88,7 @@ class StoreFacadeIT extends IntegrationTest {
     @Test
     void searchesStoresByBrandCityAndAddressRegardlessOfLetterCase() {
         UUID storeId = createStore("Biedronka", "ul. Półwiejska 2", "Poznań");
+        flush();
 
         assertThat(idsOf(storeQueryRepository.findStoresByQuery("biedronka"))).contains(storeId);
         assertThat(idsOf(storeQueryRepository.findStoresByQuery("POZNAŃ"))).contains(storeId);
@@ -97,6 +100,7 @@ class StoreFacadeIT extends IntegrationTest {
         UUID first = createStore("Biedronka", "ul. Testowa 1", "Poznań");
         UUID second = createStore("Lidl", "ul. Testowa 2", "Gniezno");
         createStore("Żabka", "ul. Testowa 3", "Września");
+        flush();
 
         assertThat(idsOf(storeQueryRepository.findStoresByIds(List.of(first, second)))).containsExactlyInAnyOrder(first, second);
     }

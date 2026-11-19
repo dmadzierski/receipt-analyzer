@@ -3,7 +3,7 @@ package pl.madzierski.daniel.file_group;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.madzierski.daniel.common.entity.BaseEntity;
+import pl.madzierski.daniel.common.entity.VersionedEntity;
 import pl.madzierski.daniel.receipt.SqlReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 @EqualsAndHashCode(callSuper = true, exclude = {"receipt", "files"})
-class SqlFileGroup extends BaseEntity {
+class SqlFileGroup extends VersionedEntity {
 
     @Enumerated(EnumType.STRING)
     private FileType fileType;
@@ -36,6 +36,7 @@ class SqlFileGroup extends BaseEntity {
     public static SqlFileGroup fromFileGroup(FileGroup fileGroup) {
         SqlFileGroup sqlFileGroup = new SqlFileGroup();
         sqlFileGroup.setId(fileGroup.getId());
+        sqlFileGroup.setVersion(fileGroup.getVersion());
         sqlFileGroup.setCreatedDate(fileGroup.getCreatedDate());
         sqlFileGroup.setModifiedDate(fileGroup.getModifiedDate());
         sqlFileGroup.setFileType(fileGroup.getFileType());
@@ -55,7 +56,7 @@ class SqlFileGroup extends BaseEntity {
     }
 
     public FileGroup toFileGroup() {
-        return FileGroup.restore(id, createdDate, modifiedDate, fileType, receipt.toReceipt(),
+        return FileGroup.restore(id, version, createdDate, modifiedDate, fileType, receipt.toReceipt(),
             ownerId != null ? new UserQuery(ownerId) : null, files.stream().map(SqlFile::toFile).toList());
     }
 }

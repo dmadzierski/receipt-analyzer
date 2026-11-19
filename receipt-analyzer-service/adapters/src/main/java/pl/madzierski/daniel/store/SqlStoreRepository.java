@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.event.EventPublisher;
-import pl.madzierski.daniel.store.event.StoreChanged;
 
 import java.util.UUID;
 
@@ -20,12 +19,8 @@ class StoreRepositoryImpl implements StoreRepository {
 
     @Override
     public Store save(Store store) {
-        SqlStore entity = this.repository.save(SqlStore.fromStore(store));
-        eventPublisher.publishLatest(entity.getId(), () -> {
-            Store saved = entity.toStore();
-            return new StoreChanged(saved.getId(), saved.getBrand() != null ? saved.getBrand().id() : null,
-            saved.getAddress(), saved.getCity(), saved.getPostalCode(), saved.getCountry());
-        });
-        return entity.toStore();
+        SqlStore saved = this.repository.save(SqlStore.fromStore(store));
+        eventPublisher.publishLatest(saved.getId(), () -> StoreSnapshots.changed(saved.toStore()));
+        return saved.toStore();
     }
 }

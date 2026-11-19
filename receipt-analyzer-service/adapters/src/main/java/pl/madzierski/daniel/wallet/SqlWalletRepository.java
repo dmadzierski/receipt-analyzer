@@ -4,7 +4,6 @@ package pl.madzierski.daniel.wallet;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import pl.madzierski.daniel.event.EventPublisher;
-import pl.madzierski.daniel.wallet.event.WalletChanged;
 
 import java.util.UUID;
 
@@ -20,12 +19,9 @@ class WalletRepositoryImpl implements WalletRepository {
 
     @Override
     public Wallet save(Wallet wallet) {
-        SqlWallet entity = repository.save(SqlWallet.fromWallet(wallet));
-        eventPublisher.publishLatest(entity.getId(), () -> {
-            Wallet saved = entity.toWallet();
-            return new WalletChanged(saved.getId(), saved.getOwner().id(), saved.getName(), saved.getCreatedDate());
-        });
-        return entity.toWallet();
+        SqlWallet saved = repository.save(SqlWallet.fromWallet(wallet));
+        eventPublisher.publishLatest(saved.getId(), () -> WalletSnapshots.changed(saved.toWallet()));
+        return saved.toWallet();
     }
 }
 

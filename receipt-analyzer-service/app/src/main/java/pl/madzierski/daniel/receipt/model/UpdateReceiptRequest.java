@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record UpdateReceiptRequest(
+    @NotNull
+    Long version,
     @NotBlank
     String name,
     String description,

@@ -17,6 +17,7 @@ public class ProductDictFacade {
     private final ProductDictQueryRepository productDictQueryRepository;
     private final ProductAliasRepository productAliasRepository;
     private final ProductCategoryRepository productCategoryRepository;
+    private final ProductCategoryQueryRepository productCategoryQueryRepository;
     private final ReceiptFacade receiptFacade;
     private final ProductMatcher productMatcher;
 
@@ -124,7 +125,9 @@ public class ProductDictFacade {
     }
 
     GetProductCategoryListResponse getProductCategoryList() {
-        List<GetProductCategoryListResponse.ProductCategory> items = productCategoryRepository.findAllByOrderByNameAsc().stream().map(productCategory -> new GetProductCategoryListResponse.ProductCategory(productCategory.getId(), productCategory.getName())).toList();
+        List<GetProductCategoryListResponse.ProductCategory> items = productCategoryQueryRepository.findAllOrderedByName().stream()
+            .map(category -> new GetProductCategoryListResponse.ProductCategory(category.getId(), category.getName()))
+            .toList();
         return new GetProductCategoryListResponse(items);
     }
 

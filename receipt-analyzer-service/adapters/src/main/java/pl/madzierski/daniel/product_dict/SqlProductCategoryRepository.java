@@ -3,7 +3,6 @@ package pl.madzierski.daniel.product_dict;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import pl.madzierski.daniel.event.EventPublisher;
-import pl.madzierski.daniel.product_dict.event.ProductCategoryChanged;
 import pl.madzierski.daniel.product_dict.event.ProductCategoryDeleted;
 
 import java.util.List;
@@ -13,8 +12,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 interface SqlProductCategoryRepository extends JpaRepository<SqlProductCategory, UUID> {
-    List<SqlProductCategory> findAllByOrderByNameAsc();
-
     boolean existsByNameIgnoreCase(String name);
 
     boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
@@ -28,13 +25,6 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     private final EventPublisher eventPublisher;
 
     @Override
-    public List<ProductCategory> findAllByOrderByNameAsc() {
-        return this.repository.findAllByOrderByNameAsc().stream()
-            .map(SqlProductCategory::toProductCategory)
-            .toList();
-    }
-
-    @Override
     public boolean existsByName(String name) {
         return this.repository.existsByNameIgnoreCase(name);
     }
@@ -46,12 +36,9 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
 
     @Override
     public ProductCategory save(ProductCategory productCategory) {
-        SqlProductCategory entity = this.repository.save(SqlProductCategory.fromProductCategory(productCategory));
-        eventPublisher.publishLatest(entity.getId(), () -> {
-            ProductCategory saved = entity.toProductCategory();
-            return new ProductCategoryChanged(saved.getId(), saved.getName());
-        });
-        return entity.toProductCategory();
+        SqlProductCategory saved = this.repository.save(SqlProductCategory.fromProductCategory(productCategory));
+        eventPublisher.publishLatest(saved.getId(), () -> ProductDictSnapshots.changed(saved.toProductCategory()));
+        return saved.toProductCategory();
     }
 
     @Override

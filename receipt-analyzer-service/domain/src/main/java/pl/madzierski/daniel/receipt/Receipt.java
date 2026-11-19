@@ -17,6 +17,7 @@ import java.util.UUID;
 class Receipt {
 
     private UUID id;
+    private Long version;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
@@ -37,11 +38,12 @@ class Receipt {
             .build();
     }
 
-    static Receipt restore(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String name,
+    static Receipt restore(UUID id, Long version, LocalDateTime createdDate, LocalDateTime modifiedDate, String name,
                            String description, WalletQuery wallet, StoreQuery store, UserQuery owner,
                            ReceiptRevisionQuery preferredRevision) {
         return builder()
             .id(id)
+            .version(version)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
             .name(name)

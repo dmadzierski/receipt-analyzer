@@ -7,6 +7,8 @@ public interface ProductDictWithAliasesAndCategoryProjection {
 
     UUID getId();
 
+    long getVersion();
+
     String getName();
 
     Set<ProductCategory> getCategories();

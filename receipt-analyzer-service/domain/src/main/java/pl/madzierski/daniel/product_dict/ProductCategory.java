@@ -14,6 +14,7 @@ import java.util.UUID;
 class ProductCategory {
 
     private UUID id;
+    private Long version;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;

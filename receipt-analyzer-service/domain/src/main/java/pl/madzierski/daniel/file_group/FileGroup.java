@@ -22,6 +22,7 @@ import java.util.stream.IntStream;
 class FileGroup {
 
     private UUID id;
+    private Long version;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private FileType fileType;
@@ -41,10 +42,11 @@ class FileGroup {
             .build();
     }
 
-    static FileGroup restore(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, FileType fileType,
+    static FileGroup restore(UUID id, Long version, LocalDateTime createdDate, LocalDateTime modifiedDate, FileType fileType,
                              ReceiptQuery receipt, UserQuery owner, Collection<File> files) {
         return builder()
             .id(id)
+            .version(version)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
             .fileType(fileType)

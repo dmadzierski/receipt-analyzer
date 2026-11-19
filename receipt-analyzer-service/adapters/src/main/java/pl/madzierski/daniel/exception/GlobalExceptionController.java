@@ -1,8 +1,10 @@
 package pl.madzierski.daniel.exception;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,13 @@ class GlobalExceptionController {
     ResponseEntity<ErrorResponse> handleAppIllegalStateException(AppIllegalStateException ex, HttpServletRequest request) {
         log.error("{} {} broke a domain rule: {}", request.getMethod(), request.getRequestURI(), ex.getType().getI18nMessage(), ex);
         return errorResponse(HttpStatus.CONFLICT, ex.getType().getI18nMessage());
+    }
+
+    @ExceptionHandler({OptimisticLockingFailureException.class, OptimisticLockException.class})
+    ResponseEntity<ErrorResponse> handleVersionConflict(Exception ex, HttpServletRequest request) {
+        log.warn("{} {} failed: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
+        AppRuntimeExceptionMessages type = AppRuntimeExceptionMessages.VERSION_CONFLICT;
+        return errorResponse(type.getStatus(), type.getI18nMessage());
     }
 
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class,

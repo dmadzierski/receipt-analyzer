@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 public record GetRevisionResponse(
     UUID id,
+    long version,
     ReceiptResolverStrategyType resolver,
     LocalDateTime createdDate,
     BigDecimal totalPrice,
@@ -23,6 +24,7 @@ public record GetRevisionResponse(
     public GetRevisionResponse(ReceiptRevisionDto revision, Collection<ReceiptItemDto> items) {
         this(
             revision.getId(),
+            revision.getVersion(),
             revision.getResolver(),
             revision.getCreatedDate(),
             revision.getTotalPrice(),

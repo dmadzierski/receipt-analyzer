@@ -97,6 +97,7 @@ public class ReceiptFacade {
     UpdateRevisionResponse updateRevision(AuthenticatedUser user, UUID revisionId, UpdateRevisionRequest updatedRevisionRequest) {
         ReceiptRevision revision = revisionRepository.findByIdWithItems(revisionId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
+        ensureVersion(revision.getVersion(), updatedRevisionRequest.version());
         if (revision.canEditItems()) {
             List<ReceiptItemChange> itemChanges = updatedRevisionRequest.items().stream()
                 .map(ReceiptMapper::toItemChange)
@@ -157,6 +158,10 @@ public class ReceiptFacade {
         revisionRepository.save(revision);
     }
 
+    private static void ensureVersion(Long current, Long expected) {
+        if (!Objects.equals(current, expected)) throw new AppRuntimeException(AppRuntimeExceptionMessages.VERSION_CONFLICT);
+    }
+
     private void validateItemChanges(Collection<ReceiptItemChange> itemChanges) {
         Set<UUID> productIds = itemChanges.stream()
             .map(ReceiptItemChange::nameDict)
@@ -183,6 +188,7 @@ public class ReceiptFacade {
     UpdateReceiptResponse updateReceipt(AuthenticatedUser user, UUID receiptId, UpdateReceiptRequest request) {
         Receipt receipt = receiptRepository.findAccessible(receiptId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
+        ensureVersion(receipt.getVersion(), request.version());
         if (!receiptRepository.storeExists(new StoreQuery(request.storeId())))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND);
         receipt.updateData(request.name().trim(), request.description(), new StoreQuery(request.storeId()));

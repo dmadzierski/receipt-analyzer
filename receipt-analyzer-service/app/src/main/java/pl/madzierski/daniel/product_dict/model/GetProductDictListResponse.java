@@ -17,6 +17,7 @@ public record GetProductDictListResponse(
 
     public record ProductDict(
         UUID id,
+        long version,
         String name,
         List<ProductCategory> productCategories,
         List<Alias> aliases
@@ -24,6 +25,7 @@ public record GetProductDictListResponse(
         ProductDict(ProductDictWithAliasesAndCategoryProjection product) {
             this(
                 product.getId(),
+                product.getVersion(),
                 product.getName(),
                 product.getCategories()
                     .stream()

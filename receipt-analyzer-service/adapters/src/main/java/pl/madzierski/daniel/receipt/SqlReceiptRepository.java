@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.event.EventPublisher;
-import pl.madzierski.daniel.receipt.event.ReceiptChanged;
 import pl.madzierski.daniel.receipt.event.ReceiptDeleted;
 import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
@@ -33,15 +32,9 @@ class ReceiptRepositoryImpl implements ReceiptRepository {
 
     @Override
     public Receipt save(Receipt receipt) {
-        SqlReceipt entity = this.repository.save(SqlReceipt.fromReceipt(receipt));
-        eventPublisher.publishLatest(entity.getId(), () -> {
-            Receipt saved = entity.toReceipt();
-            return new ReceiptChanged(saved.getId(), saved.getOwner() != null ? saved.getOwner().id() : null,
-            saved.getWallet() != null ? saved.getWallet().id() : null, saved.getStore() != null ? saved.getStore().id() : null,
-            saved.getName(), saved.getDescription(), saved.getCreatedDate(), saved.getModifiedDate(),
-            saved.getPreferredRevision() != null ? saved.getPreferredRevision().id() : null);
-        });
-        return entity.toReceipt();
+        SqlReceipt saved = this.repository.save(SqlReceipt.fromReceipt(receipt));
+        eventPublisher.publishLatest(saved.getId(), () -> ReceiptSnapshots.changed(saved.toReceipt()));
+        return saved.toReceipt();
     }
 
     @Override
@@ -61,7 +54,7 @@ class ReceiptRepositoryImpl implements ReceiptRepository {
 
     @Override
     public void deleteById(UUID receiptId) {
-        this.repository.deleteById(receiptId);
+        this.repository.deleteById(receiptId);
         eventPublisher.publish(new ReceiptDeleted(receiptId));
     }
 }

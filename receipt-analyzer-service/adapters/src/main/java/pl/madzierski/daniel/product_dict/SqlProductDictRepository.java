@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.event.EventPublisher;
-import pl.madzierski.daniel.product_dict.event.ProductDictChanged;
 import pl.madzierski.daniel.product_dict.event.ProductDictDeleted;
 
 import java.util.Collection;
@@ -54,19 +53,14 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
 
     @Override
     public void deleteAllByIdIn(List<UUID> productDictIdList) {
-        repository.deleteAllById(productDictIdList);
+        repository.deleteAllById(productDictIdList);
         productDictIdList.forEach(id -> eventPublisher.publish(new ProductDictDeleted(id)));
     }
 
     @Override
     public ProductDict save(ProductDict productDict) {
-        SqlProductDict entity = repository.saveAndFlush(SqlProductDict.fromProductDict(productDict));
-        eventPublisher.publishLatest(entity.getId(), () -> {
-            ProductDict saved = entity.toProductDict();
-            return new ProductDictChanged(saved.getId(), saved.getName(),
-            saved.getAliases().stream().map(alias -> new ProductDictChanged.Alias(alias.getId(), alias.getName())).toList(),
-            saved.getProductCategories().stream().map(ProductCategory::getId).toList());
-        });
-        return entity.toProductDict();
+        SqlProductDict saved = repository.saveAndFlush(SqlProductDict.fromProductDict(productDict));
+        eventPublisher.publishLatest(saved.getId(), () -> ProductDictSnapshots.changed(saved.toProductDict()));
+        return saved.toProductDict();
     }
 }

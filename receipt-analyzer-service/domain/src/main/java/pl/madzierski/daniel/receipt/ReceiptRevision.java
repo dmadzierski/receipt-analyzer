@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(exclude = {"items", "receipt", "sourceFileGroup"})
 class ReceiptRevision {
     private UUID id;
+    private Long version;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String revision;
@@ -49,13 +50,14 @@ class ReceiptRevision {
         return created;
     }
 
-    static ReceiptRevision restore(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String revision,
+    static ReceiptRevision restore(UUID id, Long version, LocalDateTime createdDate, LocalDateTime modifiedDate, String revision,
                                    ReceiptResolverStrategyType resolver, BigDecimal totalPrice, LocalDateTime paymentDate,
                                    Boolean isCorrect, ReceiptQuery receipt,
                                    ReceiptRevisionQuery parentReceiptRevision, Collection<ReceiptItem> items,
                                    FileGroupQuery sourceFileGroup) {
         return builder()
             .id(id)
+            .version(version)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
             .revision(revision)

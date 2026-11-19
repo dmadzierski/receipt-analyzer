@@ -2,7 +2,7 @@ package pl.madzierski.daniel.wallet;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.madzierski.daniel.common.entity.BaseEntity;
+import pl.madzierski.daniel.common.entity.VersionedEntity;
 import pl.madzierski.daniel.user.SqlUserQuery;
 
 
@@ -14,7 +14,7 @@ import pl.madzierski.daniel.user.SqlUserQuery;
 @Setter
 @Table(name = "wallet")
 @Builder
-class SqlWallet extends BaseEntity {
+class SqlWallet extends VersionedEntity {
 
     private String name;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,12 +27,13 @@ class SqlWallet extends BaseEntity {
             .owner(SqlUserQuery.fromUserQuery(wallet.getOwner()))
             .build();
         sqlWallet.setId(wallet.getId());
+        sqlWallet.setVersion(wallet.getVersion());
         sqlWallet.setCreatedDate(wallet.getCreatedDate());
         sqlWallet.setModifiedDate(wallet.getModifiedDate());
         return sqlWallet;
     }
 
     public Wallet toWallet() {
-        return Wallet.restore(id, createdDate, modifiedDate, name, owner.toUserQuery());
+        return Wallet.restore(id, version, createdDate, modifiedDate, name, owner.toUserQuery());
     }
 }

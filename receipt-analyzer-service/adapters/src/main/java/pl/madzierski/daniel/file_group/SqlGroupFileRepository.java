@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import pl.madzierski.daniel.event.EventPublisher;
-import pl.madzierski.daniel.file_group.event.FileGroupChanged;
 import pl.madzierski.daniel.file_group.event.FileGroupDeleted;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
@@ -46,14 +45,9 @@ class FileGroupRepositoryImpl implements FileGroupRepository {
 
     @Override
     public FileGroup save(FileGroup fileGroup) {
-        SqlFileGroup entity = this.fileGroupRepository.save(SqlFileGroup.fromFileGroup(fileGroup));
-        eventPublisher.publishLatest(entity.getId(), () -> {
-            FileGroup saved = entity.toFileGroup();
-            return new FileGroupChanged(saved.getId(), saved.getReceipt() != null ? saved.getReceipt().id() : null,
-            saved.getOwner().id(), saved.getFileType(),
-            saved.getFiles().stream().map(file -> new FileGroupChanged.File(file.getId(), file.getPath(), file.getPartNumber())).toList());
-        });
-        return entity.toFileGroup();
+        SqlFileGroup saved = this.fileGroupRepository.save(SqlFileGroup.fromFileGroup(fileGroup));
+        eventPublisher.publishLatest(saved.getId(), () -> FileGroupSnapshots.changed(saved.toFileGroup()));
+        return saved.toFileGroup();
     }
 
     @Override

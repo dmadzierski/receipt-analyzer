@@ -14,6 +14,7 @@ class ProductDictConfiguration {
         ProductDictQueryRepository productDictQueryRepository,
         ProductAliasRepository productAliasRepository,
         ProductCategoryRepository productCategoryRepository,
+        ProductCategoryQueryRepository productCategoryQueryRepository,
         @Lazy ReceiptFacade receiptFacade,
         @Value("${product-dict.min-required-similarity}") Double minRequiredStringSimilarity) {
         return new ProductDictFacade(
@@ -21,6 +22,7 @@ class ProductDictConfiguration {
             productDictQueryRepository,
             productAliasRepository,
             productCategoryRepository,
+            productCategoryQueryRepository,
             receiptFacade,
             new ProductMatcher(minRequiredStringSimilarity)
         );

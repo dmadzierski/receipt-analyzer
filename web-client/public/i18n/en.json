@@ -45,6 +45,7 @@
     "FILE_EMPTY": "The file is empty.",
     "CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS": "This revision has copies. Delete the copies first.",
     "REVISION_NOT_USER_RESOLVER": "Only user revisions can be changed this way.",
-    "INVALID_REQUEST": "The request contains invalid data."
+    "INVALID_REQUEST": "The request contains invalid data.",
+    "VERSION_CONFLICT": "This data was changed in another window or by someone else. The latest version has been loaded, apply your changes again."
   }
 }

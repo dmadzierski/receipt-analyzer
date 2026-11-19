@@ -4,6 +4,7 @@ export interface GetProductDictListResponse {
 
 export interface ProductDict {
   id: string;
+  version: number;
   name: string;
   productCategoryId?: string | null;
   productCategoryIds?: string[] | null;
@@ -27,6 +28,7 @@ export interface UpdateProductDictListRequest {
 }
 
 export interface UpdateProductDictListRequestItem {
+  version: number;
   canonicalName: string;
   productCategoryIds: string[];
   productDictList: string[];

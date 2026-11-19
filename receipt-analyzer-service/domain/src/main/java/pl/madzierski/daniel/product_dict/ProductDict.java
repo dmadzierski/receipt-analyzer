@@ -16,6 +16,7 @@ import java.util.UUID;
 @EqualsAndHashCode(exclude = {"aliases", "productCategories"})
 class ProductDict {
     private UUID id;
+    private Long version;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
