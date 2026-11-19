@@ -11,3 +11,7 @@ spring:
 ocr:
   tesseract:
     dataPath: ../tesseract-data
+
+read-model:
+  relay:
+    enabled: false

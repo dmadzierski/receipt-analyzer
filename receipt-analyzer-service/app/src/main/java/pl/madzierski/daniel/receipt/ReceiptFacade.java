@@ -201,10 +201,16 @@ public class ReceiptFacade {
 
     @Transactional
     void deleteRevision(AuthenticatedUser user, UUID revisionId) {
-        revisionRepository.findAccessible(revisionId, user.toUserQuery())
+        ReceiptRevision revision = revisionRepository.findAccessible(revisionId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         if (revisionRepository.hasChildRevisions(revisionId))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.CAN_NOT_DELETE_REVISION_WITH_CHILD_REVISIONS);
+        Receipt receipt = receiptRepository.findAccessible(revision.getReceipt().id(), user.toUserQuery())
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
+        if (receipt.isPreferred(revision)) {
+            receipt.unmarkPreferredRevision(revision);
+            receiptRepository.save(receipt);
+        }
         revisionRepository.deleteById(revisionId);
     }
 

@@ -13,4 +13,9 @@ public class AppRuntimeException extends RuntimeException {
         this.type = type;
     }
 
+    public AppRuntimeException(AppRuntimeExceptionMessages type, Throwable cause) {
+        super(type.getI18nMessage(), cause);
+        this.type = type;
+    }
+
 }

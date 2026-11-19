@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import pl.madzierski.daniel.event.EventPublisher;
+import pl.madzierski.daniel.file_group.event.FileGroupChanged;
+import pl.madzierski.daniel.file_group.event.FileGroupDeleted;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
@@ -39,10 +42,18 @@ interface SqlFileGroupRepository extends JpaRepository<SqlFileGroup, UUID> {
 class FileGroupRepositoryImpl implements FileGroupRepository {
 
     private final SqlFileGroupRepository fileGroupRepository;
+    private final EventPublisher eventPublisher;
 
     @Override
     public FileGroup save(FileGroup fileGroup) {
-        return this.fileGroupRepository.save(SqlFileGroup.fromFileGroup(fileGroup)).toFileGroup();
+        SqlFileGroup entity = this.fileGroupRepository.save(SqlFileGroup.fromFileGroup(fileGroup));
+        eventPublisher.publishLatest(entity.getId(), () -> {
+            FileGroup saved = entity.toFileGroup();
+            return new FileGroupChanged(saved.getId(), saved.getReceipt() != null ? saved.getReceipt().id() : null,
+            saved.getOwner().id(), saved.getFileType(),
+            saved.getFiles().stream().map(file -> new FileGroupChanged.File(file.getId(), file.getPath(), file.getPartNumber())).toList());
+        });
+        return entity.toFileGroup();
     }
 
     @Override
@@ -73,6 +84,7 @@ class FileGroupRepositoryImpl implements FileGroupRepository {
     @Override
     public void deleteById(UUID fileGroupId) {
         this.fileGroupRepository.deleteById(fileGroupId);
+        eventPublisher.publish(new FileGroupDeleted(fileGroupId));
     }
 
     @Override

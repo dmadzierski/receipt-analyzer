@@ -14,12 +14,14 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.kafka.KafkaContainer;
 import pl.madzierski.daniel.exception.AppRuntimeException;
+import pl.madzierski.daniel.event.OutboxEventPublisher;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,6 +56,9 @@ public abstract class IntegrationTest {
     @Autowired
     protected EntityManager entityManager;
 
+    @Autowired
+    private OutboxEventPublisher outboxEventPublisher;
+
     @DynamicPropertySource
     static void uploadDirProperty(DynamicPropertyRegistry registry) {
         registry.add("file.upload-dir", UPLOAD_DIR::toString);
@@ -64,6 +69,7 @@ public abstract class IntegrationTest {
     }
 
     protected void flush() {
+        publishPendingEvents();
         entityManager.flush();
         entityManager.clear();
     }
@@ -138,6 +144,21 @@ public abstract class IntegrationTest {
         return jdbcTemplate.queryForObject(
             "INSERT INTO product_alias (id, created_date, name, product_id) VALUES (gen_random_uuid(), now(), ?, ?) RETURNING id",
             UUID.class, name, productId);
+    }
+
+    protected void publishPendingEvents() {
+        outboxEventPublisher.publishPending();
+        entityManager.flush();
+    }
+
+    protected List<OutboxEvent> outboxEvents() {
+        publishPendingEvents();
+        return jdbcTemplate.query("SELECT type, aggregate_id, correlation_id, payload::text AS payload FROM outbox_event ORDER BY position",
+            (rs, rowNum) -> new OutboxEvent(rs.getString("type"), rs.getObject("aggregate_id", UUID.class),
+                rs.getObject("correlation_id", UUID.class), rs.getString("payload")));
+    }
+
+    protected record OutboxEvent(String type, UUID aggregateId, UUID correlationId, String payload) {
     }
 
     protected int count(String sql, Object... args) {

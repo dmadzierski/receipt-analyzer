@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.event.EventPublisher;
+import pl.madzierski.daniel.product_dict.event.ProductDictChanged;
+import pl.madzierski.daniel.product_dict.event.ProductDictDeleted;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +30,7 @@ interface SqlProductDictRepository extends JpaRepository<SqlProductDict, UUID> {
 class ProductDictRepositoryImpl implements ProductDictRepository {
 
     private final SqlProductDictRepository repository;
+    private final EventPublisher eventPublisher;
 
     @Override
     public Optional<ProductDict> findById(UUID productDictId) {
@@ -51,10 +55,18 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
     @Override
     public void deleteAllByIdIn(List<UUID> productDictIdList) {
         repository.deleteAllById(productDictIdList);
+        productDictIdList.forEach(id -> eventPublisher.publish(new ProductDictDeleted(id)));
     }
 
     @Override
     public ProductDict save(ProductDict productDict) {
-        return repository.saveAndFlush(SqlProductDict.fromProductDict(productDict)).toProductDict();
+        SqlProductDict entity = repository.saveAndFlush(SqlProductDict.fromProductDict(productDict));
+        eventPublisher.publishLatest(entity.getId(), () -> {
+            ProductDict saved = entity.toProductDict();
+            return new ProductDictChanged(saved.getId(), saved.getName(),
+            saved.getAliases().stream().map(alias -> new ProductDictChanged.Alias(alias.getId(), alias.getName())).toList(),
+            saved.getProductCategories().stream().map(ProductCategory::getId).toList());
+        });
+        return entity.toProductDict();
     }
 }

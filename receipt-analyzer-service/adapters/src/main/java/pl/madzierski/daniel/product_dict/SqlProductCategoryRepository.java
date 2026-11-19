@@ -2,6 +2,9 @@ package pl.madzierski.daniel.product_dict;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
+import pl.madzierski.daniel.event.EventPublisher;
+import pl.madzierski.daniel.product_dict.event.ProductCategoryChanged;
+import pl.madzierski.daniel.product_dict.event.ProductCategoryDeleted;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +25,7 @@ interface SqlProductCategoryRepository extends JpaRepository<SqlProductCategory,
 class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
 
     private final SqlProductCategoryRepository repository;
+    private final EventPublisher eventPublisher;
 
     @Override
     public List<ProductCategory> findAllByOrderByNameAsc() {
@@ -42,7 +46,12 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
 
     @Override
     public ProductCategory save(ProductCategory productCategory) {
-        return this.repository.save(SqlProductCategory.fromProductCategory(productCategory)).toProductCategory();
+        SqlProductCategory entity = this.repository.save(SqlProductCategory.fromProductCategory(productCategory));
+        eventPublisher.publishLatest(entity.getId(), () -> {
+            ProductCategory saved = entity.toProductCategory();
+            return new ProductCategoryChanged(saved.getId(), saved.getName());
+        });
+        return entity.toProductCategory();
     }
 
     @Override
@@ -54,6 +63,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     @Override
     public void delete(ProductCategory productCategory) {
         this.repository.delete(SqlProductCategory.fromProductCategory(productCategory));
+        eventPublisher.publish(new ProductCategoryDeleted(productCategory.getId()));
     }
 
     @Override
