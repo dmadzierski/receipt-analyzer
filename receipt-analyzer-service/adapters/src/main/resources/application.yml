@@ -42,6 +42,11 @@ spring:
       auto-offset-reset: earliest
     listener:
       ack-mode: record
+  modulith:
+    events:
+      completion-mode: delete
+      kafka:
+        enable-json: false
 
 server:
   port: 8090
@@ -71,3 +76,5 @@ receipt-resolver-strategy:
 product-dict:
   min-required-similarity: 0.8
 
+read-model:
+  force-rebuild: ${READ_MODEL_FORCE_REBUILD:false}
