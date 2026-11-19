@@ -10,7 +10,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.kafka.KafkaContainer;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
@@ -32,8 +34,16 @@ public abstract class IntegrationTest {
     @ServiceConnection
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17");
 
+    @ServiceConnection
+    static final MongoDBContainer MONGO = new MongoDBContainer("mongo:8");
+
+    @ServiceConnection
+    static final KafkaContainer KAFKA = new KafkaContainer("apache/kafka:3.9.1");
+
     static {
         POSTGRES.start();
+        MONGO.start();
+        KAFKA.start();
     }
 
     private static final Path UPLOAD_DIR = Path.of("build", "test-uploads").toAbsolutePath();

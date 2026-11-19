@@ -85,6 +85,52 @@ services:
     networks:
       - app-network
 
+  mongo:
+    image: mongo:8
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - receipt_analyzer_mongo_data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - app-network
+
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,EXTERNAL://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    ports:
+      - "29092:29092"
+    volumes:
+      - receipt_analyzer_kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+    networks:
+      - app-network
+
   receipt-analyzer-service:
     image: docker-registry.oziaka.eu/receipt-analyzer-service:latest
     build:
@@ -105,12 +151,18 @@ services:
       KEYCLOAK_JWK_SET_URI: http://host.docker.internal/auth/realms/activiti/protocol/openid-connect/certs
       KEYCLOAK_ISSUER_URI: http://host.docker.internal/auth/realms/activiti
       DB_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/receipt-analyzer-service?reWriteBatchedInserts=true
+      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/receipt-analyzer-service?authSource=admin
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       keycloak:
         condition: service_healthy
       nginx:
         condition: service_healthy
       postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "wget -T5 -qO- http://localhost:8090/api/actuator/health | grep UP || exit 1" ]
@@ -126,3 +178,7 @@ services:
 volumes:
   receipt_analyzer_postgres_data:
     name: postgres_data
+  receipt_analyzer_mongo_data:
+    name: mongo_data
+  receipt_analyzer_kafka_data:
+    name: kafka_data

@@ -30,6 +30,16 @@ spring:
   threads:
     virtual:
       enabled: true
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: receipt-analyzer-read-model
+      auto-offset-reset: earliest
+    listener:
+      ack-mode: record
 
 server:
   port: 8090
