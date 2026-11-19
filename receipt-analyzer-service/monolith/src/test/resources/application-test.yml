@@ -13,8 +13,9 @@ ocr:
     dataPath: ../tesseract-data
 
 read-model:
-  relay:
+  resubmission:
     enabled: false
   listener:
     enabled: false
   rebuild-on-start: false
+  consistency-timeout: PT1S

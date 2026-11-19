@@ -11,6 +11,7 @@ import {
 } from 'keycloak-angular';
 import {environment} from '../environments/environment';
 import {errorInterceptor} from './error/error.interceptor';
+import {consistencyTokenInterceptor} from './consistency/consistency-token.interceptor';
 import {provideTranslateService} from '@ngx-translate/core';
 import {provideTranslateHttpLoader} from '@ngx-translate/http-loader';
 
@@ -40,7 +41,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideHttpClient(
       withFetch(),
-      withInterceptors([includeBearerTokenInterceptor, errorInterceptor])
+      withInterceptors([includeBearerTokenInterceptor, consistencyTokenInterceptor, errorInterceptor])
     ),
     provideTranslateService({
       loader: provideTranslateHttpLoader({prefix: './i18n/', suffix: '.json', useHttpBackend: true}),

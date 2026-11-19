@@ -11,7 +11,7 @@ import java.util.UUID;
 @Component
 public class ConsistencyTokens {
 
-    static final String HEADER = "X-Consistency-Token";
+    public static final String HEADER = "X-Consistency-Token";
     private static final String ATTRIBUTE = ConsistencyTokens.class.getName() + ".tokens";
 
     void add(UUID correlationId, int eventCount) {
