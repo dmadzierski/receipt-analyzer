@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +15,11 @@ interface SqlProductDictRepository extends JpaRepository<SqlProductDict, UUID> {
 
     @Query("SELECT DISTINCT p FROM SqlProductDict p LEFT JOIN FETCH p.aliases LEFT JOIN FETCH p.categories")
     List<SqlProductDict> findAllWithAliasesAndCategories();
+
+    long countByIdIn(Collection<UUID> ids);
+
+    @Query("SELECT COUNT(p) > 0 FROM SqlProductDict p JOIN p.categories c WHERE c.id = :productCategoryId")
+    boolean isCategoryUsed(UUID productCategoryId);
 }
 
 @Repository
@@ -30,6 +36,16 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
     @Override
     public List<ProductDict> findAll() {
         return repository.findAllWithAliasesAndCategories().stream().map(SqlProductDict::toProductDict).toList();
+    }
+
+    @Override
+    public long countByIdIn(Collection<UUID> productDictIds) {
+        return repository.countByIdIn(productDictIds);
+    }
+
+    @Override
+    public boolean isCategoryUsed(UUID productCategoryId) {
+        return repository.isCategoryUsed(productCategoryId);
     }
 
     @Override

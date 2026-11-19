@@ -24,7 +24,4 @@ public interface SqlReceiptQueryRepository extends ReceiptQueryRepository, Repos
     @Query(value = "SELECT new pl.madzierski.daniel.receipt.model.ReceiptDto(r.id, r.createdDate, r.modifiedDate, r" +
         ".name, r.description, new pl.madzierski.daniel.wallet.model.WalletQuery(r.wallet.id), new pl.madzierski.daniel.store.model.StoreQuery(r.store.id)) FROM SqlReceipt r WHERE r.id = :receiptId AND r.ownerId = :ownerId")
     Optional<ReceiptDto> findById(@Param("receiptId") UUID receiptId, @Param("ownerId") UUID ownerId);
-
-    @Query("SELECT COUNT(r) > 0 FROM SqlReceipt r WHERE r.id = :receiptId AND r.ownerId = :ownerId")
-    boolean isAccessible(@Param("receiptId") UUID receiptId, @Param("ownerId") UUID ownerId);
 }

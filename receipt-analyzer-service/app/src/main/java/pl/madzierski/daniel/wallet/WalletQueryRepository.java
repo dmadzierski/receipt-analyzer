@@ -11,7 +11,4 @@ public interface WalletQueryRepository {
     Collection<WalletDto> findAllByUser(UUID userId);
 
     Optional<WalletDto> getWalletDetails(UUID walletId, UUID ownerId);
-
-    boolean isAccessible(UUID walletId, UUID ownerId);
-
 }

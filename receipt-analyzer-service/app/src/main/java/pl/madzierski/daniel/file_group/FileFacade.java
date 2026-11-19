@@ -5,8 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileContentDto;
-import pl.madzierski.daniel.file_group.model.FileDto;
-import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
@@ -20,16 +18,14 @@ import java.util.UUID;
 public class FileFacade {
 
     private final FileRepository fileRepository;
-    private final FileGroupQueryRepository fileGroupQueryRepository;
     private final FileGroupRepository fileGroupRepository;
     private final FileTypeDetector fileTypeDetector;
     private final FileStorage fileStorage;
-    private final ReceiptQueryRepository receiptQueryRepository;
     private final String uploadDir;
 
     @Transactional
     public UUID save(AuthenticatedUser user, UUID receiptId, List<byte[]> files) {
-        if (!receiptQueryRepository.isAccessible(receiptId, user.id()))
+        if (!fileGroupRepository.isReceiptAccessible(new ReceiptQuery(receiptId), user.toUserQuery()))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND);
         if (files == null || files.isEmpty()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
@@ -68,11 +64,11 @@ public class FileFacade {
     }
 
     public List<byte[]> getFiles(UUID receiptId, UUID fileGroupId) {
-        return fileGroupQueryRepository.findFileGroupWithFiles(fileGroupId, receiptId)
+        return fileGroupRepository.findByIdAndReceipt(fileGroupId, new ReceiptQuery(receiptId))
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND))
-            .files()
+            .getFiles()
             .stream()
-            .sorted(Comparator.comparing(FileDto::getPartNumber))
+            .sorted(Comparator.comparing(File::getPartNumber))
             .map(file -> readFile(file.getPath()))
             .toList();
     }
@@ -86,7 +82,7 @@ public class FileFacade {
     public void deleteFileGroupId(AuthenticatedUser user, UUID fileGroupId) {
         FileGroup fileGroup = fileGroupRepository.findById(fileGroupId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND));
-        if (fileGroupQueryRepository.isUsedByRevision(fileGroupId))
+        if (fileGroupRepository.isUsedByRevision(fileGroupId))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_USED_BY_REVISION);
         fileGroupRepository.deleteById(fileGroupId);
         fileGroup.getFiles().stream()
@@ -97,9 +93,9 @@ public class FileFacade {
 
     @Transactional
     public void deleteFileGroupsByReceiptId(UUID receiptId) {
-        List<String> paths = fileGroupQueryRepository.findAllByReceiptId(receiptId).stream()
-            .flatMap(fileGroup -> fileGroup.files().stream())
-            .map(FileDto::getPath)
+        List<String> paths = fileGroupRepository.findAllByReceipt(new ReceiptQuery(receiptId)).stream()
+            .flatMap(fileGroup -> fileGroup.getFiles().stream())
+            .map(File::getPath)
             .filter(Objects::nonNull)
             .toList();
         fileGroupRepository.deleteAllByReceiptId(receiptId);

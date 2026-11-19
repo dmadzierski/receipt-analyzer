@@ -17,8 +17,4 @@ public interface SqlWalletQueryRepository extends WalletQueryRepository, Reposit
     @Query("SELECT new pl.madzierski.daniel.wallet.model.WalletDto(w.id, w.name, w.createdDate) FROM SqlWallet w " +
         "WHERE w.id = :walletId AND w.owner.id = :ownerId")
     Optional<WalletDto> getWalletDetails(UUID walletId, UUID ownerId);
-
-    @Query("SELECT COUNT(w) > 0 FROM SqlWallet w WHERE w.id = :walletId AND w.owner.id = :ownerId")
-    boolean isAccessible(UUID walletId, UUID ownerId);
-
 }

@@ -9,7 +9,6 @@ import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -22,17 +21,6 @@ interface SqlFileGroupQueryRepository extends JpaRepository<SqlFileGroup, UUID> 
                 WHERE rfg.receipt.id = :receiptId
         """)
     List<SqlFileGroup> findAllByReceiptId(@Param(value = "receiptId") UUID receiptId);
-
-    @Query(value = """
-                SELECT rfg
-                FROM SqlFileGroup rfg
-                LEFT JOIN FETCH rfg.files rf
-                WHERE rfg.id = :fileGroupId AND rfg.receipt.id = :receiptId
-        """)
-    Optional<SqlFileGroup> findByIdAndReceiptId(UUID fileGroupId, UUID receiptId);
-
-    @Query("SELECT COUNT(rev) > 0 FROM SqlReceiptRevision rev WHERE rev.sourceFileGroup.id = :fileGroupId")
-    boolean isUsedByRevision(UUID fileGroupId);
 }
 
 @AllArgsConstructor
@@ -58,27 +46,5 @@ class FileGroupQueryRepositoryImpl implements FileGroupQueryRepository {
                     .collect(Collectors.toSet()))
                 .build())
             .toList();
-    }
-
-    @Override
-    public Optional<FileGroupDto> findFileGroupWithFiles(UUID fileGroupId, UUID receiptId) {
-        return sqlFileGroupQueryRepository.findByIdAndReceiptId(fileGroupId, receiptId)
-            .map(it -> FileGroupDto.builder()
-                .id(it.getId())
-                .fileType(it.getFileType())
-                .files(it.getFiles()
-                    .stream()
-                    .map(file -> FileDto.builder()
-                        .id(file.getId())
-                        .path(file.getPath())
-                        .partNumber(file.getPartNumber())
-                        .build())
-                    .collect(Collectors.toSet()))
-                .build());
-    }
-
-    @Override
-    public boolean isUsedByRevision(UUID fileGroupId) {
-        return sqlFileGroupQueryRepository.isUsedByRevision(fileGroupId);
     }
 }

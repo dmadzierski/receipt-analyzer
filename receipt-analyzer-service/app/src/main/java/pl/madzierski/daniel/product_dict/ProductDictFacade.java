@@ -20,6 +20,14 @@ public class ProductDictFacade {
     private final ReceiptFacade receiptFacade;
     private final ProductMatcher productMatcher;
 
+    public boolean allProductsExist(Collection<UUID> productDictIds) {
+        return productDictIds.isEmpty() || productDictRepository.countByIdIn(productDictIds) == productDictIds.size();
+    }
+
+    public Optional<String> findProductName(UUID productDictId) {
+        return productDictRepository.findById(productDictId).map(ProductDict::getName);
+    }
+
     GetProductDictListResponse getProductDictList() {
         return new GetProductDictListResponse(productDictQueryRepository.findAllWithCategoryAndAliases());
     }
@@ -146,7 +154,7 @@ public class ProductDictFacade {
     @Transactional
     void deleteProductCategory(UUID productCategoryId) {
         ProductCategory productCategory = productCategoryRepository.findById(productCategoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
-        if (productDictQueryRepository.countProductDictEntitiesByCategoriesIdIn(Set.of(productCategory.getId())) > 0) {
+        if (productDictRepository.isCategoryUsed(productCategory.getId())) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_IN_USE);
         }
         productCategoryRepository.delete(productCategory);

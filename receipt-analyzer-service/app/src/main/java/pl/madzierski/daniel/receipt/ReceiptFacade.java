@@ -8,10 +8,8 @@ import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
-import pl.madzierski.daniel.product_dict.ProductDictQueryRepository;
 import pl.madzierski.daniel.product_dict.model.AliasToLearn;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
-import pl.madzierski.daniel.product_dict.model.ProductDto;
 import pl.madzierski.daniel.receipt.model.*;
 import pl.madzierski.daniel.digitization.DigitizationFacade;
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
@@ -19,7 +17,7 @@ import pl.madzierski.daniel.store.StoreQueryRepository;
 import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
-import pl.madzierski.daniel.wallet.WalletQueryRepository;
+import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,13 +36,11 @@ public class ReceiptFacade {
     private final ReceiptRevisionQueryRepository receiptRevisionQueryRepository;
     private final StoreQueryRepository storeQueryRepository;
     private final ProductDictFacade productDictFacade;
-    private final ProductDictQueryRepository productDictQueryRepository;
     private final FileGroupQueryRepository fileGroupQueryRepository;
-    private final WalletQueryRepository walletQueryRepository;
 
     @Transactional
     CreateReceiptResponse addReceipt(AuthenticatedUser user, List<byte[]> files, CreateReceiptRequest body) {
-        if (!walletQueryRepository.isAccessible(body.walletId(), user.id()))
+        if (!receiptRepository.isWalletAccessible(new WalletQuery(body.walletId()), user.toUserQuery()))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.WALLET_NOT_FOUND);
         DigitizedReceipt digitizedReceipt = digitizationFacade.digitize(files, body.strategy());
         Receipt receipt = receiptRepository.save(receiptFactory.from(body, user));
@@ -167,7 +163,7 @@ public class ReceiptFacade {
             .filter(Objects::nonNull)
             .map(ProductDictQuery::id)
             .collect(Collectors.toSet());
-        if (!productIds.isEmpty() && productDictQueryRepository.countByIdIn(productIds) != productIds.size())
+        if (!productDictFacade.allProductsExist(productIds))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND);
     }
 
@@ -187,8 +183,8 @@ public class ReceiptFacade {
     UpdateReceiptResponse updateReceipt(AuthenticatedUser user, UUID receiptId, UpdateReceiptRequest request) {
         Receipt receipt = receiptRepository.findAccessible(receiptId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
-        storeQueryRepository.findStoreById(request.storeId())
-            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND));
+        if (!receiptRepository.storeExists(new StoreQuery(request.storeId())))
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND);
         receipt.updateData(request.name().trim(), request.description(), new StoreQuery(request.storeId()));
         Receipt savedReceipt = receiptRepository.save(receipt);
         return new UpdateReceiptResponse(savedReceipt.getId());
@@ -217,8 +213,7 @@ public class ReceiptFacade {
         ReceiptRevision revision = revisionRepository.findAccessible(revisionId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
         if (!revision.canEditItems()) throw new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_USER_RESOLVER);
-        revision.renameItemsToProductNames(nameDict -> productDictQueryRepository.findNameById(nameDict.id())
-            .map(ProductDto::getName));
+        revision.renameItemsToProductNames(nameDict -> productDictFacade.findProductName(nameDict.id()));
         revisionRepository.save(revision);
     }
 }
