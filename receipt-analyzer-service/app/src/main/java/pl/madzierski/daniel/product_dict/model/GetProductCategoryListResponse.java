@@ -8,6 +8,7 @@ public record GetProductCategoryListResponse(
 ) {
     public record ProductCategory(
         UUID id,
+        long version,
         String name
     ) {
     }

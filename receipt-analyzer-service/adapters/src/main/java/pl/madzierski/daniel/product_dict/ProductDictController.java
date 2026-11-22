@@ -1,5 +1,6 @@
 package pl.madzierski.daniel.product_dict;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ class ProductDictController {
     }
 
     @PostMapping
-    ResponseEntity<Void> updateProductDict(@RequestBody UpdateProductDictListRequest updateProductDictListRequest) {
+    ResponseEntity<Void> updateProductDict(@RequestBody @Valid UpdateProductDictListRequest updateProductDictListRequest) {
         productDictFacade.updateProductDict(updateProductDictListRequest);
         return ResponseEntity.ok().build();
     }

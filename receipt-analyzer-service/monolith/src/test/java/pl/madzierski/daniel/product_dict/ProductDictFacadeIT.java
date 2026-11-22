@@ -5,14 +5,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.product_dict.model.AliasToLearn;
 import pl.madzierski.daniel.product_dict.model.CreateProductCategoryRequest;
 import pl.madzierski.daniel.product_dict.model.GetProductCategoryListResponse;
 import pl.madzierski.daniel.product_dict.model.GetProductDictListResponse;
+import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.UpdateProductCategoryRequest;
 import pl.madzierski.daniel.product_dict.model.UpdateProductDictListRequest;
 import pl.madzierski.daniel.product_dict.model.UpdateProductDictListRequest.UpdateProductDict;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -50,18 +53,42 @@ class ProductDictFacadeIT extends IntegrationTest {
     }
 
     @Test
+    void updatingCategoryWithStaleVersionFails() {
+        UUID vegetablesId = productDictFacade.addProductCategory(new CreateProductCategoryRequest("Warzywa")).id();
+        long staleVersion = version("product_category", vegetablesId);
+        productDictFacade.updateProductCategory(vegetablesId, new UpdateProductCategoryRequest(staleVersion, "Owoce"));
+        flush();
+
+        assertError(() -> productDictFacade.updateProductCategory(vegetablesId, new UpdateProductCategoryRequest(staleVersion, "Zioła")),
+            AppRuntimeExceptionMessages.VERSION_CONFLICT);
+    }
+
+    @Test
+    void updatingProductWithStaleVersionFails() {
+        UUID productId = insertProduct("Cebula");
+        UUID aliasId = insertAlias(productId, "Cebula");
+        flush();
+        UpdateProductDictListRequest stale = new UpdateProductDictListRequest(List.of(new UpdateProductDict(
+            version("product", productId), "Cebula biała", List.of(), List.of(productId), Set.of(aliasId))));
+        productDictFacade.updateProductDict(stale);
+        flush();
+
+        assertError(() -> productDictFacade.updateProductDict(stale), AppRuntimeExceptionMessages.VERSION_CONFLICT);
+    }
+
+    @Test
     void renamesCategoryButNotToNameOfAnotherCategory() {
         UUID vegetablesId = productDictFacade.addProductCategory(new CreateProductCategoryRequest("Warzywa")).id();
         productDictFacade.addProductCategory(new CreateProductCategoryRequest("Owoce"));
         flush();
 
-        productDictFacade.updateProductCategory(vegetablesId, new UpdateProductCategoryRequest("warzywa"));
+        productDictFacade.updateProductCategory(vegetablesId, new UpdateProductCategoryRequest(version("product_category", vegetablesId), "warzywa"));
         flush();
 
         assertThat(productDictFacade.getProductCategoryList().items())
             .extracting(GetProductCategoryListResponse.ProductCategory::name)
             .containsExactly("Owoce", "warzywa");
-        assertError(() -> productDictFacade.updateProductCategory(vegetablesId, new UpdateProductCategoryRequest("owoce")),
+        assertError(() -> productDictFacade.updateProductCategory(vegetablesId, new UpdateProductCategoryRequest(version("product_category", vegetablesId), "owoce")),
             AppRuntimeExceptionMessages.PRODUCT_CATEGORY_ALREADY_EXISTS);
     }
 
@@ -98,7 +125,7 @@ class ProductDictFacadeIT extends IntegrationTest {
         flush();
 
         productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(new UpdateProductDict(
-            "Mleko", List.of(categoryId), List.of(primaryId, secondId, thirdId), Set.of(primaryAliasId, keptAliasId, thirdAliasId)))));
+            version("product", primaryId), "Mleko", List.of(categoryId), List.of(primaryId, secondId, thirdId), Set.of(primaryAliasId, keptAliasId, thirdAliasId)))));
         flush();
 
         assertThat(count("SELECT count(*) FROM product WHERE id IN (?, ?)", secondId, thirdId)).isZero();
@@ -119,7 +146,7 @@ class ProductDictFacadeIT extends IntegrationTest {
     @Test
     void mergingIntoUnknownProductFails() {
         UpdateProductDictListRequest request = new UpdateProductDictListRequest(List.of(new UpdateProductDict(
-            "Cebula", List.of(), List.of(UNKNOWN_ID), Set.of())));
+            version("product", UNKNOWN_ID), "Cebula", List.of(), List.of(UNKNOWN_ID), Set.of())));
 
         assertError(() -> productDictFacade.updateProductDict(request), AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND);
     }
@@ -128,12 +155,12 @@ class ProductDictFacadeIT extends IntegrationTest {
     void unknownCategoryIsReported() {
         UUID productId = insertProduct("Cebula");
 
-        assertError(() -> productDictFacade.updateProductCategory(UNKNOWN_ID, new UpdateProductCategoryRequest("Warzywa")),
+        assertError(() -> productDictFacade.updateProductCategory(UNKNOWN_ID, new UpdateProductCategoryRequest(version("product_category", UNKNOWN_ID), "Warzywa")),
             AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND);
         assertError(() -> productDictFacade.deleteProductCategory(UNKNOWN_ID),
             AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND);
         assertError(() -> productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(
-                new UpdateProductDict("Cebula", List.of(UNKNOWN_ID), List.of(productId), Set.of())))),
+                new UpdateProductDict(version("product", productId), "Cebula", List.of(UNKNOWN_ID), List.of(productId), Set.of())))),
             AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND);
     }
 
@@ -144,7 +171,7 @@ class ProductDictFacadeIT extends IntegrationTest {
         flush();
 
         productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(new UpdateProductDict(
-            "Cebula Biała", List.of(), List.of(productId), Set.of(aliasId)))));
+            version("product", productId), "Cebula Biała", List.of(), List.of(productId), Set.of(aliasId)))));
         flush();
 
         assertThat(jdbcTemplate.queryForObject("SELECT name FROM product WHERE id = ?", String.class, productId)).isEqualTo("Cebula Biała");
@@ -162,7 +189,7 @@ class ProductDictFacadeIT extends IntegrationTest {
         flush();
 
         productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(new UpdateProductDict(
-            "Cebula", List.of(organicId), List.of(productId), Set.of(aliasId)))));
+            version("product", productId), "Cebula", List.of(organicId), List.of(productId), Set.of(aliasId)))));
         flush();
 
         assertThat(jdbcTemplate.queryForList(
@@ -189,8 +216,8 @@ class ProductDictFacadeIT extends IntegrationTest {
         flush();
 
         productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(
-            new UpdateProductDict("Mleko", List.of(), List.of(milkId, otherMilkId), Set.of(milkAliasId, otherMilkAliasId)),
-            new UpdateProductDict("Chleb", List.of(), List.of(breadId, otherBreadId), Set.of(breadAliasId, otherBreadAliasId)))));
+            new UpdateProductDict(version("product", milkId), "Mleko", List.of(), List.of(milkId, otherMilkId), Set.of(milkAliasId, otherMilkAliasId)),
+            new UpdateProductDict(version("product", breadId), "Chleb", List.of(), List.of(breadId, otherBreadId), Set.of(breadAliasId, otherBreadAliasId)))));
         flush();
 
         assertThat(jdbcTemplate.queryForList("SELECT name FROM product", String.class)).containsExactlyInAnyOrder("Mleko", "Chleb", "Cebula");
@@ -209,11 +236,25 @@ class ProductDictFacadeIT extends IntegrationTest {
         flush();
 
         productDictFacade.updateProductDict(new UpdateProductDictListRequest(List.of(new UpdateProductDict(
-            "  Cebula ", List.of(), List.of(productId), Set.of(keptAliasId)))));
+            version("product", productId), "  Cebula ", List.of(), List.of(productId), Set.of(keptAliasId)))));
         flush();
 
         assertThat(jdbcTemplate.queryForObject("SELECT name FROM product WHERE id = ?", String.class, productId)).isEqualTo("Cebula");
         assertThat(aliasesOf(productId)).containsExactlyInAnyOrder("Cebula", "CEB ZOL");
+    }
+
+    @Test
+    void correctionToNameOfExistingProductWithoutThatAliasJoinsThatProduct() {
+        UUID onionId = insertProduct("Cebula");
+        AliasToLearn red = new AliasToLearn("Cebula Czerwona Luz", "cebula", null);
+        AliasToLearn white = new AliasToLearn("Cebula Biala Luz", "Cebula", null);
+
+        Map<AliasToLearn, ProductDictQuery> learned = productDictFacade.learnAliases(List.of(red, white));
+        flush();
+
+        assertThat(learned).containsEntry(red, new ProductDictQuery(onionId)).containsEntry(white, new ProductDictQuery(onionId));
+        assertThat(aliasesOf(onionId)).contains("Cebula Czerwona Luz", "Cebula Biala Luz");
+        assertThat(count("SELECT count(*) FROM product WHERE LOWER(name) = 'cebula'")).isEqualTo(1);
     }
 
     private UUID productOfItem(UUID itemId) {

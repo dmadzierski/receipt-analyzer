@@ -41,12 +41,17 @@ public class ProductDictFacade {
             List<UUID> sourceIds = dictIds.subList(1, dictIds.size());
             ProductDict product = productDictRepository.findById(primaryId)
                 .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
+            ensureVersion(product.getVersion(), item.version());
             String canonicalName = item.canonicalName().trim();
             updateAliases(product, canonicalName, item.aliasIds());
             product.setProductCategories(loadCategories(item.productCategoryIds()));
             productDictRepository.save(product);
             mergeProducts(primaryId, sourceIds);
         });
+    }
+
+    private static void ensureVersion(Long current, Long expected) {
+        if (!Objects.equals(current, expected)) throw new AppRuntimeException(AppRuntimeExceptionMessages.VERSION_CONFLICT);
     }
 
     private void updateAliases(ProductDict product, String name, Set<UUID> aliasIds) {
@@ -106,15 +111,12 @@ public class ProductDictFacade {
             product.addAlias(aliasToLearn.alias());
             productsByAlias.put(aliasToLearn, product);
         });
-        Map<String, UUID> savedIdsByName = productsByAlias.values()
-            .stream()
-            .distinct()
-            .map(productDictRepository::save)
-            .collect(Collectors.toMap(ProductDict::getName, ProductDict::getId));
+        Map<ProductDict, ProductDictQuery> savedProducts = new IdentityHashMap<>();
+        productsByAlias.values().forEach(product -> savedProducts.computeIfAbsent(product,
+            unsaved -> new ProductDictQuery(productDictRepository.save(unsaved).getId())));
         return productsByAlias.entrySet()
             .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey,
-                entry -> new ProductDictQuery(savedIdsByName.get(entry.getValue().getName()))));
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> savedProducts.get(entry.getValue())));
     }
 
     private ProductDict productById(Collection<ProductDict> products, UUID productId) {
@@ -126,7 +128,7 @@ public class ProductDictFacade {
 
     GetProductCategoryListResponse getProductCategoryList() {
         List<GetProductCategoryListResponse.ProductCategory> items = productCategoryQueryRepository.findAllOrderedByName().stream()
-            .map(category -> new GetProductCategoryListResponse.ProductCategory(category.getId(), category.getName()))
+            .map(category -> new GetProductCategoryListResponse.ProductCategory(category.getId(), category.getVersion(), category.getName()))
             .toList();
         return new GetProductCategoryListResponse(items);
     }
@@ -143,6 +145,7 @@ public class ProductDictFacade {
     @Transactional
     UpdateProductCategoryResponse updateProductCategory(UUID productCategoryId, UpdateProductCategoryRequest request) {
         ProductCategory productCategory = productCategoryRepository.findById(productCategoryId).orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_NOT_FOUND));
+        ensureVersion(productCategory.getVersion(), request.version());
         String name = request.name().trim();
 
         if (!productCategory.getName().equals(name) && productCategoryRepository.existsByNameAndIdNot(name, productCategoryId)) {

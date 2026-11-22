@@ -14,7 +14,7 @@ class ProductMatcher {
 
     Optional<ProductDict> match(Collection<ProductDict> products, String alias, String userTranslation) {
         Optional<ProductDict> exactMatch = products.stream()
-            .filter(product -> product.getAliases().stream()
+            .filter(product -> product.getName().equalsIgnoreCase(userTranslation) || product.getAliases().stream()
                 .map(ProductAlias::getName)
                 .anyMatch(known -> known.equalsIgnoreCase(alias) || known.equalsIgnoreCase(userTranslation)))
             .findAny();
