@@ -31,6 +31,7 @@ import {RevisionListComponent} from '../component/revision-list/revision-list.co
 import {MatIcon} from '@angular/material/icon';
 import {RevisionService} from '../service/revision.service';
 import {UpdateRevisionResponse} from '../model/revision.model';
+import {isVersionConflict} from '../error/version-conflict';
 import {FileGroupService} from '../service/file-group.service';
 import {debounceTime, distinctUntilChanged, map, Observable, of, Subject, switchMap} from 'rxjs';
 import {FileGroupSelectorComponent} from '../component/file-group-selector/file-group-selector.component';
@@ -80,7 +81,7 @@ export class ReceiptDetailsComponent implements OnInit {
   receiptId: string = '';
   createRevisionData: CreateRevisionRequest = {} as CreateRevisionRequest;
   receiptEditMode: boolean = false;
-  receiptEdit: UpdateReceiptRequest = {name: '', description: '', storeId: ''};
+  receiptEdit: UpdateReceiptRequest = {version: 0, name: '', description: '', storeId: ''};
   storeSearchText: string = '';
   stores: GetStoreListResponseItem[] = [];
   private readonly storeService = inject(StoreService);
@@ -108,6 +109,7 @@ export class ReceiptDetailsComponent implements OnInit {
 
   startReceiptEdit(): void {
     this.receiptEdit = {
+      version: this.receiptDetails.version,
       name: this.receiptDetails.name ?? '',
       description: this.receiptDetails.description ?? '',
       storeId: this.receiptDetails.store?.id ?? '',
@@ -130,11 +132,12 @@ export class ReceiptDetailsComponent implements OnInit {
     this.receiptService.updateReceipt(this.receiptId, {...this.receiptEdit, name: this.receiptEdit.name.trim()}).subscribe({
       next: () => {
         this.receiptEditMode = false;
-        this.receiptService.getReceiptDetails(this.receiptId).subscribe(res => {
-          this.receiptDetails.name = res.name;
-          this.receiptDetails.description = res.description;
-          this.receiptDetails.store = res.store;
-        });
+        this.refreshReceipt();
+      },
+      error: (error: unknown) => {
+        if (!isVersionConflict(error)) return;
+        this.receiptEditMode = false;
+        this.refreshReceipt();
       }
     });
   }
@@ -159,6 +162,15 @@ export class ReceiptDetailsComponent implements OnInit {
           this.selectStore(createdStore);
         }
       });
+  }
+
+  private refreshReceipt(): void {
+    this.receiptService.getReceiptDetails(this.receiptId).subscribe(res => {
+      this.receiptDetails.version = res.version;
+      this.receiptDetails.name = res.name;
+      this.receiptDetails.description = res.description;
+      this.receiptDetails.store = res.store;
+    });
   }
 
   private storeLabel(store?: StoreDetails | GetStoreListResponseItem): string {
@@ -195,7 +207,7 @@ export class ReceiptDetailsComponent implements OnInit {
     }
     this.selectedFileGroupId = group.id;
 
-    const files = [...group.files];
+    const files = [...group.files].sort((first, second) => first.partNumber - second.partNumber);
     if (group.fileType === FileType.PDF) {
       const pdfFile = files.find(file => file.path?.toLowerCase().endsWith('.pdf')) ?? files[0];
       this.receiptFileId = pdfFile?.id ?? '';
@@ -227,6 +239,10 @@ export class ReceiptDetailsComponent implements OnInit {
           this.editMode = false;
           this.refreshRevisionDetails(response.id);
           this.refreshRevisions();
+          this.refreshReceipt();
+        },
+        error: (error: unknown) => {
+          if (isVersionConflict(error)) this.declineEdit();
         }
       }
     )

@@ -28,6 +28,7 @@ export enum ResolverStrategy {
 }
 
 export interface UpdateReceiptRequest {
+  version: number
   name: string
   description: string
   storeId: string
@@ -52,6 +53,7 @@ export interface StoreDetails {
 
 export interface GetReceiptDetailsResponse {
   id: string
+  version: number
   name: string
   description: string
   walletId?: string
@@ -79,6 +81,7 @@ export enum FileType {
 
 export interface RevisionDetails {
   id: string
+  version: number
   resolver: any
   createdDate: string
   totalPrice: Number
@@ -103,6 +106,7 @@ export interface Item {
 export interface ReceiptFile {
   id: string
   path: string
+  partNumber: number
   rawData?: string
 }
 
