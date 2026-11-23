@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import pl.madzierski.daniel.exception.AppIllegalStateException;
+import pl.madzierski.daniel.exception.AppIllegalStateExceptionMessages;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,12 +34,17 @@ class FileGroup {
     @Builder.Default
     private Set<File> files = new HashSet<>();
 
-    static FileGroup create(FileType fileType, ReceiptQuery receipt, UserQuery owner, int partCount) {
+    static boolean haveSameType(List<FileType> partTypes) {
+        return !partTypes.isEmpty() && partTypes.stream().allMatch(type -> type != null && type == partTypes.getFirst());
+    }
+
+    static FileGroup create(List<FileType> partTypes, ReceiptQuery receipt, UserQuery owner) {
+        if (!haveSameType(partTypes)) throw new AppIllegalStateException(AppIllegalStateExceptionMessages.FILE_TYPE_MISMATCH);
         return builder()
-            .fileType(fileType)
+            .fileType(partTypes.getFirst())
             .receipt(receipt)
             .owner(owner)
-            .files(IntStream.range(0, partCount)
+            .files(IntStream.range(0, partTypes.size())
                 .mapToObj(File::create)
                 .collect(Collectors.toCollection(HashSet::new)))
             .build();

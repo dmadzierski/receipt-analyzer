@@ -78,15 +78,17 @@ class ReceiptFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void storesUploadedFileInUploadDirectory() throws IOException {
+    void storesUploadedFileUnderUploadDirectoryAndKeepsPathRelativeToIt() throws IOException {
         UUID receiptId = createReceiptFromJson();
 
         List<String> paths = jdbcTemplate.queryForList(
             "SELECT f.path FROM receipt_file f JOIN receipt_file_group g ON g.id = f.file_group_id WHERE g.receipt_id = ?",
             String.class, receiptId);
         assertThat(paths).hasSize(1);
-        Path stored = Path.of(paths.getFirst());
-        assertThat(stored).startsWith(uploadDir()).exists();
+        assertThat(Path.of(paths.getFirst())).isRelative();
+        assertThat(paths.getFirst()).startsWith("user/" + user.id() + "/receipts/" + receiptId + "/file_group/");
+        Path stored = uploadDir().resolve(paths.getFirst());
+        assertThat(stored).exists();
         assertThat(Files.readAllBytes(stored)).isEqualTo(readResource(RECEIPT_JSON));
     }
 

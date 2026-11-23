@@ -14,7 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -59,12 +58,12 @@ class FileFacadeIT extends IntegrationTest {
     }
 
     @Test
-    void savedFilesGetPathsBuiltFromOwnerReceiptGroupAndFileIds() {
+    void savedFilesGetPathsRelativeToUploadDirectoryBuiltFromOwnerReceiptGroupAndFileIds() {
         UUID groupId = fileFacade.save(user, receiptId, List.of(PNG));
         UUID fileId = fileIdOf(groupId);
 
         assertThat(jdbcTemplate.queryForObject("SELECT path FROM receipt_file WHERE id = ?", String.class, fileId))
-            .endsWith(String.join(java.io.File.separator, "user", user.id().toString(), "receipts", receiptId.toString(),
+            .isEqualTo(String.join("/", "user", user.id().toString(), "receipts", receiptId.toString(),
                 "file_group", groupId.toString(), "file", fileId + ".png"));
     }
 
@@ -143,7 +142,7 @@ class FileFacadeIT extends IntegrationTest {
     void fileMissingOnDiskIsReported() throws IOException {
         UUID groupId = fileFacade.save(user, receiptId, List.of(PNG));
         UUID fileId = fileIdOf(groupId);
-        Files.delete(Path.of(jdbcTemplate.queryForObject("SELECT path FROM receipt_file WHERE id = ?", String.class, fileId)));
+        Files.delete(uploadDir().resolve(jdbcTemplate.queryForObject("SELECT path FROM receipt_file WHERE id = ?", String.class, fileId)));
 
         assertError(() -> fileFacade.getFile(user, fileId), AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);
         assertError(() -> fileFacade.getFiles(receiptId, groupId), AppRuntimeExceptionMessages.FILE_RECEIPT_FILE_NOT_FOUND);

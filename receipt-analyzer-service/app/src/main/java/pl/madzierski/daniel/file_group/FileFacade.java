@@ -21,7 +21,7 @@ public class FileFacade {
     private final FileGroupRepository fileGroupRepository;
     private final FileTypeDetector fileTypeDetector;
     private final FileStorage fileStorage;
-    private final String uploadDir;
+    private final FilePathPolicy filePathPolicy;
 
     @Transactional
     public UUID save(AuthenticatedUser user, UUID receiptId, List<byte[]> files) {
@@ -30,29 +30,14 @@ public class FileFacade {
         if (files == null || files.isEmpty()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
         }
-        FileType fileType = null;
-        for (byte[] content : files) {
-            if (fileType == null)
-                fileType = fileTypeDetector.detectFileType(content);
-            else if (fileTypeDetector.detectFileType(content) != fileType) {
-                throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_TYPE_MISMATCH);
-            }
-        }
-        if (fileType == null) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_TYPE_NOT_DETECTED);
+        List<FileType> partTypes = files.stream().map(fileTypeDetector::detectFileType).toList();
+        if (!FileGroup.haveSameType(partTypes)) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_TYPE_MISMATCH);
         FileGroup savedFileGroup = fileGroupRepository.save(
-            FileGroup.create(fileType, new ReceiptQuery(receiptId), user.toUserQuery(), files.size()));
-        savedFileGroup.assignPaths(this::createPath);
+            FileGroup.create(partTypes, new ReceiptQuery(receiptId), user.toUserQuery()));
+        savedFileGroup.assignPaths(filePathPolicy);
         FileGroup fileGroupWithPaths = fileGroupRepository.save(savedFileGroup);
         fileGroupWithPaths.getFiles().forEach(file -> fileStorage.save(file.getPath(), files.get(file.getPartNumber())));
         return fileGroupWithPaths.getId();
-    }
-
-    private String createPath(FileGroup fileGroup, File file) {
-        return uploadDir + java.io.File.separator + "user" + java.io.File.separator +
-               fileGroup.getOwner().id() + java.io.File.separator + "receipts" + java.io.File.separator +
-               fileGroup.getReceipt().id() + java.io.File.separator + "file_group" + java.io.File.separator +
-               fileGroup.getId() + java.io.File.separator + "file" + java.io.File.separator +
-               file.getId() + "." + fileGroup.getFileType().getExtension();
     }
 
     FileContentDto getFile(AuthenticatedUser user, UUID receiptFileId) {

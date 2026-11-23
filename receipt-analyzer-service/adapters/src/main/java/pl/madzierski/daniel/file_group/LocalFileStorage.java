@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.file_group;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -16,9 +17,15 @@ import java.util.Optional;
 @Service
 class LocalFileStorage implements FileStorage {
 
+    private final Path uploadDir;
+
+    LocalFileStorage(@Value("${file.upload-dir}") String uploadDir) {
+        this.uploadDir = Path.of(uploadDir);
+    }
+
     @Override
     public void save(String path, byte[] content) {
-        Path destination = Path.of(path);
+        Path destination = resolve(path);
         try {
             if (destination.getParent() != null) Files.createDirectories(destination.getParent());
             Files.write(destination, content);
@@ -37,7 +44,7 @@ class LocalFileStorage implements FileStorage {
 
     @Override
     public Optional<byte[]> read(String path) {
-        Path source = Path.of(path);
+        Path source = resolve(path);
         if (!Files.isRegularFile(source)) return Optional.empty();
         try {
             return Optional.of(Files.readAllBytes(source));
@@ -49,7 +56,7 @@ class LocalFileStorage implements FileStorage {
 
     @Override
     public void delete(String path) {
-        Path target = Path.of(path);
+        Path target = resolve(path);
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             deleteQuietly(target);
             return;
@@ -60,6 +67,11 @@ class LocalFileStorage implements FileStorage {
                 deleteQuietly(target);
             }
         });
+    }
+
+    private Path resolve(String path) {
+        Path stored = Path.of(path);
+        return stored.isAbsolute() ? stored : uploadDir.resolve(stored);
     }
 
     private void deleteQuietly(Path path) {

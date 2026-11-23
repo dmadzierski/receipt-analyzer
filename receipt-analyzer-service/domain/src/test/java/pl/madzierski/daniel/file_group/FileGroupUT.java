@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.file_group;
 
 import org.junit.jupiter.api.Test;
+import pl.madzierski.daniel.exception.AppIllegalStateException;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
@@ -17,7 +18,7 @@ class FileGroupUT {
         ReceiptQuery receipt = new ReceiptQuery(UUID.randomUUID());
         UserQuery owner = new UserQuery(UUID.randomUUID());
 
-        FileGroup group = FileGroup.create(FileType.PNG, receipt, owner, 3);
+        FileGroup group = FileGroup.create(List.of(FileType.PNG, FileType.PNG, FileType.PNG), receipt, owner);
 
         assertThat(group.getId()).isNull();
         assertThat(group.getFileType()).isEqualTo(FileType.PNG);
@@ -25,6 +26,19 @@ class FileGroupUT {
         assertThat(group.getOwner()).isEqualTo(owner);
         assertThat(group.getFiles()).extracting(File::getPartNumber).containsExactlyInAnyOrder(0, 1, 2);
         assertThat(group.getFiles()).extracting(File::getPath).containsOnlyNulls();
+    }
+
+    @Test
+    void groupOfPartsWithDifferentTypesCannotBeCreated() {
+        List<FileType> partTypes = List.of(FileType.PNG, FileType.JPEG);
+
+        assertThat(FileGroup.haveSameType(partTypes)).isFalse();
+        assertThatThrownBy(() -> FileGroup.create(partTypes, null, null)).isInstanceOf(AppIllegalStateException.class);
+    }
+
+    @Test
+    void groupNeedsAtLeastOnePart() {
+        assertThat(FileGroup.haveSameType(List.of())).isFalse();
     }
 
     @Test
@@ -44,7 +58,7 @@ class FileGroupUT {
 
     @Test
     void filesCannotBeModifiedFromOutside() {
-        FileGroup group = FileGroup.create(FileType.PNG, null, null, 1);
+        FileGroup group = FileGroup.create(List.of(FileType.PNG), null, null);
 
         assertThatThrownBy(() -> group.getFiles().add(File.create(1))).isInstanceOf(UnsupportedOperationException.class);
     }

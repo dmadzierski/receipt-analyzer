@@ -122,12 +122,12 @@ class ReceiptFilesOnDiskIT extends IntegrationTest {
         return jdbcTemplate.queryForList(
                 "SELECT f.path FROM receipt_file f JOIN receipt_file_group g ON g.id = f.file_group_id WHERE g.receipt_id = ?",
                 String.class, receiptId)
-            .stream().map(Path::of).toList();
+            .stream().map(path -> uploadDir().resolve(path)).toList();
     }
 
     private List<Path> filesOfGroup(UUID groupId) {
         return jdbcTemplate.queryForList("SELECT path FROM receipt_file WHERE file_group_id = ?", String.class, groupId)
-            .stream().map(Path::of).toList();
+            .stream().map(path -> uploadDir().resolve(path)).toList();
     }
 
     private Path userUploadDir() {

@@ -50,6 +50,23 @@ class LocalFileStorageIT extends IntegrationTest {
     }
 
     @Test
+    void relativePathIsStoredUnderUploadDirectoryAndAbsolutePathIsUsedAsItIs() throws IOException {
+        String relative = "storage-test/" + UUID.randomUUID() + ".txt";
+        Path absolute = uploadDir().resolve("storage-test").resolve(UUID.randomUUID() + ".txt");
+
+        newTransaction().executeWithoutResult(status -> {
+            fileStorage.save(relative, CONTENT);
+            fileStorage.save(absolute.toString(), CONTENT);
+        });
+
+        assertThat(uploadDir().resolve(relative)).exists();
+        assertThat(fileStorage.read(relative)).hasValue(CONTENT);
+        assertThat(fileStorage.read(absolute.toString())).hasValue(CONTENT);
+        Files.delete(uploadDir().resolve(relative));
+        Files.delete(absolute);
+    }
+
+    @Test
     void deletedFileIsRemovedOnlyAfterCommit() throws IOException {
         Path path = storedFile();
 
