@@ -13,7 +13,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/receipt-group-files")
 @AllArgsConstructor
-public class FileGroupController {
+class FileGroupController {
 
     private final FileFacade fileFacade;
 

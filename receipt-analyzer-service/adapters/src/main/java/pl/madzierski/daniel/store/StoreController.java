@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pl.madzierski.daniel.store.model.CreateStoreRequest;
 import pl.madzierski.daniel.store.model.CreateStoreResponse;
@@ -17,7 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @RestController
 @RequestMapping(path = "/stores", produces = MediaType.APPLICATION_JSON_VALUE)
-@Validated
 class StoreController {
 
     private final StoreFacade storeFacade;

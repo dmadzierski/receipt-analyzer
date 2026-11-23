@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pl.madzierski.daniel.receipt.model.*;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
@@ -14,7 +13,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/revisions")
-@Validated
 @RequiredArgsConstructor
 class ReceiptRevisionController {
 

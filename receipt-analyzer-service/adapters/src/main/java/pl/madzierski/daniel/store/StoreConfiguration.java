@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class StoreConfiguration {
+class StoreConfiguration {
 
     @Bean
     StoreFacade storeFacade(StoreQueryRepository storeQueryRepository, StoreRepository storeRepository, StoreBrandRepository storeBrandRepository, StoreBrandQueryRepository storeBrandQueryRepository) {

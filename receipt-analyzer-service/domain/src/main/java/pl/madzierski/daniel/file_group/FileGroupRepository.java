@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface FileGroupRepository {
+interface FileGroupRepository {
     FileGroup save(FileGroup fileGroup);
 
     Optional<FileGroup> findById(UUID fileGroupId, UserQuery user);
