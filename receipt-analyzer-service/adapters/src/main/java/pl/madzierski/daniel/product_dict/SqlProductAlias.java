@@ -25,11 +25,6 @@ class SqlProductAlias extends BaseEntity {
     }
 
     public ProductAlias toProductAlias() {
-        return new ProductAlias(
-            this.id,
-            this.createdDate,
-            this.modifiedDate,
-            this.name
-        );
+        return ProductAlias.restore(id, createdDate, modifiedDate, name);
     }
 }

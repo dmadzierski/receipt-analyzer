@@ -15,7 +15,6 @@ public class ProductDictFacade {
 
     private final ProductDictRepository productDictRepository;
     private final ProductDictQueryRepository productDictQueryRepository;
-    private final ProductAliasRepository productAliasRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductCategoryQueryRepository productCategoryQueryRepository;
     private final ReceiptFacade receiptFacade;
@@ -42,31 +41,19 @@ public class ProductDictFacade {
             ProductDict product = productDictRepository.findById(primaryId)
                 .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND));
             ensureVersion(product.getVersion(), item.version());
-            String canonicalName = item.canonicalName().trim();
-            updateAliases(product, canonicalName, item.aliasIds());
-            product.setProductCategories(loadCategories(item.productCategoryIds()));
-            productDictRepository.save(product);
+            List<ProductDict> mergedProducts = sourceIds.stream()
+                .map(sourceId -> productDictRepository.findById(sourceId)
+                    .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_NOT_FOUND)))
+                .toList();
+            product.rename(item.canonicalName(), item.aliasIds() == null ? Set.of() : item.aliasIds(), mergedProducts);
+            product.changeCategories(loadCategories(item.productCategoryIds()));
             mergeProducts(primaryId, sourceIds);
+            productDictRepository.save(product);
         });
     }
 
     private static void ensureVersion(Long current, Long expected) {
         if (!Objects.equals(current, expected)) throw new AppRuntimeException(AppRuntimeExceptionMessages.VERSION_CONFLICT);
-    }
-
-    private void updateAliases(ProductDict product, String name, Set<UUID> aliasIds) {
-        Set<ProductAlias> previous = new HashSet<>(product.getAliases());
-        Set<ProductAlias> chosen = new HashSet<>(productAliasRepository.findAllByIds(aliasIds));
-
-        boolean hasCanonical = chosen.stream().anyMatch(a -> a.getName().equalsIgnoreCase(name));
-        if (!hasCanonical) {
-            chosen.add(previous.stream()
-                .filter(a -> a.getName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElseGet(() -> ProductAlias.builder().name(name).build()));
-        }
-        product.setAliases(chosen);
-        product.setName(name);
     }
 
     private void mergeProducts(UUID primaryId, List<UUID> sourceIds) {
@@ -138,7 +125,7 @@ public class ProductDictFacade {
         String name = request.name().trim();
         if (productCategoryRepository.existsByName(name))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_ALREADY_EXISTS);
-        ProductCategory savedProductCategory = productCategoryRepository.save(new ProductCategory(name));
+        ProductCategory savedProductCategory = productCategoryRepository.save(ProductCategory.create(name));
         return new CreateProductCategoryResponse(savedProductCategory.getId());
     }
 
@@ -152,7 +139,7 @@ public class ProductDictFacade {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.PRODUCT_CATEGORY_ALREADY_EXISTS);
         }
 
-        productCategory.setName(name);
+        productCategory.rename(name);
         ProductCategory savedProductCategory = productCategoryRepository.save(productCategory);
         return new UpdateProductCategoryResponse(savedProductCategory.getId());
     }

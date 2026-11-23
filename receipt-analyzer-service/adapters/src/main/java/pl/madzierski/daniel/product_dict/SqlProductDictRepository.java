@@ -54,6 +54,7 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
     @Override
     public void deleteAllByIdIn(List<UUID> productDictIdList) {
         repository.deleteAllById(productDictIdList);
+        repository.flush();
         productDictIdList.forEach(id -> eventPublisher.publish(new ProductDictDeleted(id)));
     }
 

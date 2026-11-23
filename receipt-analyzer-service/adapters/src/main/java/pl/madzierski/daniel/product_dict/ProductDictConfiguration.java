@@ -12,7 +12,6 @@ class ProductDictConfiguration {
     ProductDictFacade productDictFacade(
         ProductDictRepository productDictRepository,
         ProductDictQueryRepository productDictQueryRepository,
-        ProductAliasRepository productAliasRepository,
         ProductCategoryRepository productCategoryRepository,
         ProductCategoryQueryRepository productCategoryQueryRepository,
         @Lazy ReceiptFacade receiptFacade,
@@ -20,7 +19,6 @@ class ProductDictConfiguration {
         return new ProductDictFacade(
             productDictRepository,
             productDictQueryRepository,
-            productAliasRepository,
             productCategoryRepository,
             productCategoryQueryRepository,
             receiptFacade,

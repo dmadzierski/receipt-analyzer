@@ -1,16 +1,15 @@
 package pl.madzierski.daniel.product_dict;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
-@Setter
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 class ProductAlias {
 
@@ -18,4 +17,19 @@ class ProductAlias {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String name;
+
+    static ProductAlias create(String name) {
+        return builder()
+            .name(name)
+            .build();
+    }
+
+    static ProductAlias restore(UUID id, LocalDateTime createdDate, LocalDateTime modifiedDate, String name) {
+        return builder()
+            .id(id)
+            .createdDate(createdDate)
+            .modifiedDate(modifiedDate)
+            .name(name)
+            .build();
+    }
 }

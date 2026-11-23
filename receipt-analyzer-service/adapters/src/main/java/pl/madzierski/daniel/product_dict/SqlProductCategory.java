@@ -26,12 +26,6 @@ class SqlProductCategory extends VersionedEntity {
     }
 
     public ProductCategory toProductCategory() {
-        ProductCategory productCategory = new ProductCategory();
-        productCategory.setId(this.id);
-        productCategory.setVersion(this.version);
-        productCategory.setName(this.name);
-        productCategory.setCreatedDate(this.createdDate);
-        productCategory.setModifiedDate(this.modifiedDate);
-        return productCategory;
+        return ProductCategory.restore(id, version, createdDate, modifiedDate, name);
     }
 }

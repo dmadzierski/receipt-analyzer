@@ -59,15 +59,9 @@ class SqlProductDict extends VersionedEntity {
     }
 
     public ProductDict toProductDict() {
-        ProductDict productDict = new ProductDict();
-        productDict.setId(this.id);
-        productDict.setVersion(this.version);
-        productDict.setName(this.name);
-        productDict.setCreatedDate(this.createdDate);
-        productDict.setModifiedDate(this.modifiedDate);
-        productDict.addAllAlias(this.aliases.stream().map(SqlProductAlias::toProductAlias).toList());
-        productDict.addAllCategories(this.categories.stream().map(SqlProductCategory::toProductCategory).toList());
-        return productDict;
+        return ProductDict.restore(id, version, createdDate, modifiedDate, name,
+            aliases.stream().map(SqlProductAlias::toProductAlias).toList(),
+            categories.stream().map(SqlProductCategory::toProductCategory).toList());
     }
 
 }

@@ -43,8 +43,7 @@ class ProductMatcherUT {
 
     @Test
     void matchesUserTranslationToNameOfProductWithoutThatAlias() {
-        ProductDict cheese = new ProductDict();
-        cheese.setName("Ser");
+        ProductDict cheese = ProductDict.restore(null, null, null, null, "Ser", List.of(), List.of());
 
         assertThat(matcher.match(List.of(cheese, MILK), "Ser Gouda Plastry", "ser")).containsSame(cheese);
     }
