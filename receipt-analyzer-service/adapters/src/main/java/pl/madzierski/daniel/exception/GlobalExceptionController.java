@@ -34,7 +34,7 @@ class GlobalExceptionController {
     @ExceptionHandler({AppIllegalStateException.class})
     ResponseEntity<ErrorResponse> handleAppIllegalStateException(AppIllegalStateException ex, HttpServletRequest request) {
         log.error("{} {} broke a domain rule: {}", request.getMethod(), request.getRequestURI(), ex.getType().getI18nMessage(), ex);
-        return errorResponse(HttpStatus.CONFLICT, ex.getType().getI18nMessage());
+        return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getType().getI18nMessage());
     }
 
     @ExceptionHandler({OptimisticLockingFailureException.class, OptimisticLockException.class})
