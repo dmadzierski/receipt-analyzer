@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.product_dict.model.*;
-import pl.madzierski.daniel.receipt.ReceiptFacade;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,7 +16,7 @@ public class ProductDictFacade {
     private final ProductDictQueryRepository productDictQueryRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductCategoryQueryRepository productCategoryQueryRepository;
-    private final ReceiptFacade receiptFacade;
+    private final MergedProductReassignment mergedProductReassignment;
     private final ProductMatcher productMatcher;
 
     public boolean allProductsExist(Collection<UUID> productDictIds) {
@@ -58,7 +57,7 @@ public class ProductDictFacade {
 
     private void mergeProducts(UUID primaryId, List<UUID> sourceIds) {
         if (sourceIds.isEmpty()) return;
-        receiptFacade.reassignProductDict(new ProductDictQuery(primaryId), sourceIds);
+        mergedProductReassignment.reassignToPrimary(new ProductDictQuery(primaryId), sourceIds);
         productDictRepository.deleteAllByIdIn(sourceIds);
     }
 

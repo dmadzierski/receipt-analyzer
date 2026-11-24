@@ -2,7 +2,6 @@ package pl.madzierski.daniel.receipt;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
 import pl.madzierski.daniel.digitization.DigitizationFacade;
@@ -22,7 +21,7 @@ class ReceiptConfiguration {
         ReceiptQueryRepository receiptQueryRepository,
         ReceiptRevisionQueryRepository receiptRevisionQueryRepository,
         StoreQueryRepository storeQueryRepository,
-        @Lazy ProductDictFacade productDictFacade,
+        ProductDictFacade productDictFacade,
         FileGroupQueryRepository fileGroupQueryRepository,
         WalletQueryRepository walletQueryRepository
     ) {
@@ -41,5 +40,10 @@ class ReceiptConfiguration {
             fileGroupQueryRepository,
             walletQueryRepository
         );
+    }
+
+    @Bean
+    ReceiptMergedProductReassignment receiptMergedProductReassignment(ReceiptRevisionRepository revisionRepository) {
+        return new ReceiptMergedProductReassignment(revisionRepository);
     }
 }

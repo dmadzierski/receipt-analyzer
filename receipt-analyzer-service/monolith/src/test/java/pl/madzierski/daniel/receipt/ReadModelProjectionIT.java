@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+import pl.madzierski.daniel.product_dict.MergedProductReassignment;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.model.AliasToLearn;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
@@ -42,6 +43,9 @@ class ReadModelProjectionIT extends IntegrationTest {
     @Autowired
     private ProductDictFacade productDictFacade;
 
+    @Autowired
+    private MergedProductReassignment mergedProductReassignment;
+
     private AuthenticatedUser user;
     private UUID walletId;
     private UUID storeId;
@@ -69,7 +73,7 @@ class ReadModelProjectionIT extends IntegrationTest {
         UUID otherProductId = productDictFacade.learnAliases(List.of(new AliasToLearn("Cebula Czerwona Luz", "Cebula czerwona", null)))
             .values().iterator().next().id();
         clearSession();
-        receiptFacade.reassignProductDict(new ProductDictQuery(otherProductId), List.of(productIdOfItem(originalId, ONION)));
+        mergedProductReassignment.reassignToPrimary(new ProductDictQuery(otherProductId), List.of(productIdOfItem(originalId, ONION)));
         clearSession();
         receiptFacade.createRevisionCopy(user, copyId);
 

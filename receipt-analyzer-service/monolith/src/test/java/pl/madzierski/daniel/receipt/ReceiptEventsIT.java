@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.product_dict.MergedProductReassignment;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.CreateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;
@@ -23,6 +24,9 @@ class ReceiptEventsIT extends IntegrationTest {
 
     @Autowired
     private ReceiptFacade receiptFacade;
+
+    @Autowired
+    private MergedProductReassignment mergedProductReassignment;
 
     private AuthenticatedUser user;
     private UUID walletId;
@@ -111,7 +115,7 @@ class ReceiptEventsIT extends IntegrationTest {
         UUID primaryId = insertProduct("Cebula");
         UUID mergedId = insertProduct("Cebula czerwona");
 
-        receiptFacade.reassignProductDict(new ProductDictQuery(primaryId), List.of(mergedId));
+        mergedProductReassignment.reassignToPrimary(new ProductDictQuery(primaryId), List.of(mergedId));
 
         assertThat(outboxEvents()).singleElement()
             .satisfies(event -> {

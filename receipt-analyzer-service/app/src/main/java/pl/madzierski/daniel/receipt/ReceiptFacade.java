@@ -164,11 +164,6 @@ public class ReceiptFacade {
     }
 
     @Transactional
-    public void reassignProductDict(ProductDictQuery primaryDict, List<UUID> productDictIdList) {
-        revisionRepository.reassignProductDict(primaryDict, productDictIdList);
-    }
-
-    @Transactional
     void updateProductDictInRevisionItems(AuthenticatedUser user, UUID revisionId) {
         ReceiptRevision revision = revisionRepository.findByIdWithItems(revisionId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.REVISION_NOT_FOUND));
