@@ -1,4 +1,4 @@
-package pl.madzierski.daniel;
+package pl.madzierski.daniel.readmodel;
 
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.AfterEach;
@@ -16,8 +16,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import pl.madzierski.daniel.IntegrationTest;
+import pl.madzierski.daniel.TestJwtDecoder;
 import pl.madzierski.daniel.event.ConsistencyTokens;
-import pl.madzierski.daniel.readmodel.ReadModelEventListener;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -29,7 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@Import(HttpApiIT.TestJwtDecoder.class)
+@Import(TestJwtDecoder.class)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 class ReadModelPipelineIT extends IntegrationTest {
 

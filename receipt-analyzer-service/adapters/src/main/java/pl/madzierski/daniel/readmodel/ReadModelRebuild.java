@@ -38,7 +38,7 @@ public class ReadModelRebuild {
         else if (rebuildOnStart) rebuildIfNeverBuilt();
     }
 
-    public boolean rebuildIfNeverBuilt() {
+    boolean rebuildIfNeverBuilt() {
         if (projectionMetaRepository.existsById(ProjectionMeta.READ_MODEL)) return false;
         rebuild();
         return true;
@@ -50,7 +50,7 @@ public class ReadModelRebuild {
         projectionMetaRepository.save(new ProjectionMeta(ProjectionMeta.READ_MODEL, new Date()));
     }
 
-    public void republish() {
+    void republish() {
         transactionTemplate.executeWithoutResult(status -> {
             projector.clear();
             snapshots().forEach(eventPublisher::publish);

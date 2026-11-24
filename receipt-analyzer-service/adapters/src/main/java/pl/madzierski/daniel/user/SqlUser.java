@@ -12,7 +12,7 @@ import pl.madzierski.daniel.common.entity.BaseEntity;
 @AllArgsConstructor
 @Getter
 @Setter
-public class SqlUser extends BaseEntity {
+class SqlUser extends BaseEntity {
 
     @Column(name = "user_sub", nullable = false, unique = true)
     private String userSub;

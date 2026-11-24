@@ -14,9 +14,9 @@ import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
 @Component
 @RequiredArgsConstructor
-public class ReadModelEventListener {
+class ReadModelEventListener {
 
-    public static final String LISTENER_ID = "read-model";
+    static final String LISTENER_ID = "read-model";
 
     private final ReadModelProjector projector;
     private final ObjectMapper objectMapper;

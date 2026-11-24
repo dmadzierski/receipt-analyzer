@@ -5,20 +5,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.oauth2.jwt.BadJwtException;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,27 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@Import(HttpApiIT.TestJwtDecoder.class)
+@Import(TestJwtDecoder.class)
 class HttpApiIT extends IntegrationTest {
 
     private static final String CONTEXT_PATH = "/api";
-    private static final String INVALID_TOKEN = "invalid";
-
-    @TestConfiguration
-    static class TestJwtDecoder {
-        @Bean
-        JwtDecoder jwtDecoder() {
-            return token -> {
-                if (INVALID_TOKEN.equals(token)) throw new BadJwtException("invalid token");
-                return Jwt.withTokenValue(token)
-                    .header("alg", "none")
-                    .subject(token)
-                    .issuedAt(Instant.now())
-                    .expiresAt(Instant.now().plusSeconds(60))
-                    .build();
-            };
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -71,7 +48,7 @@ class HttpApiIT extends IntegrationTest {
     @Test
     void requestsWithoutValidTokenAreUnauthorized() throws Exception {
         mockMvc.perform(api(get(CONTEXT_PATH + "/wallets"))).andExpect(status().isUnauthorized());
-        mockMvc.perform(as(INVALID_TOKEN, get(CONTEXT_PATH + "/wallets"))).andExpect(status().isUnauthorized());
+        mockMvc.perform(as(TestJwtDecoder.INVALID_TOKEN, get(CONTEXT_PATH + "/wallets"))).andExpect(status().isUnauthorized());
     }
 
     @Test

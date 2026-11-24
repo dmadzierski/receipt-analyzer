@@ -7,7 +7,7 @@ import pl.madzierski.daniel.user.model.UserDto;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SqlUserQueryRepository extends UserQueryRepository, Repository<SqlUser, UUID> {
+interface SqlUserQueryRepository extends UserQueryRepository, Repository<SqlUser, UUID> {
 
     @Query(value = """
         SELECT new pl.madzierski.daniel.user.model.UserDto(u.id)
