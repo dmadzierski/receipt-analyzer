@@ -83,12 +83,16 @@ class HttpApiIT extends IntegrationTest {
         mockMvc.perform(as(userSub, get(CONTEXT_PATH + "/wallets/" + walletId)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("Home"))
+            .andExpect(jsonPath("$.receipts").doesNotExist());
+        mockMvc.perform(as(userSub, get(CONTEXT_PATH + "/receipts").param("walletId", walletId)))
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$.receipts", hasSize(0)));
 
         String stranger = registerOtherUser();
         mockMvc.perform(as(stranger, get(CONTEXT_PATH + "/wallets")))
             .andExpect(jsonPath("$.items", hasSize(0)));
         expectError(mockMvc.perform(as(stranger, get(CONTEXT_PATH + "/wallets/" + walletId))), 400, "EXCEPTION.WALLET_NOT_FOUND");
+        expectError(mockMvc.perform(as(stranger, get(CONTEXT_PATH + "/receipts").param("walletId", walletId))), 400, "EXCEPTION.WALLET_NOT_FOUND");
     }
 
     @Test

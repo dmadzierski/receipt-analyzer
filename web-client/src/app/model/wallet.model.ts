@@ -23,6 +23,9 @@ export interface AddWalletResponse {
 export interface WalletDetails {
   id: string;
   name: string;
+}
+
+export interface WalletReceiptsResponse {
   receipts: WalletReceipt[];
 }
 

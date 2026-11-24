@@ -11,15 +11,19 @@ import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.model.AliasToLearn;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.*;
+import pl.madzierski.daniel.receipt.projection.WalletReceiptProjection;
 import pl.madzierski.daniel.digitization.DigitizationFacade;
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
 import pl.madzierski.daniel.store.StoreQueryRepository;
 import pl.madzierski.daniel.store.model.StoreDetailsResponse;
+import pl.madzierski.daniel.store.model.StoreDto;
 import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
+import pl.madzierski.daniel.wallet.WalletQueryRepository;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -37,6 +41,7 @@ public class ReceiptFacade {
     private final StoreQueryRepository storeQueryRepository;
     private final ProductDictFacade productDictFacade;
     private final FileGroupQueryRepository fileGroupQueryRepository;
+    private final WalletQueryRepository walletQueryRepository;
 
     @Transactional
     CreateReceiptResponse addReceipt(AuthenticatedUser user, List<byte[]> files, CreateReceiptRequest body) {
@@ -68,6 +73,28 @@ public class ReceiptFacade {
             .orElse(null);
         return new GetReceiptDetailsResponse(receipt, preferredRevision,
             fileGroupQueryRepository.findAllByReceiptId(receiptId), items, revisions, store);
+    }
+
+    GetWalletReceiptsResponse getWalletReceipts(AuthenticatedUser user, UUID walletId) {
+        walletQueryRepository.getWalletDetails(walletId, user.id())
+            .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.WALLET_NOT_FOUND));
+        Collection<WalletReceiptProjection> walletReceipts = receiptQueryRepository.getWalletReceipts(walletId);
+        Set<UUID> storeIds = walletReceipts.stream()
+            .map(WalletReceiptProjection::storeId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        Map<UUID, StoreDto> stores = storeIds.isEmpty() ? Map.of() : storeQueryRepository.findStoresByIds(storeIds).stream()
+            .collect(Collectors.toMap(StoreDto::getId, Function.identity()));
+        return new GetWalletReceiptsResponse(walletReceipts.stream()
+            .map(receipt -> new GetWalletReceiptsResponse.Receipt(
+                receipt.id(),
+                receipt.name(),
+                receipt.paymentDate() != null ? receipt.paymentDate().toLocalDate() : null,
+                receipt.isCorrect(),
+                receipt.totalPrice(),
+                receipt.createdDate(),
+                receipt.storeId() != null ? stores.get(receipt.storeId()) : null))
+            .toList());
     }
 
     @Transactional(readOnly = true)

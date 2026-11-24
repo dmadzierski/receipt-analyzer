@@ -2,15 +2,12 @@ package pl.madzierski.daniel.wallet;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
-import pl.madzierski.daniel.store.StoreQueryRepository;
 
 @Configuration
 class WalletConfiguration {
 
     @Bean
-    WalletFacade walletFacade(WalletRepository walletRepository, WalletQueryRepository walletQueryRepository,
-                              ReceiptQueryRepository receiptQueryRepository, StoreQueryRepository storeQueryRepository) {
-        return new WalletFacade(walletRepository, walletQueryRepository, receiptQueryRepository, storeQueryRepository);
+    WalletFacade walletFacade(WalletRepository walletRepository, WalletQueryRepository walletQueryRepository) {
+        return new WalletFacade(walletRepository, walletQueryRepository);
     }
 }

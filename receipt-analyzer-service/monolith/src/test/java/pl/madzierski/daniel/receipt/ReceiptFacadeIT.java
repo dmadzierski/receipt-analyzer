@@ -14,6 +14,7 @@ import pl.madzierski.daniel.receipt.model.CreateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.CreateRevisionRequest;
 import pl.madzierski.daniel.receipt.model.GetReceiptDetailsResponse;
 import pl.madzierski.daniel.receipt.model.GetRevisionResponse;
+import pl.madzierski.daniel.receipt.model.GetWalletReceiptsResponse;
 import pl.madzierski.daniel.receipt.model.UpdateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest.ItemRequest;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -970,6 +972,66 @@ class ReceiptFacadeIT extends IntegrationTest {
 
         assertError(() -> receiptFacade.updateProductDictInRevisionItems(stranger, revisionId),
             AppRuntimeExceptionMessages.REVISION_NOT_FOUND);
+    }
+
+    @Test
+    void listsEveryReceiptOfWalletWithItsOwnStoreAndPreferredTotal() {
+        UUID lidlId = createStore("Lidl", "ul. Testowa 2", "Gniezno");
+        UUID biedronkaReceiptId = insertReceipt(walletId, storeId, "Biedronka");
+        insertRevision(biedronkaReceiptId, "BIEDRONKA_JSON", "999.99", false, null);
+        insertRevision(biedronkaReceiptId, "USER", "10.00", true, true, LocalDateTime.of(2026, 5, 22, 10, 4));
+        insertRevision(insertReceipt(walletId, lidlId, "Lidl"), "USER", "20.00", true, true, null);
+        insertRevision(insertReceipt(walletId, null, "Bez sklepu"), "USER", "30.00", false, true, null);
+        insertReceipt(createWallet(user.id(), "Other"), storeId, "Other wallet");
+        flush();
+
+        GetWalletReceiptsResponse receipts = receiptFacade.getWalletReceipts(user, walletId);
+
+        assertThat(receipts.receipts())
+            .extracting(GetWalletReceiptsResponse.Receipt::name, receipt -> receipt.totalPrice().toPlainString(), GetWalletReceiptsResponse.Receipt::isCorrect,
+                GetWalletReceiptsResponse.Receipt::paymentDate,
+                receipt -> receipt.store() != null ? receipt.store().getBrand() : null,
+                receipt -> receipt.store() != null ? receipt.store().getCity() : null)
+            .containsExactlyInAnyOrder(
+                tuple("Biedronka", "10.00", true, LocalDate.of(2026, 5, 22), "Biedronka", "Poznań"),
+                tuple("Lidl", "20.00", true, null, "Lidl", "Gniezno"),
+                tuple("Bez sklepu", "30.00", false, null, null, null));
+    }
+
+    @Test
+    void listsWalletReceiptWithManyCorrectRevisionsOnceWithPreferredRevision() {
+        UUID receiptId = insertReceipt(walletId, null, "Weekly shopping");
+        insertRevision(receiptId, "BIEDRONKA_JSON", "100.00", true, null);
+        insertRevision(receiptId, "USER", "110.00", true, true, null);
+        insertRevision(receiptId, "USER", "120.00", true, null);
+        flush();
+
+        GetWalletReceiptsResponse receipts = receiptFacade.getWalletReceipts(user, walletId);
+
+        assertThat(receipts.receipts()).singleElement()
+            .satisfies(receipt -> assertThat(receipt.totalPrice()).isEqualByComparingTo("110.00"));
+    }
+
+    @Test
+    void listsWalletReceiptWithoutPreferredRevision() {
+        UUID receiptId = insertReceipt(walletId, null, "Not checked yet");
+        insertRevision(receiptId, "BIEDRONKA_JSON", "12.50", true, null);
+        flush();
+
+        GetWalletReceiptsResponse.Receipt receipt = receiptFacade.getWalletReceipts(user, walletId).receipts().getFirst();
+
+        assertThat(receipt.name()).isEqualTo("Not checked yet");
+        assertThat(receipt.totalPrice()).isNull();
+        assertThat(receipt.store()).isNull();
+    }
+
+    @Test
+    void doesNotListReceiptsOfSomeoneElsesWallet() {
+        insertReceipt(walletId, null, "Owner's receipt");
+        AuthenticatedUser stranger = new AuthenticatedUser(createUser(STRANGER_SUB));
+        flush();
+
+        assertError(() -> receiptFacade.getWalletReceipts(stranger, walletId), AppRuntimeExceptionMessages.WALLET_NOT_FOUND);
     }
 
     private Set<UUID> productIdsOfItemsNamed(UUID revisionId, String name) {

@@ -10,12 +10,22 @@ import {
   UpdateReceiptRequest,
   UpdateReceiptResponse,
 } from '../model/receipt.model';
+import {WalletReceiptsResponse} from '../model/wallet.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReceiptService {
   private readonly httpClient = inject(HttpClient);
+
+  getWalletReceipts(walletId: string): Observable<WalletReceiptsResponse> {
+    return this.httpClient.get<WalletReceiptsResponse>(
+      '/api/receipts',
+      {
+        params: {walletId},
+      }
+    );
+  }
 
   getReceiptDetails(id: string): Observable<GetReceiptDetailsResponse> {
     return this.httpClient.get<GetReceiptDetailsResponse>(

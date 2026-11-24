@@ -33,6 +33,11 @@ class ReceiptController {
             .body(this.receiptFacade.addReceipt(user, binaryFiles, body));
     }
 
+    @GetMapping
+    ResponseEntity<GetWalletReceiptsResponse> getWalletReceipts(AuthenticatedUser user, @RequestParam UUID walletId) {
+        return ResponseEntity.ok(this.receiptFacade.getWalletReceipts(user, walletId));
+    }
+
     @GetMapping(path = {"/{receiptId}"})
     ResponseEntity<GetReceiptDetailsResponse> getReceiptDetails(AuthenticatedUser user, @PathVariable UUID receiptId) {
         return ResponseEntity.ok(this.receiptFacade.getReceiptDetails(user, receiptId));

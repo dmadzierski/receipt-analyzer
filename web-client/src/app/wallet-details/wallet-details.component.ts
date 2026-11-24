@@ -9,6 +9,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import {WalletDetails, WalletReceipt} from '../model/wallet.model';
 import {WalletService} from '../service/wallet-service';
+import {ReceiptService} from '../service/receipt.service';
 import {ReceiptListComponent} from '../component/receipt-list/receipt-list.component';
 
 
@@ -30,12 +31,13 @@ import {ReceiptListComponent} from '../component/receipt-list/receipt-list.compo
 export class WalletDetailsComponent implements OnInit {
   public wallet: WalletDetails = {
     id: '',
-    name: '',
-    receipts: []
+    name: ''
   };
+  public receipts: WalletReceipt[] = [];
 
   constructor(
     private readonly walletService: WalletService,
+    private readonly receiptService: ReceiptService,
     private readonly route: ActivatedRoute
   ) {
   }
@@ -47,11 +49,14 @@ export class WalletDetailsComponent implements OnInit {
         this.walletService.getWalletDetails(walletId).subscribe((res) => {
           this.wallet = res;
         });
+        this.receiptService.getWalletReceipts(walletId).subscribe((res) => {
+          this.receipts = res.receipts;
+        });
       }
     })
   }
 
   getReceipts(): WalletReceipt[] {
-    return this.wallet?.receipts || [];
+    return this.receipts;
   }
 }
