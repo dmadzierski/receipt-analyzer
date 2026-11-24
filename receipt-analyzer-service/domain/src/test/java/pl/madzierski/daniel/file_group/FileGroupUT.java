@@ -2,7 +2,6 @@ package pl.madzierski.daniel.file_group;
 
 import org.junit.jupiter.api.Test;
 import pl.madzierski.daniel.exception.AppIllegalStateException;
-import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.List;
@@ -15,14 +14,14 @@ class FileGroupUT {
 
     @Test
     void createdGroupHasOneFileWithoutPathPerPart() {
-        ReceiptQuery receipt = new ReceiptQuery(UUID.randomUUID());
+        UUID receiptId = UUID.randomUUID();
         UserQuery owner = new UserQuery(UUID.randomUUID());
 
-        FileGroup group = FileGroup.create(List.of(FileType.PNG, FileType.PNG, FileType.PNG), receipt, owner);
+        FileGroup group = FileGroup.create(List.of(FileType.PNG, FileType.PNG, FileType.PNG), receiptId, owner);
 
         assertThat(group.getId()).isNull();
         assertThat(group.getFileType()).isEqualTo(FileType.PNG);
-        assertThat(group.getReceipt()).isEqualTo(receipt);
+        assertThat(group.getReceiptId()).isEqualTo(receiptId);
         assertThat(group.getOwner()).isEqualTo(owner);
         assertThat(group.getFiles()).extracting(File::getPartNumber).containsExactlyInAnyOrder(0, 1, 2);
         assertThat(group.getFiles()).extracting(File::getPath).containsOnlyNulls();

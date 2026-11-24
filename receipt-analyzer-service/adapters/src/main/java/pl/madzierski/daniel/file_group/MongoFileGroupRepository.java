@@ -10,8 +10,6 @@ import java.util.UUID;
 
 interface MongoFileGroupRepository extends MongoRepository<MongoFileGroup, UUID> {
     List<MongoFileGroup> findAllByReceiptId(UUID receiptId);
-
-    void deleteAllByReceiptId(UUID receiptId);
 }
 
 @Repository

@@ -94,15 +94,16 @@ class ReceiptEventsIT extends IntegrationTest {
     }
 
     @Test
-    void deletingReceiptPublishesOnlyReceiptDeletion() {
+    void deletingReceiptPublishesDeletionOfItsFileGroupsAndReceipt() {
         UUID receiptId = addReceipt();
+        UUID fileGroupId = jdbcTemplate.queryForObject("SELECT id FROM receipt_file_group WHERE receipt_id = ?", UUID.class, receiptId);
         int before = outboxEvents().size();
 
         receiptFacade.deleteReceipt(user, receiptId);
 
         assertThat(outboxEvents().subList(before, outboxEvents().size()))
             .extracting(OutboxEvent::type, OutboxEvent::aggregateId)
-            .containsExactly(tuple("ReceiptDeleted", receiptId));
+            .containsExactly(tuple("FileGroupDeleted", fileGroupId), tuple("ReceiptDeleted", receiptId));
     }
 
     @Test

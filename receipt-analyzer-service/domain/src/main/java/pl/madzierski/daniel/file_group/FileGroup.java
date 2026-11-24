@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import pl.madzierski.daniel.exception.AppIllegalStateException;
 import pl.madzierski.daniel.exception.AppIllegalStateExceptionMessages;
-import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.time.LocalDateTime;
@@ -21,7 +20,7 @@ import java.util.stream.IntStream;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
-@EqualsAndHashCode(exclude = {"receipt", "files"})
+@EqualsAndHashCode(exclude = {"receiptId", "files"})
 class FileGroup {
 
     private UUID id;
@@ -29,7 +28,7 @@ class FileGroup {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private FileType fileType;
-    private ReceiptQuery receipt;
+    private UUID receiptId;
     private UserQuery owner;
     @Builder.Default
     private Set<File> files = new HashSet<>();
@@ -38,11 +37,11 @@ class FileGroup {
         return !partTypes.isEmpty() && partTypes.stream().allMatch(type -> type != null && type == partTypes.getFirst());
     }
 
-    static FileGroup create(List<FileType> partTypes, ReceiptQuery receipt, UserQuery owner) {
+    static FileGroup create(List<FileType> partTypes, UUID receiptId, UserQuery owner) {
         if (!haveSameType(partTypes)) throw new AppIllegalStateException(AppIllegalStateExceptionMessages.FILE_TYPE_MISMATCH);
         return builder()
             .fileType(partTypes.getFirst())
-            .receipt(receipt)
+            .receiptId(receiptId)
             .owner(owner)
             .files(IntStream.range(0, partTypes.size())
                 .mapToObj(File::create)
@@ -51,14 +50,14 @@ class FileGroup {
     }
 
     static FileGroup restore(UUID id, Long version, LocalDateTime createdDate, LocalDateTime modifiedDate, FileType fileType,
-                             ReceiptQuery receipt, UserQuery owner, Collection<File> files) {
+                             UUID receiptId, UserQuery owner, Collection<File> files) {
         return builder()
             .id(id)
             .version(version)
             .createdDate(createdDate)
             .modifiedDate(modifiedDate)
             .fileType(fileType)
-            .receipt(receipt)
+            .receiptId(receiptId)
             .owner(owner)
             .files(new HashSet<>(files))
             .build();

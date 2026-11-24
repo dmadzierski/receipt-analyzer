@@ -15,7 +15,7 @@ class FileGroupSnapshots implements ReadModelSnapshotSource {
     private final SqlFileGroupRepository repository;
 
     static FileGroupChanged changed(FileGroup fileGroup) {
-        return new FileGroupChanged(fileGroup.getId(), fileGroup.getVersion(), fileGroup.getReceipt() != null ? fileGroup.getReceipt().id() : null,
+        return new FileGroupChanged(fileGroup.getId(), fileGroup.getVersion(), fileGroup.getReceiptId(),
             fileGroup.getOwner().id(), fileGroup.getFileType(), fileGroup.getFiles().stream()
             .map(file -> new FileGroupChanged.File(file.getId(), file.getPath(), file.getPartNumber()))
             .toList());

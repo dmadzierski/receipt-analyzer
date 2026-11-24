@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileContentDto;
-import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import java.nio.file.Path;
@@ -25,7 +24,7 @@ public class FileFacade {
 
     @Transactional
     public UUID save(AuthenticatedUser user, UUID receiptId, List<byte[]> files) {
-        if (!fileGroupRepository.isReceiptAccessible(new ReceiptQuery(receiptId), user.toUserQuery()))
+        if (!fileGroupRepository.isReceiptAccessible(receiptId, user.toUserQuery()))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND);
         if (files == null || files.isEmpty()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
@@ -33,7 +32,7 @@ public class FileFacade {
         List<FileType> partTypes = files.stream().map(fileTypeDetector::detectFileType).toList();
         if (!FileGroup.haveSameType(partTypes)) throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_TYPE_MISMATCH);
         FileGroup savedFileGroup = fileGroupRepository.save(
-            FileGroup.create(partTypes, new ReceiptQuery(receiptId), user.toUserQuery()));
+            FileGroup.create(partTypes, receiptId, user.toUserQuery()));
         savedFileGroup.assignPaths(filePathPolicy);
         FileGroup fileGroupWithPaths = fileGroupRepository.save(savedFileGroup);
         fileGroupWithPaths.getFiles().forEach(file -> fileStorage.save(file.getPath(), files.get(file.getPartNumber())));
@@ -49,7 +48,7 @@ public class FileFacade {
     }
 
     public List<byte[]> getFiles(UUID receiptId, UUID fileGroupId) {
-        return fileGroupRepository.findByIdAndReceipt(fileGroupId, new ReceiptQuery(receiptId))
+        return fileGroupRepository.findByIdAndReceiptId(fileGroupId, receiptId)
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND))
             .getFiles()
             .stream()
@@ -78,7 +77,7 @@ public class FileFacade {
 
     @Transactional
     public void deleteFileGroupsByReceiptId(UUID receiptId) {
-        List<String> paths = fileGroupRepository.findAllByReceipt(new ReceiptQuery(receiptId)).stream()
+        List<String> paths = fileGroupRepository.findAllByReceiptId(receiptId).stream()
             .flatMap(fileGroup -> fileGroup.getFiles().stream())
             .map(File::getPath)
             .filter(Objects::nonNull)

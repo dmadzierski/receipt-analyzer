@@ -1,6 +1,5 @@
 package pl.madzierski.daniel.file_group;
 
-import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.List;
@@ -12,11 +11,11 @@ interface FileGroupRepository {
 
     Optional<FileGroup> findById(UUID fileGroupId, UserQuery user);
 
-    Optional<FileGroup> findByIdAndReceipt(UUID fileGroupId, ReceiptQuery receipt);
+    Optional<FileGroup> findByIdAndReceiptId(UUID fileGroupId, UUID receiptId);
 
-    List<FileGroup> findAllByReceipt(ReceiptQuery receipt);
+    List<FileGroup> findAllByReceiptId(UUID receiptId);
 
-    boolean isReceiptAccessible(ReceiptQuery receipt, UserQuery user);
+    boolean isReceiptAccessible(UUID receiptId, UserQuery user);
 
     boolean isUsedByRevision(UUID fileGroupId);
 

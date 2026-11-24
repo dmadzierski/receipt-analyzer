@@ -4,7 +4,6 @@ package pl.madzierski.daniel.file_group;
 import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.VersionedEntity;
-import pl.madzierski.daniel.receipt.SqlReceiptQuery;
 import pl.madzierski.daniel.user.model.UserQuery;
 
 import java.util.Collections;
@@ -18,14 +17,13 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Setter
 @Getter
-@EqualsAndHashCode(callSuper = true, exclude = {"receipt", "files"})
+@EqualsAndHashCode(callSuper = true, exclude = {"receiptId", "files"})
 class SqlFileGroup extends VersionedEntity {
 
     @Enumerated(EnumType.STRING)
     private FileType fileType;
-    @ManyToOne
-    @JoinColumn(name = "receipt_id")
-    private SqlReceiptQuery receipt;
+    @Column(name = "receipt_id")
+    private UUID receiptId;
     @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
     @Getter(AccessLevel.NONE)
@@ -41,8 +39,7 @@ class SqlFileGroup extends VersionedEntity {
         sqlFileGroup.setModifiedDate(fileGroup.getModifiedDate());
         sqlFileGroup.setFileType(fileGroup.getFileType());
         sqlFileGroup.setOwnerId(fileGroup.getOwner() != null ? fileGroup.getOwner().id() : null);
-        sqlFileGroup.setReceipt(fileGroup.getReceipt() != null ? new SqlReceiptQuery(fileGroup.getReceipt().id()) :
-            null);
+        sqlFileGroup.setReceiptId(fileGroup.getReceiptId());
         sqlFileGroup.addFiles(fileGroup.getFiles().stream().map(SqlFile::fromFile).collect(Collectors.toSet()));
         return sqlFileGroup;
     }
@@ -56,7 +53,7 @@ class SqlFileGroup extends VersionedEntity {
     }
 
     public FileGroup toFileGroup() {
-        return FileGroup.restore(id, version, createdDate, modifiedDate, fileType, receipt.toReceipt(),
+        return FileGroup.restore(id, version, createdDate, modifiedDate, fileType, receiptId,
             ownerId != null ? new UserQuery(ownerId) : null, files.stream().map(SqlFile::toFile).toList());
     }
 }
