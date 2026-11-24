@@ -6,7 +6,7 @@ import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
-import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
 import pl.madzierski.daniel.digitization.ReceiptResolverStrategy;
 import pl.madzierski.daniel.digitization.PDFService;

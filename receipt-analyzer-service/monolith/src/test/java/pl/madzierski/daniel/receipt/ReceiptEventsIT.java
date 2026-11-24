@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.madzierski.daniel.IntegrationTest;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.CreateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;

@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.receipt;
 
 import lombok.*;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.exception.AppIllegalStateException;
 import pl.madzierski.daniel.exception.AppIllegalStateExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;

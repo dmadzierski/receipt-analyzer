@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.receipt;
+package pl.madzierski.daniel.digitization;
 
 public enum ReceiptResolverStrategyType {
     BIEDRONKA,

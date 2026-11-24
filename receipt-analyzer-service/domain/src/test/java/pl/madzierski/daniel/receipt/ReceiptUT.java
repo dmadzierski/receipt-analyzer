@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.receipt;
 
 import org.junit.jupiter.api.Test;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.exception.AppIllegalStateException;
 import pl.madzierski.daniel.exception.AppIllegalStateExceptionMessages;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;

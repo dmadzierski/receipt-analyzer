@@ -1,7 +1,7 @@
 package pl.madzierski.daniel.digitization.model;
 
 import lombok.Builder;
-import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

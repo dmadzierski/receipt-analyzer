@@ -2,7 +2,7 @@ package pl.madzierski.daniel.receipt.model;
 
 import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
-import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 
 import java.math.BigDecimal;

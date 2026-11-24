@@ -1,6 +1,7 @@
 package pl.madzierski.daniel.receipt;
 
 import org.junit.jupiter.api.Test;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.exception.AppIllegalStateException;
 import pl.madzierski.daniel.exception.AppIllegalStateExceptionMessages;
 import pl.madzierski.daniel.file_group.model.FileGroupQuery;
@@ -14,9 +15,9 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.BIEDRONKA;
-import static pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.BIEDRONKA_JSON;
-import static pl.madzierski.daniel.receipt.ReceiptResolverStrategyType.USER;
+import static pl.madzierski.daniel.digitization.ReceiptResolverStrategyType.BIEDRONKA;
+import static pl.madzierski.daniel.digitization.ReceiptResolverStrategyType.BIEDRONKA_JSON;
+import static pl.madzierski.daniel.digitization.ReceiptResolverStrategyType.USER;
 
 class ReceiptRevisionUT {
 

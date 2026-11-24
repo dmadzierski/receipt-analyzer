@@ -3,6 +3,7 @@ package pl.madzierski.daniel.receipt;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.receipt.event.RevisionChanged;
 import pl.madzierski.daniel.receipt.model.ReceiptItemDto;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;

@@ -3,7 +3,6 @@ package pl.madzierski.daniel.digitization;
 import lombok.AllArgsConstructor;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
-import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
 
 import java.util.List;
 

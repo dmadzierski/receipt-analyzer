@@ -1,7 +1,7 @@
 package pl.madzierski.daniel.receipt.event;
 
 import pl.madzierski.daniel.event.AggregateChanged;
-import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

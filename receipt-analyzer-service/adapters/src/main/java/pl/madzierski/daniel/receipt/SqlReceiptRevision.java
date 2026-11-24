@@ -3,6 +3,7 @@ package pl.madzierski.daniel.receipt;
 import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.VersionedEntity;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.file_group.SqlFileGroupQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionQuery;

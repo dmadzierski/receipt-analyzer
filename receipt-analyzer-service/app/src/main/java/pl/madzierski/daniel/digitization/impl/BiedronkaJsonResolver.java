@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
-import pl.madzierski.daniel.receipt.ReceiptResolverStrategyType;
+import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt.DigitizedReceiptItem;
 import pl.madzierski.daniel.digitization.ReceiptResolverStrategy;
