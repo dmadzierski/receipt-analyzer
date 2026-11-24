@@ -114,10 +114,7 @@ public class ProductDictFacade {
     }
 
     GetProductCategoryListResponse getProductCategoryList() {
-        List<GetProductCategoryListResponse.ProductCategory> items = productCategoryQueryRepository.findAllOrderedByName().stream()
-            .map(category -> new GetProductCategoryListResponse.ProductCategory(category.getId(), category.getVersion(), category.getName()))
-            .toList();
-        return new GetProductCategoryListResponse(items);
+        return new GetProductCategoryListResponse(productCategoryQueryRepository.findAllOrderedByName());
     }
 
     @Transactional

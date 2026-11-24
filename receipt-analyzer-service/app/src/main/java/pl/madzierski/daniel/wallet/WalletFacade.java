@@ -7,7 +7,6 @@ import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
 import pl.madzierski.daniel.wallet.model.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -22,9 +21,7 @@ public class WalletFacade {
     }
 
     GetWalletListResponse getWallets(AuthenticatedUser user) {
-        List<GetWalletListResponse.GetWalletListResponseItem> wallets =
-            walletQueryRepository.findAllByUser(user.id()).stream().map(wallet -> new GetWalletListResponse.GetWalletListResponseItem(wallet.getId(), wallet.getName())).toList();
-        return new GetWalletListResponse(wallets);
+        return new GetWalletListResponse(walletQueryRepository.findAllByUser(user.id()));
     }
 
     GetWalletDetailsResponse getWalletDetails(AuthenticatedUser user, UUID walletId) {

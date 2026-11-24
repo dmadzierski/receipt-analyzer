@@ -85,16 +85,7 @@ public class ReceiptFacade {
             .collect(Collectors.toSet());
         Map<UUID, StoreDto> stores = storeIds.isEmpty() ? Map.of() : storeQueryRepository.findStoresByIds(storeIds).stream()
             .collect(Collectors.toMap(StoreDto::getId, Function.identity()));
-        return new GetWalletReceiptsResponse(walletReceipts.stream()
-            .map(receipt -> new GetWalletReceiptsResponse.Receipt(
-                receipt.id(),
-                receipt.name(),
-                receipt.paymentDate() != null ? receipt.paymentDate().toLocalDate() : null,
-                receipt.isCorrect(),
-                receipt.totalPrice(),
-                receipt.createdDate(),
-                receipt.storeId() != null ? stores.get(receipt.storeId()) : null))
-            .toList());
+        return new GetWalletReceiptsResponse(walletReceipts, stores);
     }
 
     @Transactional(readOnly = true)

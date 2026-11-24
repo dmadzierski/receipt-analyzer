@@ -7,7 +7,6 @@ import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 import pl.madzierski.daniel.store.model.*;
 
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class StoreFacade {
@@ -22,10 +21,7 @@ public class StoreFacade {
     }
 
     StoreListResponse getStores(String query) {
-        return new StoreListResponse(
-            storeQueryRepository.findStoresByQuery(query).stream().map(
-                StoreListResponse::storeMapper).collect(Collectors.toSet())
-        );
+        return new StoreListResponse(storeQueryRepository.findStoresByQuery(query));
     }
 
     @Transactional
@@ -49,6 +45,6 @@ public class StoreFacade {
     }
 
     public StoreBrandListResponse getStoreBrands(String query) {
-        return new StoreBrandListResponse(storeBrandQueryRepository.findStoreBrandsByQuery(query).stream().map(StoreBrandListResponse::storeBrandMapper).collect(Collectors.toSet()));
+        return new StoreBrandListResponse(storeBrandQueryRepository.findStoreBrandsByQuery(query));
     }
 }
