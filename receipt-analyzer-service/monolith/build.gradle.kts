@@ -19,6 +19,7 @@ dependencies {
     testImplementation(libs.spring.boot.starter.data.mongodb)
     testImplementation(libs.spring.kafka)
     testImplementation(libs.awaitility)
+    testImplementation(libs.spring.modulith.core)
     testImplementation(libs.testcontainers.junit.jupiter)
     testImplementation(libs.flyway.core)
     testRuntimeOnly(libs.junit.platform.launcher)

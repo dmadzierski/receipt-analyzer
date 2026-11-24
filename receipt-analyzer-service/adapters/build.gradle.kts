@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.spring.kafka)
     implementation(libs.spring.modulith.starter.jdbc)
     implementation(libs.spring.modulith.events.kafka)
+    implementation(libs.spring.modulith.api)
     runtimeOnly(libs.flyway.database.postgresql)
     runtimeOnly(libs.postgresql)
     compileOnly(libs.lombok)
