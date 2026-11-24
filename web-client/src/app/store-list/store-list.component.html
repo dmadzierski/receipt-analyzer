@@ -42,4 +42,7 @@
 
   <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
   <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
+  <tr *matNoDataRow class="mat-row">
+    <td [attr.colspan]="displayedColumns.length" class="mat-cell no-data">No stores found</td>
+  </tr>
 </table>

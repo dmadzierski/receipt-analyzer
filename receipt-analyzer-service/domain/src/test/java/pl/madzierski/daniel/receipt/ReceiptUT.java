@@ -8,6 +8,8 @@ import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionQuery;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,13 +25,18 @@ class ReceiptUT {
 
     @Test
     void createUsesCurrentDateTimeWhenNameIsMissingOrBlank() {
-        LocalDateTime before = LocalDateTime.now();
+        LocalDateTime before = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
 
         String missing = Receipt.create(null, null, null, null, null).getName();
         String blank = Receipt.create("   ", null, null, null, null).getName();
 
-        assertThat(LocalDateTime.parse(missing)).isBetween(before, LocalDateTime.now());
-        assertThat(LocalDateTime.parse(blank)).isBetween(before, LocalDateTime.now());
+        assertThat(defaultNameDate(missing)).isBetween(before, LocalDateTime.now());
+        assertThat(defaultNameDate(blank)).isBetween(before, LocalDateTime.now());
+    }
+
+    private static LocalDateTime defaultNameDate(String name) {
+        assertThat(name).startsWith("Receipt ");
+        return LocalDateTime.parse(name.substring("Receipt ".length()), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
     @Test

@@ -24,6 +24,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatDialog} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import {RevisionDetailsComponent} from '../component/revision-details/revision-details.component';
 import {PdfViewerComponent} from '../component/pdf-viewer/pdf-viewer.component';
@@ -85,6 +86,7 @@ export class ReceiptDetailsComponent implements OnInit {
   storeSearchText: string = '';
   stores: GetStoreListResponseItem[] = [];
   private readonly storeService = inject(StoreService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly storeSearchSubject = new Subject<string>();
 
   constructor(
@@ -266,8 +268,12 @@ export class ReceiptDetailsComponent implements OnInit {
   }
 
   protected refreshAliases() {
-    this.revisionService.updateAliases(this.receiptDetails.preferredRevision?.id!!)
-      .subscribe({})
+    const revisionId = this.receiptDetails.preferredRevision?.id!!;
+    this.revisionService.updateAliases(revisionId)
+      .subscribe(() => {
+        this.snackBar.open('Aliases updated', 'Close', {duration: 3000});
+        this.refreshRevisionDetails(revisionId);
+      })
   }
 
   protected refreshProductDict() {

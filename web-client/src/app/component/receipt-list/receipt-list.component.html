@@ -5,7 +5,7 @@
   </a>
 </div>
 
-<table [dataSource]="matDataSource" mat-table matSort #sort="matSort">
+<table [dataSource]="matDataSource" mat-table matSort matSortActive="createdDate" matSortDirection="desc">
   <ng-container matColumnDef="position">
     <th *matHeaderCellDef mat-header-cell> No.</th>
     <td *matCellDef="let element" mat-cell> {{ element.position }}</td>

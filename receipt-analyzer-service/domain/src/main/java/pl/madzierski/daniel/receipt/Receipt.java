@@ -9,12 +9,15 @@ import pl.madzierski.daniel.user.model.UserQuery;
 import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(exclude = "wallet")
 class Receipt {
+
+    private static final DateTimeFormatter DEFAULT_NAME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private UUID id;
     private Long version;
@@ -30,7 +33,7 @@ class Receipt {
     static Receipt create(String name, String description, WalletQuery wallet, StoreQuery store,
                            UserQuery owner) {
         return builder()
-            .name(name != null && !name.isBlank() ? name : LocalDateTime.now().toString())
+            .name(name != null && !name.isBlank() ? name : "Receipt " + LocalDateTime.now().format(DEFAULT_NAME_FORMAT))
             .description(description)
             .wallet(wallet)
             .store(store)

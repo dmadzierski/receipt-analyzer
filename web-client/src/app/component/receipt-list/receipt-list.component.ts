@@ -36,8 +36,6 @@ export class ReceiptListComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-   this.sort.active = 'createdDate';
-   this.sort.direction = 'desc';
    this.matDataSource.sort = this.sort;
   }
 

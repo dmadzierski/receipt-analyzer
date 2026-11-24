@@ -1,5 +1,7 @@
 import {CommonModule} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
+import {ConfirmDialogComponent, ConfirmDialogData} from '../component/confirm-dialog/confirm-dialog.component';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -29,6 +31,8 @@ export class ProductCategoryListComponent implements OnInit {
   newCategoryName = '';
   editingId: string | null = null;
   displayedColumns: string[] = ['name', 'actions'];
+
+  private readonly dialog = inject(MatDialog);
 
   constructor(private readonly productCategoryService: ProductCategoryService) {
   }
@@ -89,8 +93,18 @@ export class ProductCategoryListComponent implements OnInit {
   }
 
   deleteCategory(category: EditableProductCategory): void {
-    this.productCategoryService.deleteProductCategory(category.id).subscribe(() => {
-      this.loadCategories();
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete category',
+        message: `Delete category "${category.name}"?`,
+        confirmLabel: 'Delete',
+      } as ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed?: boolean) => {
+      if (!confirmed) return;
+      this.productCategoryService.deleteProductCategory(category.id).subscribe(() => {
+        this.loadCategories();
+      });
     });
   }
 }

@@ -1,10 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {MatTableModule} from '@angular/material/table';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {Router, RouterModule} from '@angular/router';
-import {GetReceiptResponseItem} from '../model/receipt.model';
-import {GetWalletListResponse, GetWalletListResponseItem} from '../model/wallet.model';
+import {GetWalletListResponseItem} from '../model/wallet.model';
 import {WalletService} from '../service/wallet-service';
 
 @Component({
@@ -13,29 +12,13 @@ import {WalletService} from '../service/wallet-service';
   styleUrl: './wallet-list.component.scss',
   imports: [MatTableModule, MatIconModule, MatButtonModule, RouterModule],
 })
-export class WalletListComponent implements OnInit {
-  dataSource: GetWalletListResponseItem[] = [];
+export class WalletListComponent {
+  private readonly router = inject(Router);
+
+  readonly wallets = inject(WalletService).wallets;
   displayedColumns: string[] = ['name'];
 
-  constructor(
-    private readonly walletService: WalletService,
-    private readonly router: Router
-  ) {
-  }
-
-  ngOnInit(): void {
-    this.getWalletList();
-  }
-
-  toReceipts(row: GetReceiptResponseItem) {
+  toReceipts(row: GetWalletListResponseItem) {
     this.router.navigate(['/wallets/', row.id]);
-  }
-
-  private getWalletList() {
-    this.walletService
-      .getWalletList()
-      .subscribe((result: GetWalletListResponse) => {
-        this.dataSource = result.items;
-      });
   }
 }

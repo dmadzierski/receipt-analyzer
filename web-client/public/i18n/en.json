@@ -1,6 +1,8 @@
 {
   "ERROR": {
     "TITLE": "Something went wrong",
+    "TITLE_400": "Action not possible",
+    "TITLE_409": "Data changed",
     "UNKNOWN": "Something went wrong. Please try again.",
     "CONNECTION": "Cannot reach the server. Check your connection and try again.",
     "PDF_LOAD": "The PDF file could not be loaded.",
