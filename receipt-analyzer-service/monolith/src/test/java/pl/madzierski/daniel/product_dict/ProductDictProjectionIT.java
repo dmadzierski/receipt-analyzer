@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.product_dict.event.ProductCategoryChanged;
 import pl.madzierski.daniel.product_dict.event.ProductDictChanged;
-import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
+import pl.madzierski.daniel.product_dict.model.ProductDictDto;
 
 import java.util.List;
 import java.util.Map;
@@ -52,8 +52,8 @@ class ProductDictProjectionIT extends IntegrationTest {
 
     private Map<UUID, Set<String>> categoryNamesByProduct() {
         return productDictQueryRepository.findAllWithCategoryAndAliases().stream()
-            .collect(Collectors.toMap(ProductDictWithAliasesAndCategoryProjection::getId, product -> product.getCategories().stream()
-                .map(ProductDictWithAliasesAndCategoryProjection.ProductCategory::getName)
+            .collect(Collectors.toMap(ProductDictDto::id, product -> product.categories().stream()
+                .map(ProductDictDto.Category::name)
                 .collect(Collectors.toSet())));
     }
 }

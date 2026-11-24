@@ -1,15 +1,13 @@
 package pl.madzierski.daniel.product_dict.model;
 
-import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
-
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 public record GetProductDictListResponse(
     List<ProductDict> items
 ) {
-    public GetProductDictListResponse(Set<ProductDictWithAliasesAndCategoryProjection> products) {
+    public GetProductDictListResponse(Collection<ProductDictDto> products) {
         this(products.stream()
             .map(ProductDict::new)
             .toList());
@@ -22,18 +20,18 @@ public record GetProductDictListResponse(
         List<ProductCategory> productCategories,
         List<Alias> aliases
     ) {
-        ProductDict(ProductDictWithAliasesAndCategoryProjection product) {
+        ProductDict(ProductDictDto product) {
             this(
-                product.getId(),
-                product.getVersion(),
-                product.getName(),
-                product.getCategories()
+                product.id(),
+                product.version(),
+                product.name(),
+                product.categories()
                     .stream()
-                    .map(category -> new ProductCategory(category.getId(), category.getName()))
+                    .map(category -> new ProductCategory(category.id(), category.name()))
                     .toList(),
-                product.getAliases()
+                product.aliases()
                     .stream()
-                    .map(alias -> new Alias(alias.getId(), alias.getName()))
+                    .map(alias -> new Alias(alias.id(), alias.name()))
                     .toList());
         }
 

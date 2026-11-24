@@ -5,11 +5,10 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
-import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
+import pl.madzierski.daniel.product_dict.model.ProductDictDto;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 interface MongoProductDictRepository extends MongoRepository<MongoProductDict, UUID> {
 
@@ -25,9 +24,9 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
     private final MongoProductDictRepository productDictRepository;
 
     @Override
-    public Set<ProductDictWithAliasesAndCategoryProjection> findAllWithCategoryAndAliases() {
+    public List<ProductDictDto> findAllWithCategoryAndAliases() {
         return productDictRepository.findAll().stream()
-            .map(MongoProductDict::toProjection)
-            .collect(Collectors.toSet());
+            .map(MongoProductDict::toDto)
+            .toList();
     }
 }

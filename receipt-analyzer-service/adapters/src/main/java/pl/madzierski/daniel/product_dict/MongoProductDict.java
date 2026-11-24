@@ -3,13 +3,11 @@ package pl.madzierski.daniel.product_dict;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import pl.madzierski.daniel.product_dict.event.ProductDictChanged;
-import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
+import pl.madzierski.daniel.product_dict.model.ProductDictDto;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Document("product_dicts")
 record MongoProductDict(@Id UUID id, long version, String name, List<Alias> aliases, List<Category> categories) {
@@ -26,26 +24,14 @@ record MongoProductDict(@Id UUID id, long version, String name, List<Alias> alia
             event.categoryIds().stream().map(categoryId -> new Category(categoryId, categoryName.apply(categoryId))).toList());
     }
 
-    ProductDictWithAliasesAndCategoryProjection toProjection() {
-        return new ProductDictView(id, version, name,
+    ProductDictDto toDto() {
+        return new ProductDictDto(id, version, name,
             categories.stream()
                 .filter(category -> category.name() != null)
-                .map(category -> new CategoryView(category.id(), category.name()))
-                .collect(Collectors.toSet()),
+                .map(category -> new ProductDictDto.Category(category.id(), category.name()))
+                .toList(),
             aliases.stream()
-                .map(alias -> new AliasView(alias.id(), alias.name()))
-                .collect(Collectors.toSet()));
-    }
-
-    private record ProductDictView(UUID getId, long getVersion, String getName,
-                                   Set<ProductDictWithAliasesAndCategoryProjection.ProductCategory> getCategories,
-                                   Set<ProductDictWithAliasesAndCategoryProjection.Alias> getAliases)
-        implements ProductDictWithAliasesAndCategoryProjection {
-    }
-
-    private record CategoryView(UUID getId, String getName) implements ProductDictWithAliasesAndCategoryProjection.ProductCategory {
-    }
-
-    private record AliasView(UUID getId, String getName) implements ProductDictWithAliasesAndCategoryProjection.Alias {
+                .map(alias -> new ProductDictDto.Alias(alias.id(), alias.name()))
+                .toList());
     }
 }

@@ -48,10 +48,6 @@ class SqlFileGroup extends VersionedEntity {
         this.files.addAll(collect);
     }
 
-    Set<SqlFile> getFiles() {
-        return Collections.unmodifiableSet(files);
-    }
-
     public FileGroup toFileGroup() {
         return FileGroup.restore(id, version, createdDate, modifiedDate, fileType, receiptId,
             ownerId != null ? new UserQuery(ownerId) : null, files.stream().map(SqlFile::toFile).toList());

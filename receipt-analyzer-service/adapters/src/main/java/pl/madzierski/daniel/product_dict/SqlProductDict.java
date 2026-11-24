@@ -32,14 +32,6 @@ class SqlProductDict extends VersionedEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private final Set<SqlProductAlias> aliases = new HashSet<>();
 
-    public Set<SqlProductAlias> getAliases() {
-        return Collections.unmodifiableSet(aliases);
-    }
-
-    public Set<SqlProductCategory> getCategories() {
-        return Collections.unmodifiableSet(categories);
-    }
-
     public static <S extends ProductDict> SqlProductDict fromProductDict(S s) {
         SqlProductDict sqlProductDict = new SqlProductDict();
         sqlProductDict.setId(s.getId());

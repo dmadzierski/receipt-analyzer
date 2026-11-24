@@ -1,5 +1,7 @@
 package pl.madzierski.daniel.file_group;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
@@ -8,10 +10,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MultipartFileMapper {
-
-    private MultipartFileMapper() {
-    }
 
     public static List<byte[]> toBytes(List<MultipartFile> files) {
         List<byte[]> result = new ArrayList<>();

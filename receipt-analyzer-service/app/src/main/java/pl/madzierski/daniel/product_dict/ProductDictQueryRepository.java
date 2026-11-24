@@ -1,9 +1,9 @@
 package pl.madzierski.daniel.product_dict;
 
-import pl.madzierski.daniel.product_dict.projection.ProductDictWithAliasesAndCategoryProjection;
+import pl.madzierski.daniel.product_dict.model.ProductDictDto;
 
-import java.util.Set;
+import java.util.List;
 
 public interface ProductDictQueryRepository {
-    Set<ProductDictWithAliasesAndCategoryProjection> findAllWithCategoryAndAliases();
+    List<ProductDictDto> findAllWithCategoryAndAliases();
 }

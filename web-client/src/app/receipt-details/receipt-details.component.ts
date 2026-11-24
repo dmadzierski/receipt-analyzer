@@ -242,7 +242,10 @@ export class ReceiptDetailsComponent implements OnInit {
           this.refreshReceipt();
         },
         error: (error: unknown) => {
-          if (isVersionConflict(error)) this.declineEdit();
+          if (!isVersionConflict(error)) return;
+          this.declineEdit();
+          this.refreshRevisions();
+          this.refreshReceipt();
         }
       }
     )
