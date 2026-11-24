@@ -22,6 +22,7 @@ A modular web application for receipt digitization and expense tracking with adv
 - Editing receipt items with product autocomplete on the item name (free text still allowed) and CSV paste from the clipboard
 - Product dictionary management, with aliases learned from user corrections
 - Per-user data isolation: wallets, receipts and files are visible only to their owner
+- Edits made from stale data are rejected (optimistic locking) instead of silently overwriting newer changes
 - Authentication and authorization via Keycloak
 - Angular Material interface
 
@@ -32,7 +33,12 @@ A modular web application for receipt digitization and expense tracking with adv
 
 ### Architectural Pattern
 
-The project uses Hexagonal Architecture and CQRS:
+The backend is a modular monolith built with Hexagonal Architecture, DDD aggregates and CQRS:
+
+- **Layers** are separate Gradle modules: `domain` (aggregates and write-side ports, no Spring), `app` (facades with the use cases, read-side ports), `adapters` (REST, JPA, MongoDB, Kafka, security) and `monolith` (the Spring Boot entry point).
+- **Features** (`receipt`, `digitization`, `file_group`, `product_dict`, `store`, `wallet`, `user`) are Spring Modulith modules.
+- **Writes** go through aggregates to PostgreSQL, the source of truth. Each saved aggregate produces an event, which the application stores in an outbox table in the same transaction. After the commit, Spring Modulith sends it to Kafka and retries if sending fails. PostgreSQL itself never talks to Kafka.
+- **Reads** are served from a MongoDB read model. The application consumes the events from Kafka and projects them into MongoDB. It can be rebuilt from PostgreSQL at any time, and a client can wait until its own last change is visible.
 
 ```mermaid
 ---
@@ -50,10 +56,10 @@ flowchart TB
         C["REST<br>Controllers"]
   end
  subgraph Application["Application Layer"]
-        D["Services &amp;<br>Facades"]
+        D["Facades"]
   end
  subgraph Domain["Domain Layer"]
-        E["Domain<br>Models"]
+        E["Aggregates &amp;<br>Ports"]
   end
  subgraph Service["Receipt Analyzer Service"]
         Adapters
@@ -63,12 +69,21 @@ flowchart TB
  subgraph OAuth["OAuth"]
         K["Keycloak"]
   end
- subgraph Database["Database"]
+ subgraph WriteModel["Write model"]
         L["PostgreSQL"]
   end
-    Gateway --> Service
-    Service --> OAuth & Database
+ subgraph Broker["Event broker"]
+        M["Kafka"]
+  end
+ subgraph ReadModel["Read model"]
+        N["MongoDB"]
+  end
     Frontend --> Gateway
+    Gateway --> Service
+    Service --> OAuth
+    Service --> WriteModel
+    Service --> Broker
+    Service --> ReadModel
     Adapters --> Application
     Application --> Domain
     Adapters --> Domain
@@ -82,13 +97,15 @@ flowchart TB
 Language:           Java 21
 Framework:          Spring Boot 3.5
 Build Tool:         Gradle (multi-module: domain, app, adapters, monolith)
-Database:           PostgreSQL 17
+Modules & events:   Spring Modulith 1.4
+Write model:        PostgreSQL 17, Hibernate JPA
+Read model:         MongoDB 8 (Spring Data MongoDB)
+Event broker:       Apache Kafka 3.9 (KRaft, Spring Kafka)
 Migrations:         Flyway
 Authentication:     Keycloak 26.3 (OAuth2 resource server, JWT)
 OCR:                Tesseract (tess4j)
 File type detection: Apache Tika
-Persistence:        Hibernate JPA
-Tests:              JUnit 5, Testcontainers (PostgreSQL)
+Tests:              JUnit 5, AssertJ, Testcontainers (PostgreSQL, MongoDB, Kafka)
 ```
 
 ### Frontend
@@ -103,7 +120,7 @@ UI Library:         Angular Material 20.2, Bootstrap 5.3
 Container:          Docker & Docker Compose
 Web Server:         Nginx 1.29.3
 Orchestration:      Docker Compose
-CI/CD:              Jenkins (integration tests, image build, push to a private registry)
+CI/CD:              Jenkins (all tests, backend and web client images, private registry, Dockhand deploy)
 ```
 ---
 
@@ -121,12 +138,17 @@ CI/CD:              Jenkins (integration tests, image build, push to a private r
 - [x] Manual linking of receipt items to products (autocomplete)
 - [x] Stores and store brands
 - [x] Per-user ownership of wallets, receipts and files (IDOR protection)
+- [x] Optimistic locking on edits
 - [x] Database schema versioned with Flyway
 - [x] Angular interface
 
 ### Architecture and Design
 - [x] Hexagonal Architecture
-- [x] Command Query Responsibility Segregation (CQRS)
+- [x] DDD aggregates: state changes go through domain objects
+- [x] Command Query Responsibility Segregation with a MongoDB read model
+- [x] Transactional outbox and event externalization to Kafka
+- [x] Read model rebuild from PostgreSQL and read-your-writes consistency
+- [x] Modular monolith with module boundaries verified by Spring Modulith
 - [x] Strategy Pattern for processing different formats
 
 ### Infrastructure
@@ -134,31 +156,13 @@ CI/CD:              Jenkins (integration tests, image build, push to a private r
 - [x] Docker Compose setup (prod + local dev)
 - [x] Nginx reverse proxy
 - [x] Environment configuration
-- [x] Jenkins pipeline: integration tests, Docker image build and push
+- [x] MongoDB and Kafka in local and production stacks
+- [x] Jenkins pipeline: all tests, Docker images for backend and web client, push and deploy
 
 ### Tests
-- [x] Backend integration tests (Testcontainers + PostgreSQL)
-
----
-
-## Future Plans
-
-- [ ] **Improved Data Reading**
-    - Implementation of ML model for receipt recognition
-    - Optimization for different PDF qualities
-    - Asynchronous processing (RabbitMQ)
-
-- [ ] **Support for New Store Formats**
-    - Expansion to other retail chains
-    - Adaptation of ML model to different formats
-
-- [ ] **Advanced Analytics**
-    - Dashboard with expense statistics
-    - Expense category charts
-    - Product trends over time
-
-- [ ] **Automated Tests**
-    - Backend unit tests
+- [x] Domain unit tests
+- [x] Module structure test (Spring Modulith)
+- [x] Backend integration tests (Testcontainers: PostgreSQL, MongoDB, Kafka)
 
 ---
 
