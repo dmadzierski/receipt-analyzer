@@ -7,10 +7,9 @@ import pl.madzierski.daniel.common.entity.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product_alias")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@Setter
 class SqlProductAlias extends BaseEntity {
 
     @Column(nullable = false, unique = true)

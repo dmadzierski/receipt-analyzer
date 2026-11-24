@@ -2,6 +2,7 @@ package pl.madzierski.daniel.user;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.madzierski.daniel.common.entity.BaseEntity;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "app_user")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SqlUserQuery extends BaseEntity {
 
     public SqlUserQuery(UUID id) {

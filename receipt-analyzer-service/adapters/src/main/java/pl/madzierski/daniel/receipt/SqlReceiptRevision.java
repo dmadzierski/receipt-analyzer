@@ -19,10 +19,8 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "receipt_revision")
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Setter(AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 class SqlReceiptRevision extends VersionedEntity {
 
     private String revision;
@@ -39,7 +37,6 @@ class SqlReceiptRevision extends VersionedEntity {
     @Getter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "receipt_revision_id", nullable = false)
-    @Builder.Default
     private Set<SqlReceiptItem> items = new HashSet<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_file_group_id")

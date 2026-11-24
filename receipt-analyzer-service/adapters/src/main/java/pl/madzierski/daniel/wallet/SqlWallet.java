@@ -6,14 +6,13 @@ import pl.madzierski.daniel.common.entity.VersionedEntity;
 import pl.madzierski.daniel.user.SqlUserQuery;
 
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode(callSuper = true, exclude = "owner")
 @Entity
-@Setter
 @Table(name = "wallet")
-@Builder
+@Setter(AccessLevel.PRIVATE)
 class SqlWallet extends VersionedEntity {
 
     private String name;
@@ -22,10 +21,9 @@ class SqlWallet extends VersionedEntity {
     private SqlUserQuery owner;
 
     public static SqlWallet fromWallet(Wallet wallet) {
-        SqlWallet sqlWallet = SqlWallet.builder()
-            .name(wallet.getName())
-            .owner(SqlUserQuery.fromUserQuery(wallet.getOwner()))
-            .build();
+        SqlWallet sqlWallet = new SqlWallet();
+        sqlWallet.setName(wallet.getName());
+        sqlWallet.setOwner(SqlUserQuery.fromUserQuery(wallet.getOwner()));
         sqlWallet.setId(wallet.getId());
         sqlWallet.setVersion(wallet.getVersion());
         sqlWallet.setCreatedDate(wallet.getCreatedDate());

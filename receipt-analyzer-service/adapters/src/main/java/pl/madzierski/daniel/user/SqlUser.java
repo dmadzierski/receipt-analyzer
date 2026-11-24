@@ -8,10 +8,9 @@ import pl.madzierski.daniel.common.entity.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "app_user")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@Setter
 class SqlUser extends BaseEntity {
 
     @Column(name = "user_sub", nullable = false, unique = true)

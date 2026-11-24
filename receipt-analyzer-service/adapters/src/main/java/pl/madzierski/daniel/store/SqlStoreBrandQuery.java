@@ -2,6 +2,7 @@ package pl.madzierski.daniel.store;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.madzierski.daniel.common.entity.BaseEntity;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "store_brand")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 class SqlStoreBrandQuery extends BaseEntity {
 
     SqlStoreBrandQuery(UUID id) {

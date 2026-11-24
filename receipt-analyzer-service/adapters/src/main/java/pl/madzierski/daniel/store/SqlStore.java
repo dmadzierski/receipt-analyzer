@@ -7,10 +7,9 @@ import pl.madzierski.daniel.common.entity.VersionedEntity;
 
 @Entity
 @Table(name = "store")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@Setter
 @EqualsAndHashCode(callSuper = true, exclude = {"brand"})
 class SqlStore extends VersionedEntity {
 

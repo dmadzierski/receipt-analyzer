@@ -10,10 +10,9 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "receipt_item")
-@Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter(AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(callSuper = true, exclude = {"parentItem", "product"})
 class SqlReceiptItem extends BaseEntity {
 

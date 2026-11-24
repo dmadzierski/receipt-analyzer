@@ -10,14 +10,12 @@ import pl.madzierski.daniel.wallet.SqlWalletQuery;
 
 import java.util.UUID;
 
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(callSuper = true, exclude = {"wallet", "store"})
 @Entity
 @Getter
-@Setter
+@Setter(AccessLevel.PRIVATE)
 @Table(name = "receipt")
-@Builder
 class SqlReceipt extends VersionedEntity {
 
     private String name;

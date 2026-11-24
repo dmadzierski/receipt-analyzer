@@ -13,8 +13,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "receipt")
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SqlReceiptQuery extends BaseEntity {
 
     @Column(name = "owner_id", insertable = false, updatable = false)

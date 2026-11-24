@@ -7,10 +7,9 @@ import pl.madzierski.daniel.common.entity.VersionedEntity;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product_category")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@Setter
 class SqlProductCategory extends VersionedEntity {
 
     @Column(nullable = false, unique = true)

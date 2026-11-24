@@ -4,14 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.VersionedEntity;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
+@Setter(AccessLevel.PRIVATE)
 @Entity
 @Table(name = "product")
 @EqualsAndHashCode(callSuper = true, exclude = {"categories", "aliases"})
@@ -32,25 +30,25 @@ class SqlProductDict extends VersionedEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private final Set<SqlProductAlias> aliases = new HashSet<>();
 
-    public static <S extends ProductDict> SqlProductDict fromProductDict(S s) {
+    static SqlProductDict fromProductDict(ProductDict productDict) {
         SqlProductDict sqlProductDict = new SqlProductDict();
-        sqlProductDict.setId(s.getId());
-        sqlProductDict.setVersion(s.getVersion());
-        sqlProductDict.setName(s.getName());
-        sqlProductDict.setCreatedDate(s.getCreatedDate());
-        sqlProductDict.setModifiedDate(s.getModifiedDate());
-        sqlProductDict.aliases.addAll(s.getAliases()
+        sqlProductDict.setId(productDict.getId());
+        sqlProductDict.setVersion(productDict.getVersion());
+        sqlProductDict.setName(productDict.getName());
+        sqlProductDict.setCreatedDate(productDict.getCreatedDate());
+        sqlProductDict.setModifiedDate(productDict.getModifiedDate());
+        sqlProductDict.aliases.addAll(productDict.getAliases()
             .stream()
             .map(SqlProductAlias::fromProductAlias)
             .toList());
-        sqlProductDict.categories.addAll(s.getProductCategories()
+        sqlProductDict.categories.addAll(productDict.getProductCategories()
             .stream()
             .map(SqlProductCategory::fromProductCategory)
             .toList());
         return sqlProductDict;
     }
 
-    public ProductDict toProductDict() {
+    ProductDict toProductDict() {
         return ProductDict.restore(id, version, createdDate, modifiedDate, name,
             aliases.stream().map(SqlProductAlias::toProductAlias).toList(),
             categories.stream().map(SqlProductCategory::toProductCategory).toList());

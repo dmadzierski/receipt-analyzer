@@ -6,7 +6,6 @@ import lombok.*;
 import pl.madzierski.daniel.common.entity.VersionedEntity;
 import pl.madzierski.daniel.user.model.UserQuery;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -14,9 +13,9 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "receipt_file_group")
-@NoArgsConstructor
-@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Setter(AccessLevel.PRIVATE)
 @EqualsAndHashCode(callSuper = true, exclude = {"receiptId", "files"})
 class SqlFileGroup extends VersionedEntity {
 

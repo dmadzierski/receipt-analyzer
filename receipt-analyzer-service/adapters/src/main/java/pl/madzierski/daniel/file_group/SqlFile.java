@@ -1,19 +1,18 @@
 package pl.madzierski.daniel.file_group;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import pl.madzierski.daniel.common.entity.BaseEntity;
 
 
 @EqualsAndHashCode(callSuper = true, exclude = "fileGroup")
 @Entity
 @Table(name = "receipt_file")
-@Setter
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 class SqlFile extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
