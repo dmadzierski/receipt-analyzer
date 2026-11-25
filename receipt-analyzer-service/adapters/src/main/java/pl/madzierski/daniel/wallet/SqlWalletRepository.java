@@ -20,7 +20,7 @@ class WalletRepositoryImpl implements WalletRepository {
     @Override
     public Wallet save(Wallet wallet) {
         SqlWallet saved = repository.save(SqlWallet.fromWallet(wallet));
-        eventPublisher.publishLatest(saved.getId(), () -> WalletSnapshots.changed(saved.toWallet()));
+        eventPublisher.publishLatest(saved.getId(), () -> WalletEventMapper.changed(saved.toWallet()));
         return saved.toWallet();
     }
 }

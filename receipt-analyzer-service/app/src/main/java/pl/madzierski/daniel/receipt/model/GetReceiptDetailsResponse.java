@@ -134,14 +134,14 @@ public record GetReceiptDetailsResponse(
     ) {
         ItemResponse(ReceiptItemDto item) {
             this(
-                item.getId(),
-                item.getName(),
-                item.getAmount(),
-                item.getUnitPrice(),
-                item.getDiscount(),
-                item.getTotalPrice(),
-                item.getPosition(),
-                item.getProductDictId());
+                item.id(),
+                item.name(),
+                item.amount(),
+                item.unitPrice(),
+                item.discount(),
+                item.totalPrice(),
+                item.position(),
+                item.productDictId());
         }
     }
 }

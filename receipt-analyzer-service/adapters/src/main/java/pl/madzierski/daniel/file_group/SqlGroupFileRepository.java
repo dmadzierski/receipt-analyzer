@@ -13,8 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 interface SqlFileGroupRepository extends JpaRepository<SqlFileGroup, UUID> {
-    SqlFileGroup save(SqlFileGroup sqlFileGroup);
-
     @Query("SELECT g FROM SqlFileGroup g LEFT JOIN FETCH g.files WHERE g.id = :fileGroupId AND g.ownerId = :ownerId")
     Optional<SqlFileGroup> findById(UUID fileGroupId, UUID ownerId);
 
@@ -48,7 +46,7 @@ class FileGroupRepositoryImpl implements FileGroupRepository {
     @Override
     public FileGroup save(FileGroup fileGroup) {
         SqlFileGroup saved = this.fileGroupRepository.save(SqlFileGroup.fromFileGroup(fileGroup));
-        eventPublisher.publishLatest(saved.getId(), () -> FileGroupSnapshots.changed(saved.toFileGroup()));
+        eventPublisher.publishLatest(saved.getId(), () -> FileGroupEventMapper.changed(saved.toFileGroup()));
         return saved.toFileGroup();
     }
 

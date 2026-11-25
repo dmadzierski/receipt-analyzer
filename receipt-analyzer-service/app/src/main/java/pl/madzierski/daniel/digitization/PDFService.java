@@ -3,12 +3,14 @@ package pl.madzierski.daniel.digitization;
 import lombok.AllArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import pl.madzierski.daniel.exception.AppRuntimeException;
+import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @AllArgsConstructor
@@ -29,9 +31,8 @@ public class PDFService {
                 }
             }
             return outputImages;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Collections.emptyList();
+        } catch (IOException e) {
+            throw new AppRuntimeException(AppRuntimeExceptionMessages.CAN_NOT_RESOLVE_RECEIPT, e);
         }
     }
 }

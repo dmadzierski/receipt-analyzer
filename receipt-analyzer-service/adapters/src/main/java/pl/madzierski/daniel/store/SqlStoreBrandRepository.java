@@ -21,7 +21,7 @@ class StoreBrandRepositoryImpl implements StoreBrandRepository {
     @Override
     public StoreBrand save(StoreBrand storeBrand) {
         SqlStoreBrand saved = this.repository.save(SqlStoreBrand.fromStoreBrand(storeBrand));
-        eventPublisher.publishLatest(saved.getId(), () -> StoreSnapshots.changed(saved.toStoreBrand()));
+        eventPublisher.publishLatest(saved.getId(), () -> StoreEventMapper.changed(saved.toStoreBrand()));
         return saved.toStoreBrand();
     }
 

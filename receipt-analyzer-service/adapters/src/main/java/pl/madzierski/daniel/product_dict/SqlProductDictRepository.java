@@ -61,7 +61,7 @@ class ProductDictRepositoryImpl implements ProductDictRepository {
     @Override
     public ProductDict save(ProductDict productDict) {
         SqlProductDict saved = repository.saveAndFlush(SqlProductDict.fromProductDict(productDict));
-        eventPublisher.publishLatest(saved.getId(), () -> ProductDictSnapshots.changed(saved.toProductDict()));
+        eventPublisher.publishLatest(saved.getId(), () -> ProductDictEventMapper.changed(saved.toProductDict()));
         return saved.toProductDict();
     }
 }

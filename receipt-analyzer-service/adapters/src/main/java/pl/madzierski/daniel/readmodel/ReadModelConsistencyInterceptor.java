@@ -3,6 +3,7 @@ package pl.madzierski.daniel.readmodel;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -29,12 +30,12 @@ class ReadModelConsistencyInterceptor implements HandlerInterceptor, WebMvcConfi
     private Duration timeout;
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
+    public void addInterceptors(@NonNull InterceptorRegistry registry) {
         registry.addInterceptor(this);
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws InterruptedException {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws InterruptedException {
         String header = request.getHeader(ConsistencyTokens.HEADER);
         if (!"GET".equals(request.getMethod()) || header == null || header.isBlank()) return true;
         List<Token> tokens = parse(header);

@@ -3,7 +3,7 @@ package pl.madzierski.daniel.store;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.madzierski.daniel.event.IntegrationEvent;
-import pl.madzierski.daniel.readmodel.Projection;
+import pl.madzierski.daniel.readmodel.Projector;
 import pl.madzierski.daniel.store.event.StoreBrandChanged;
 import pl.madzierski.daniel.store.event.StoreChanged;
 
@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-class StoreProjection implements Projection {
+class StoreProjector implements Projector {
 
     private final MongoStoreBrandRepository brandRepository;
     private final MongoStoreRepository storeRepository;

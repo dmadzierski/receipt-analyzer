@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 import pl.madzierski.daniel.event.IntegrationEvent;
 import pl.madzierski.daniel.file_group.event.FileGroupChanged;
 import pl.madzierski.daniel.file_group.event.FileGroupDeleted;
-import pl.madzierski.daniel.readmodel.Projection;
+import pl.madzierski.daniel.readmodel.Projector;
 
 @Component
 @RequiredArgsConstructor
-class FileGroupProjection implements Projection {
+class FileGroupProjector implements Projector {
 
     private final MongoFileGroupRepository repository;
 

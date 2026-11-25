@@ -37,7 +37,7 @@ class ProductCategoryRepositoryImpl implements ProductCategoryRepository {
     @Override
     public ProductCategory save(ProductCategory productCategory) {
         SqlProductCategory saved = this.repository.save(SqlProductCategory.fromProductCategory(productCategory));
-        eventPublisher.publishLatest(saved.getId(), () -> ProductDictSnapshots.changed(saved.toProductCategory()));
+        eventPublisher.publishLatest(saved.getId(), () -> ProductDictEventMapper.changed(saved.toProductCategory()));
         return saved.toProductCategory();
     }
 

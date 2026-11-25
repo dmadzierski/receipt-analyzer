@@ -13,7 +13,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-class StoreProjectionIT extends IntegrationTest {
+class StoreProjectorIT extends IntegrationTest {
 
     @Autowired
     private StoreQueryRepository storeQueryRepository;

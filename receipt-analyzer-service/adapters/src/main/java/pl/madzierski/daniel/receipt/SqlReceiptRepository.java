@@ -33,7 +33,7 @@ class ReceiptRepositoryImpl implements ReceiptRepository {
     @Override
     public Receipt save(Receipt receipt) {
         SqlReceipt saved = this.repository.save(SqlReceipt.fromReceipt(receipt));
-        eventPublisher.publishLatest(saved.getId(), () -> ReceiptSnapshots.changed(saved.toReceipt()));
+        eventPublisher.publishLatest(saved.getId(), () -> ReceiptEventMapper.changed(saved.toReceipt()));
         return saved.toReceipt();
     }
 
@@ -54,7 +54,7 @@ class ReceiptRepositoryImpl implements ReceiptRepository {
 
     @Override
     public void deleteById(UUID receiptId) {
-        this.repository.deleteById(receiptId);
+        this.repository.deleteById(receiptId);
         eventPublisher.publish(new ReceiptDeleted(receiptId));
     }
 }

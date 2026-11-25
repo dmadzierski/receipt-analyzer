@@ -14,7 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ReadModelProjector {
 
-    private final List<Projection> projections;
+    private final List<Projector> projectors;
     private final ProcessedEventRepository processedEventRepository;
     private final ProjectedVersionRepository projectedVersionRepository;
 
@@ -44,7 +44,7 @@ public class ReadModelProjector {
     }
 
     public void clear() {
-        projections.forEach(Projection::clear);
+        projectors.forEach(Projector::clear);
         projectedVersionRepository.deleteAll();
     }
 
@@ -55,6 +55,6 @@ public class ReadModelProjector {
     }
 
     private void apply(IntegrationEvent event) {
-        projections.forEach(projection -> projection.apply(event));
+        projectors.forEach(projector -> projector.apply(event));
     }
 }

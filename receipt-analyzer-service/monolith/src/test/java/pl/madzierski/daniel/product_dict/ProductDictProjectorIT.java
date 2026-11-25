@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProductDictProjectionIT extends IntegrationTest {
+class ProductDictProjectorIT extends IntegrationTest {
 
     @Autowired
     private ProductDictQueryRepository productDictQueryRepository;

@@ -48,7 +48,7 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     @Override
     public ReceiptRevision save(ReceiptRevision revision) {
         SqlReceiptRevision saved = repository.save(SqlReceiptRevision.fromReceiptRevision(revision));
-        eventPublisher.publishLatest(saved.getId(), () -> ReceiptSnapshots.changed(saved.toReceiptRevision()));
+        eventPublisher.publishLatest(saved.getId(), () -> ReceiptEventMapper.changed(saved.toReceiptRevision()));
         return saved.toReceiptRevision();
     }
 

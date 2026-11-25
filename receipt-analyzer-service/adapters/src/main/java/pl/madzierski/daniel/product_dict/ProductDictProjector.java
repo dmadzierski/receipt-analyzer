@@ -7,13 +7,13 @@ import pl.madzierski.daniel.product_dict.event.ProductCategoryChanged;
 import pl.madzierski.daniel.product_dict.event.ProductCategoryDeleted;
 import pl.madzierski.daniel.product_dict.event.ProductDictChanged;
 import pl.madzierski.daniel.product_dict.event.ProductDictDeleted;
-import pl.madzierski.daniel.readmodel.Projection;
+import pl.madzierski.daniel.readmodel.Projector;
 
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-class ProductDictProjection implements Projection {
+class ProductDictProjector implements Projector {
 
     private final MongoProductCategoryRepository categoryRepository;
     private final MongoProductDictRepository productDictRepository;

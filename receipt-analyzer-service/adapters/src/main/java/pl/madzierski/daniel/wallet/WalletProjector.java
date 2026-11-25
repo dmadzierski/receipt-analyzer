@@ -3,12 +3,12 @@ package pl.madzierski.daniel.wallet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.madzierski.daniel.event.IntegrationEvent;
-import pl.madzierski.daniel.readmodel.Projection;
+import pl.madzierski.daniel.readmodel.Projector;
 import pl.madzierski.daniel.wallet.event.WalletChanged;
 
 @Component
 @RequiredArgsConstructor
-class WalletProjection implements Projection {
+class WalletProjector implements Projector {
 
     private final MongoWalletRepository repository;
 

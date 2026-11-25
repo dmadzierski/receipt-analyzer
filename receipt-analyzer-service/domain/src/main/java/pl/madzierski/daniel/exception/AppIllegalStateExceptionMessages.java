@@ -1,8 +1,10 @@
 package pl.madzierski.daniel.exception;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum AppIllegalStateExceptionMessages {
     REVISION_NOT_USER_RESOLVER("EXCEPTION.REVISION_NOT_USER_RESOLVER"),
     REVISION_NOT_PARENT("EXCEPTION.REVISION_NOT_PARENT"),
@@ -11,8 +13,4 @@ public enum AppIllegalStateExceptionMessages {
     FILE_TYPE_MISMATCH("EXCEPTION.FILE_TYPE_MISMATCH");
 
     private final String i18nMessage;
-
-    AppIllegalStateExceptionMessages(String i18nMessage) {
-        this.i18nMessage = i18nMessage;
-    }
 }

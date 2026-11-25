@@ -1,9 +1,11 @@
 package pl.madzierski.daniel.exception;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@RequiredArgsConstructor
 public enum AppRuntimeExceptionMessages {
     FILE_RECEIPT_NOT_FOUND("EXCEPTION.FILE_RECEIPT_NOT_FOUND", HttpStatus.NOT_FOUND),
     FILE_RECEIPT_PATH_NOT_FOUND("EXCEPTION.FILE_RECEIPT_PATH_NOT_FOUND", HttpStatus.NOT_FOUND),
@@ -44,9 +46,4 @@ public enum AppRuntimeExceptionMessages {
     private final String i18nMessage;
 
     private final HttpStatus status;
-
-    AppRuntimeExceptionMessages(String i18nMessage, HttpStatus status) {
-        this.i18nMessage = i18nMessage;
-        this.status = status;
-    }
 }

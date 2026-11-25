@@ -3,6 +3,7 @@ package pl.madzierski.daniel.security;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,13 +27,13 @@ class AuthenticatedUserArgumentResolver implements HandlerMethodArgumentResolver
         .build();
 
     @Override
-    public boolean supportsParameter(MethodParameter parameter) {
+    public boolean supportsParameter(@NonNull MethodParameter parameter) {
         return AuthenticatedUser.class.equals(parameter.getParameterType());
     }
 
     @Override
-    public AuthenticatedUser resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                     NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public AuthenticatedUser resolveArgument(@NonNull MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                     @NonNull NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof JwtAuthenticationToken token))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.USER_NOT_FOUND);

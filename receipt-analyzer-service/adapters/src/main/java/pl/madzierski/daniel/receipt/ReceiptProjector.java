@@ -3,7 +3,7 @@ package pl.madzierski.daniel.receipt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.madzierski.daniel.event.IntegrationEvent;
-import pl.madzierski.daniel.readmodel.Projection;
+import pl.madzierski.daniel.readmodel.Projector;
 import pl.madzierski.daniel.receipt.event.ItemProductsReassigned;
 import pl.madzierski.daniel.receipt.event.ReceiptChanged;
 import pl.madzierski.daniel.receipt.event.ReceiptDeleted;
@@ -12,7 +12,7 @@ import pl.madzierski.daniel.receipt.event.RevisionDeleted;
 
 @Component
 @RequiredArgsConstructor
-class ReceiptProjection implements Projection {
+class ReceiptProjector implements Projector {
 
     private final MongoReceiptRepository receiptRepository;
     private final MongoRevisionRepository revisionRepository;

@@ -20,7 +20,7 @@ class StoreRepositoryImpl implements StoreRepository {
     @Override
     public Store save(Store store) {
         SqlStore saved = this.repository.save(SqlStore.fromStore(store));
-        eventPublisher.publishLatest(saved.getId(), () -> StoreSnapshots.changed(saved.toStore()));
+        eventPublisher.publishLatest(saved.getId(), () -> StoreEventMapper.changed(saved.toStore()));
         return saved.toStore();
     }
 }
