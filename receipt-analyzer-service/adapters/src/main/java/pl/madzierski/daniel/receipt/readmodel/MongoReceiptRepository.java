@@ -1,9 +1,10 @@
-package pl.madzierski.daniel.receipt;
+package pl.madzierski.daniel.receipt.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.receipt.ReceiptQueryRepository;
 import pl.madzierski.daniel.receipt.model.ReceiptDto;
 import pl.madzierski.daniel.receipt.model.WalletReceiptDto;
 

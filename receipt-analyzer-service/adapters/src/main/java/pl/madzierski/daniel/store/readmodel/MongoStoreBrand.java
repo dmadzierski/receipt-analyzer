@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.store;
+package pl.madzierski.daniel.store.readmodel;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

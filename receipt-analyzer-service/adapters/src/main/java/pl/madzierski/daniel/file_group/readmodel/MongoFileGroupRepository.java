@@ -1,8 +1,9 @@
-package pl.madzierski.daniel.file_group;
+package pl.madzierski.daniel.file_group.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 
 import java.util.List;

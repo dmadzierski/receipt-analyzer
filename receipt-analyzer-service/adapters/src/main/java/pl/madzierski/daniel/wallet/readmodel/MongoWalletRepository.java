@@ -1,8 +1,9 @@
-package pl.madzierski.daniel.wallet;
+package pl.madzierski.daniel.wallet.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.wallet.WalletQueryRepository;
 import pl.madzierski.daniel.wallet.model.WalletDto;
 
 import java.util.Collection;

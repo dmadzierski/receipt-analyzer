@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.file_group;
+package pl.madzierski.daniel.file_group.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

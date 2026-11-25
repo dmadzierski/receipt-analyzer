@@ -1,9 +1,10 @@
-package pl.madzierski.daniel.product_dict;
+package pl.madzierski.daniel.product_dict.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.annotation.Collation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.product_dict.ProductCategoryQueryRepository;
 import pl.madzierski.daniel.product_dict.model.ProductCategoryDto;
 
 import java.util.List;

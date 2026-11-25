@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.wallet;
+package pl.madzierski.daniel.wallet.readmodel;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;

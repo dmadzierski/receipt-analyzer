@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.wallet;
+package pl.madzierski.daniel.wallet.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

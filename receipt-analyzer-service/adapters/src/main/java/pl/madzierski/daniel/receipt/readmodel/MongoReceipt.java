@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.receipt;
+package pl.madzierski.daniel.receipt.readmodel;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;

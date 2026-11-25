@@ -16,8 +16,9 @@ import pl.madzierski.daniel.receipt.event.RevisionDeleted;
 import pl.madzierski.daniel.receipt.model.CreateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.GetReceiptDetailsResponse;
 import pl.madzierski.daniel.receipt.model.GetRevisionResponse;
-import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest.ItemRequest;
+import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;
+import pl.madzierski.daniel.receipt.readmodel.MongoRevision;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import java.math.BigDecimal;

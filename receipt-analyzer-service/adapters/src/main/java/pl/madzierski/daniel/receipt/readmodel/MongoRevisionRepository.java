@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.receipt;
+package pl.madzierski.daniel.receipt.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -6,6 +6,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.product_dict.ProductDictQueryRepository;
+import pl.madzierski.daniel.receipt.ReceiptItemQueryRepository;
+import pl.madzierski.daniel.receipt.ReceiptRevisionQueryRepository;
 import pl.madzierski.daniel.receipt.model.ReceiptItemDto;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;
 

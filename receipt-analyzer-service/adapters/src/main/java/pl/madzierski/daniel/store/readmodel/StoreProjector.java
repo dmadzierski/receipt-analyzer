@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.store;
+package pl.madzierski.daniel.store.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

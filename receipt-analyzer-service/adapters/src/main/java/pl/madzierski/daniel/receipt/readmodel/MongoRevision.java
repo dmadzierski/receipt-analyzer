@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.receipt;
+package pl.madzierski.daniel.receipt.readmodel;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Document("revisions")
-record MongoRevision(@Id UUID id, long version, @Indexed UUID receiptId, ReceiptResolverStrategyType resolver, LocalDateTime createdDate,
+public record MongoRevision(@Id UUID id, long version, @Indexed UUID receiptId, ReceiptResolverStrategyType resolver, LocalDateTime createdDate,
                      BigDecimal totalPrice, LocalDateTime paymentDate, Boolean isCorrect, UUID parentRevisionId,
                      UUID sourceFileGroupId, List<Item> items) {
 

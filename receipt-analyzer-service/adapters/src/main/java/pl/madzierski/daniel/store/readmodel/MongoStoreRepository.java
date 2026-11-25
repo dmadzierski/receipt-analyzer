@@ -1,10 +1,11 @@
-package pl.madzierski.daniel.store;
+package pl.madzierski.daniel.store.readmodel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.store.StoreQueryRepository;
 import pl.madzierski.daniel.store.model.StoreDto;
 
 import java.util.Collection;

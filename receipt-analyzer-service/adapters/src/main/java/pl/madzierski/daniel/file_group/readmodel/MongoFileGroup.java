@@ -1,8 +1,9 @@
-package pl.madzierski.daniel.file_group;
+package pl.madzierski.daniel.file_group.readmodel;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import pl.madzierski.daniel.file_group.FileType;
 import pl.madzierski.daniel.file_group.event.FileGroupChanged;
 import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
