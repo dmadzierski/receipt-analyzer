@@ -7,11 +7,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.modulith.events.EventExternalizationConfiguration;
-import pl.madzierski.daniel.exception.AppRuntimeException;
-import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
+
+import java.io.UncheckedIOException;
 
 @Configuration
-public class EventTopic {
+public class KafkaEventConfiguration {
 
     public static final String NAME = "receipt-analyzer.events";
 
@@ -33,7 +33,7 @@ public class EventTopic {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (JsonProcessingException e) {
-            throw new AppRuntimeException(AppRuntimeExceptionMessages.EVENT_NOT_SERIALIZABLE, e);
+            throw new UncheckedIOException(e);
         }
     }
 }

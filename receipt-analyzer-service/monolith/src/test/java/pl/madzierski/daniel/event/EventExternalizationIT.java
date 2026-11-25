@@ -76,7 +76,7 @@ class EventExternalizationIT extends IntegrationTest {
         Properties properties = new Properties();
         properties.put("auto.offset.reset", "earliest");
         try (Consumer<String, String> consumer = consumerFactory.createConsumer("externalization-test-" + UUID.randomUUID(), null, null, properties)) {
-            consumer.subscribe(List.of(EventTopic.NAME));
+            consumer.subscribe(List.of(KafkaEventConfiguration.NAME));
             List<ConsumerRecord<String, String>> found = new ArrayList<>();
             long deadline = System.currentTimeMillis() + 15_000;
             while (found.size() < expected && System.currentTimeMillis() < deadline) {
