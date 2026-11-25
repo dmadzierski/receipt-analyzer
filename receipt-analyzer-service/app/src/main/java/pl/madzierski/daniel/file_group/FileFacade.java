@@ -21,10 +21,11 @@ public class FileFacade {
     private final FileTypeDetector fileTypeDetector;
     private final FileStorage fileStorage;
     private final FilePathPolicy filePathPolicy;
+    private final ReceiptLookup receiptLookup;
 
     @Transactional
     public UUID save(AuthenticatedUser user, UUID receiptId, List<byte[]> files) {
-        if (!fileGroupRepository.isReceiptAccessible(receiptId, user.toUserQuery()))
+        if (!receiptLookup.isReceiptAccessible(receiptId, user.toUserQuery()))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND);
         if (files == null || files.isEmpty()) {
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_NOT_FOUND);
@@ -66,7 +67,7 @@ public class FileFacade {
     public void deleteFileGroupId(AuthenticatedUser user, UUID fileGroupId) {
         FileGroup fileGroup = fileGroupRepository.findById(fileGroupId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_NOT_FOUND));
-        if (fileGroupRepository.isUsedByRevision(fileGroupId))
+        if (receiptLookup.isSourceOfRevision(fileGroupId))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.FILE_GROUP_USED_BY_REVISION);
         fileGroupRepository.deleteById(fileGroupId);
         fileGroup.getFiles().stream()

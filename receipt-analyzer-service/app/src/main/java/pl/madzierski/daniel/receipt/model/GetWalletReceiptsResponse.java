@@ -1,6 +1,5 @@
 package pl.madzierski.daniel.receipt.model;
 
-import pl.madzierski.daniel.receipt.projection.WalletReceiptProjection;
 import pl.madzierski.daniel.store.model.StoreDto;
 
 import java.math.BigDecimal;
@@ -15,7 +14,7 @@ public record GetWalletReceiptsResponse(
     List<Receipt> receipts
 ) {
 
-    public GetWalletReceiptsResponse(Collection<WalletReceiptProjection> receipts, Map<UUID, StoreDto> stores) {
+    public GetWalletReceiptsResponse(Collection<WalletReceiptDto> receipts, Map<UUID, StoreDto> stores) {
         this(receipts.stream()
             .map(receipt -> new Receipt(receipt, receipt.storeId() != null ? stores.get(receipt.storeId()) : null))
             .toList());
@@ -28,9 +27,9 @@ public record GetWalletReceiptsResponse(
         Boolean isCorrect,
         BigDecimal totalPrice,
         LocalDateTime createdDate,
-        StoreDto store
+        Store store
     ) {
-        Receipt(WalletReceiptProjection receipt, StoreDto store) {
+        Receipt(WalletReceiptDto receipt, StoreDto store) {
             this(
                 receipt.id(),
                 receipt.name(),
@@ -38,7 +37,13 @@ public record GetWalletReceiptsResponse(
                 receipt.isCorrect(),
                 receipt.totalPrice(),
                 receipt.createdDate(),
-                store);
+                store != null ? new Store(store) : null);
+        }
+
+        public record Store(UUID id, String brand, String address, String city, String postalCode, String country) {
+            Store(StoreDto store) {
+                this(store.getId(), store.getBrand(), store.getAddress(), store.getCity(), store.getPostalCode(), store.getCountry());
+            }
         }
     }
 }

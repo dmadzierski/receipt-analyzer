@@ -11,19 +11,17 @@ import pl.madzierski.daniel.product_dict.ProductDictFacade;
 import pl.madzierski.daniel.product_dict.model.AliasToLearn;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.*;
-import pl.madzierski.daniel.receipt.projection.WalletReceiptProjection;
 import pl.madzierski.daniel.digitization.DigitizationFacade;
 import pl.madzierski.daniel.digitization.model.DigitizedReceipt;
+import pl.madzierski.daniel.store.StoreFacade;
 import pl.madzierski.daniel.store.StoreQueryRepository;
-import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 import pl.madzierski.daniel.store.model.StoreDto;
 import pl.madzierski.daniel.store.model.StoreQuery;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
+import pl.madzierski.daniel.wallet.WalletFacade;
 import pl.madzierski.daniel.wallet.WalletQueryRepository;
-import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -42,10 +40,12 @@ public class ReceiptFacade {
     private final ProductDictFacade productDictFacade;
     private final FileGroupQueryRepository fileGroupQueryRepository;
     private final WalletQueryRepository walletQueryRepository;
+    private final WalletFacade walletFacade;
+    private final StoreFacade storeFacade;
 
     @Transactional
     CreateReceiptResponse addReceipt(AuthenticatedUser user, List<byte[]> files, CreateReceiptRequest body) {
-        if (!receiptRepository.isWalletAccessible(new WalletQuery(body.walletId()), user.toUserQuery()))
+        if (!walletFacade.isWalletAccessible(user, body.walletId()))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.WALLET_NOT_FOUND);
         DigitizedReceipt digitizedReceipt = digitizationFacade.digitize(files, body.strategy());
         Receipt receipt = receiptRepository.save(receiptFactory.from(body, user));
@@ -67,9 +67,8 @@ public class ReceiptFacade {
             .orElse(null);
         Collection<ReceiptItemDto> items = preferredRevision == null ? List.of()
             : receiptItemQueryRepository.findReceiptItemsByRevisionId(preferredRevision.getId());
-        StoreDetailsResponse store = Optional.ofNullable(receipt.getStore())
-            .flatMap(storeQuery -> storeQueryRepository.findStoreById(storeQuery.id()))
-            .map(StoreDetailsResponse::storeMapper)
+        StoreDto store = Optional.ofNullable(receipt.storeId())
+            .flatMap(storeQueryRepository::findStoreById)
             .orElse(null);
         return new GetReceiptDetailsResponse(receipt, preferredRevision,
             fileGroupQueryRepository.findAllByReceiptId(receiptId), items, revisions, store);
@@ -78,14 +77,14 @@ public class ReceiptFacade {
     GetWalletReceiptsResponse getWalletReceipts(AuthenticatedUser user, UUID walletId) {
         walletQueryRepository.getWalletDetails(walletId, user.id())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.WALLET_NOT_FOUND));
-        Collection<WalletReceiptProjection> walletReceipts = receiptQueryRepository.getWalletReceipts(walletId);
-        Set<UUID> storeIds = walletReceipts.stream()
-            .map(WalletReceiptProjection::storeId)
+        Collection<WalletReceiptDto> receipts = receiptQueryRepository.getWalletReceipts(walletId);
+        Set<UUID> storeIds = receipts.stream()
+            .map(WalletReceiptDto::storeId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
-        Map<UUID, StoreDto> stores = storeIds.isEmpty() ? Map.of() : storeQueryRepository.findStoresByIds(storeIds).stream()
-            .collect(Collectors.toMap(StoreDto::getId, Function.identity()));
-        return new GetWalletReceiptsResponse(walletReceipts, stores);
+        Map<UUID, StoreDto> stores = storeQueryRepository.findStoresByIds(storeIds).stream()
+            .collect(Collectors.toMap(StoreDto::getId, store -> store));
+        return new GetWalletReceiptsResponse(receipts, stores);
     }
 
     @Transactional(readOnly = true)
@@ -202,7 +201,7 @@ public class ReceiptFacade {
         Receipt receipt = receiptRepository.findAccessible(receiptId, user.toUserQuery())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.RECEIPT_NOT_FOUND));
         ensureVersion(receipt.getVersion(), request.version());
-        if (!receiptRepository.storeExists(new StoreQuery(request.storeId())))
+        if (!storeFacade.storeExists(request.storeId()))
             throw new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND);
         receipt.updateData(request.name().trim(), request.description(), new StoreQuery(request.storeId()));
         Receipt savedReceipt = receiptRepository.save(receipt);

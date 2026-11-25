@@ -7,8 +7,11 @@ import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.product_dict.model.ProductDictDto;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 interface MongoProductDictRepository extends MongoRepository<MongoProductDict, UUID> {
 
@@ -28,5 +31,11 @@ class ProductDictQueryRepositoryImpl implements ProductDictQueryRepository {
         return productDictRepository.findAll().stream()
             .map(MongoProductDict::toDto)
             .toList();
+    }
+
+    @Override
+    public Map<UUID, String> findNamesByIds(Collection<UUID> productIds) {
+        return productDictRepository.findAllById(productIds).stream()
+            .collect(Collectors.toMap(MongoProductDict::id, MongoProductDict::name));
     }
 }

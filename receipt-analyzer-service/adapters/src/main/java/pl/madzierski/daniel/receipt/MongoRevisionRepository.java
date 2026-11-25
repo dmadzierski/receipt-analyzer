@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import pl.madzierski.daniel.product_dict.ProductDictQueryRepository;
 import pl.madzierski.daniel.receipt.model.ReceiptItemDto;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionDto;
 
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -67,7 +67,7 @@ class ReceiptRevisionQueryRepositoryImpl implements ReceiptRevisionQueryReposito
 class ReceiptItemQueryRepositoryImpl implements ReceiptItemQueryRepository {
 
     private final MongoRevisionRepository revisionRepository;
-    private final MongoProductNameRepository productNameRepository;
+    private final ProductDictQueryRepository productDictQueryRepository;
 
     @Override
     public List<ReceiptItemDto> findReceiptItemsByRevisionId(UUID revisionId) {
@@ -77,7 +77,6 @@ class ReceiptItemQueryRepositoryImpl implements ReceiptItemQueryRepository {
     }
 
     private Map<UUID, String> productNames(MongoRevision revision) {
-        return productNameRepository.findAllById(revision.productIds()).stream()
-            .collect(Collectors.toMap(MongoProductName::id, MongoProductName::name));
+        return productDictQueryRepository.findNamesByIds(revision.productIds());
     }
 }

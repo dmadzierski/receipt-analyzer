@@ -5,8 +5,6 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import pl.madzierski.daniel.receipt.event.ReceiptChanged;
 import pl.madzierski.daniel.receipt.model.ReceiptDto;
-import pl.madzierski.daniel.store.model.StoreQuery;
-import pl.madzierski.daniel.wallet.model.WalletQuery;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,7 +19,6 @@ record MongoReceipt(@Id UUID id, long version, UUID ownerId, @Indexed UUID walle
     }
 
     ReceiptDto toDto() {
-        return new ReceiptDto(id, version, createdDate, modifiedDate, name, description,
-            walletId != null ? new WalletQuery(walletId) : null, storeId != null ? new StoreQuery(storeId) : null);
+        return new ReceiptDto(id, version, createdDate, modifiedDate, name, description, walletId, storeId);
     }
 }

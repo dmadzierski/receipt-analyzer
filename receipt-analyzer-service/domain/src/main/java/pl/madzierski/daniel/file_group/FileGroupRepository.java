@@ -15,10 +15,6 @@ interface FileGroupRepository {
 
     List<FileGroup> findAllByReceiptId(UUID receiptId);
 
-    boolean isReceiptAccessible(UUID receiptId, UserQuery user);
-
-    boolean isUsedByRevision(UUID fileGroupId);
-
     void deleteById(UUID fileGroupId);
 
     void deleteAllByReceiptId(UUID receiptId);

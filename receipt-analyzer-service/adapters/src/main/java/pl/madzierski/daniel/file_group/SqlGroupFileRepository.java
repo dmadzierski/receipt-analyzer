@@ -22,12 +22,6 @@ interface SqlFileGroupRepository extends JpaRepository<SqlFileGroup, UUID> {
     @Query("SELECT DISTINCT g FROM SqlFileGroup g LEFT JOIN FETCH g.files WHERE g.receiptId = :receiptId")
     List<SqlFileGroup> findAllByReceiptId(UUID receiptId);
 
-    @Query("SELECT COUNT(r) > 0 FROM SqlReceipt r WHERE r.id = :receiptId AND r.ownerId = :ownerId")
-    boolean isReceiptAccessible(UUID receiptId, UUID ownerId);
-
-    @Query("SELECT COUNT(rev) > 0 FROM SqlReceiptRevision rev WHERE rev.sourceFileGroup.id = :fileGroupId")
-    boolean isUsedByRevision(UUID fileGroupId);
-
     @Query("SELECT g.id FROM SqlFileGroup g WHERE g.receiptId = :receiptId")
     List<UUID> findIdsByReceiptId(UUID receiptId);
 
@@ -63,16 +57,6 @@ class FileGroupRepositoryImpl implements FileGroupRepository {
     @Override
     public List<FileGroup> findAllByReceiptId(UUID receiptId) {
         return this.fileGroupRepository.findAllByReceiptId(receiptId).stream().map(SqlFileGroup::toFileGroup).toList();
-    }
-
-    @Override
-    public boolean isReceiptAccessible(UUID receiptId, UserQuery user) {
-        return this.fileGroupRepository.isReceiptAccessible(receiptId, user.id());
-    }
-
-    @Override
-    public boolean isUsedByRevision(UUID fileGroupId) {
-        return this.fileGroupRepository.isUsedByRevision(fileGroupId);
     }
 
     @Override

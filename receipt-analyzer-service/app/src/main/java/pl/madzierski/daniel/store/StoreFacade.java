@@ -20,6 +20,10 @@ public class StoreFacade {
         return storeQueryRepository.findStoreById(storeId).stream().map(StoreDetailsResponse::storeMapper).findFirst().orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.STORE_NOT_FOUND));
     }
 
+    public boolean storeExists(UUID storeId) {
+        return storeRepository.exists(storeId);
+    }
+
     StoreListResponse getStores(String query) {
         return new StoreListResponse(storeQueryRepository.findStoresByQuery(query));
     }

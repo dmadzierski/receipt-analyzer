@@ -26,6 +26,8 @@ interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision,
 
     boolean existsByParentReceiptRevisionId(UUID parentRevisionId);
 
+    boolean existsBySourceFileGroupId(UUID fileGroupId);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId")
     void deleteByReceiptId(UUID receiptId);
@@ -67,6 +69,11 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
     @Override
     public boolean hasChildRevisions(UUID revisionId) {
         return repository.existsByParentReceiptRevisionId(revisionId);
+    }
+
+    @Override
+    public boolean isSourceFileGroup(UUID fileGroupId) {
+        return repository.existsBySourceFileGroupId(fileGroupId);
     }
 
     @Override

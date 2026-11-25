@@ -3,7 +3,7 @@ package pl.madzierski.daniel.receipt.model;
 import pl.madzierski.daniel.file_group.model.FileDto;
 import pl.madzierski.daniel.file_group.model.FileGroupDto;
 import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.store.model.StoreDetailsResponse;
+import pl.madzierski.daniel.store.model.StoreDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,28 +24,34 @@ public record GetReceiptDetailsResponse(
     LocalDateTime createdDate,
     LocalDateTime updateDate,
     List<FileGroupResponse> fileGroups,
-    StoreDetailsResponse store
+    Store store
 ) {
 
     public GetReceiptDetailsResponse(ReceiptDto receipt, ReceiptRevisionDto preferredRevision, List<FileGroupDto> fileGroups,
                                      Collection<ReceiptItemDto> items, Collection<ReceiptRevisionDto> revisions,
-                                     StoreDetailsResponse store) {
+                                     StoreDto store) {
         this(
-            receipt.getId(),
-            receipt.getVersion(),
-            receipt.getName(),
-            receipt.getDescription(),
-            receipt.getWallet() != null ? receipt.getWallet().id() : null,
+            receipt.id(),
+            receipt.version(),
+            receipt.name(),
+            receipt.description(),
+            receipt.walletId(),
             preferredRevision != null ? new PreferredRevisionResponse(preferredRevision, items) : null,
             revisions.stream()
                 .map(RevisionResponse::new)
                 .collect(Collectors.toSet()),
-            receipt.getCreatedDate(),
-            receipt.getModifiedDate(),
+            receipt.createdDate(),
+            receipt.modifiedDate(),
             fileGroups.stream()
                 .map(FileGroupResponse::new)
                 .toList(),
-            store);
+            store != null ? new Store(store) : null);
+    }
+
+    public record Store(UUID id, String brand, String address, String city, String postalCode, String country) {
+        Store(StoreDto store) {
+            this(store.getId(), store.getBrand(), store.getAddress(), store.getCity(), store.getPostalCode(), store.getCountry());
+        }
     }
 
     public record FileGroupResponse(

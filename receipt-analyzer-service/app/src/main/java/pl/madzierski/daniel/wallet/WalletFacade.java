@@ -24,6 +24,10 @@ public class WalletFacade {
         return new GetWalletListResponse(walletQueryRepository.findAllByUser(user.id()));
     }
 
+    public boolean isWalletAccessible(AuthenticatedUser user, UUID walletId) {
+        return walletRepository.isAccessible(walletId, user.toUserQuery());
+    }
+
     GetWalletDetailsResponse getWalletDetails(AuthenticatedUser user, UUID walletId) {
         WalletDto walletDetails = walletQueryRepository.getWalletDetails(walletId, user.id())
             .orElseThrow(() -> new AppRuntimeException(AppRuntimeExceptionMessages.WALLET_NOT_FOUND));

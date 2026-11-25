@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.receipt.model.ReceiptDto;
-import pl.madzierski.daniel.receipt.projection.WalletReceiptProjection;
+import pl.madzierski.daniel.receipt.model.WalletReceiptDto;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +19,7 @@ interface MongoReceiptRepository extends MongoRepository<MongoReceipt, UUID> {
         "{ $unwind: { path: '$preferred', preserveNullAndEmptyArrays: true } }",
         "{ $project: { name: 1, createdDate: 1, storeId: 1, paymentDate: '$preferred.paymentDate', isCorrect: '$preferred.isCorrect', totalPrice: '$preferred.totalPrice' } }"
     })
-    List<WalletReceiptProjection> findWalletReceipts(UUID walletId);
+    List<WalletReceiptDto> findWalletReceipts(UUID walletId);
 
     Optional<MongoReceipt> findByIdAndOwnerId(UUID id, UUID ownerId);
 }
@@ -31,7 +31,7 @@ class ReceiptQueryRepositoryImpl implements ReceiptQueryRepository {
     private final MongoReceiptRepository receiptRepository;
 
     @Override
-    public Collection<WalletReceiptProjection> getWalletReceipts(UUID walletId) {
+    public Collection<WalletReceiptDto> getWalletReceipts(UUID walletId) {
         return receiptRepository.findWalletReceipts(walletId);
     }
 

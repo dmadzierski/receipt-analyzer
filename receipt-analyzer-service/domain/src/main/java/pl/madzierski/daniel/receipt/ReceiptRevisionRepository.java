@@ -17,6 +17,8 @@ interface ReceiptRevisionRepository {
 
     boolean hasChildRevisions(UUID revisionId);
 
+    boolean isSourceFileGroup(UUID fileGroupId);
+
     void deleteById(UUID revisionId);
 
     void deleteAllByReceiptId(UUID receiptId);

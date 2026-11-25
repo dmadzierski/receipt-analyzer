@@ -23,4 +23,9 @@ class StoreRepositoryImpl implements StoreRepository {
         eventPublisher.publishLatest(saved.getId(), () -> StoreEventMapper.changed(saved.toStore()));
         return saved.toStore();
     }
+
+    @Override
+    public boolean exists(UUID storeId) {
+        return repository.existsById(storeId);
+    }
 }

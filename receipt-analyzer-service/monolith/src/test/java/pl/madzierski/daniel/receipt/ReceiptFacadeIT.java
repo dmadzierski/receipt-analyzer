@@ -18,7 +18,6 @@ import pl.madzierski.daniel.receipt.model.GetWalletReceiptsResponse;
 import pl.madzierski.daniel.receipt.model.UpdateReceiptRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest;
 import pl.madzierski.daniel.receipt.model.UpdateRevisionRequest.ItemRequest;
-import pl.madzierski.daniel.store.model.StoreDetailsResponse;
 import pl.madzierski.daniel.user.model.AuthenticatedUser;
 
 import javax.imageio.ImageIO;
@@ -694,7 +693,7 @@ class ReceiptFacadeIT extends IntegrationTest {
         assertThat(details.name()).isEqualTo("Biedronka 22.05");
         assertThat(details.description()).isEqualTo("test receipt");
         assertThat(details.walletId()).isEqualTo(walletId);
-        assertThat(details.store()).extracting(StoreDetailsResponse::id, StoreDetailsResponse::brand, StoreDetailsResponse::city)
+        assertThat(details.store()).extracting(GetReceiptDetailsResponse.Store::id, GetReceiptDetailsResponse.Store::brand, GetReceiptDetailsResponse.Store::city)
             .containsExactly(storeId, "Biedronka", "Poznań");
         assertThat(details.preferredRevision().id()).isEqualTo(copyId);
         assertThat(details.preferredRevision().resolver()).isEqualTo(ReceiptResolverStrategyType.USER);
@@ -990,8 +989,8 @@ class ReceiptFacadeIT extends IntegrationTest {
         assertThat(receipts.receipts())
             .extracting(GetWalletReceiptsResponse.Receipt::name, receipt -> receipt.totalPrice().toPlainString(), GetWalletReceiptsResponse.Receipt::isCorrect,
                 GetWalletReceiptsResponse.Receipt::paymentDate,
-                receipt -> receipt.store() != null ? receipt.store().getBrand() : null,
-                receipt -> receipt.store() != null ? receipt.store().getCity() : null)
+                receipt -> receipt.store() != null ? receipt.store().brand() : null,
+                receipt -> receipt.store() != null ? receipt.store().city() : null)
             .containsExactlyInAnyOrder(
                 tuple("Biedronka", "10.00", true, LocalDate.of(2026, 5, 22), "Biedronka", "Poznań"),
                 tuple("Lidl", "20.00", true, null, "Lidl", "Gniezno"),

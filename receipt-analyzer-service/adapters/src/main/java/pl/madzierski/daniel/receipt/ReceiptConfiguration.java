@@ -6,7 +6,9 @@ import pl.madzierski.daniel.file_group.FileFacade;
 import pl.madzierski.daniel.file_group.FileGroupQueryRepository;
 import pl.madzierski.daniel.digitization.DigitizationFacade;
 import pl.madzierski.daniel.product_dict.ProductDictFacade;
+import pl.madzierski.daniel.store.StoreFacade;
 import pl.madzierski.daniel.store.StoreQueryRepository;
+import pl.madzierski.daniel.wallet.WalletFacade;
 import pl.madzierski.daniel.wallet.WalletQueryRepository;
 
 @Configuration
@@ -23,7 +25,9 @@ class ReceiptConfiguration {
         StoreQueryRepository storeQueryRepository,
         ProductDictFacade productDictFacade,
         FileGroupQueryRepository fileGroupQueryRepository,
-        WalletQueryRepository walletQueryRepository
+        WalletQueryRepository walletQueryRepository,
+        WalletFacade walletFacade,
+        StoreFacade storeFacade
     ) {
         return new ReceiptFacade(
             receiptItemQueryRepository,
@@ -38,8 +42,15 @@ class ReceiptConfiguration {
             storeQueryRepository,
             productDictFacade,
             fileGroupQueryRepository,
-            walletQueryRepository
+            walletQueryRepository,
+            walletFacade,
+            storeFacade
         );
+    }
+
+    @Bean
+    ReceiptLookupImpl receiptLookup(ReceiptRepository receiptRepository, ReceiptRevisionRepository revisionRepository) {
+        return new ReceiptLookupImpl(receiptRepository, revisionRepository);
     }
 
     @Bean
