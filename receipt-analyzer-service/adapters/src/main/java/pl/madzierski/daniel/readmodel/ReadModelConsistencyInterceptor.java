@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -37,7 +38,7 @@ class ReadModelConsistencyInterceptor implements HandlerInterceptor, WebMvcConfi
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws InterruptedException {
         String header = request.getHeader(ConsistencyTokens.HEADER);
-        if (!"GET".equals(request.getMethod()) || header == null || header.isBlank()) return true;
+        if (!HttpMethod.GET.matches(request.getMethod()) || header == null || header.isBlank()) return true;
         List<Token> tokens = parse(header);
         long deadline = System.nanoTime() + timeout.toNanos();
         while (!caughtUp(tokens)) {

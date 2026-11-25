@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,13 +18,13 @@ import java.util.Set;
 @RequiredArgsConstructor
 class ConsistencyTokenFilter extends OncePerRequestFilter {
 
-    private static final Set<String> COMMAND_METHODS = Set.of("POST", "PUT", "PATCH", "DELETE");
+    private static final Set<HttpMethod> COMMAND_METHODS = Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE);
 
     private final ConsistencyTokens consistencyTokens;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !COMMAND_METHODS.contains(request.getMethod());
+        return !COMMAND_METHODS.contains(HttpMethod.valueOf(request.getMethod()));
     }
 
     @Override
