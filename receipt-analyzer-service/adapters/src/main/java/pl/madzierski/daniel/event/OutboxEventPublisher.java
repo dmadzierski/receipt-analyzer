@@ -10,6 +10,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import pl.madzierski.daniel.exception.AppRuntimeException;
 import pl.madzierski.daniel.exception.AppRuntimeExceptionMessages;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -21,7 +22,7 @@ public class OutboxEventPublisher implements EventPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
-    private final ConsistencyTokens consistencyTokens;
+    private final List<CommittedEventsListener> committedEventsListeners;
 
     @Override
     public void publish(IntegrationEvent event) {
@@ -38,7 +39,7 @@ public class OutboxEventPublisher implements EventPublisher {
         if(pending.isEmpty()) return;
         entityManager.flush();
         TransactionCorrelation correlation = TransactionCorrelation.current(
-            committed -> consistencyTokens.add(committed.getId(), committed.getEventCount()));
+            committed -> committedEventsListeners.forEach(listener -> listener.onCommit(committed.getId(), committed.getEventCount())));
         pending.get().drain().forEach(event -> {
             applicationEventPublisher.publishEvent(new PublishedEvent(UUID.randomUUID(), correlation.getId(), event.id(),
                 EventTypes.typeOf(event), toJson(event)));

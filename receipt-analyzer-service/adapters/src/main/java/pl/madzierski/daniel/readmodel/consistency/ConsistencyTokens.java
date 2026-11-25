@@ -1,6 +1,7 @@
-package pl.madzierski.daniel.event;
+package pl.madzierski.daniel.readmodel.consistency;
 
 import org.springframework.stereotype.Component;
+import pl.madzierski.daniel.event.CommittedEventsListener;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -9,12 +10,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class ConsistencyTokens {
+public class ConsistencyTokens implements CommittedEventsListener {
 
     public static final String HEADER = "X-Consistency-Token";
     private static final String ATTRIBUTE = ConsistencyTokens.class.getName() + ".tokens";
 
-    void add(UUID correlationId, int eventCount) {
+    @Override
+    public void onCommit(UUID correlationId, int eventCount) {
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         if (attributes == null || eventCount == 0) return;
         @SuppressWarnings("unchecked")

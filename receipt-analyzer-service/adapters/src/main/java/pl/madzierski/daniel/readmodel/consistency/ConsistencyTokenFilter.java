@@ -1,4 +1,4 @@
-package pl.madzierski.daniel.event;
+package pl.madzierski.daniel.readmodel.consistency;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

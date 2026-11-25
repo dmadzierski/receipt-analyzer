@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pl.madzierski.daniel.IntegrationTest;
 import pl.madzierski.daniel.TestJwtDecoder;
-import pl.madzierski.daniel.event.ConsistencyTokens;
+import pl.madzierski.daniel.readmodel.consistency.ConsistencyTokens;
 
 import java.time.Duration;
 import java.util.UUID;
