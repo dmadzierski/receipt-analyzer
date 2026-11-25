@@ -3,27 +3,28 @@ package pl.madzierski.daniel.wallet;
 import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.VersionedEntity;
-import pl.madzierski.daniel.user.SqlUserQuery;
+import pl.madzierski.daniel.user.model.UserQuery;
+
+import java.util.UUID;
 
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@EqualsAndHashCode(callSuper = true, exclude = "owner")
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "wallet")
 @Setter(AccessLevel.PRIVATE)
 class SqlWallet extends VersionedEntity {
 
     private String name;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private SqlUserQuery owner;
+    @Column(name = "user_id")
+    private UUID ownerId;
 
     public static SqlWallet fromWallet(Wallet wallet) {
         SqlWallet sqlWallet = new SqlWallet();
         sqlWallet.setName(wallet.getName());
-        sqlWallet.setOwner(SqlUserQuery.fromUserQuery(wallet.getOwner()));
+        sqlWallet.setOwnerId(wallet.getOwner().id());
         sqlWallet.setId(wallet.getId());
         sqlWallet.setVersion(wallet.getVersion());
         sqlWallet.setCreatedDate(wallet.getCreatedDate());
@@ -32,6 +33,6 @@ class SqlWallet extends VersionedEntity {
     }
 
     public Wallet toWallet() {
-        return Wallet.restore(id, version, createdDate, modifiedDate, name, owner.toUserQuery());
+        return Wallet.restore(id, version, createdDate, modifiedDate, name, new UserQuery(ownerId));
     }
 }

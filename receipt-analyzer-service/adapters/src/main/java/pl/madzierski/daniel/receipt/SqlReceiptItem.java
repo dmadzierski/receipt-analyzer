@@ -3,23 +3,23 @@ package pl.madzierski.daniel.receipt;
 import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.BaseEntity;
-import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
+import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptItemQuery;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Table(name = "receipt_item")
 @Getter
 @Setter(AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode(callSuper = true, exclude = {"parentItem", "product"})
+@EqualsAndHashCode(callSuper = true, exclude = "parentItem")
 class SqlReceiptItem extends BaseEntity {
 
     private String name;
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private SqlProductDictQuery product;
+    @Column(name = "product_id")
+    private UUID productId;
     @Column(precision = 10, scale = 3)
     private BigDecimal amount;
     @Column(precision = 10, scale = 2)
@@ -50,14 +50,14 @@ class SqlReceiptItem extends BaseEntity {
             sqlReceiptItem.setParentItem(parent);
         }
         if (item.getNameDict() != null) {
-            sqlReceiptItem.setProduct(SqlProductDictQuery.fromProductDict(item.getNameDict()));
+            sqlReceiptItem.setProductId(item.getNameDict().id());
         }
         return sqlReceiptItem;
     }
 
     public ReceiptItem toReceiptItem() {
         return ReceiptItem.restore(id, createdDate, modifiedDate, name,
-            product != null ? product.toProductDictQuery() : null, amount, unitPrice, discount, totalPrice, position,
+            productId != null ? new ProductDictQuery(productId) : null, amount, unitPrice, discount, totalPrice, position,
             parentItem != null ? new ReceiptItemQuery(parentItem.getId()) : null);
     }
 }

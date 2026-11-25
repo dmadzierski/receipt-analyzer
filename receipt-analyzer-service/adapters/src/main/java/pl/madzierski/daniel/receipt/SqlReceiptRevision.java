@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import pl.madzierski.daniel.common.entity.VersionedEntity;
 import pl.madzierski.daniel.digitization.ReceiptResolverStrategyType;
-import pl.madzierski.daniel.file_group.SqlFileGroupQuery;
+import pl.madzierski.daniel.file_group.model.FileGroupQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptQuery;
 import pl.madzierski.daniel.receipt.model.ReceiptRevisionQuery;
 
@@ -13,9 +13,10 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-@EqualsAndHashCode(callSuper = true, exclude = {"items", "receipt", "parentReceiptRevision", "sourceFileGroup"})
+@EqualsAndHashCode(callSuper = true, exclude = {"items", "receipt", "parentReceiptRevision"})
 @Entity
 @Table(name = "receipt_revision")
 @Getter
@@ -38,9 +39,8 @@ class SqlReceiptRevision extends VersionedEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "receipt_revision_id", nullable = false)
     private Set<SqlReceiptItem> items = new HashSet<>();
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "source_file_group_id")
-    private SqlFileGroupQuery sourceFileGroup;
+    @Column(name = "source_file_group_id")
+    private UUID sourceFileGroupId;
 
     public static SqlReceiptRevision fromReceiptRevision(ReceiptRevision revision) {
         SqlReceiptRevision sqlReceiptRevision = new SqlReceiptRevision();
@@ -64,7 +64,7 @@ class SqlReceiptRevision extends VersionedEntity {
             sqlReceiptRevision.setParentReceiptRevision(new SqlReceiptRevisionQuery(revision.getParentReceiptRevision().id()));
         }
         if (revision.getSourceFileGroup() != null) {
-            sqlReceiptRevision.setSourceFileGroup(SqlFileGroupQuery.fromFileGroupQuery(revision.getSourceFileGroup()));
+            sqlReceiptRevision.setSourceFileGroupId(revision.getSourceFileGroup().id());
         }
         return sqlReceiptRevision;
     }
@@ -76,6 +76,6 @@ class SqlReceiptRevision extends VersionedEntity {
             items.stream()
                 .map(SqlReceiptItem::toReceiptItem)
                 .collect(Collectors.toSet()),
-            sourceFileGroup != null ? sourceFileGroup.toFileGroupQuery() : null);
+            sourceFileGroupId != null ? new FileGroupQuery(sourceFileGroupId) : null);
     }
 }

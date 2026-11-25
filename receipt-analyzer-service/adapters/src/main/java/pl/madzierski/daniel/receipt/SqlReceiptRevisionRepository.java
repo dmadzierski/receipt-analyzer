@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.event.EventPublisher;
-import pl.madzierski.daniel.product_dict.SqlProductDictQuery;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
 import pl.madzierski.daniel.receipt.event.ItemProductsReassigned;
 import pl.madzierski.daniel.receipt.event.RevisionDeleted;
@@ -35,10 +34,10 @@ interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision,
     @Modifying
     @Query("""
         UPDATE SqlReceiptItem i
-        SET i.product = :dict
-        WHERE i.product.id IN (:productDictIdList)
+        SET i.productId = :productDictId
+        WHERE i.productId IN (:productDictIdList)
         """)
-    void reassignProductDict(SqlProductDictQuery dict, List<UUID> productDictIdList);
+    void reassignProductDict(UUID productDictId, List<UUID> productDictIdList);
 }
 
 @AllArgsConstructor
@@ -89,7 +88,7 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
 
     @Override
     public void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList) {
-        repository.reassignProductDict(SqlProductDictQuery.fromProductDict(dict), productDictIdList);
+        repository.reassignProductDict(dict.id(), productDictIdList);
         eventPublisher.publish(new ItemProductsReassigned(dict.id(), List.copyOf(productDictIdList)));
     }
 }

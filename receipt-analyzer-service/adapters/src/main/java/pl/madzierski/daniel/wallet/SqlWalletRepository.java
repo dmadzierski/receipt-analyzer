@@ -10,7 +10,7 @@ import pl.madzierski.daniel.user.model.UserQuery;
 import java.util.UUID;
 
 interface SqlWalletRepository extends JpaRepository<SqlWallet, UUID> {
-    @Query("SELECT COUNT(w) > 0 FROM SqlWallet w WHERE w.id = :walletId AND w.owner.id = :ownerId")
+    @Query("SELECT COUNT(w) > 0 FROM SqlWallet w WHERE w.id = :walletId AND w.ownerId = :ownerId")
     boolean isAccessible(UUID walletId, UUID ownerId);
 }
 
