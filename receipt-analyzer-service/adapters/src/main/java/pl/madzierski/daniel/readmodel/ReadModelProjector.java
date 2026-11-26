@@ -45,7 +45,7 @@ public class ReadModelProjector {
 
     public void clear() {
         projectors.forEach(Projector::clear);
-        projectedVersionRepository.deleteAll();
+        projectedVersionRepository.deleteVersions();
     }
 
     private boolean isNewerThanProjected(AggregateChanged event) {

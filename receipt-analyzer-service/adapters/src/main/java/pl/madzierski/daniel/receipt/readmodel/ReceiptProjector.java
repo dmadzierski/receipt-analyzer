@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.madzierski.daniel.event.IntegrationEvent;
 import pl.madzierski.daniel.readmodel.Projector;
-import pl.madzierski.daniel.receipt.event.ItemProductsReassigned;
 import pl.madzierski.daniel.receipt.event.ReceiptChanged;
 import pl.madzierski.daniel.receipt.event.ReceiptDeleted;
 import pl.madzierski.daniel.receipt.event.RevisionChanged;
@@ -27,7 +26,6 @@ class ReceiptProjector implements Projector {
             }
             case RevisionChanged changed -> revisionRepository.save(MongoRevision.fromEvent(changed));
             case RevisionDeleted deleted -> revisionRepository.deleteById(deleted.id());
-            case ItemProductsReassigned reassigned -> revisionRepository.reassignItemProducts(reassigned.fromProductIds(), reassigned.id());
             default -> {
             }
         }

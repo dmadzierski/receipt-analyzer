@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.event.EventPublisher;
 import pl.madzierski.daniel.product_dict.model.ProductDictQuery;
-import pl.madzierski.daniel.receipt.event.ItemProductsReassigned;
 import pl.madzierski.daniel.receipt.event.RevisionDeleted;
 import pl.madzierski.daniel.user.model.UserQuery;
 
@@ -27,9 +26,15 @@ interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision,
 
     boolean existsBySourceFileGroupId(UUID fileGroupId);
 
+    @Query("SELECT r.id FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId")
+    List<UUID> findRevisionIdsByReceiptId(UUID receiptId);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM SqlReceiptRevision r WHERE r.receipt.id = :receiptId")
     void deleteByReceiptId(UUID receiptId);
+
+    @Query("SELECT DISTINCT r.id FROM SqlReceiptRevision r JOIN r.items i WHERE i.productId IN (:productDictIdList)")
+    List<UUID> findRevisionIdsByItemProductIds(List<UUID> productDictIdList);
 
     @Modifying
     @Query("""
@@ -38,6 +43,10 @@ interface SqlReceiptRevisionRepository extends JpaRepository<SqlReceiptRevision,
         WHERE i.productId IN (:productDictIdList)
         """)
     void reassignProductDict(UUID productDictId, List<UUID> productDictIdList);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE SqlReceiptRevision r SET r.version = r.version + 1 WHERE r.id IN (:revisionIds)")
+    void increaseVersions(List<UUID> revisionIds);
 }
 
 @AllArgsConstructor
@@ -83,12 +92,18 @@ class ReceiptRevisionRepositoryImpl implements ReceiptRevisionRepository {
 
     @Override
     public void deleteAllByReceiptId(UUID receiptId) {
+        List<UUID> revisionIds = repository.findRevisionIdsByReceiptId(receiptId);
         repository.deleteByReceiptId(receiptId);
+        revisionIds.forEach(revisionId -> eventPublisher.publish(new RevisionDeleted(revisionId)));
     }
 
     @Override
     public void reassignProductDict(ProductDictQuery dict, List<UUID> productDictIdList) {
+        List<UUID> revisionIds = repository.findRevisionIdsByItemProductIds(productDictIdList);
+        if (revisionIds.isEmpty()) return;
         repository.reassignProductDict(dict.id(), productDictIdList);
-        eventPublisher.publish(new ItemProductsReassigned(dict.id(), List.copyOf(productDictIdList)));
+        repository.increaseVersions(revisionIds);
+        revisionIds.forEach(revisionId -> eventPublisher.publishLatest(revisionId, () -> ReceiptEventMapper.changed(
+            repository.findById(revisionId).orElseThrow().toReceiptRevision())));
     }
 }

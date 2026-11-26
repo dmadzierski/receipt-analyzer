@@ -23,7 +23,7 @@ interface SqlFileGroupRepository extends JpaRepository<SqlFileGroup, UUID> {
     List<SqlFileGroup> findAllByReceiptId(UUID receiptId);
 
     @Query("SELECT g.id FROM SqlFileGroup g WHERE g.receiptId = :receiptId")
-    List<UUID> findIdsByReceiptId(UUID receiptId);
+    List<UUID> findFileGroupIdsByReceiptId(UUID receiptId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM SqlFileGroup g WHERE g.receiptId = :receiptId")
@@ -67,7 +67,7 @@ class FileGroupRepositoryImpl implements FileGroupRepository {
 
     @Override
     public void deleteAllByReceiptId(UUID receiptId) {
-        List<UUID> fileGroupIds = this.fileGroupRepository.findIdsByReceiptId(receiptId);
+        List<UUID> fileGroupIds = this.fileGroupRepository.findFileGroupIdsByReceiptId(receiptId);
         this.fileGroupRepository.deleteByReceiptId(receiptId);
         fileGroupIds.forEach(fileGroupId -> eventPublisher.publish(new FileGroupDeleted(fileGroupId)));
     }

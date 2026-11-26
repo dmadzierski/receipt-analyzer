@@ -98,8 +98,9 @@ class ReceiptEventsIT extends IntegrationTest {
     }
 
     @Test
-    void deletingReceiptPublishesDeletionOfItsFileGroupsAndReceipt() {
+    void deletingReceiptPublishesDeletionOfItsRevisionsFileGroupsAndReceipt() {
         UUID receiptId = addReceipt();
+        UUID revisionId = revisionIdOf(receiptId);
         UUID fileGroupId = jdbcTemplate.queryForObject("SELECT id FROM receipt_file_group WHERE receipt_id = ?", UUID.class, receiptId);
         int before = outboxEvents().size();
 
@@ -107,22 +108,39 @@ class ReceiptEventsIT extends IntegrationTest {
 
         assertThat(outboxEvents().subList(before, outboxEvents().size()))
             .extracting(OutboxEvent::type, OutboxEvent::aggregateId)
-            .containsExactly(tuple("FileGroupDeleted", fileGroupId), tuple("ReceiptDeleted", receiptId));
+            .containsExactly(tuple("RevisionDeleted", revisionId), tuple("FileGroupDeleted", fileGroupId), tuple("ReceiptDeleted", receiptId));
     }
 
     @Test
-    void reassigningProductsPublishesReassignmentToPrimaryProduct() {
+    void reassigningProductsPublishesNewVersionsOfRevisionsUsingThem() {
+        UUID receiptId = addReceipt();
+        UUID revisionId = revisionIdOf(receiptId);
+        UUID primaryId = insertProduct("Cebula");
+        UUID mergedId = insertProduct("Cebula czerwona");
+        jdbcTemplate.update("UPDATE receipt_item SET product_id = ? WHERE id = (SELECT id FROM receipt_item WHERE receipt_revision_id = ? LIMIT 1)",
+            mergedId, revisionId);
+        long version = jdbcTemplate.queryForObject("SELECT version FROM receipt_revision WHERE id = ?", Long.class, revisionId);
+        int before = outboxEvents().size();
+
+        mergedProductReassignment.reassignToPrimary(new ProductDictQuery(primaryId), List.of(mergedId));
+
+        assertThat(outboxEvents().subList(before, outboxEvents().size())).singleElement()
+            .satisfies(event -> {
+                assertThat(event.type()).isEqualTo("RevisionChanged");
+                assertThat(event.aggregateId()).isEqualTo(revisionId);
+                assertThat(event.payload()).contains("\"version\":" + (version + 1), primaryId.toString())
+                    .doesNotContain(mergedId.toString());
+            });
+    }
+
+    @Test
+    void reassigningUnusedProductsPublishesNothing() {
         UUID primaryId = insertProduct("Cebula");
         UUID mergedId = insertProduct("Cebula czerwona");
 
         mergedProductReassignment.reassignToPrimary(new ProductDictQuery(primaryId), List.of(mergedId));
 
-        assertThat(outboxEvents()).singleElement()
-            .satisfies(event -> {
-                assertThat(event.type()).isEqualTo("ItemProductsReassigned");
-                assertThat(event.aggregateId()).isEqualTo(primaryId);
-                assertThat(event.payload()).contains(mergedId.toString());
-            });
+        assertThat(outboxEvents()).isEmpty();
     }
 
     private UUID addReceipt() {

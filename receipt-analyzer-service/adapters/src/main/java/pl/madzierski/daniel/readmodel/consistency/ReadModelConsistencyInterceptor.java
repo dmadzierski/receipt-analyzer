@@ -19,6 +19,7 @@ class ReadModelConsistencyInterceptor implements HandlerInterceptor {
 
     static final String STALE_HEADER = "X-Read-Model-Stale";
     private static final long POLL_INTERVAL_MILLIS = 50;
+    private static final int MAX_TOKENS = 10;
 
     private final ReadModelProjector projector;
     private final Duration timeout;
@@ -47,6 +48,7 @@ class ReadModelConsistencyInterceptor implements HandlerInterceptor {
         return Arrays.stream(header.split(","))
             .map(ReadModelConsistencyInterceptor::parseToken)
             .filter(Objects::nonNull)
+            .limit(MAX_TOKENS)
             .toList();
     }
 

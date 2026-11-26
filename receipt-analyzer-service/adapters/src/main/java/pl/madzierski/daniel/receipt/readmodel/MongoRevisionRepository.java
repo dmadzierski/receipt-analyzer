@@ -1,8 +1,6 @@
 package pl.madzierski.daniel.receipt.readmodel;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import pl.madzierski.daniel.product_dict.ProductDictQueryRepository;
@@ -16,31 +14,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
-
-interface MongoRevisionRepository extends MongoRepository<MongoRevision, UUID>, ItemProductReassignment {
+interface MongoRevisionRepository extends MongoRepository<MongoRevision, UUID> {
     List<MongoRevision> findAllByReceiptId(UUID receiptId);
 
     void deleteAllByReceiptId(UUID receiptId);
-}
-
-interface ItemProductReassignment {
-    void reassignItemProducts(List<UUID> fromProductIds, UUID toProductId);
-}
-
-@RequiredArgsConstructor
-class ItemProductReassignmentImpl implements ItemProductReassignment {
-
-    private final MongoTemplate mongoTemplate;
-
-    @Override
-    public void reassignItemProducts(List<UUID> fromProductIds, UUID toProductId) {
-        mongoTemplate.updateMulti(
-            query(where("items.productId").in(fromProductIds)),
-            new Update().set("items.$[item].productId", toProductId).filterArray(where("item.productId").in(fromProductIds)),
-            MongoRevision.class);
-    }
 }
 
 @Repository
